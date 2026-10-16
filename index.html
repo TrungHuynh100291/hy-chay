@@ -242,3 +242,480 @@
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
       display: grid;
       grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: center;
+      margin-bottom: 60px;
+    }
+
+    .featured-banner img {
+      width: 100%;
+      border-radius: 14px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+
+    .featured-info h3 {
+      font-size: 1.8rem;
+      margin-bottom: 15px;
+    }
+
+    .featured-info p {
+      color: var(--text-muted);
+      margin-bottom: 18px;
+    }
+
+    .tag-pill {
+      display: inline-block;
+      background: #eaf5ed;
+      color: var(--primary);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-right: 8px;
+      margin-bottom: 12px;
+    }
+
+    /* DISH CARDS GRID */
+    .dish-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 25px;
+    }
+
+    .dish-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+      transition: transform 0.3s, box-shadow 0.3s;
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .dish-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.08);
+    }
+
+    .dish-img-wrap {
+      width: 100%;
+      height: 220px;
+      overflow: hidden;
+      background: #eaeaea;
+    }
+
+    .dish-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s;
+    }
+
+    .dish-card:hover .dish-img-wrap img {
+      transform: scale(1.05);
+    }
+
+    .dish-body {
+      padding: 18px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .dish-body h3 {
+      font-size: 1.15rem;
+      margin-bottom: 8px;
+    }
+
+    .dish-body p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    /* 3 POSTER MENUS */
+    .menu-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 30px;
+      margin-top: 20px;
+    }
+
+    .menu-poster-card {
+      background: #ffffff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.06);
+      border: 1px solid var(--border);
+      transition: transform 0.3s;
+    }
+
+    .menu-poster-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .menu-poster-header {
+      padding: 15px;
+      font-weight: 700;
+      font-size: 1.05rem;
+      text-align: center;
+      color: #ffffff;
+    }
+
+    .menu-poster-card a {
+      display: block;
+      overflow: hidden;
+    }
+
+    .menu-poster-card img {
+      width: 100%;
+      display: block;
+      transition: opacity 0.2s;
+    }
+
+    .menu-poster-card img:hover {
+      opacity: 0.95;
+    }
+
+    .menu-poster-desc {
+      padding: 15px;
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      background: #fbfbfb;
+    }
+
+    /* FOOTER */
+    footer {
+      background: #142e1d;
+      color: #e5e7eb;
+      padding: 60px 20px 30px;
+      margin-top: 80px;
+    }
+
+    .footer-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 2fr 1.2fr 1.5fr;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+
+    .footer-col h4 {
+      font-size: 1.15rem;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    .footer-col p, .footer-col li {
+      font-size: 0.92rem;
+      color: #d1d5db;
+      line-height: 1.8;
+    }
+
+    .footer-col ul {
+      list-style: none;
+    }
+
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding-top: 25px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: center;
+      font-size: 0.85rem;
+      color: #9ca3af;
+    }
+
+    /* FLOATING BUTTONS */
+    .floating-contact {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 9999;
+    }
+
+    .float-btn {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 1rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+      transition: transform 0.2s;
+    }
+
+    .float-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .float-call {
+      background: #e53e3e;
+    }
+
+    .float-zalo {
+      background: #0068ff;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+      }
+      .hero h1 {
+        font-size: 1.9rem;
+      }
+      .featured-banner {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      .footer-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="nav-container">
+      <a href="#" class="brand-logo">
+        <img src="Logo nho.png" alt="Hy Chay Logo">
+        <span>HY CHAY</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#gioi-thieu">Về Chúng Tôi</a></li>
+        <li><a href="#mon-dac-sac">Món Nổi Bật</a></li>
+        <li><a href="#thuc-don">Thực Đơn</a></li>
+        <li><a href="#lien-he">Liên Hệ</a></li>
+        <li><a href="tel:0903242400" class="btn-header">Đặt Bàn: 0903.242.400</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- HERO SECTION -->
+  <section class="hero">
+    <div class="hero-content">
+      <span class="hero-badge">Ẩm Thực Chay Rau Củ Nấm Tự Nhiên</span>
+      <h1>Hương Vị Thanh Tịnh<br>Gắn Kết Tình Thân</h1>
+      <p>Trải nghiệm trọn vẹn ẩm thực dưỡng sinh, thanh khiết từ nguồn rau củ nấm tự nhiên tại không gian ấm cúng 280 Trần Hưng Đạo.</p>
+      <div class="hero-actions">
+        <a href="#thuc-don" class="btn-primary">Xem Toàn Bộ Menu</a>
+        <a href="tel:0903242400" class="btn-secondary">Hotline: 0903.242.400</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURED COMBO BANNER -->
+  <section class="section" id="gioi-thieu">
+    <div class="featured-banner">
+      <img src="combo 7 mon chay.png" alt="Mâm cỗ 7 món Hy Chay">
+      <div class="featured-info">
+        <span class="tag-pill">Gợi Ý Đặt Tiệc</span>
+        <span class="tag-pill">Trọn Vị Ngũ Hành</span>
+        <h3>Mâm Cỗ Chay Sum Vầy 7 Món</h3>
+        <p>Bữa tiệc thanh tịnh kết hợp trọn vẹn canh nấm bồ ngót thanh nhiệt, chả giò giòn thơm, rau củ ngũ sắc xào giòn, mì xào thập cẩm, sườn non chiên thơm lừng và gỏi hoa chuối thanh tao.</p>
+        <p>Thích hợp cho các buổi họp mặt gia đình, tiệc chay ngày rằm hoặc tiệc mừng ấm cúng.</p>
+        <a href="tel:0903242400" class="btn-primary" style="margin-top: 10px;">Đặt Tiệc: 0903.242.400</a>
+      </div>
+    </div>
+
+    <!-- 8 MÓN ĂN ĐẶC SẮC -->
+    <div class="section-title" id="mon-dac-sac">
+      <h2>Món Ngon Đặc Sắc</h2>
+      <p>Tuyển chọn những hương vị mộc mạc, chuẩn phong vị truyền thống và giàu dinh dưỡng</p>
+      <div class="divider"></div>
+    </div>
+
+    <div class="dish-grid">
+      <!-- Món 1 -->
+      <div class="dish-card">
+        <div class="dish-img-wrap">
+          <img src="BunChaGio.png" alt="Bún Chả Giò Chay">
+        </div>
+        <div class="dish-body">
+          <h3>Bún Chả Giò Chay</h3>
+          <p>Từng cuốn chả giò vàng ươm, nhân khoai môn nấm bùi béo kết hợp chà bông nấm và rau sống giòn mát.</p>
+        </div>
+      </div>
+
+      <!-- Món 2 -->
+      <div class="dish-card">
+        <div class="dish-img-wrap">
+          <img src="Banh Canh Chay.png" alt="Bánh Canh Chay">
+        </div>
+        <div class="dish-body">
+          <h3>Bánh Canh Chay</h3>
+          <p>Nước dùng thanh ngọt hầm kỹ từ bắp ngọt và rau củ, chả lụa chay dai mềm cùng nấm rơm tươi.</p>
+        </div>
+      </div>
+
+      <!-- Món 3 -->
+      <div class="dish-card">
+        <div class="dish-img-wrap">
+          <img src="Hoanh Thanh Mi.png" alt="Mì Hoành Thánh Chay">
+        </div>
+        <div class="dish-body">
+          <h3>Mì Hoành Thánh Chay</h3>
+          <p>Sợi mì trứng dai mềm, hoành thánh chiên giòn tan chấm kèm tương ớt và rau cải thìa tươi ngọt.</p>
+        </div>
+      </div>
+
+      <!-- Món 4 -->
+      <div class="dish-card">
+        <div class="dish-img-wrap">
+          <img src="Mi Quang Chay.png" alt="Mì Quảng Chay">
+        </div>
+        <div class="dish-body">
+          <h3>Mì Quảng Chay</h3>
+          <p>Đậm đà hương vị miền Trung với nấm đùi gà thấm vị, đậu phộng rang giòn và bánh tráng mè nướng giòn rụm.</p>
+        </div>
+      </div>
+
+      <!-- Món 5: Cơm Gà Chay -->
+      <div class="dish-card">
+        <div class="dish-img-wrap">
+          <img src="Com Ga.png" alt="Cơm Gà Chay">
+        </div>
+        <div class="dish-body">
+          <h3>Cơm Gà Chay</h3>
+          <p>Hạt cơm thơm dẻo cùng những lát gà tàu hũ ky ướp chiên giòn rụm, ăn kèm dưa leo và nước sốt chua ngọt.</p>
+        </div>
+      </div>
+
+      <!-- Món 6 -->
+      <div class="dish-card">
+        <div class="dish-img-wrap">
+          <img src="Xoi.png" alt="Xôi Thập Cẩm Chay">
+        </div>
+        <div class="dish-body">
+          <h3>Xôi Thập Cẩm Chay</h3>
+          <p>Xôi nếp dẻo thơm kết hợp pate béo ngậy từ hạt điều, chà bông nấm hương đậm vị và đồ chua giải ngấy.</p>
+        </div>
+      </div>
+
+      <!-- Món 7 -->
+      <div class="dish-card">
+        <div class="dish-img-wrap">
+          <img src="Nom Hoa Chuoi.png" alt="Nộm Hoa Chuối Tri Kỷ">
+        </div>
+        <div class="dish-body">
+          <h3>Nộm Hoa Chuối Tri Kỷ</h3>
+          <p>Hoa chuối tươi thái sợi giòn tan, vị chua thanh ngọt bùi ăn kèm phồng tôm chay ngũ sắc thanh đạm.</p>
+        </div>
+      </div>
+
+      <!-- Món 8: Mì Ý Sốt Bò Bằm -->
+      <div class="dish-card">
+        <div class="dish-img-wrap">
+          <img src="Mi Spaghetti Chay.png" alt="Mì Ý Sốt Bò Bằm Chay">
+        </div>
+        <div class="dish-body">
+          <h3>Mì Ý Sốt Bò Bằm Chay</h3>
+          <p>Sợi mì spaghetti chuẩn Ý kết hợp sốt cà chua tươi nấu cùng nấm hương băm nhỏ và lá húng quế thơm ngát.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- THỰC ĐƠN ĐẦY ĐỦ (3 POSTER MENUS) -->
+  <section class="section" id="thuc-don" style="padding-top: 10px;">
+    <div class="section-title">
+      <h2>Thực Đơn Chi Tiết</h2>
+      <p>Nhấp vào từng bảng menu để xem kích thước lớn rõ nét</p>
+      <div class="divider"></div>
+    </div>
+
+    <div class="menu-cards-grid">
+      <!-- Card 1: Menu Món Ăn -->
+      <div class="menu-poster-card">
+        <div class="menu-poster-header" style="background: #1e5e3a;">
+          ẨM THỰC PHỤC VỤ TẠI CHỖ
+        </div>
+        <a href="menu 1.jpg" target="_blank">
+          <img src="menu 1.jpg" alt="Menu Món Ăn Hy Chay">
+        </a>
+        <div class="menu-poster-desc">
+          Bún Mọc, Bún Huế, Phở, Mì Ý, Cơm Chiên, Lẩu Thái & Lẩu Chao
+        </div>
+      </div>
+
+      <!-- Card 2: Menu Thực Phẩm Sơ Chế -->
+      <div class="menu-poster-card">
+        <div class="menu-poster-header" style="background: #c88900;">
+          THỰC PHẨM SƠ CHẾ & ĂN LIỀN
+        </div>
+        <a href="Menu 3.jpg" target="_blank">
+          <img src="Menu 3.jpg" alt="Menu Thực Phẩm Sơ Chế Ăn Liền">
+        </a>
+        <div class="menu-poster-desc">
+          Chà Bông Nấm, Chả Mít Non, Chân Nấm Hương & Sườn Rim Cay
+        </div>
+      </div>
+
+      <!-- Card 3: Menu Đồ Uống BAL'S HOUSE -->
+      <div class="menu-poster-card">
+        <div class="menu-poster-header" style="background: #4a2e1b;">
+          ĐỒ UỐNG BAL'S HOUSE
+        </div>
+        <a href="Menu 4.jpg" target="_blank">
+          <img src="Menu 4.jpg" alt="Menu Đồ Uống BAL'S HOUSE">
+        </a>
+        <div class="menu-poster-desc">
+          Cà Phê Muối, Matcha Latte, Yaourt Trái Cây & Trà Giải Nhiệt
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NÚT LIÊN HỆ NỔI (CALL & ZALO) -->
+  <div class="floating-contact">
+    <a href="https://zalo.me/0903242400" target="_blank" class="float-btn float-zalo" title="Chat Zalo">Zalo</a>
+    <a href="tel:0903242400" class="float-btn float-call" title="Gọi Hotline">📞</a>
+  </div>
+
+  <!-- FOOTER -->
+  <footer id="lien-he">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h4>HY CHAY</h4>
+        <p>Đơn vị chủ quản: <strong>CÔNG TY TNHH TMDV VÀ SẢN XUẤT BẢO ANH LÂM</strong></p>
+        <p>Mã số thuế: <strong>3401289271</strong></p>
+        <p>Địa chỉ: <strong>280 Trần Hưng Đạo, P. Phan Thiết, T. Lâm Đồng</strong></p>
+        <p style="margin-top: 10px;">Cam kết mang đến những món chay thanh sạch, nguồn gốc rau củ nấm tự nhiên vì sức khỏe cộng đồng.</p>
+      </div>
+
+      <div class="footer-col">
+        <h4>GIỜ MỞ CỬA</h4>
+        <p><strong>Thứ Hai - Chủ Nhật:</strong></p>
+        <p style="font-size: 1.15rem; color: var(--accent); font-weight: 700;">06:30 - 20:15</p>
+        <p style="margin-top: 8px;">Phục vụ điểm tâm sáng, cơm trưa, cơm tối và nhận đặt tiệc chay theo yêu cầu.</p>
+      </div>
+
+      <div class="footer-col">
+        <h4>LIÊN HỆ NHANH</h4>
+        <ul>
+          <li><strong>Hotline / Zalo:</strong> <a href="tel:0903242400" style="color: var(--accent); font-weight: 700;">0903242400</a></li>
+          <li style="margin-top: 6px;"><strong>Fanpage:</strong> <a href="https://www.facebook.com/profile.php?id=61582410750653" target="_blank" style="color: var(--accent); text-decoration: underline;">Hy Chay Ẩm Thực Chay</a></li>
+          <li style="margin-top: 6px;">🛵 <strong>Giao hàng tận nơi</strong> tại khu vực Phan Thiết</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© 2026 HY CHAY - CÔNG TY TNHH TMDV VÀ SẢN XUẤT BẢO ANH LÂM. All rights reserved.</p>
+    </div>
+  </footer>
+
+</body>
+</html>
