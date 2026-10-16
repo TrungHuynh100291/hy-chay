@@ -4,7 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hy Chay POS - Trung Tâm Quản Lý Đơn Hàng Trực Tuyến</title>
-  <link rel="icon" type="image/png" href="Logo nho.png">
+
+  <!-- 1. BIỂU TƯỢNG ICON TRÊN THANH CỬA SỔ (FAVICON) -->
+  <link rel="icon" type="image/png" href="https://hychayfood.vercel.app/Logo%20nho.png">
+  <link rel="shortcut icon" type="image/png" href="https://hychayfood.vercel.app/Logo%20nho.png">
+  <link rel="apple-touch-icon" href="https://hychayfood.vercel.app/Logo%20nho.png">
+
+  <!-- 2. HÌNH ẢNH & THÔNG TIN KHI CHIA SẺ LINK QUA ZALO / FACEBOOK -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://hychayfood.vercel.app/admin.html">
+  <meta property="og:title" content="Hy Chay POS - Quản Lý Đơn Hàng Trực Tuyến">
+  <meta property="og:description" content="Hệ thống tiếp nhận và điều hành đơn hàng nội bộ Hy Chay - 280 Trần Hưng Đạo, P. Phan Thiết, T. Lâm Đồng.">
+  <meta property="og:image" content="https://hychayfood.vercel.app/Logo%20Lon.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://hychayfood.vercel.app/Logo%20Lon.png">
+
+  <!-- GOOGLE FONTS -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
@@ -18,7 +35,6 @@
       --danger: #ef4444;
       --warning: #f59e0b;
       --success: #10b981;
-      --info: #3b82f6;
       --bg: #f8fafc;
       --card-bg: #ffffff;
       --text-main: #0f172a;
@@ -43,7 +59,7 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
     .brand-group { display: flex; align-items: center; gap: 14px; }
-    .brand-logo { height: 42px; border-radius: 8px; }
+    .brand-logo { height: 42px; width: auto; border-radius: 8px; }
     .brand-title h1 { font-size: 1.25rem; font-family: 'Montserrat', sans-serif; color: var(--primary); font-weight: 800; letter-spacing: 0.5px; }
     .brand-title p { font-size: 0.8rem; color: var(--text-muted); }
 
@@ -292,7 +308,7 @@
     .empty-state h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 8px; color: var(--text-main); }
     .empty-state p { color: var(--text-muted); font-size: 0.95rem; max-width: 480px; margin: 0 auto; }
 
-    /* PRINT RECEIPT STYLES */
+    /* PRINT RECEIPT */
     @media print {
       body * { visibility: hidden; }
       #printArea, #printArea * { visibility: visible; }
@@ -316,7 +332,7 @@
     <div class="top-actions">
       <div class="status-pill status-online">
         <span class="status-dot"></span>
-        <span>CƠ SỞ DỮ LIỆU ĐANG KẾT NỐI</span>
+        <span>DATABASE KẾT NỐI (SINGAPORE)</span>
       </div>
       <div id="liveClock" class="live-clock">--:--:--</div>
       <button id="btnSoundTrigger" class="btn-sound" onclick="toggleAudioEngine()">
@@ -327,7 +343,7 @@
   </header>
 
   <main class="dashboard-container no-print">
-    <!-- STATS -->
+    <!-- STATS KPI -->
     <section class="stats-grid">
       <div class="stat-card">
         <div class="stat-info">
@@ -361,16 +377,16 @@
 
     <!-- TABS -->
     <div class="tabs-bar">
-      <button class="tab-btn active" onclick="switchTab('all')">
+      <button class="tab-btn active" onclick="switchTab('all', event)">
         Tất Cả Đơn <span class="tab-badge" id="badgeAll">0</span>
       </button>
-      <button class="tab-btn" onclick="switchTab('pending')">
+      <button class="tab-btn" onclick="switchTab('pending', event)">
         Chờ Xác Nhận <span class="tab-badge badge-danger" id="badgePending">0</span>
       </button>
-      <button class="tab-btn" onclick="switchTab('cooking')">
+      <button class="tab-btn" onclick="switchTab('cooking', event)">
         Bếp Đang Làm <span class="tab-badge" id="badgeCooking">0</span>
       </button>
-      <button class="tab-btn" onclick="switchTab('done')">
+      <button class="tab-btn" onclick="switchTab('done', event)">
         Đã Giao / Xong <span class="tab-badge" id="badgeDone">0</span>
       </button>
     </div>
@@ -385,7 +401,7 @@
     </div>
   </main>
 
-  <!-- KHU VỰC IN HÓA ĐƠN ẨN (DÀNH CHO WINDOW.PRINT) -->
+  <!-- KHU VỰC IN HÓA ĐƠN ẨN (DÀNH CHO THERMAL PRINTER) -->
   <div id="printArea"></div>
 
   <!-- AUDIO THÔNG BÁO VÒNG LẶP -->
@@ -416,13 +432,13 @@
     let originalTitle = document.title;
     let titleBlinkInterval = null;
 
-    // ĐỒNG HỒ REALTIME
+    // ĐỒNG HỒ THỜI GIAN THỰC
     setInterval(() => {
       const now = new Date();
       document.getElementById('liveClock').innerText = now.toLocaleTimeString('vi-VN');
     }, 1000);
 
-    // KÍCH HOẠT ÂM THANH
+    // BẬT / TẮT ÂM THANH
     window.toggleAudioEngine = function() {
       const audio = document.getElementById('audioNotification');
       audio.play().then(() => {
@@ -434,11 +450,10 @@
         document.getElementById('soundIcon').innerText = '🔊';
         document.getElementById('soundText').innerText = 'Âm Thanh Báo Sẵn Sàng';
       }).catch(err => {
-        alert("Vui lòng nhấp cấp quyền âm thanh cho trang để kích hoạt chuông.");
+        alert("Vui lòng nhấp để cấp quyền phát âm thanh cho trang.");
       });
     };
 
-    // PHÁT / DỪNG CHUÔNG BÁO VÒNG LẶP
     function startAlarm() {
       if (isAudioActive) {
         const audio = document.getElementById('audioNotification');
@@ -462,7 +477,7 @@
       }
     }
 
-    // LẮNG NGHE ĐƠN HÀNG THỜI GIAN THỰC TỪ FIREBASE
+    // LẮNG NGHE ĐƠN TỪ FIREBASE REALTIME DATABASE
     const ordersRef = ref(db, 'orders');
     onValue(ordersRef, (snapshot) => {
       const data = snapshot.val();
@@ -470,10 +485,12 @@
       renderDashboard();
     });
 
-    window.switchTab = function(tabName) {
+    window.switchTab = function(tabName, ev) {
       currentFilter = tabName;
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      event.currentTarget.classList.add('active');
+      if (ev && ev.currentTarget) {
+        ev.currentTarget.classList.add('active');
+      }
       renderDashboard();
     };
 
@@ -485,7 +502,7 @@
       let totalRev = 0;
       let cardsHtml = '';
 
-      const keys = Object.keys(ordersCache).reverse(); // Mới nhất lên đầu
+      const keys = Object.keys(ordersCache).reverse();
 
       keys.forEach(id => {
         const order = ordersCache[id];
@@ -510,7 +527,6 @@
         else if (status === 'Đang chế biến') countCooking++;
         else if (status === 'Đã hoàn tất') { countDone++; totalRev += subtotal; }
 
-        // Lọc theo Tab
         let show = false;
         if (currentFilter === 'all') show = true;
         else if (currentFilter === 'pending' && status === 'Chờ xác nhận') show = true;
@@ -593,7 +609,7 @@
         }
       });
 
-      // CẬP NHẬT STATS & BADGES
+      // CẬP NHẬT CHỈ SỐ KPI
       document.getElementById('kpiPending').innerText = countPending;
       document.getElementById('kpiCooking').innerText = countCooking;
       document.getElementById('kpiDone').innerText = countDone;
@@ -604,14 +620,14 @@
       document.getElementById('badgeCooking').innerText = countCooking;
       document.getElementById('badgeDone').innerText = countDone;
 
-      // KIỂM SOÁT BÁO ĐỘNG
+      // ĐIỀU KHIỂN CHUÔNG BÁO LIÊN TỤC
       if (countPending > 0) {
         startAlarm();
       } else {
         stopAlarm();
       }
 
-      // HIỂN THỊ
+      // XUẤT NỘI DUNG RA MÀN HÌNH
       if (cardsHtml === '') {
         container.innerHTML = `
           <div class="empty-state">
@@ -625,7 +641,7 @@
       }
     }
 
-    // CHUYỂN TRẠNG THÁI ĐƠN
+    // CHUYỂN TRẠNG THÁI ĐƠN HÀNG
     window.updateOrderStatus = function(id, nextStatus) {
       update(ref(db, 'orders/' + id), { status: nextStatus })
         .then(() => {
@@ -633,14 +649,14 @@
         });
     };
 
-    // HỦY ĐƠN
+    // HỦY ĐƠN HÀNG
     window.deleteOrder = function(id) {
       if (confirm("Bạn có chắc chắn muốn hủy đơn hàng này?")) {
         remove(ref(db, 'orders/' + id));
       }
     };
 
-    // IN PHIẾU BẾP / HÓA ĐƠN GIAO HÀNG (THERMAL PRINTER FORMAT)
+    // IN PHIẾU BẾP / HÓA ĐƠN NHIỆT KHỔ 80MM
     window.printReceipt = function(id) {
       const order = ordersCache[id];
       if (!order) return;
