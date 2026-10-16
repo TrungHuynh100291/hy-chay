@@ -6,7 +6,7 @@
   <title>Hy Chay - Ẩm Thực Chay Rau Củ Nấm | Bảo Anh Lâm</title>
   <meta name="description" content="Nhà hàng Hy Chay - Ẩm thực chay thanh khiết từ rau củ nấm tại 280 Trần Hưng Đạo, P. Phan Thiết, T. Lâm Đồng.">
 
-  <!-- CẤU HÌNH ICON & PWA -->
+  <!-- CẤU HÌNH ICON & PWA TOÀN MÀN HÌNH -->
   <link rel="icon" type="image/png" href="https://hychayfood.vercel.app/Logo%20nho.png">
   <link rel="apple-touch-icon" href="https://hychayfood.vercel.app/Logo%20nho.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -17,58 +17,16 @@
 
   <link rel="manifest" href='data:application/manifest+json,{"name":"Hy Chay - Ẩm Thực Chay","short_name":"Hy Chay","start_url":"/","display":"standalone","background_color":"#faf9f5","theme_color":"#1e5e3a","icons":[{"src":"https://hychayfood.vercel.app/Logo%20nho.png","sizes":"192x192","type":"image/png"},{"src":"https://hychayfood.vercel.app/Logo%20Lon.png","sizes":"512x512","type":"image/png"}]}'>
 
+  <!-- OPEN GRAPH CHO ZALO & FACEBOOK -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://hychayfood.vercel.app/">
   <meta property="og:title" content="Hy Chay - Ẩm Thực Chay Rau Củ Nấm | Bảo Anh Lâm">
-  <meta property="og:description" content="Đặt món chay thanh khiết, ship tận nơi tại Phan Thiết, freeship đơn từ 200k trong bánNguyên nhân chính khiến hình ảnh tải lên từ trang Admin chưa hiển thị sang trang khách hàng (`index.html`) gồm 2 điểm:
-
-1. **Danh sách thực đơn chi tiết (hơn 70 món) chưa có khung chứa ảnh:** Trước đó, các dòng món ăn (`menu-item-row`) chỉ được thiết kế gồm *Tên món* và *Đơn giá*, chưa có thẻ `<img>` để nạp ảnh. Do đó, dù Admin đã tải ảnh lên cơ sở dữ liệu thành công, trang khách vẫn không có chỗ để hiển thị.
-2. **Trang `index.html` chưa đồng bộ nhánh dữ liệu `menu_customizations`:** Trang khách cần bộ lắng nghe tự động để khi Admin đổi ảnh hoặc đổi giá, hình ảnh mới (kể cả 8 món đặc sắc lẫn toàn bộ menu) sẽ lập tức hiển thị thay thế ảnh mặc định.
-
----
-
-### Cách khắc phục: Thay thế mã nguồn chuẩn cho `index.html`
-
-Phiên bản `index.html` dưới đây đã được bổ sung:
-* Khung ảnh đại diện thu nhỏ (Thumbnail 64x64px bo tròn sắc nét) cho toàn bộ các món trong thực đơn.
-* Bộ lắng nghe Firebase tự động cập nhật ảnh mới tải lên cho cả 8 món đặc sắc lẫn toàn bộ thực đơn.
-
-#### Các bước thực hiện:
-1. Mở tệp **`index.html`** trên GitHub và bấm biểu tượng chiếc bút chì (**Edit this file**).
-2. Nhấn **Ctrl + A** rồi bấm **Delete** để xóa sạch toàn bộ mã cũ.
-3. Sao chép toàn bộ đoạn mã bên dưới và dán vào.
-4. Kéo xuống cuối trang, bấm **Commit changes...** để xác nhận lưu.
-
-```html
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Hy Chay - Ẩm Thực Chay Rau Củ Nấm | Bảo Anh Lâm</title>
-  <meta name="description" content="Nhà hàng Hy Chay - Ẩm thực chay thanh khiết từ rau củ nấm tại 280 Trần Hưng Đạo, P. Phan Thiết, T. Lâm Đồng.">
-
-  <!-- CẤU HÌNH ICON TRÊN MÀN HÌNH CHÍNH & PWA -->
-  <link rel="icon" type="image/png" href="[https://hychayfood.vercel.app/Logo%20nho.png](https://hychayfood.vercel.app/Logo%20nho.png)">
-  <link rel="apple-touch-icon" href="[https://hychayfood.vercel.app/Logo%20nho.png](https://hychayfood.vercel.app/Logo%20nho.png)">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Hy Chay">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#1e5e3a">
-
-  <link rel="manifest" href='data:application/manifest+json,{"name":"Hy Chay - Ẩm Thực Chay","short_name":"Hy Chay","start_url":"/","display":"standalone","background_color":"#faf9f5","theme_color":"#1e5e3a","icons":[{"src":"[https://hychayfood.vercel.app/Logo%20nho.png](https://hychayfood.vercel.app/Logo%20nho.png)","sizes":"192x192","type":"image/png"},{"src":"[https://hychayfood.vercel.app/Logo%20Lon.png](https://hychayfood.vercel.app/Logo%20Lon.png)","sizes":"512x512","type":"image/png"}]}'>
-
-  <!-- OPEN GRAPH CHO ZALO & FACEBOOK -->
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="[https://hychayfood.vercel.app/](https://hychayfood.vercel.app/)">
-  <meta property="og:title" content="Hy Chay - Ẩm Thực Chay Rau Củ Nấm | Bảo Anh Lâm">
   <meta property="og:description" content="Đặt món chay thanh khiết, ship tận nơi tại Phan Thiết, freeship đơn từ 200k trong bán kính 5km.">
-  <meta property="og:image" content="[https://hychayfood.vercel.app/Logo%20Lon.png](https://hychayfood.vercel.app/Logo%20Lon.png)">
+  <meta property="og:image" content="https://hychayfood.vercel.app/Logo%20Lon.png">
 
-  <link rel="preconnect" href="[https://fonts.googleapis.com](https://fonts.googleapis.com)">
-  <link rel="preconnect" href="[https://fonts.gstatic.com](https://fonts.gstatic.com)" crossorigin>
-  <link href="[https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800&display=swap](https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800&display=swap)" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
 
   <style>
     :root {
@@ -150,6 +108,7 @@ Phiên bản `index.html` dưới đây đã được bổ sung:
     .hero-actions { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
 
     .btn-primary { background: var(--accent); color: #1a3826; font-weight: 700; padding: 12px 26px; border-radius: 30px; box-shadow: 0 4px 15px rgba(255, 216, 0, 0.3); border: none; cursor: pointer; display: inline-block; }
+    .btn-primary:hover { background: var(--accent-dark); }
     .btn-secondary { background: transparent; color: #ffffff; border: 2px solid #ffffff; font-weight: 600; padding: 10px 24px; border-radius: 30px; display: inline-block; }
 
     .section { padding: 50px 20px; max-width: 1200px; margin: 0 auto; }
@@ -174,7 +133,7 @@ Phiên bản `index.html` dưới đây đã được bổ sung:
     .dish-price { font-weight: 700; color: #e53e3e; font-size: 1.05rem; }
     .btn-add-cart { background: var(--primary); color: #fff; border: none; padding: 8px 14px; border-radius: 20px; font-weight: 600; font-size: 0.85rem; cursor: pointer; }
 
-    /* TOÀN BỘ THỰC ĐƠN CHI TIẾT - CÓ KHUNG ẢNH THUMBNAIL */
+    /* TOÀN BỘ THỰC ĐƠN CHI TIẾT - CÓ ẢNH THUMBNAIL */
     .menu-filter-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px; -webkit-overflow-scrolling: touch; }
     .filter-chip { background: #ffffff; border: 1px solid var(--border); color: var(--text-dark); padding: 8px 16px; border-radius: 24px; font-size: 0.88rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
     .filter-chip.active { background: var(--primary); color: #ffffff; border-color: var(--primary); }
@@ -183,8 +142,7 @@ Phiên bản `index.html` dưới đây đã được bổ sung:
     .menu-item-row { background: #ffffff; border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; gap: 12px; transition: transform 0.2s, box-shadow 0.2s; }
     .menu-item-row:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
     
-    /* KHUNG CHỨA ẢNH MÓN */
-    .item-thumb { width: 64px; height: 64px; border-radius: 10px; overflow: hidden; background: #f1f5f9; flex-shrink: 0; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; }
+    .item-thumb { width: 62px; height: 62px; border-radius: 10px; overflow: hidden; background: #f1f5f9; flex-shrink: 0; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; }
     .item-thumb img { width: 100%; height: 100%; object-fit: cover; }
     
     .item-meta { flex-grow: 1; }
@@ -275,7 +233,7 @@ Phiên bản `index.html` dưới đây đã được bổ sung:
     </div>
   </section>
 
-  <!-- 8 MÓN ĐẶC SẮC -->
+  <!-- 8 MÓN ĐẶC SẮC CÓ HÌNH -->
   <section class="section" id="mon-dac-sac">
     <div class="section-title">
       <h2>Món Ngon Đặc Sắc</h2>
@@ -406,7 +364,7 @@ Phiên bản `index.html` dưới đây đã được bổ sung:
     </div>
   </section>
 
-  <!-- TOÀN BỘ THỰC ĐƠN (CÓ ẢNH THUMBNAIL TỰ ĐỘNG) -->
+  <!-- TOÀN BỘ THỰC ĐƠN (CÓ ẢNH THUMBNAIL) -->
   <section class="section" id="toan-bo-menu" style="background:#fff; border-radius:24px; padding:30px 20px;">
     <div class="section-title">
       <h2>Thực Đơn Đặt Món Trực Tuyến</h2>
@@ -425,6 +383,7 @@ Phiên bản `index.html` dưới đây đã được bổ sung:
       <button class="filter-chip" onclick="filterMenuCategory('douong', this)">Đồ Uống BAL'S HOUSE</button>
     </div>
 
+    <!-- KHUNG CHỨA TOÀN BỘ MÓN ĂN ĐƯỢC VẼ RA BẰNG JAVASCRIPT -->
     <div class="full-menu-container" id="fullMenuContainer"></div>
   </section>
 
@@ -515,9 +474,10 @@ Phiên bản `index.html` dưới đây đã được bổ sung:
     </div>
   </footer>
 
+  <!-- SCRIPT ENGINE ĐÃ GẮN HÀM TRỰC TIẾP LÊN WINDOW ĐỂ KHÔNG BAO GIỜ BỊ LỖI PHẠM VI -->
   <script type="module">
-    import { initializeApp } from "[https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js](https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js)";
-    import { getDatabase, ref, push, onValue } from "[https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js](https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js)";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyB7CH4HUqEozclN38P_iGtSFzDB_w7sOUk",
@@ -529,7 +489,7 @@ Phiên bản `index.html` dưới đây đã được bổ sung:
     };
 
     const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app, "[https://hy-chay-default-rtdb.asia-southeast1.firebasedatabase.app](https://hy-chay-default-rtdb.asia-southeast1.firebasedatabase.app)");
+    const db = getDatabase(app, "https://hy-chay-default-rtdb.asia-southeast1.firebasedatabase.app");
 
     const STORE_LAT = 10.9328;
     const STORE_LON = 108.1025;
@@ -537,34 +497,47 @@ Phiên bản `index.html` dưới đây đã được bổ sung:
     const urlParams = new URLSearchParams(window.location.search);
     const tableParam = urlParams.get('ban') || urlParams.get('table');
 
-    // AUTO PROMPT INSTALL
+    // TỰ ĐỘNG BẬT CÀI ICON CHO ANDROID
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      document.getElementById('pwaInstallBanner').style.display = 'flex';
+      const b = document.getElementById('pwaInstallBanner');
+      if (b) b.style.display = 'flex';
     });
 
-    document.getElementById('btnTriggerInstall').addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        await deferredPrompt.userChoice;
-        deferredPrompt = null;
-        document.getElementById('pwaInstallBanner').style.display = 'none';
-      }
-    });
+    const triggerBtn = document.getElementById('btnTriggerInstall');
+    if (triggerBtn) {
+      triggerBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          await deferredPrompt.userChoice;
+          deferredPrompt = null;
+          document.getElementById('pwaInstallBanner').style.display = 'none';
+        }
+      });
+    }
 
-    window.closeInstallBanner = () => { document.getElementById('pwaInstallBanner').style.display = 'none'; };
+    window.closeInstallBanner = () => { 
+      const b = document.getElementById('pwaInstallBanner');
+      if (b) b.style.display = 'none'; 
+    };
 
     const isIos = () => /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
     const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
 
     if (isIos() && !isInStandaloneMode()) {
-      setTimeout(() => { document.getElementById('iosGuideModal').style.display = 'block'; }, 1500);
+      setTimeout(() => { 
+        const m = document.getElementById('iosGuideModal');
+        if (m) m.style.display = 'block'; 
+      }, 1500);
     }
-    window.closeIosGuide = () => { document.getElementById('iosGuideModal').style.display = 'none'; };
+    window.closeIosGuide = () => { 
+      const m = document.getElementById('iosGuideModal');
+      if (m) m.style.display = 'none'; 
+    };
 
-    // DANH SÁCH MÓN
+    // TOÀN BỘ THỰC ĐƠN ĐẦY ĐỦ CỦA HY CHAY & BAL'S HOUSE
     const ALL_MENU_DATA = [
       { id: "bunmoc", name: "Bún Mọc Chay", defaultPrice: 30000, cat: "bun", catName: "Món Bún", defaultImg: "menu 1.jpg" },
       { id: "bunthai", name: "Bún Thái Chay", defaultPrice: 35000, cat: "bun", catName: "Món Bún", defaultImg: "menu 1.jpg" },
@@ -644,7 +617,6 @@ Phiên bản `index.html` dưới đây đã được bổ sung:
     let currentShippingFee = 14000;
     let isStoreOpen = true;
 
-    // LẤY DỮ LIỆU ĐÃ CẬP NHẬT (ẢNH VÀ GIÁ)
     function getDishData(dish) {
       const custom = menuCustomCache[dish.id] || {};
       return {
@@ -658,9 +630,10 @@ Phiên bản `index.html` dưới đây đã được bổ sung:
       };
     }
 
-    // RENDER MENU CHI TIẾT - CÓ ẢNH THUMBNAIL
+    // HÀM VẼ TOÀN BỘ MÓN ĂN RA GIAO DIỆN
     function renderFullMenu() {
       const container = document.getElementById('fullMenuContainer');
+      if (!container) return;
       let html = '';
 
       ALL_MENU_DATA.forEach(dish => {
@@ -670,7 +643,7 @@ Phiên bản `index.html` dưới đây đã được bổ sung:
         html += `
           <div class="menu-item-row ${item.isSoldOut ? 'is-sold-out' : ''}">
             <div class="item-thumb">
-              <img src="${item.image}" alt="${item.name}">
+              <img src="${item.image}" alt="${item.name}" onerror="this.src='Logo nho.png'">
             </div>
             <div class="item-meta">
               <span class="item-cat-label">${item.catName}</span>
@@ -691,7 +664,7 @@ Phiên bản `index.html` dưới đây đã được bổ sung:
     window.filterMenuCategory = function(cat, btn) {
       currentFilterCat = cat;
       document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-      btn.classList.add('active');
+      if (btn) btn.classList.add('active');
       renderFullMenu();
     };
 
@@ -741,10 +714,10 @@ Phiên bản `index.html` dưới đây đã được bổ sung:
       let baseFee = 0;
 
       if (peak) {
-        timeSlotText.innerHTML = '<span style="color:#d97706; font-weight:bold;">⚡ Cao điểm (Bằng 90% sàn)</span>';
+        if (timeSlotText) timeSlotText.innerHTML = '<span style="color:#d97706; font-weight:bold;">⚡ Cao điểm (Bằng 90% sàn)</span>';
         baseFee = km <= 2 ? 19000 : Math.round((21000 + (km - 2) * 5000) * 0.9 / 1000) * 1000;
       } else {
-        timeSlotText.innerText = 'Tiêu chuẩn (Rẻ hơn 10% sàn)';
+        if (timeSlotText) timeSlotText.innerText = 'Tiêu chuẩn (Rẻ hơn 10% sàn)';
         baseFee = km <= 2 ? 14000 : Math.round((16000 + (km - 2) * 5000) * 0.9 / 1000) * 1000;
       }
 
@@ -752,13 +725,13 @@ Phiên bản `index.html` dưới đây đã được bổ sung:
       if (subtotal >= 200000) {
         if (km <= 5) {
           baseFee = 0;
-          freeshipBadge.style.display = 'block';
+          if (freeshipBadge) freeshipBadge.style.display = 'block';
         } else {
           baseFee = Math.max(0, baseFee - 28000);
-          freeshipBadge.style.display = 'block';
+          if (freeshipBadge) freeshipBadge.style.display = 'block';
         }
       } else {
-        freeshipBadge.style.display = 'none';
+        if (freeshipBadge) freeshipBadge.style.display = 'none';
       }
       return baseFee;
     }
@@ -766,7 +739,7 @@ Phiên bản `index.html` dưới đây đã được bổ sung:
     window.calculateDistanceByAddress = function(address) {
       if (!address || address.trim().length < 4) return;
       const query = encodeURIComponent(address + ", Phan Thiết");
-      fetch(`[https://nominatim.openstreetmap.org/search?format=json&q=$](https://nominatim.openstreetmap.org/search?format=json&q=$){query}`)
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}`)
         .then(res => res.json())
         .then(data => {
           if (data && data.length > 0) {
@@ -795,16 +768,20 @@ Phiên bản `index.html` dưới đây đã được bổ sung:
       currentShippingFee = calculateShipping(calculatedDistance, subtotal);
       const grandTotal = subtotal + currentShippingFee;
 
-      document.getElementById('subtotalText').innerText = subtotal.toLocaleString() + 'đ';
-      document.getElementById('shipFeeText').innerText = currentShippingFee === 0 ? "0đ (Freeship)" : currentShippingFee.toLocaleString() + 'đ';
-      document.getElementById('grandTotalText').innerText = grandTotal.toLocaleString() + 'đ';
+      const subEl = document.getElementById('subtotalText');
+      const feeEl = document.getElementById('shipFeeText');
+      const grandEl = document.getElementById('grandTotalText');
+
+      if (subEl) subEl.innerText = subtotal.toLocaleString() + 'đ';
+      if (feeEl) feeEl.innerText = currentShippingFee === 0 ? "0đ (Freeship)" : currentShippingFee.toLocaleString() + 'đ';
+      if (grandEl) grandEl.innerText = grandTotal.toLocaleString() + 'đ';
     }
 
     // ĐỒNG BỘ ẢNH VÀ GIÁ THỜI GIAN THỰC TỪ FIREBASE SANG GIAO DIỆN KHÁCH
     onValue(ref(db, 'menu_customizations'), (snapshot) => {
       menuCustomCache = snapshot.val() || {};
 
-      // 1. Cập nhật 8 món có hình
+      // 1. Cập nhật 8 món đặc sắc có hình
       document.querySelectorAll('.dish-card').forEach(card => {
         const dishId = card.getAttribute('data-dish-id');
         const custom = menuCustomCache[dishId] || {};
@@ -821,16 +798,14 @@ Phiên bản `index.html` dưới đây đã được bổ sung:
         }
         if (isSoldOut) {
           card.classList.add('is-sold-out');
-          btn.innerText = "TẠM HẾT MÓN";
-          btn.disabled = true;
+          if (btn) { btn.innerText = "TẠM HẾT MÓN"; btn.disabled = true; }
         } else {
           card.classList.remove('is-sold-out');
-          btn.innerText = "+ Chọn Món";
-          btn.disabled = false;
+          if (btn) { btn.innerText = "+ Chọn Món"; btn.disabled = false; }
         }
       });
 
-      // 2. Cập nhật toàn bộ thực đơn chi tiết
+      // 2. Vẽ lại toàn bộ thực đơn chi tiết kèm ảnh mới
       renderFullMenu();
     });
 
@@ -862,14 +837,18 @@ Phiên bản `index.html` dưới đây đã được bổ sung:
         totalCount += cart[key].qty;
         totalPrice += cart[key].price * cart[key].qty;
       }
-      document.getElementById('cartCount').innerText = totalCount;
-      document.getElementById('cartTotal').innerText = totalPrice.toLocaleString() + 'đ';
+      const countEl = document.getElementById('cartCount');
+      const totalEl = document.getElementById('cartTotal');
+      if (countEl) countEl.innerText = totalCount;
+      if (totalEl) totalEl.innerText = totalPrice.toLocaleString() + 'đ';
       
       const bar = document.getElementById('cartBar');
-      if (totalCount > 0) bar.classList.add('active');
-      else {
-        bar.classList.remove('active');
-        closeCheckoutModal();
+      if (bar) {
+        if (totalCount > 0) bar.classList.add('active');
+        else {
+          bar.classList.remove('active');
+          closeCheckoutModal();
+        }
       }
     }
 
@@ -879,21 +858,31 @@ Phiên bản `index.html` dưới đây đã được bổ sung:
       updateOrderCalculation();
 
       if (tableParam) {
-        document.getElementById('groupAddress').style.display = 'none';
-        document.getElementById('shippingBox').style.display = 'none';
-        document.getElementById('cusName').value = `Bàn ${tableParam}`;
-        document.getElementById('cusPhone').required = false;
-        document.getElementById('cusPhone').placeholder = "SĐT liên hệ (không bắt buộc)";
+        const addrGroup = document.getElementById('groupAddress');
+        const shipBox = document.getElementById('shippingBox');
+        if (addrGroup) addrGroup.style.display = 'none';
+        if (shipBox) shipBox.style.display = 'none';
+        
+        const nameInput = document.getElementById('cusName');
+        const phoneInput = document.getElementById('cusPhone');
+        if (nameInput) nameInput.value = `Bàn ${tableParam}`;
+        if (phoneInput) {
+          phoneInput.required = false;
+          phoneInput.placeholder = "SĐT liên hệ (không bắt buộc)";
+        }
       }
-      document.getElementById('checkoutModal').classList.add('active');
+      const modal = document.getElementById('checkoutModal');
+      if (modal) modal.classList.add('active');
     };
 
     window.closeCheckoutModal = function() {
-      document.getElementById('checkoutModal').classList.remove('active');
+      const modal = document.getElementById('checkoutModal');
+      if (modal) modal.classList.remove('active');
     };
 
     function renderCartItems() {
       let listDiv = document.getElementById('cartItemsList');
+      if (!listDiv) return;
       let html = '';
       for (let key in cart) {
         let item = cart[key];
@@ -954,6 +943,7 @@ Phiên bản `index.html` dưới đây đã được bổ sung:
       });
     };
 
+    // VẼ MENU NGAY KHI MỞ TRANG (KHÔNG CHỜ NETWORK)
     renderFullMenu();
     checkOperatingHours();
   </script>
