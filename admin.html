@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hy Chay POS - Quản Lý, Order & Báo Cáo Thuế Quý Doanh Nghiệp</title>
+  <title>Hy Chay POS - Quản Lý Đơn Hàng, Thực Đơn & Doanh Thu</title>
 
   <!-- FAVICON & OPEN GRAPH -->
   <link rel="icon" type="image/png" href="https://hychayfood.vercel.app/Logo%20nho.png">
@@ -11,8 +11,8 @@
   <link rel="apple-touch-icon" href="https://hychayfood.vercel.app/Logo%20nho.png">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://hychayfood.vercel.app/admin.html">
-  <meta property="og:title" content="Hy Chay POS - Báo Cáo Doanh Thu & Thuế Quý">
-  <meta property="og:description" content="Hệ thống điều hành POS, xuất dữ liệu doanh thu ngày/tháng/quý phục vụ kê khai thuế Bảo Anh Lâm.">
+  <meta property="og:title" content="Hy Chay POS - Hệ Thống Điều Hành Nhà Hàng">
+  <meta property="og:description" content="Quản lý đơn hàng, điều chỉnh giá, upload ảnh món và báo cáo thuế Bảo Anh Lâm.">
   <meta property="og:image" content="https://hychayfood.vercel.app/Logo%20Lon.png">
 
   <!-- GOOGLE FONTS -->
@@ -78,7 +78,7 @@
     .tab-btn.active .tab-badge { background: var(--primary); color: #fff; }
     .badge-danger { background: var(--danger) !important; color: #fff; }
 
-    /* VIEW 1: ORDERS GRID */
+    /* ORDERS GRID */
     .orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 18px; }
     .order-card { background: var(--card-bg); border-radius: 14px; border: 1px solid var(--border); box-shadow: 0 3px 12px rgba(0,0,0,0.04); display: flex; flex-direction: column; overflow: hidden; }
     .order-card.pending { border: 2px solid #ef4444; animation: alert-card 1.2s infinite alternate; }
@@ -114,7 +114,7 @@
     .btn-print-bill { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
     .btn-cancel { background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; }
 
-    /* VIEW 2: POS TẠI BÀN */
+    /* POS TẠI BÀN */
     .pos-layout { display: grid; grid-template-columns: 1.8fr 1.2fr; gap: 20px; }
     .pos-menu-panel { background: #fff; border-radius: 14px; border: 1px solid var(--border); padding: 20px; }
     .pos-cart-panel { background: #fff; border-radius: 14px; border: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; }
@@ -125,12 +125,12 @@
     .btn-table-pill { border: 1px solid #cbd5e1; background: #f8fafc; padding: 7px 14px; border-radius: 20px; font-weight: 700; font-size: 0.88rem; cursor: pointer; color: var(--text-main); }
     .btn-table-pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-    .pos-dish-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
-    .pos-dish-btn { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: left; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between; min-height: 90px; }
+    .pos-dish-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; max-height: 520px; overflow-y: auto; padding-right: 4px; }
+    .pos-dish-btn { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px; text-align: left; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between; min-height: 85px; }
     .pos-dish-btn:hover:not(:disabled) { border-color: var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.06); transform: translateY(-2px); }
     .pos-dish-btn:disabled { opacity: 0.5; cursor: not-allowed; background: #f1f5f9; }
-    .pos-dish-btn h4 { font-size: 0.95rem; margin-bottom: 4px; color: var(--text-main); }
-    .pos-dish-btn span { font-weight: 700; color: #dc2626; font-size: 0.9rem; }
+    .pos-dish-btn h4 { font-size: 0.9rem; margin-bottom: 4px; color: var(--text-main); line-height: 1.3; }
+    .pos-dish-btn span { font-weight: 700; color: #dc2626; font-size: 0.88rem; }
 
     .pos-cart-panel h3 { font-size: 1.15rem; color: var(--primary); margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
     .pos-cart-items { flex-grow: 1; overflow-y: auto; max-height: 380px; margin-bottom: 15px; }
@@ -141,18 +141,34 @@
     .pos-submit-btn { background: #16a34a; color: #fff; border: none; padding: 14px; border-radius: 10px; font-weight: 800; font-size: 1rem; cursor: pointer; width: 100%; transition: background 0.2s; }
     .pos-submit-btn:hover { background: #15803d; }
 
-    /* VIEW 3: STOCK MANAGEMENT TABLE */
-    .menu-management-table { width: 100%; background: #fff; border-radius: 14px; border-collapse: collapse; overflow: hidden; border: 1px solid var(--border); }
-    .menu-management-table th { background: #f8fafc; padding: 14px 20px; text-align: left; font-size: 0.88rem; font-weight: 700; color: var(--text-muted); border-bottom: 1px solid var(--border); }
-    .menu-management-table td { padding: 14px 20px; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
-    .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .3s; border-radius: 34px; }
-    .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
-    input:checked + .slider { background-color: #16a34a; }
-    input:checked + .slider:before { transform: translateX(24px); }
+    /* QUẢN LÝ MÓN ĂN: TÌM KIẾM, SỬA GIÁ & UPLOAD ẢNH */
+    .menu-ctrl-header { background: #fff; border-radius: 14px; border: 1px solid var(--border); padding: 18px 20px; margin-bottom: 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+    .search-input { padding: 9px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.92rem; width: 280px; }
+    .cat-select { padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.92rem; font-weight: 600; }
+    
+    .menu-mgmt-table { width: 100%; background: #fff; border-radius: 14px; border-collapse: collapse; overflow: hidden; border: 1px solid var(--border); }
+    .menu-mgmt-table th { background: #f8fafc; padding: 14px 16px; text-align: left; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+    .menu-mgmt-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 0.92rem; vertical-align: middle; }
 
-    /* VIEW 4: BÁO CÁO THUẾ & KẾT CA DOANH NGHIỆP */
+    .dish-thumb-box { width: 56px; height: 56px; border-radius: 8px; overflow: hidden; background: #e2e8f0; position: relative; border: 1px solid #cbd5e1; display: flex; align-items: center; justify-content: center; }
+    .dish-thumb-box img { width: 100%; height: 100%; object-fit: cover; }
+    
+    .btn-upload-img { background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; margin-top: 4px; display: block; text-align: center; }
+    .btn-upload-img:hover { background: #0284c7; color: #fff; }
+
+    .price-input-group { display: flex; align-items: center; gap: 6px; }
+    .price-input { width: 95px; padding: 6px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-weight: 700; color: #dc2626; text-align: right; }
+    .btn-save-price { background: var(--primary); color: #fff; border: none; padding: 6px 10px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
+    .btn-save-price:hover { background: var(--primary-dark); }
+
+    .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .3s; border-radius: 24px; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+    input:checked + .slider { background-color: #16a34a; }
+    input:checked + .slider:before { transform: translateX(22px); }
+
+    /* BÁO CÁO KẾT CA & THUẾ */
     .report-card { background: #fff; border-radius: 14px; border: 1px solid var(--border); padding: 24px; margin-bottom: 24px; }
     .tax-company-banner { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; }
     .tax-company-banner h3 { font-size: 1.05rem; color: var(--primary); margin-bottom: 4px; }
@@ -160,12 +176,9 @@
 
     .report-filter-bar { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; background: #f8fafc; border: 1px solid var(--border); padding: 14px 18px; border-radius: 10px; margin-bottom: 20px; }
     .report-filter-bar select, .report-filter-bar input { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.9rem; font-weight: 600; }
-    
     .report-btn-group { display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; }
-    .btn-export-excel { background: #059669; color: #fff; border: none; padding: 9px 18px; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-    .btn-export-excel:hover { background: #047857; }
-    .btn-print-report { background: var(--primary); color: #fff; border: none; padding: 9px 18px; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-    .btn-print-report:hover { background: var(--primary-dark); }
+    .btn-export-excel { background: #059669; color: #fff; border: none; padding: 9px 18px; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer; }
+    .btn-print-report { background: var(--primary); color: #fff; border: none; padding: 9px 18px; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer; }
 
     .report-summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
     .rep-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center; }
@@ -176,7 +189,7 @@
     .report-table th { background: #f1f5f9; padding: 10px 14px; text-align: left; font-size: 0.82rem; color: var(--text-muted); border-bottom: 2px solid var(--border); }
     .report-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
 
-    /* IN NHIỆT 80MM HOẶC KHỔ A4 */
+    /* IN NHIỆT KHỔ 80MM */
     @media print {
       body * { visibility: hidden; }
       #printArea, #printArea * { visibility: visible; }
@@ -212,7 +225,7 @@
   </header>
 
   <main class="dashboard-container no-print">
-    <!-- STATS TRỰC QUAN -->
+    <!-- STATS -->
     <section class="stats-grid">
       <div class="stat-card">
         <div class="stat-info">
@@ -249,7 +262,7 @@
         ➕ Order Tại Bàn (Khách Ăn Quán)
       </button>
       <button class="tab-btn" onclick="switchMainTab('menuStock', event)">
-        🍽️ Bật/Tắt Hết Món
+        🍽️ Quản Lý Món Ăn (Sửa Giá, Đổi Ảnh & Tắt/Bật)
       </button>
       <button class="tab-btn" onclick="switchMainTab('shiftReport', event)">
         📊 Báo Cáo Thuế & Doanh Thu (Ngày/Tháng/Quý)
@@ -280,61 +293,75 @@
             </div>
           </div>
 
-          <label style="font-size:0.85rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:8px;">2. CHỌN MÓN VÀO ORDER:</label>
+          <label style="font-size:0.85rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:8px;">2. CHỌN MÓN VÀO ORDER (BẤM ĐỂ CHỌN):</label>
           <div class="pos-dish-grid" id="posDishGrid"></div>
         </div>
 
         <div class="pos-cart-panel">
           <h3>Order: <span id="currentSelectedTable" style="color:#d97706;">Bàn 1</span></h3>
-          
           <div class="pos-cart-items" id="posCartItemsList">
             <p style="color:#94a3b8; text-align:center; padding:40px 0;">Chưa có món nào được chọn.</p>
           </div>
-
           <div style="margin-bottom: 14px;">
             <label style="font-size:0.82rem; font-weight:600; color:#475569;">Ghi chú cho bếp:</label>
             <input type="text" id="posOrderNote" placeholder="Ví dụ: Không hành, cay nhiều, làm gấp..." style="width:100%; padding:9px 12px; border:1px solid #cbd5e1; border-radius:8px; margin-top:4px;">
           </div>
-
           <div style="border-top:2px solid var(--border); padding-top:10px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center;">
             <span style="font-weight:700; font-size:1.05rem;">Tổng tiền:</span>
             <span id="posCartTotal" style="font-size:1.4rem; font-weight:800; color:#dc2626;">0đ</span>
           </div>
-
           <button class="pos-submit-btn" onclick="submitDineInOrder()">⚡ GỬI BẾP & IN BÁO BẾP</button>
         </div>
       </div>
     </div>
 
-    <!-- VIEW 3: STOCK MANAGEMENT -->
+    <!-- VIEW 3: QUẢN LÝ MÓN ĂN (SỬA GIÁ, TẢI ẢNH, BẬT TẮT) -->
     <div id="viewMenuStock" style="display: none;">
-      <table class="menu-management-table">
+      <div class="menu-ctrl-header">
+        <input type="text" id="menuSearchInput" class="search-input" placeholder="🔍 Tìm tên món ăn..." oninput="renderMenuStockTable()">
+        <select id="menuCatFilter" class="cat-select" onchange="renderMenuStockTable()">
+          <option value="all">Tất cả nhóm món</option>
+          <option value="bun">Món Bún</option>
+          <option value="mi_pho">Mì, Phở & Hủ Tiếu</option>
+          <option value="com_kho">Cơm & Món Khô</option>
+          <option value="chien_dacbiet">Món Chiên & Đặc Biệt</option>
+          <option value="lau">Lẩu Chay</option>
+          <option value="soche">Sơ Chế & Đóng Gói</option>
+          <option value="douong">Đồ Uống BAL'S HOUSE</option>
+        </select>
+        <span style="margin-left: auto; font-size: 0.85rem; color: #64748b;">💡 Giá và Ảnh thay đổi tại đây sẽ lập tức cập nhật sang màn hình của khách!</span>
+      </div>
+
+      <table class="menu-mgmt-table">
         <thead>
           <tr>
-            <th>Món Ăn</th>
-            <th>Đơn Giá</th>
-            <th>Trạng Thái Bán</th>
-            <th>Hành Động (Gạt để Tắt/Bật)</th>
+            <th style="width: 80px;">Hình Ảnh</th>
+            <th>Tên Món Ăn</th>
+            <th>Nhóm Món</th>
+            <th style="width: 170px;">Giá Bán Hiện Tại</th>
+            <th style="width: 110px;">Trạng Thái</th>
+            <th style="width: 80px; text-align: center;">Tắt/Bật</th>
           </tr>
         </thead>
         <tbody id="menuStockBody"></tbody>
       </table>
+
+      <!-- Input file ẩn để chọn ảnh tải lên -->
+      <input type="file" id="dishImageFileInput" accept="image/*" style="display: none;" onchange="handleImageFileSelected(this)">
     </div>
 
-    <!-- VIEW 4: BÁO CÁO THUẾ & DOANH THU ĐA KỲ -->
+    <!-- VIEW 4: BÁO CÁO THUẾ & DOANH THU -->
     <div id="viewShiftReport" style="display: none;">
       <div class="report-card">
-        <!-- BANNER PHÁP NHÂN DOANH NGHIỆP -->
         <div class="tax-company-banner">
           <h3>CÔNG TY TNHH TMDV VÀ SẢN XUẤT BẢO ANH LÂM</h3>
           <p>
-            <b>Mã số thuế:</b> 3401289271 | <b>Đơn vị trực thuộc:</b> Hy Chay (Nhà hàng F&B - Nhóm ngành 5610)<br>
+            <b>Mã số thuế:</b> 3401289271 | <b>Đơn vị trực thuộc:</b> Hy Chay (Nhóm ngành 5610)<br>
             <b>Địa chỉ trụ sở:</b> 280 Trần Hưng Đạo, P. Phan Thiết, T. Lâm Đồng<br>
             <i>Hệ thống tổng hợp dữ liệu doanh thu bán lẻ phục vụ Tờ khai thuế GTGT và Quyết toán thuế TNDN.</i>
           </p>
         </div>
 
-        <!-- BỘ LỌC KỲ THỜI GIAN -->
         <div class="report-filter-bar">
           <div>
             <label style="font-weight:700; font-size:0.85rem; margin-right:6px;">Chế độ lọc:</label>
@@ -345,7 +372,6 @@
             </select>
           </div>
 
-          <!-- LỌC QUÝ -->
           <div id="filterQuarterBox">
             <select id="filterQuarter">
               <option value="1">Quý 1 (Tháng 1 - Tháng 3)</option>
@@ -359,12 +385,10 @@
             </select>
           </div>
 
-          <!-- LỌC THÁNG -->
           <div id="filterMonthBox" style="display: none;">
             <input type="month" id="filterMonthInput">
           </div>
 
-          <!-- LỌC NGÀY -->
           <div id="filterDayBox" style="display: none;">
             <input type="date" id="filterDayInput">
           </div>
@@ -374,23 +398,18 @@
           </button>
 
           <div class="report-btn-group">
-            <button class="btn-export-excel" onclick="exportTaxReportCSV()">
-              📥 Xuất Excel (CSV) Báo Cáo Thuế
-            </button>
-            <button class="btn-print-report" onclick="printShiftReport()">
-              🖨️ In Bảng Kê Doanh Thu
-            </button>
+            <button class="btn-export-excel" onclick="exportTaxReportCSV()">📥 Xuất Excel (CSV) Báo Cáo Thuế</button>
+            <button class="btn-print-report" onclick="printShiftReport()">🖨️ In Bảng Kê Doanh Thu</button>
           </div>
         </div>
 
-        <!-- KPI TỔNG HỢP TRONG KỲ -->
         <div class="report-summary-cards">
           <div class="rep-box">
             <span>TỔNG DOANH THU THUẾ</span>
             <h3 id="repTotalRev" style="color:#1e5e3a;">0đ</h3>
           </div>
           <div class="rep-box">
-            <span>DOANH THU TẠI CHỖ (BÀN)</span>
+            <span>DOANH THU TẠI BÀN</span>
             <h3 id="repDineInRev" style="color:#d97706;">0đ</h3>
           </div>
           <div class="rep-box">
@@ -403,7 +422,6 @@
           </div>
         </div>
 
-        <!-- BẢNG 1: DOANH THU THEO TỪNG NGÀY TRONG KỲ -->
         <h3 style="font-size:1.05rem; color:var(--primary); margin-top:20px;">1. BẢNG KÊ DOANH THU CHI TIẾT THEO NGÀY TRONG KỲ</h3>
         <table class="report-table">
           <thead>
@@ -418,7 +436,6 @@
           <tbody id="repDailyBreakdownBody"></tbody>
         </table>
 
-        <!-- BẢNG 2: KIỂM KÊ MÓN ĂN TIÊU THỤ TRONG KỲ -->
         <h3 style="font-size:1.05rem; color:var(--primary); margin-top:25px;">2. TỔNG HỢP HÀNG HÓA - MÓN ĂN ĐÃ TIÊU THỤ TRONG KỲ</h3>
         <table class="report-table">
           <thead>
@@ -434,14 +451,13 @@
     </div>
   </main>
 
-  <!-- VÙNG IN NHIỆT KHỔ 80MM / A4 -->
   <div id="printArea"></div>
 
-  <!-- AUDIO THÔNG BÁO -->
   <audio id="audioNotification" loop preload="auto">
     <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
   </audio>
 
+  <!-- FIREBASE ENGINE & POS SCRIPT -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, onValue, update, remove, set, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -458,24 +474,103 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app, "https://hy-chay-default-rtdb.asia-southeast1.firebasedatabase.app");
 
-    const DISH_LIST = [
-      { id: "bunchagio", name: "Bún Chả Giò Chay", price: 35000 },
-      { id: "banhcanh", name: "Bánh Canh Chay", price: 30000 },
-      { id: "hoanhthanhmi", name: "Mì Hoành Thánh Chay", price: 35000 },
-      { id: "miquang", name: "Mì Quảng Chay", price: 35000 },
-      { id: "comga", name: "Cơm Gà Chay", price: 35000 },
-      { id: "xoi", name: "Xôi Thập Cẩm Chay", price: 25000 },
-      { id: "nomhoachuoi", name: "Nộm Hoa Chuối Tri Kỷ", price: 70000 },
-      { id: "mispaghetti", name: "Mì Ý Sốt Bò Bằm Chay", price: 55000 }
+    // TOÀN BỘ DANH SÁCH MÓN ĂN GỐC CỦA HY CHAY & BAL'S HOUSE
+    const MASTER_DISH_LIST = [
+      // MÓN BÚN
+      { id: "bunmoc", name: "Bún Mọc Chay", defaultPrice: 30000, cat: "bun", catName: "Món Bún", defaultImg: "menu 1.jpg" },
+      { id: "bunthai", name: "Bún Thái Chay", defaultPrice: 35000, cat: "bun", catName: "Món Bún", defaultImg: "menu 1.jpg" },
+      { id: "bunrieu", name: "Bún Riêu Chay", defaultPrice: 30000, cat: "bun", catName: "Món Bún", defaultImg: "menu 1.jpg" },
+      { id: "bunhue", name: "Bún Huế Chay", defaultPrice: 30000, cat: "bun", catName: "Món Bún", defaultImg: "menu 1.jpg" },
+      { id: "bunmam", name: "Bún Mắm Chay", defaultPrice: 35000, cat: "bun", catName: "Món Bún", defaultImg: "menu 1.jpg" },
+      { id: "bunbokho", name: "Bún Bò Kho Chay", defaultPrice: 30000, cat: "bun", catName: "Món Bún", defaultImg: "menu 1.jpg" },
+      { id: "bunchuathila", name: "Bún Chua Thì Là", defaultPrice: 35000, cat: "bun", catName: "Món Bún", defaultImg: "menu 1.jpg" },
+
+      // MÌ, PHỞ & HỦ TIẾU
+      { id: "miquang", name: "Mì Quảng Chay", defaultPrice: 35000, cat: "mi_pho", catName: "Mì - Phở - Hủ Tiếu", defaultImg: "Mi Quang Chay.png" },
+      { id: "mitiem", name: "Mì Tiềm Chay", defaultPrice: 35000, cat: "mi_pho", catName: "Mì - Phở - Hủ Tiếu", defaultImg: "menu 1.jpg" },
+      { id: "hoanhthanhmi", name: "Mì Hoành Thánh Chay", defaultPrice: 35000, cat: "mi_pho", catName: "Mì - Phở - Hủ Tiếu", defaultImg: "Hoanh Thanh Mi.png" },
+      { id: "mitronkho", name: "Mì Trộn Khô Chay", defaultPrice: 35000, cat: "mi_pho", catName: "Mì - Phở - Hủ Tiếu", defaultImg: "menu 1.jpg" },
+      { id: "mispaghetti", name: "Mì Ý Sốt Bò Bằm Chay", defaultPrice: 55000, cat: "mi_pho", catName: "Mì - Phở - Hủ Tiếu", defaultImg: "Mi Spaghetti Chay.png" },
+      { id: "miykemnam", name: "Mì Ý Kem Nấm", defaultPrice: 55000, cat: "mi_pho", catName: "Mì - Phở - Hủ Tiếu", defaultImg: "menu 1.jpg" },
+      { id: "micay", name: "Mì Cay Chay", defaultPrice: 45000, cat: "mi_pho", catName: "Mì - Phở - Hủ Tiếu", defaultImg: "menu 1.jpg" },
+      { id: "phoboga", name: "Phở Bò / Gà Chay", defaultPrice: 30000, cat: "mi_pho", catName: "Mì - Phở - Hủ Tiếu", defaultImg: "menu 1.jpg" },
+      { id: "hutieudai", name: "Hủ Tiếu Dai / Hủ Tiếu Mì", defaultPrice: 30000, cat: "mi_pho", catName: "Mì - Phở - Hủ Tiếu", defaultImg: "menu 1.jpg" },
+      { id: "hutieutronkho", name: "Hủ Tiếu Trộn Khô", defaultPrice: 35000, cat: "mi_pho", catName: "Mì - Phở - Hủ Tiếu", defaultImg: "menu 1.jpg" },
+      { id: "hutieubokho", name: "Hủ Tiếu Bò Kho Chay", defaultPrice: 30000, cat: "mi_pho", catName: "Mì - Phở - Hủ Tiếu", defaultImg: "menu 1.jpg" },
+      { id: "banhmibokho", name: "Bánh Mì Bò Kho Chay", defaultPrice: 30000, cat: "mi_pho", catName: "Mì - Phở - Hủ Tiếu", defaultImg: "menu 1.jpg" },
+      { id: "banhcanh", name: "Bánh Canh Chay", defaultPrice: 30000, cat: "mi_pho", catName: "Mì - Phở - Hủ Tiếu", defaultImg: "Banh Canh Chay.png" },
+
+      // CƠM, CHÁO & MÓN KHÔ
+      { id: "comga", name: "Cơm Gà Chay", defaultPrice: 35000, cat: "com_kho", catName: "Cơm & Món Khô", defaultImg: "Com Ga.png" },
+      { id: "comtam", name: "Cơm Tấm Chay", defaultPrice: 35000, cat: "com_kho", catName: "Cơm & Món Khô", defaultImg: "menu 1.jpg" },
+      { id: "comdiathapcam", name: "Cơm Dĩa Thập Cẩm Chay", defaultPrice: 35000, cat: "com_kho", catName: "Cơm & Món Khô", defaultImg: "menu 1.jpg" },
+      { id: "comchienraucunam", name: "Cơm Chiên Rau Củ Nấm", defaultPrice: 40000, cat: "com_kho", catName: "Cơm & Món Khô", defaultImg: "menu 1.jpg" },
+      { id: "chaonam", name: "Cháo Nấm Chay", defaultPrice: 30000, cat: "com_kho", catName: "Cơm & Món Khô", defaultImg: "menu 1.jpg" },
+      { id: "banhmipatecha", name: "Bánh Mì Pate Chả Chay", defaultPrice: 20000, cat: "com_kho", catName: "Cơm & Món Khô", defaultImg: "menu 1.jpg" },
+      { id: "xoi", name: "Xôi Thập Cẩm Chay", defaultPrice: 25000, cat: "com_kho", catName: "Cơm & Món Khô", defaultImg: "Xoi.png" },
+      { id: "xoichabongnam", name: "Xôi Chà Bông Nấm Hương", defaultPrice: 30000, cat: "com_kho", catName: "Cơm & Món Khô", defaultImg: "Xoi.png" },
+      { id: "banhuot", name: "Bánh Ướt Chay", defaultPrice: 25000, cat: "com_kho", catName: "Cơm & Món Khô", defaultImg: "menu 1.jpg" },
+      { id: "banhhoi", name: "Bánh Hỏi Chay", defaultPrice: 30000, cat: "com_kho", catName: "Cơm & Món Khô", defaultImg: "menu 1.jpg" },
+      { id: "bunchagio", name: "Bún Chả Giò Chay", defaultPrice: 35000, cat: "com_kho", catName: "Cơm & Món Khô", defaultImg: "BunChaGio.png" },
+      { id: "bunmamnem", name: "Bún Mắm Nêm Chay", defaultPrice: 30000, cat: "com_kho", catName: "Cơm & Món Khô", defaultImg: "menu 1.jpg" },
+
+      // MÓN CHIÊN & MÓN ĐẶC BIỆT
+      { id: "chagiochien", name: "Chả Giò Chiên Giòn", defaultPrice: 60000, cat: "chien_dacbiet", catName: "Món Chiên & Đặc Biệt", defaultImg: "combo 7 mon chay.png" },
+      { id: "baonguchienxu", name: "Bào Ngư Chiên Xù", defaultPrice: 70000, cat: "chien_dacbiet", catName: "Món Chiên & Đặc Biệt", defaultImg: "menu 1.jpg" },
+      { id: "khoaitaychien", name: "Khoai Tây Chiên", defaultPrice: 40000, cat: "chien_dacbiet", catName: "Món Chiên & Đặc Biệt", defaultImg: "menu 1.jpg" },
+      { id: "phomaivienchien", name: "Phô Mai Viên Chiên", defaultPrice: 70000, cat: "chien_dacbiet", catName: "Món Chiên & Đặc Biệt", defaultImg: "menu 1.jpg" },
+      { id: "hoanhthanhchien", name: "Hoành Thánh Chiên Giòn", defaultPrice: 60000, cat: "chien_dacbiet", catName: "Món Chiên & Đặc Biệt", defaultImg: "menu 1.jpg" },
+      { id: "dauhuchien", name: "Đậu Hũ Chiên Giòn", defaultPrice: 40000, cat: "chien_dacbiet", catName: "Món Chiên & Đặc Biệt", defaultImg: "menu 1.jpg" },
+      { id: "namcuonthinh", name: "Nấm Cuộn Thính", defaultPrice: 70000, cat: "chien_dacbiet", catName: "Món Chiên & Đặc Biệt", defaultImg: "menu 1.jpg" },
+      { id: "namxucbanhda", name: "Nấm Xúc Bánh Đa", defaultPrice: 70000, cat: "chien_dacbiet", catName: "Món Chiên & Đặc Biệt", defaultImg: "menu 1.jpg" },
+      { id: "nomhoachuoi", name: "Nộm Hoa Chuối Tri Kỷ", defaultPrice: 70000, cat: "chien_dacbiet", catName: "Món Chiên & Đặc Biệt", defaultImg: "Nom Hoa Chuoi.png" },
+      { id: "boluclacbanhmi", name: "Bò Lúc Lắc - Bánh Mì", defaultPrice: 60000, cat: "chien_dacbiet", catName: "Món Chiên & Đặc Biệt", defaultImg: "menu 1.jpg" },
+      { id: "boluclackhoaitay", name: "Bò Lúc Lắc - Khoai Tây", defaultPrice: 70000, cat: "chien_dacbiet", catName: "Món Chiên & Đặc Biệt", defaultImg: "menu 1.jpg" },
+
+      // LẨU CHAY
+      { id: "lauthai", name: "Lẩu Thái Chay (Nồi Lớn)", defaultPrice: 230000, cat: "lau", catName: "Lẩu Chay", defaultImg: "menu 1.jpg" },
+      { id: "lauchao", name: "Lẩu Chao Chay (Nồi Lớn)", defaultPrice: 230000, cat: "lau", catName: "Lẩu Chay", defaultImg: "menu 1.jpg" },
+
+      // THỰC PHẨM SƠ CHẾ & ĐÓNG GÓI
+      { id: "chanamhuong", name: "Chả Nấm Hương (Đòn)", defaultPrice: 65000, cat: "soche", catName: "Sơ Chế & Đóng Gói", defaultImg: "Menu 3.jpg" },
+      { id: "charaucunam", name: "Chả Rau Củ Nấm (Đòn)", defaultPrice: 70000, cat: "soche", catName: "Sơ Chế & Đóng Gói", defaultImg: "Menu 3.jpg" },
+      { id: "chamitnon", name: "Chả Mít Non Độc Quyền", defaultPrice: 75000, cat: "soche", catName: "Sơ Chế & Đóng Gói", defaultImg: "Menu 3.jpg" },
+      { id: "channamhuong", name: "Chân Nấm Hương Thượng Hạng", defaultPrice: 120000, cat: "soche", catName: "Sơ Chế & Đóng Gói", defaultImg: "Menu 3.jpg" },
+      { id: "gahukychuachien", name: "Gà Hũ Ky Cuộn Nấm (Chưa Chiên)", defaultPrice: 75000, cat: "soche", catName: "Sơ Chế & Đóng Gói", defaultImg: "Menu 3.jpg" },
+      { id: "chagiochuachien", name: "Chả Giò (Chưa Chiên / Hộp)", defaultPrice: 60000, cat: "soche", catName: "Sơ Chế & Đóng Gói", defaultImg: "Menu 3.jpg" },
+      { id: "patehatdieu", name: "Pate Hạt Điều Béo Bùi", defaultPrice: 75000, cat: "soche", catName: "Sơ Chế & Đóng Gói", defaultImg: "Menu 3.jpg" },
+      { id: "chabongnamhuonganlien", name: "Chà Bông Nấm Hương (Hũ)", defaultPrice: 120000, cat: "soche", catName: "Sơ Chế & Đóng Gói", defaultImg: "Menu 3.jpg" },
+      { id: "chabongsuonanlien", name: "Chà Bông Sườn (Ăn Liền)", defaultPrice: 70000, cat: "soche", catName: "Sơ Chế & Đóng Gói", defaultImg: "Menu 3.jpg" },
+      { id: "namchienxuchuachien", name: "Nấm Chiên Xù (Chưa Chiên)", defaultPrice: 70000, cat: "soche", catName: "Sơ Chế & Đóng Gói", defaultImg: "Menu 3.jpg" },
+      { id: "rongbiensayanlien", name: "Rong Biển Sấy Giòn (Ăn Liền)", defaultPrice: 40000, cat: "soche", catName: "Sơ Chế & Đóng Gói", defaultImg: "Menu 3.jpg" },
+      { id: "suonsaymeanlien", name: "Sườn Sấy Mè Giòn (Ăn Liền)", defaultPrice: 70000, cat: "soche", catName: "Sơ Chế & Đóng Gói", defaultImg: "Menu 3.jpg" },
+      { id: "suonrimcayanlien", name: "Sườn Rim Cay Đậm Vị (Ăn Liền)", defaultPrice: 70000, cat: "soche", catName: "Sơ Chế & Đóng Gói", defaultImg: "Menu 3.jpg" },
+      { id: "mocvienchay", name: "Mọc Viên Chay Thơm Ngon", defaultPrice: 70000, cat: "soche", catName: "Sơ Chế & Đóng Gói", defaultImg: "Menu 3.jpg" },
+
+      // ĐỒ UỐNG BAL'S HOUSE
+      { id: "cafeda", name: "Cà Phê Đen Đá", defaultPrice: 17000, cat: "douong", catName: "Đồ Uống BAL'S HOUSE", defaultImg: "Menu 4.jpg" },
+      { id: "cafesua", name: "Cà Phê Sữa Đá", defaultPrice: 19000, cat: "douong", catName: "Đồ Uống BAL'S HOUSE", defaultImg: "Menu 4.jpg" },
+      { id: "bacxiu", name: "Bạc Xỉu BAL", defaultPrice: 20000, cat: "douong", catName: "Đồ Uống BAL'S HOUSE", defaultImg: "Menu 4.jpg" },
+      { id: "cafemuoi", name: "Cà Phê Muối Đặc Biệt", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống BAL'S HOUSE", defaultImg: "Menu 4.jpg" },
+      { id: "cafekemtrung", name: "Cà Phê Kem Trứng Béo Ngậy", defaultPrice: 30000, cat: "douong", catName: "Đồ Uống BAL'S HOUSE", defaultImg: "Menu 4.jpg" },
+      { id: "lattematcha", name: "Latte Matcha", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống BAL'S HOUSE", defaultImg: "Menu 4.jpg" },
+      { id: "trataximuoi", name: "Trà Tắc Xí Muội", defaultPrice: 15000, cat: "douong", catName: "Đồ Uống BAL'S HOUSE", defaultImg: "Menu 4.jpg" },
+      { id: "tradao", name: "Trà Đào Thanh Mát", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống BAL'S HOUSE", defaultImg: "Menu 4.jpg" },
+      { id: "tradau", name: "Trà Dâu Tươi", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống BAL'S HOUSE", defaultImg: "Menu 4.jpg" },
+      { id: "epcam", name: "Nước Ép Cam Tươi", defaultPrice: 20000, cat: "douong", catName: "Đồ Uống BAL'S HOUSE", defaultImg: "Menu 4.jpg" },
+      { id: "epthom", name: "Nước Ép Thơm", defaultPrice: 20000, cat: "douong", catName: "Đồ Uống BAL'S HOUSE", defaultImg: "Menu 4.jpg" },
+      { id: "yaourtda", name: "Yaourt Đá", defaultPrice: 20000, cat: "douong", catName: "Đồ Uống BAL'S HOUSE", defaultImg: "Menu 4.jpg" },
+      { id: "sodadau", name: "Soda Dâu Tươi", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống BAL'S HOUSE", defaultImg: "Menu 4.jpg" },
+      { id: "nuocmia", name: "Nước Mía Sạch", defaultPrice: 10000, cat: "douong", catName: "Đồ Uống BAL'S HOUSE", defaultImg: "Menu 4.jpg" },
+      { id: "nuocngot", name: "Nước Ngọt Các Loại", defaultPrice: 15000, cat: "douong", catName: "Đồ Uống BAL'S HOUSE", defaultImg: "Menu 4.jpg" }
     ];
 
     let ordersCache = {};
-    let menuStatusCache = {};
+    let menuCustomCache = {};
     let isAudioActive = false;
-
-    // POS DINE-IN STATE
     let selectedTable = "Bàn 1";
     let posCart = {};
+    let uploadingDishId = null;
 
     // KHỞI TẠO MẶC ĐỊNH
     const today = new Date();
@@ -527,13 +622,165 @@
         renderPosDishGrid();
       } else if (tabName === 'menuStock') {
         document.getElementById('viewMenuStock').style.display = 'block';
+        renderMenuStockTable();
       } else if (tabName === 'shiftReport') {
         document.getElementById('viewShiftReport').style.display = 'block';
         renderShiftReport();
       }
     };
 
-    // --- POS ORDER TẠI BÀN LOGIC ---
+    // --- QUẢN LÝ MÓN ĂN: LẤY GIÁ & ẢNH MỚI NHẤT ---
+    function getDishData(dish) {
+      const custom = menuCustomCache[dish.id] || {};
+      return {
+        id: dish.id,
+        name: dish.name,
+        cat: dish.cat,
+        catName: dish.catName,
+        price: custom.price !== undefined ? custom.price : dish.defaultPrice,
+        image: custom.image || dish.defaultImg,
+        isSoldOut: !!custom.soldOut
+      };
+    }
+
+    // LẮNG NGHE CẤU HÌNH MÓN ĂN TỪ FIREBASE (MENU_CUSTOMIZATIONS)
+    onValue(ref(db, 'menu_customizations'), (snap) => {
+      menuCustomCache = snap.val() || {};
+      renderMenuStockTable();
+      renderPosDishGrid();
+    });
+
+    // RENDER BẢNG QUẢN LÝ MÓN ĂN
+    window.renderMenuStockTable = function() {
+      const tbody = document.getElementById('menuStockBody');
+      const keyword = (document.getElementById('menuSearchInput').value || '').toLowerCase().trim();
+      const catFilter = document.getElementById('menuCatFilter').value;
+      let html = '';
+
+      MASTER_DISH_LIST.forEach(dish => {
+        const item = getDishData(dish);
+
+        // Lọc danh mục & từ khóa tìm kiếm
+        if (catFilter !== 'all' && item.cat !== catFilter) return;
+        if (keyword && !item.name.toLowerCase().includes(keyword)) return;
+
+        html += `
+          <tr>
+            <td>
+              <div class="dish-thumb-box">
+                <img src="${item.image}" alt="${item.name}">
+              </div>
+              <button class="btn-upload-img" onclick="triggerUploadImage('${item.id}')">📷 Đổi ảnh</button>
+            </td>
+            <td>
+              <b>${item.name}</b><br>
+              <small style="color:#64748b;">Mã: ${item.id}</small>
+            </td>
+            <td><span style="background:#f1f5f9; padding:2px 8px; border-radius:10px; font-size:0.75rem;">${item.catName}</span></td>
+            <td>
+              <div class="price-input-group">
+                <input type="number" id="price_input_${item.id}" class="price-input" value="${item.price}" step="1000">
+                <button class="btn-save-price" onclick="saveDishPrice('${item.id}')">Lưu</button>
+              </div>
+            </td>
+            <td>
+              ${item.isSoldOut ? '<span style="color:#ef4444; font-weight:bold;">Tạm hết</span>' : '<span style="color:#16a34a; font-weight:bold;">Đang bán</span>'}
+            </td>
+            <td style="text-align: center;">
+              <label class="switch">
+                <input type="checkbox" ${!item.isSoldOut ? 'checked' : ''} onchange="toggleDishStock('${item.id}', this.checked)">
+                <span class="slider"></span>
+              </label>
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center; padding:30px; color:#94a3b8;">Không tìm thấy món ăn phù hợp.</td></tr>';
+    };
+
+    // 1. LƯU GIÁ TIỀN MỚI CHO MÓN
+    window.saveDishPrice = function(dishId) {
+      const input = document.getElementById(`price_input_${dishId}`);
+      const newPrice = parseInt(input.value);
+      if (isNaN(newPrice) || newPrice < 0) {
+        alert("Vui lòng nhập giá tiền hợp lệ!");
+        return;
+      }
+
+      update(ref(db, `menu_customizations/${dishId}`), {
+        price: newPrice,
+        updatedAt: new Date().toISOString()
+      }).then(() => {
+        alert("Đã cập nhật giá mới thành công!");
+      });
+    };
+
+    // 2. BẬT/TẮT MÓN (HẾT HÀNG)
+    window.toggleDishStock = function(dishId, isAvailable) {
+      update(ref(db, `menu_customizations/${dishId}`), {
+        soldOut: !isAvailable,
+        updatedAt: new Date().toISOString()
+      });
+    };
+
+    // 3. TỰ TẢI LÊN HÌNH ẢNH MÓN ĂN & NÉN BẰNG CANVAS
+    window.triggerUploadImage = function(dishId) {
+      uploadingDishId = dishId;
+      document.getElementById('dishImageFileInput').click();
+    };
+
+    window.handleImageFileSelected = function(inputElement) {
+      const file = inputElement.files[0];
+      if (!file || !uploadingDishId) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          // Nén ảnh về kích thước tối đa 350x350px để lưu trữ nhẹ nhàng
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const max_size = 350;
+
+          if (width > height) {
+            if (width > max_size) {
+              height *= max_size / width;
+              width = max_size;
+            }
+          } else {
+            if (height > max_size) {
+              width *= max_size / height;
+              height = max_size;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Tạo chuỗi base64 JPEG chất lượng tốt (~30KB)
+          const base64Data = canvas.toDataURL('image/jpeg', 0.82);
+
+          // Lưu trực tiếp vào Firebase Realtime Database
+          update(ref(db, `menu_customizations/${uploadingDishId}`), {
+            image: base64Data,
+            updatedAt: new Date().toISOString()
+          }).then(() => {
+            alert("Đã tải lên và lưu hình ảnh món mới thành công!");
+            inputElement.value = '';
+          }).catch(err => {
+            alert("Lỗi tải ảnh: " + err.message);
+          });
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
+
+    // --- POS TẠI BÀN (CHỌN MÓN VÀ LÊN ĐƠN) ---
     window.selectTable = function(tableName, btnElement) {
       selectedTable = tableName;
       document.querySelectorAll('.btn-table-pill').forEach(b => b.classList.remove('active'));
@@ -544,15 +791,15 @@
     function renderPosDishGrid() {
       const grid = document.getElementById('posDishGrid');
       let html = '';
-      DISH_LIST.forEach(dish => {
-        const isSoldOut = menuStatusCache[dish.id] && menuStatusCache[dish.id].soldOut;
+      MASTER_DISH_LIST.forEach(dish => {
+        const item = getDishData(dish);
         html += `
-          <button class="pos-dish-btn" ${isSoldOut ? 'disabled' : ''} onclick="addToPosCart('${dish.name}', ${dish.price})">
+          <button class="pos-dish-btn" ${item.isSoldOut ? 'disabled' : ''} onclick="addToPosCart('${item.name}', ${item.price})">
             <div>
-              <h4>${dish.name}</h4>
-              ${isSoldOut ? '<small style="color:#ef4444; font-weight:bold;">Tạm hết</small>' : ''}
+              <h4>${item.name}</h4>
+              ${item.isSoldOut ? '<small style="color:#ef4444; font-weight:bold;">Tạm hết</small>' : ''}
             </div>
-            <span>${dish.price.toLocaleString()}đ</span>
+            <span>${item.price.toLocaleString()}đ</span>
           </button>
         `;
       });
@@ -631,45 +878,7 @@
       });
     };
 
-    // --- LẮNG NGHE TỒN KHO MÓN ---
-    onValue(ref(db, 'menu_status'), (snap) => {
-      menuStatusCache = snap.val() || {};
-      renderMenuStockTable();
-      renderPosDishGrid();
-    });
-
-    function renderMenuStockTable() {
-      const tbody = document.getElementById('menuStockBody');
-      let html = '';
-      DISH_LIST.forEach(dish => {
-        const isSoldOut = menuStatusCache[dish.id] && menuStatusCache[dish.id].soldOut;
-        html += `
-          <tr>
-            <td><b>${dish.name}</b></td>
-            <td>${dish.price.toLocaleString()}đ</td>
-            <td>
-              ${isSoldOut ? '<span style="color:#ef4444; font-weight:bold;">🔴 TẠM HẾT MÓN</span>' : '<span style="color:#16a34a; font-weight:bold;">🟢 ĐANG BÁN</span>'}
-            </td>
-            <td>
-              <label class="switch">
-                <input type="checkbox" ${!isSoldOut ? 'checked' : ''} onchange="toggleDishStock('${dish.id}', this.checked)">
-                <span class="slider"></span>
-              </label>
-            </td>
-          </tr>
-        `;
-      });
-      tbody.innerHTML = html;
-    }
-
-    window.toggleDishStock = function(dishId, isAvailable) {
-      set(ref(db, 'menu_status/' + dishId), {
-        soldOut: !isAvailable,
-        updatedAt: new Date().toISOString()
-      });
-    };
-
-    // --- LẮNG NGHE & RENDER ĐƠN HÀNG ---
+    // --- LẮNG NGHE & RENDER ĐƠN HÀNG THỜI GIAN THỰC ---
     onValue(ref(db, 'orders'), (snapshot) => {
       ordersCache = snapshot.val() || {};
       renderOrders();
@@ -799,7 +1008,7 @@
       }
     };
 
-    // --- BỘ LỌC THUẾ: ĐIỀU KHIỂN GIAO DIỆN CHẾ ĐỘ LỌC ---
+    // --- BỘ LỌC BÁO CÁO KẾT CA & DOANH THU THUẾ ---
     window.onFilterModeChange = function() {
       const mode = document.getElementById('filterMode').value;
       document.getElementById('filterQuarterBox').style.display = mode === 'quarter' ? 'inline-block' : 'none';
@@ -808,7 +1017,6 @@
       renderShiftReport();
     };
 
-    // --- TÍNH TOÁN DỮ LIỆU BÁO CÁO DOANH THU ĐA KỲ (NGÀY / THÁNG / QUÝ) ---
     function getFilteredTaxData() {
       const mode = document.getElementById('filterMode').value;
       let labelPeriod = "";
@@ -826,8 +1034,8 @@
 
         const orderDateObj = new Date(order.createdAt);
         const y = orderDateObj.getFullYear();
-        const m = orderDateObj.getMonth() + 1; // 1 - 12
-        const dateStr = orderDateObj.toISOString().split('T')[0]; // YYYY-MM-DD
+        const m = orderDateObj.getMonth() + 1;
+        const dateStr = orderDateObj.toISOString().split('T')[0];
 
         let match = false;
         if (mode === 'quarter') {
@@ -839,11 +1047,11 @@
           let endMonth = q * 3;
           if (y === qYear && m >= startMonth && m <= endMonth) match = true;
         } else if (mode === 'month') {
-          const selectedMonth = document.getElementById('filterMonthInput').value; // YYYY-MM
+          const selectedMonth = document.getElementById('filterMonthInput').value;
           labelPeriod = `Tháng ${selectedMonth}`;
           if (orderDateObj.toISOString().startsWith(selectedMonth)) match = true;
         } else if (mode === 'day') {
-          const selectedDay = document.getElementById('filterDayInput').value; // YYYY-MM-DD
+          const selectedDay = document.getElementById('filterDayInput').value;
           labelPeriod = `Ngày ${selectedDay}`;
           if (dateStr === selectedDay) match = true;
         }
@@ -897,7 +1105,6 @@
       document.getElementById('repDeliveryRev').innerText = data.deliveryRev.toLocaleString() + 'đ';
       document.getElementById('repDoneCount').innerText = data.doneCount + ' hóa đơn';
 
-      // 1. Render Bảng Kê Doanh Thu Hàng Ngày Trong Kỳ
       const dailyTbody = document.getElementById('repDailyBreakdownBody');
       const dates = Object.keys(data.dailyBreakdown).sort();
       let dailyHtml = '';
@@ -919,7 +1126,6 @@
       }
       dailyTbody.innerHTML = dailyHtml;
 
-      // 2. Render Bảng Hàng Hóa Món Ăn Bán Ra
       const dishTbody = document.getElementById('repDishTableBody');
       const dishNames = Object.keys(data.dishStats);
       let dishHtml = '';
@@ -940,7 +1146,6 @@
       dishTbody.innerHTML = dishHtml;
     };
 
-    // --- XUẤT FILE EXCEL / CSV BÁO CÁO THUẾ CHUẨN UTF-8 ---
     window.exportTaxReportCSV = function() {
       const data = getFilteredTaxData();
       if (data.rawOrdersList.length === 0) {
@@ -948,13 +1153,11 @@
         return;
       }
 
-      // Tạo nội dung CSV chuẩn UTF-8 kèm ký tự BOM (\uFEFF)
       let csvContent = "\uFEFF";
       csvContent += "CÔNG TY TNHH TMDV VÀ SẢN XUẤT BẢO ANH LÂM\n";
       csvContent += "MST: 3401289271 - Địa chỉ: 280 Trần Hưng Đạo, P. Phan Thiết, T. Lâm Đồng\n";
       csvContent += `BẢNG KÊ CHI TIẾT DOANH THU BÁN LẺ HÀNG HÓA DỊCH VỤ (${data.labelPeriod})\n`;
       csvContent += `Tổng doanh thu: ${data.totalRev} VNĐ - Tổng số hóa đơn: ${data.doneCount}\n\n`;
-
       csvContent += "STT,Mã Đơn,Thời Gian,Loại Hình,Khách Hàng/Bàn,Số Điện Thoại,Địa Chỉ,Chi Tiết Món Ăn,Doanh Thu (VNĐ)\n";
 
       data.rawOrdersList.forEach((ord, index) => {
@@ -979,7 +1182,6 @@
       document.body.removeChild(link);
     };
 
-    // --- IN BẢNG KÊ BÁO CÁO THUẾ QUÝ / KẾT CA (KHỔ A4 HOẶC 80MM) ---
     window.printShiftReport = function() {
       const data = getFilteredTaxData();
       let dailyRows = '';
