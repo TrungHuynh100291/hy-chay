@@ -3,53 +3,400 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quản Lý Đơn Hàng - Hy Chay POS</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Inter', sans-serif; background: #f3f4f6; color: #1f2937; margin: 0; padding: 20px; }
-    header { background: #1e5e3a; color: #fff; padding: 15px 25px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-    h1 { margin: 0; font-size: 1.5rem; }
-    .status-badge { background: #ffd800; color: #1a3826; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.9rem; }
-    
-    .orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
-    .order-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: 6px solid #e53e3e; position: relative; }
-    
-    .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-    .order-time { font-size: 0.85rem; color: #666; }
-    .customer-info p { margin: 4px 0; font-size: 0.95rem; }
-    .items-list { background: #f9fafb; padding: 10px; border-radius: 8px; margin: 12px 0; font-size: 0.9rem; }
-    .items-list div { display: flex; justify-content: space-between; margin-bottom: 4px; }
-    
-    .btn-confirm { background: #1e5e3a; color: #fff; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 1rem; transition: background 0.2s; }
-    .btn-confirm:hover { background: #2b7a4d; }
+  <title>Hy Chay POS - Trung Tâm Quản Lý Đơn Hàng Trực Tuyến</title>
+  <link rel="icon" type="image/png" href="Logo nho.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
 
-    #soundControl { background: #fff; padding: 15px 25px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-    .btn-audio { background: #ffd800; color: #1a3826; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+  <style>
+    :root {
+      --primary: #1e5e3a;
+      --primary-dark: #144228;
+      --accent: #ffd800;
+      --accent-hover: #e6c300;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --success: #10b981;
+      --info: #3b82f6;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text-main); line-height: 1.5; }
+
+    /* TOPBAR */
+    .topbar {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      padding: 12px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .brand-group { display: flex; align-items: center; gap: 14px; }
+    .brand-logo { height: 42px; border-radius: 8px; }
+    .brand-title h1 { font-size: 1.25rem; font-family: 'Montserrat', sans-serif; color: var(--primary); font-weight: 800; letter-spacing: 0.5px; }
+    .brand-title p { font-size: 0.8rem; color: var(--text-muted); }
+
+    .top-actions { display: flex; align-items: center; gap: 16px; }
+    .live-clock { font-size: 0.95rem; font-weight: 700; color: var(--primary); background: #eaf5ed; padding: 6px 14px; border-radius: 20px; border: 1px solid #c7e5d2; }
+    .status-pill { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 600; padding: 6px 12px; border-radius: 20px; }
+    .status-online { background: #dcfce7; color: #166534; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; animation: blink 1.5s infinite; }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    .btn-sound {
+      background: var(--accent);
+      color: #1a3826;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 2px 6px rgba(255, 216, 0, 0.4);
+      transition: all 0.2s;
+    }
+    .btn-sound:hover { background: var(--accent-hover); transform: translateY(-1px); }
+    .btn-sound.active { background: #dcfce7; color: #166534; box-shadow: none; border: 1px solid #86efac; }
+
+    /* DASHBOARD WRAPPER */
+    .dashboard-container { max-width: 1440px; margin: 24px auto; padding: 0 24px; }
+
+    /* KPI STATS CARDS */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin-bottom: 24px; }
+    .stat-card {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .stat-info span { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-info h2 { font-size: 1.85rem; font-weight: 800; margin-top: 4px; color: var(--text-main); }
+    .stat-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+    .icon-pending { background: #fee2e2; color: #ef4444; }
+    .icon-cooking { background: #fef3c7; color: #d97706; }
+    .icon-done { background: #dcfce7; color: #16a34a; }
+    .icon-rev { background: #e0e7ff; color: #4338ca; }
+
+    /* TABS BAR */
+    .tabs-bar {
+      display: flex;
+      gap: 12px;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 24px;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 12px 20px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tab-btn.active { color: var(--primary); }
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--primary);
+      border-radius: 3px 3px 0 0;
+    }
+    .tab-badge {
+      background: #e2e8f0;
+      color: var(--text-main);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.78rem;
+    }
+    .tab-btn.active .tab-badge { background: var(--primary); color: #fff; }
+    .tab-badge.badge-danger { background: var(--danger); color: #fff; animation: pulse-badge 1s infinite; }
+    @keyframes pulse-badge { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+
+    /* ORDERS GRID */
+    .orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
+
+    /* ORDER CARD */
+    .order-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: all 0.2s ease;
+    }
+    .order-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+
+    .order-card.pending {
+      border: 2px solid #ef4444;
+      animation: alert-card 1.2s infinite alternate;
+    }
+    @keyframes alert-card {
+      from { box-shadow: 0 0 10px rgba(239, 68, 68, 0.2); }
+      to { box-shadow: 0 0 24px rgba(239, 68, 68, 0.5); }
+    }
+
+    .card-top {
+      padding: 16px 20px;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .order-id-group { display: flex; align-items: center; gap: 8px; }
+    .order-id { font-weight: 800; font-size: 1.05rem; color: var(--primary); }
+    .order-badge-state {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+    }
+    .state-new { background: #fee2e2; color: #b91c1c; }
+    .state-process { background: #fef3c7; color: #92400e; }
+    .state-complete { background: #dcfce7; color: #15803d; }
+    .order-time { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+
+    .card-body { padding: 20px; flex-grow: 1; }
+    .customer-box {
+      background: #f1f5f9;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+    }
+    .cust-row { display: flex; align-items: flex-start; gap: 8px; font-size: 0.9rem; margin-bottom: 6px; }
+    .cust-row:last-child { margin-bottom: 0; }
+    .cust-name { font-weight: 700; font-size: 1rem; color: var(--text-main); }
+    .cust-phone { font-weight: 700; color: #2563eb; text-decoration: none; }
+    .cust-phone:hover { text-decoration: underline; }
+    .note-box {
+      margin-top: 8px;
+      padding: 6px 10px;
+      background: #fff1f2;
+      border-left: 3px solid #f43f5e;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      color: #9f1239;
+    }
+
+    .items-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 0.92rem; }
+    .items-table tr { border-bottom: 1px dashed var(--border); }
+    .items-table td { padding: 8px 0; }
+    .item-qty { font-weight: 700; color: var(--primary); width: 34px; }
+    .item-name { font-weight: 600; }
+    .item-price { text-align: right; font-weight: 600; color: var(--text-muted); }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 10px;
+      border-top: 2px solid var(--border);
+      font-size: 1.05rem;
+    }
+    .total-label { font-weight: 700; }
+    .total-amount { font-size: 1.35rem; font-weight: 800; color: #dc2626; }
+
+    .card-footer {
+      padding: 16px 20px;
+      background: #fafafa;
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .btn-act {
+      border: none;
+      padding: 11px 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-accept { background: var(--primary); color: #fff; grid-column: span 2; }
+    .btn-accept:hover { background: var(--primary-dark); }
+    .btn-print { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
+    .btn-print:hover { background: #e2e8f0; }
+    .btn-complete { background: var(--success); color: #fff; }
+    .btn-complete:hover { background: #059669; }
+    .btn-cancel { background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; }
+    .btn-cancel:hover { background: #ffe4e6; }
+
+    /* EMPTY STATE */
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      background: #ffffff;
+      border-radius: 16px;
+      border: 1px dashed #cbd5e1;
+      grid-column: 1 / -1;
+    }
+    .radar-circle {
+      width: 70px;
+      height: 70px;
+      background: #eaf5ed;
+      color: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin: 0 auto 18px;
+      position: relative;
+    }
+    .radar-circle::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 2px solid var(--primary);
+      animation: ripple 2s infinite ease-out;
+    }
+    @keyframes ripple {
+      0% { transform: scale(1); opacity: 0.8; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+    .empty-state h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 8px; color: var(--text-main); }
+    .empty-state p { color: var(--text-muted); font-size: 0.95rem; max-width: 480px; margin: 0 auto; }
+
+    /* PRINT RECEIPT STYLES */
+    @media print {
+      body * { visibility: hidden; }
+      #printArea, #printArea * { visibility: visible; }
+      #printArea { position: absolute; left: 0; top: 0; width: 80mm; padding: 10px; font-family: monospace; font-size: 12px; line-height: 1.4; color: #000; }
+      .no-print { display: none !important; }
+    }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>🔔 Hệ Thống Nhận Đơn Hy Chay</h1>
-    <div class="status-badge" id="orderCountBadge">Đang chờ: 0 đơn</div>
+  <!-- TOPBAR -->
+  <header class="topbar no-print">
+    <div class="brand-group">
+      <img src="Logo nho.png" alt="Hy Chay Logo" class="brand-logo">
+      <div class="brand-title">
+        <h1>HY CHAY POS PRO</h1>
+        <p>280 Trần Hưng Đạo, P. Phan Thiết, T. Lâm Đồng</p>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <div class="status-pill status-online">
+        <span class="status-dot"></span>
+        <span>CƠ SỞ DỮ LIỆU ĐANG KẾT NỐI</span>
+      </div>
+      <div id="liveClock" class="live-clock">--:--:--</div>
+      <button id="btnSoundTrigger" class="btn-sound" onclick="toggleAudioEngine()">
+        <span id="soundIcon">🔔</span>
+        <span id="soundText">Kích Hoạt Chuông Báo</span>
+      </button>
+    </div>
   </header>
 
-  <div id="soundControl">
-    <span>⚠️ Trình duyệt cần kích hoạt âm thanh để chuông báo reo khi có đơn mới:</span>
-    <button class="btn-audio" onclick="enableAudio()">Bật Âm Thanh Báo Đơn</button>
-  </div>
+  <main class="dashboard-container no-print">
+    <!-- STATS -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-info">
+          <span>Chờ Tiếp Nhận</span>
+          <h2 id="kpiPending" style="color: #ef4444;">0</h2>
+        </div>
+        <div class="stat-icon icon-pending">⏳</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-info">
+          <span>Bếp Đang Nấu</span>
+          <h2 id="kpiCooking" style="color: #d97706;">0</h2>
+        </div>
+        <div class="stat-icon icon-cooking">🍳</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-info">
+          <span>Đã Hoàn Tất Hôm Nay</span>
+          <h2 id="kpiDone" style="color: #16a34a;">0</h2>
+        </div>
+        <div class="stat-icon icon-done">✅</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-info">
+          <span>Doanh Thu Trực Tuyến</span>
+          <h2 id="kpiRevenue" style="color: #1e5e3a;">0đ</h2>
+        </div>
+        <div class="stat-icon icon-rev">💰</div>
+      </div>
+    </section>
 
-  <div id="ordersContainer" class="orders-grid">
-    <p style="color: #666;">Đang kết nối dữ liệu đơn hàng thời gian thực...</p>
-  </div>
+    <!-- TABS -->
+    <div class="tabs-bar">
+      <button class="tab-btn active" onclick="switchTab('all')">
+        Tất Cả Đơn <span class="tab-badge" id="badgeAll">0</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('pending')">
+        Chờ Xác Nhận <span class="tab-badge badge-danger" id="badgePending">0</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('cooking')">
+        Bếp Đang Làm <span class="tab-badge" id="badgeCooking">0</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('done')">
+        Đã Giao / Xong <span class="tab-badge" id="badgeDone">0</span>
+      </button>
+    </div>
 
-  <audio id="alertSound" loop>
+    <!-- ORDERS CARDS CONTAINER -->
+    <div id="ordersContainer" class="orders-grid">
+      <div class="empty-state">
+        <div class="radar-circle">📡</div>
+        <h3>Hệ thống POS đang lắng nghe đơn mới...</h3>
+        <p>Khi có khách đặt món trên website <strong>hychayfood.vercel.app</strong>, thẻ đơn hàng và chuông báo reo liên tục sẽ kích hoạt ngay tại đây.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- KHU VỰC IN HÓA ĐƠN ẨN (DÀNH CHO WINDOW.PRINT) -->
+  <div id="printArea"></div>
+
+  <!-- AUDIO THÔNG BÁO VÒNG LẶP -->
+  <audio id="audioNotification" loop preload="auto">
     <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
   </audio>
 
+  <!-- FIREBASE ENGINE & POS LOGIC -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyB7CH4HUqEozclN38P_iGtSFzDB_w7sOUk",
@@ -63,89 +410,276 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app, "https://hy-chay-default-rtdb.asia-southeast1.firebasedatabase.app");
 
-    let audioEnabled = false;
-    window.enableAudio = function() {
-      let sound = document.getElementById('alertSound');
-      sound.play().then(() => {
-        sound.pause();
-        sound.currentTime = 0;
-        audioEnabled = true;
-        document.getElementById('soundControl').style.background = '#d1fae5';
-        document.getElementById('soundControl').innerHTML = '✅ Âm thanh báo đơn đã sẵn sàng hoạt động!';
-      }).catch(e => {
-        alert("Vui lòng bấm lại hoặc kiểm tra cài đặt âm thanh trình duyệt.");
+    let ordersCache = {};
+    let currentFilter = 'all';
+    let isAudioActive = false;
+    let originalTitle = document.title;
+    let titleBlinkInterval = null;
+
+    // ĐỒNG HỒ REALTIME
+    setInterval(() => {
+      const now = new Date();
+      document.getElementById('liveClock').innerText = now.toLocaleTimeString('vi-VN');
+    }, 1000);
+
+    // KÍCH HOẠT ÂM THANH
+    window.toggleAudioEngine = function() {
+      const audio = document.getElementById('audioNotification');
+      audio.play().then(() => {
+        audio.pause();
+        audio.currentTime = 0;
+        isAudioActive = true;
+        const btn = document.getElementById('btnSoundTrigger');
+        btn.classList.add('active');
+        document.getElementById('soundIcon').innerText = '🔊';
+        document.getElementById('soundText').innerText = 'Âm Thanh Báo Sẵn Sàng';
+      }).catch(err => {
+        alert("Vui lòng nhấp cấp quyền âm thanh cho trang để kích hoạt chuông.");
       });
     };
 
+    // PHÁT / DỪNG CHUÔNG BÁO VÒNG LẶP
+    function startAlarm() {
+      if (isAudioActive) {
+        const audio = document.getElementById('audioNotification');
+        if (audio.paused) audio.play();
+      }
+      if (!titleBlinkInterval) {
+        titleBlinkInterval = setInterval(() => {
+          document.title = document.title === "🚨 (1) CÓ ĐƠN HÀNG MỚI!" ? originalTitle : "🚨 (1) CÓ ĐƠN HÀNG MỚI!";
+        }, 800);
+      }
+    }
+
+    function stopAlarm() {
+      const audio = document.getElementById('audioNotification');
+      audio.pause();
+      audio.currentTime = 0;
+      if (titleBlinkInterval) {
+        clearInterval(titleBlinkInterval);
+        titleBlinkInterval = null;
+        document.title = originalTitle;
+      }
+    }
+
+    // LẮNG NGHE ĐƠN HÀNG THỜI GIAN THỰC TỪ FIREBASE
     const ordersRef = ref(db, 'orders');
     onValue(ordersRef, (snapshot) => {
       const data = snapshot.val();
-      const container = document.getElementById('ordersContainer');
-      const badge = document.getElementById('orderCountBadge');
-      
-      if (!data) {
-        container.innerHTML = '<p style="color: #666; grid-column: 1/-1; text-align: center; padding: 40px;">Chưa có đơn hàng nào.</p>';
-        badge.innerText = 'Đang chờ: 0 đơn';
-        document.getElementById('alertSound').pause();
-        return;
-      }
-
-      let html = '';
-      let count = 0;
-      let hasNewOrder = false;
-
-      for (let id in data) {
-        let order = data[id];
-        count++;
-        hasNewOrder = true;
-
-        let itemsHtml = '';
-        let totalPrice = 0;
-        for (let key in order.items) {
-          let i = order.items[key];
-          let sub = i.price * i.qty;
-          totalPrice += sub;
-          itemsHtml += `<div><span>${i.name} (x${i.qty})</span><b>${sub.toLocaleString()}đ</b></div>`;
-        }
-
-        html += `
-          <div class="order-card">
-            <div class="order-header">
-              <b>Khách: ${order.customerName}</b>
-              <span class="order-time">${new Date(order.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-            </div>
-            <div class="customer-info">
-              <p>📞 SĐT: <a href="tel:${order.phone}" style="color: #2563eb; font-weight:bold;">${order.phone}</a></p>
-              <p>📍 Địa chỉ: <b>${order.address}</b></p>
-              ${order.note ? `<p>📝 Ghi chú: <span style="color:#e53e3e">${order.note}</span></p>` : ''}
-            </div>
-            <div class="items-list">${itemsHtml}</div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; font-size: 1.05rem;">
-              <span>Tổng tiền:</span>
-              <span style="color: #e53e3e;">${totalPrice.toLocaleString()}đ</span>
-            </div>
-            <button class="btn-confirm" onclick="confirmOrder('${id}')">✓ ĐÃ XÁC NHẬN / IN ĐƠN</button>
-          </div>
-        `;
-      }
-
-      container.innerHTML = html;
-      badge.innerText = `Đang chờ: ${count} đơn`;
-
-      if (hasNewOrder && audioEnabled) {
-        let sound = document.getElementById('alertSound');
-        if (sound.paused) {
-          sound.play().catch(err => console.log("Chờ tương tác bật âm thanh"));
-        }
-      }
+      ordersCache = data || {};
+      renderDashboard();
     });
 
-    window.confirmOrder = function(orderId) {
-      if (confirm("Xác nhận đã tiếp nhận và xử lý đơn này? Chuông báo sẽ ngưng.")) {
-        document.getElementById('alertSound').pause();
-        document.getElementById('alertSound').currentTime = 0;
-        remove(ref(db, 'orders/' + orderId));
+    window.switchTab = function(tabName) {
+      currentFilter = tabName;
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      renderDashboard();
+    };
+
+    function renderDashboard() {
+      const container = document.getElementById('ordersContainer');
+      let countPending = 0;
+      let countCooking = 0;
+      let countDone = 0;
+      let totalRev = 0;
+      let cardsHtml = '';
+
+      const keys = Object.keys(ordersCache).reverse(); // Mới nhất lên đầu
+
+      keys.forEach(id => {
+        const order = ordersCache[id];
+        const status = order.status || 'Chờ xác nhận';
+
+        let subtotal = 0;
+        let itemsRows = '';
+        for (let k in order.items) {
+          const it = order.items[k];
+          const st = it.price * it.qty;
+          subtotal += st;
+          itemsRows += `
+            <tr>
+              <td class="item-qty">${it.qty}x</td>
+              <td class="item-name">${it.name}</td>
+              <td class="item-price">${st.toLocaleString()}đ</td>
+            </tr>
+          `;
+        }
+
+        if (status === 'Chờ xác nhận') countPending++;
+        else if (status === 'Đang chế biến') countCooking++;
+        else if (status === 'Đã hoàn tất') { countDone++; totalRev += subtotal; }
+
+        // Lọc theo Tab
+        let show = false;
+        if (currentFilter === 'all') show = true;
+        else if (currentFilter === 'pending' && status === 'Chờ xác nhận') show = true;
+        else if (currentFilter === 'cooking' && status === 'Đang chế biến') show = true;
+        else if (currentFilter === 'done' && status === 'Đã hoàn tất') show = true;
+
+        if (show) {
+          const isPending = status === 'Chờ xác nhận';
+          const isCooking = status === 'Đang chế biến';
+          const isDone = status === 'Đã hoàn tất';
+
+          let stateBadge = `<span class="order-badge-state state-new">Mới - Chờ Duyệt</span>`;
+          if (isCooking) stateBadge = `<span class="order-badge-state state-process">Đang Nấu Bếp</span>`;
+          if (isDone) stateBadge = `<span class="order-badge-state state-complete">Đã Hoàn Tất</span>`;
+
+          const shortId = id.substring(id.length - 5).toUpperCase();
+          const orderTime = new Date(order.createdAt).toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit', day:'2-digit', month:'2-digit'});
+
+          cardsHtml += `
+            <div class="order-card ${isPending ? 'pending' : ''}">
+              <div class="card-top">
+                <div class="order-id-group">
+                  <span class="order-id">#HC-${shortId}</span>
+                  ${stateBadge}
+                </div>
+                <span class="order-time">🕒 ${orderTime}</span>
+              </div>
+              <div class="card-body">
+                <div class="customer-box">
+                  <div class="cust-row">
+                    <span>👤</span>
+                    <span class="cust-name">${order.customerName}</span>
+                  </div>
+                  <div class="cust-row">
+                    <span>📞</span>
+                    <a href="tel:${order.phone}" class="cust-phone">${order.phone} (Gọi Khách)</a>
+                  </div>
+                  <div class="cust-row">
+                    <span>📍</span>
+                    <span>${order.address}</span>
+                  </div>
+                  ${order.note ? `<div class="note-box"><b>Ghi chú:</b> ${order.note}</div>` : ''}
+                </div>
+
+                <table class="items-table">${itemsRows}</table>
+
+                <div class="total-row">
+                  <span class="total-label">Tổng thu hộ (COD):</span>
+                  <span class="total-amount">${subtotal.toLocaleString()}đ</span>
+                </div>
+              </div>
+
+              <div class="card-footer">
+                ${isPending ? `
+                  <button class="btn-act btn-accept" onclick="updateOrderStatus('${id}', 'Đang chế biến')">
+                    ⚡ TIẾP NHẬN ĐƠN & DỪNG CHUÔNG
+                  </button>
+                ` : ''}
+                ${isCooking ? `
+                  <button class="btn-act btn-complete" onclick="updateOrderStatus('${id}', 'Đã hoàn tất')">
+                    🚀 HOÀN TẤT & ĐÃ GIAO
+                  </button>
+                  <button class="btn-act btn-print" onclick="printReceipt('${id}')">
+                    🖨️ In Phiếu Bếp
+                  </button>
+                ` : ''}
+                ${isDone ? `
+                  <button class="btn-act btn-print" style="grid-column: span 2;" onclick="printReceipt('${id}')">
+                    🖨️ In Lại Hóa Đơn
+                  </button>
+                ` : ''}
+                ${!isDone ? `
+                  <button class="btn-act btn-cancel" style="${isPending ? 'grid-column: span 2;' : ''}" onclick="deleteOrder('${id}')">
+                    🗑️ Hủy Đơn
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        }
+      });
+
+      // CẬP NHẬT STATS & BADGES
+      document.getElementById('kpiPending').innerText = countPending;
+      document.getElementById('kpiCooking').innerText = countCooking;
+      document.getElementById('kpiDone').innerText = countDone;
+      document.getElementById('kpiRevenue').innerText = totalRev.toLocaleString() + 'đ';
+
+      document.getElementById('badgeAll').innerText = Object.keys(ordersCache).length;
+      document.getElementById('badgePending').innerText = countPending;
+      document.getElementById('badgeCooking').innerText = countCooking;
+      document.getElementById('badgeDone').innerText = countDone;
+
+      // KIỂM SOÁT BÁO ĐỘNG
+      if (countPending > 0) {
+        startAlarm();
+      } else {
+        stopAlarm();
       }
+
+      // HIỂN THỊ
+      if (cardsHtml === '') {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="radar-circle">📡</div>
+            <h3>Không có đơn hàng nào ở mục này</h3>
+            <p>Khi có khách đặt món trên website <strong>hychayfood.vercel.app</strong>, hệ thống sẽ tự động cập nhật ngay lập tức.</p>
+          </div>
+        `;
+      } else {
+        container.innerHTML = cardsHtml;
+      }
+    }
+
+    // CHUYỂN TRẠNG THÁI ĐƠN
+    window.updateOrderStatus = function(id, nextStatus) {
+      update(ref(db, 'orders/' + id), { status: nextStatus })
+        .then(() => {
+          stopAlarm();
+        });
+    };
+
+    // HỦY ĐƠN
+    window.deleteOrder = function(id) {
+      if (confirm("Bạn có chắc chắn muốn hủy đơn hàng này?")) {
+        remove(ref(db, 'orders/' + id));
+      }
+    };
+
+    // IN PHIẾU BẾP / HÓA ĐƠN GIAO HÀNG (THERMAL PRINTER FORMAT)
+    window.printReceipt = function(id) {
+      const order = ordersCache[id];
+      if (!order) return;
+      const shortId = id.substring(id.length - 5).toUpperCase();
+      let total = 0;
+      let rows = '';
+
+      for (let k in order.items) {
+        const item = order.items[k];
+        const st = item.price * item.qty;
+        total += st;
+        rows += `<tr><td>${item.qty}x ${item.name}</td><td style="text-align:right;">${st.toLocaleString()}</td></tr>`;
+      }
+
+      const receiptHtml = `
+        <div style="text-align:center; margin-bottom:10px;">
+          <h2 style="margin:0; font-size:16px;">HY CHAY - ẨM THỰC CHAY</h2>
+          <p style="margin:2px 0; font-size:11px;">Cty TNHH TMDV & SX Bảo Anh Lâm</p>
+          <p style="margin:2px 0; font-size:11px;">Đ/c: 280 Trần Hưng Đạo, P. Phan Thiết</p>
+          <p style="margin:2px 0; font-size:11px;">Hotline: 0903.242.400</p>
+          <p style="margin:6px 0; border-top:1px dashed #000; border-bottom:1px dashed #000; padding:4px 0; font-weight:bold;">PHIẾU XUẤT MÓN / GIAO HÀNG #HC-${shortId}</p>
+        </div>
+        <p style="margin:3px 0;"><b>Khách:</b> ${order.customerName}</p>
+        <p style="margin:3px 0;"><b>SĐT:</b> ${order.phone}</p>
+        <p style="margin:3px 0;"><b>Địa chỉ:</b> ${order.address}</p>
+        ${order.note ? `<p style="margin:3px 0;"><b>Ghi chú:</b> ${order.note}</p>` : ''}
+        <table style="width:100%; border-collapse:collapse; margin-top:8px; border-top:1px dashed #000; padding-top:4px;">
+          ${rows}
+        </table>
+        <div style="border-top:1px dashed #000; margin-top:8px; padding-top:6px; display:flex; justify-content:space-between; font-weight:bold; font-size:14px;">
+          <span>TỔNG THU (COD):</span>
+          <span>${total.toLocaleString()}đ</span>
+        </div>
+        <p style="text-align:center; font-size:10px; margin-top:12px;">Cảm ơn quý khách đã đồng hành cùng Hy Chay!</p>
+      `;
+
+      const printArea = document.getElementById('printArea');
+      printArea.innerHTML = receiptHtml;
+      window.print();
     };
   </script>
 </body>
