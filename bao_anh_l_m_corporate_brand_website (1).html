@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hy Chay - Tinh Hoa Ẩm Thực Chay & Thức Uống</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        hyYellow: '#FDE008',
+                        hyGreen: '#006622',
+                        hyDark: '#111111',
+                        hyLight: '#FFFDF5'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .scroll-smooth { scroll-behavior: smooth; }
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            margin-left: -125px;
+            background-color: #006622;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1000;
+            left: 50%;
+            bottom: 30px;
+            font-size: 17px;
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.2);
+        }
+        .toast.show {
+            visibility: visible;
+            -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+        @-webkit-keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @-webkit-keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+    </style>
+</head>
+<body class="bg-hyLight text-hyDark font-sans scroll-smooth">
+
+    <nav class="fixed w-full z-50 bg-hyYellow shadow-md border-b-2 border-hyGreen">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-24">
+                <div class="flex-shrink-0 flex items-center gap-3">
+                    <div class="flex flex-col">
+                        <span class="text-hyGreen font-black text-3xl tracking-wider leading-none">hy</span>
+                        <span class="text-hyGreen font-extrabold text-2xl tracking-widest leading-none mt-1">CHAY</span>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-6">
+                        <a href="#home" class="text-hyGreen hover:text-hyDark font-bold text-sm transition-colors">Trang Chủ</a>
+                        <a href="#featured" class="text-hyGreen hover:text-hyDark font-bold text-sm transition-colors">Món Nổi Bật</a>
+                        <a href="#menu" class="text-hyGreen hover:text-hyDark font-bold text-sm transition-colors">Thực Đơn & Giá</a>
+                        <a href="#ai-assistant" class="text-hyGreen hover:text-hyDark font-bold text-sm transition-colors flex items-center gap-1"><i class="fa-solid fa-wand-magic-sparkles"></i> Trợ Lý Ảo AI</a>
+                        <a href="#booking" class="text-hyGreen hover:text-hyDark font-bold text-sm transition-colors">Đặt Bàn / Đặt Món</a>
+                        <a href="#contact" class="text-hyGreen hover:text-hyDark font-bold text-sm transition-colors">Liên Hệ</a>
+                        <a href="#booking" class="bg-hyGreen text-hyYellow hover:bg-hyDark px-5 py-2.5 rounded-full font-extrabold text-sm transition-all shadow-md">Đặt Bàn Ngay</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section id="home" class="bg-hyYellow min-h-screen flex items-center pt-28 pb-16 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div class="text-left">
+                    <span class="bg-hyGreen text-hyYellow px-4 py-1.5 rounded-full font-bold text-sm tracking-wider uppercase mb-6 inline-block shadow-sm">100% Thuần Chay Tự Nhiên</span>
+                    <h1 class="text-5xl md:text-7xl font-black text-hyGreen mb-6 leading-tight">
+                        Thanh Tịnh Tâm Hồn <br>Hương Vị Tự Nhiên
+                    </h1>
+                    <p class="text-lg md:text-xl text-hyDark mb-8 leading-relaxed font-medium">
+                        Chào mừng bạn đến với <strong>Hy Chay</strong> (280 Trần Hưng Đạo, phường Phan Thiết, Lâm Đồng). Không gian ẩm thực chay thanh tao và thức uống thủ công nguyên bản.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <a href="#menu" class="bg-hyGreen text-hyYellow hover:bg-hyDark px-8 py-4 rounded-full font-extrabold text-center transition-all shadow-lg text-lg">Xem Bảng Giá & Menu</a>
+                        <a href="#ai-assistant" class="bg-white text-hyGreen border-2 border-hyGreen hover:bg-hyGreen hover:text-hyYellow px-8 py-4 rounded-full font-extrabold text-center transition-all shadow-lg text-lg flex items-center justify-center gap-2"><i class="fa-solid fa-robot"></i> Hỏi Trợ Lý AI</a>
+                    </div>
+                </div>
+                <div class="relative flex justify-center">
+                    <div class="w-full max-w-lg h-[400px] rounded-3xl overflow-hidden shadow-2xl border-4 border-hyGreen">
+                        <img src="https://images.unsplash.com/photo-1540420773420-3366772f4999?ixlib=rb-4.0.3" alt="Hy Chay Dish" class="w-full h-full object-cover">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="featured" class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-4xl font-black text-hyGreen mb-4">Món Ngon Đặc Sắc Tại Quán</h2>
+                <div class="w-24 h-1.5 bg-hyYellow mx-auto mb-6"></div>
+                <p class="text-gray-700 text-lg">Những món ăn được chăm chút tỉ mỉ từ nguyên liệu tươi sạch thiên nhiên.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Dish 1 -->
+                <div class="bg-hyLight rounded-2xl overflow-hidden shadow-lg border border-hyYellow group">
+                    <div class="h-64 overflow-hidden bg-white flex items-center justify-center p-2">
+                        <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3" alt="Bún Chả Giò Chay" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 rounded-xl">
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-2xl font-bold text-hyGreen mb-2">Bún Chả Giò Chay</h3>
+                        <p class="text-gray-600 mb-4">Chả giò giòn rụm kết hợp bún tươi, rau sống và nước chấm thanh vị.</p>
+                        <span class="text-hyGreen font-extrabold text-xl">30K</span>
+                    </div>
+                </div>
+
+                <!-- Dish 2 -->
+                <div class="bg-hyLight rounded-2xl overflow-hidden shadow-lg border border-hyYellow group">
+                    <div class="h-64 overflow-hidden bg-white flex items-center justify-center p-2">
+                        <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3" alt="Mì Quảng Chay" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 rounded-xl">
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-2xl font-bold text-hyGreen mb-2">Mì Quảng Chay</h3>
+                        <p class="text-gray-600 mb-4">Hương vị đậm đà, sợi mì dai ngon kết hợp nước dùng thơm ngọt tự nhiên.</p>
+                        <span class="text-hyGreen font-extrabold text-xl">30K</span>
+                    </div>
+                </div>
+
+                <!-- Dish 3 -->
+                <div class="bg-hyLight rounded-2xl overflow-hidden shadow-lg border border-hyYellow group">
+                    <div class="h-64 overflow-hidden bg-white flex items-center justify-center p-2">
+                        <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3" alt="Cơm Gà Chay" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 rounded-xl">
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-2xl font-bold text-hyGreen mb-2">Cơm Gà Chay</h3>
+                        <p class="text-gray-600 mb-4">Cơm dẻo thơm ăn kèm gà chay chế biến độc quyền từ nấm và hũ ky.</p>
+                        <span class="text-hyGreen font-extrabold text-xl">35K</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="menu" class="py-24 bg-hyYellow/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-black text-hyGreen mb-4">Thực Đơn & Bảng Giá Chi Tiết</h2>
+                <div class="w-24 h-1.5 bg-hyYellow mx-auto mb-6"></div>
+                <p class="text-gray-700 text-lg">Cập nhật toàn bộ các món bún, mì, phở, cơm, lẩu và thức uống tại Hy Chay</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Category 1 -->
+                <div class="bg-white p-8 rounded-3xl shadow-lg border-2 border-hyYellow">
+                    <h3 class="text-2xl font-black text-hyGreen mb-6 border-b-2 border-hyYellow pb-2">🍜 Món Bún</h3>
+                    <ul class="space-y-4">
+                        <li class="flex justify-between items-center"><span class="font-medium">Bún Mọc</span> <span class="font-bold text-hyGreen">30K</span></li>
+                        <li class="flex justify-between items-center"><span class="font-medium">Bún Thái</span> <span class="font-bold text-hyGreen">35K</span></li>
+                        <li class="flex justify-between items-center"><span class="font-medium">Bún Riêu</span> <span class="font-bold text-hyGreen">30K</span></li>
+                        <li class="flex justify-between items-center"><span class="font-medium">Bún Huế</span> <span class="font-bold text-hyGreen">30K</span></li>
+                        <li class="flex justify-between items-center"><span class="font-medium">Bún Mắm</span> <span class="font-bold text-hyGreen">35K</span></li>
+                        <li class="flex justify-between items-center"><span class="font-medium">Bún Bò Kho</span> <span class="font-bold text-hyGreen">30K</span></li>
+                        <li class="flex justify-between items-center"><span class="font-medium">Bún Chua Thì Là</span> <span class="font-bold text-hyGreen">35K</span></li>
+                    </ul>
+                </div>
+
+                <!-- Category 2 -->
+                <div class="bg-white p-8 rounded-3xl shadow-lg border-2 border-hyYellow">
+                    <h3 class="text-2xl font-black text-hyGreen mb-6 border-b-2 border-hyYellow pb-2">🍲 Mì & Phở / Hủ Tiếu</h3>
+                    <ul class="space-y-4">
+                        <li class="flex justify-between items-center"><span class="font-medium">Mì Quảng</span> <span class="font-bold text-hyGreen">30K</span></li>
+                        <li class="flex justify-between items-center"><span class="font-medium">Mì Tiềm</span> <span class="font-bold text-hyGreen">35K</span></li>
+                        <li class="flex justify-between items-center"><span class="font-medium">Mì Hoành Thánh</span> <span class="font-bold text-hyGreen">35K</span></li>
+                        <li class="flex justify-between items-center"><span class="font-medium">Phở Bò / Gà</span> <span class="font-bold text-hyGreen">30K</span></li>
+                        <li class="flex justify-between items-center"><span class="font-medium">Hủ Tiếu Trộn Khô</span> <span class="font-bold text-hyGreen">35K</span></li>
+                        <li class="flex justify-between items-center"><span class="font-medium">Bánh Mì Bò Kho</span> <span class="font-bold text-hyGreen">30K</span></li>
+                        <li class="flex justify-between items-center"><span class="font-medium">Mì Ý Sốt Bò Bằm</span> <span class="font-bold text-hyGreen">55K</span></li>
+                    </ul>
+                </div>
+
+                <!-- Category 3 -->
+                <div class="bg-white p-8 rounded-3xl shadow-lg border-2 border-hyYellow">
+                    <h3 class="text-2xl font-black text-hyGreen mb-6 border-b-2 border-hyYellow pb-2">🍚 Cơm & Món Khô</h3>
+                    <ul class="space-y-4">
+                        <li class="flex justify-between items-center"><span class="font-medium">Cơm Gà</span> <span class="font-bold text-hyGreen">35K</span></li>
+                        <li class="flex justify-between items-center"><span class="font-medium">Cơm Tấm</span> <span class="font-bold text-hyGreen">35K</span></li>
+                        <li class="flex justify-between items-center"><span class="font-medium">Cơm Dĩa Thập Cẩm</span> <span class="font-bold text-hyGreen">35K</span></li>
+                        <li class="flex justify-between items-center"><span class="font-medium">Cơm Chiên Rau Củ Nấm</span> <span class="font-bold text-hyGreen">40K</span></li>
+                        <li class="flex justify-between items-center"><span class="font-medium">Cháo Nấm</span> <span class="font-bold text-hyGreen">30K</span></li>
+                        <li class="flex justify-between items-center"><span class="font-medium">Xôi Thập Cẩm</span> <span class="font-bold text-hyGreen">25K</span></li>
+                        <li class="flex justify-between items-center"><span class="font-medium">Bánh Hỏi / Bánh Ướt</span> <span class="font-bold text-hyGreen">25-30K</span></li>
+                    </ul>
+                </div>
+
+                <!-- Category 4 -->
+                <div class="bg-white p-8 rounded-3xl shadow-lg border-2 border-hyYellow">
+                    <h3 class="text-2xl font-black text-hyGreen mb-6 border-b-2 border-hyYellow pb-2">🔥 Món Chiên & Đặc Biệt</h3>
+                    <ul class="space-y-4">
+                        <li class="flex justify-between items-center"><span class="font-medium">Chả Giò Chiên</span> <span class="font-bold text-hyGreen">60K</span></li>
+                        <li class="flex justify-between items-center"><span class="font-medium">Bào Ngư Chiên Xù</span> <span class="font-bold text-hyGreen">70K</span></li>
+                        <li class="flex justify-between items-center"><span class="font-medium">Nấm Cuộn Thính</span> <span class="font-bold text-hyGreen">70K</span></li>
+                        <li class="flex justify-between items-center"><span class="font-medium">Nấm Xúc Bánh Đa</span> <span class="font-bold text-hyGreen">70K</span></li>
+                        <li class="flex justify-between items-center"><span class="font-medium">Gỏi Bắp Chuối</span> <span class="font-bold text-hyGreen">70K</span></li>
+                        <li class="flex justify-between items-center"><span class="font-medium">Bò Lúc Lắc - Khoai Tây</span> <span class="font-bold text-hyGreen">70K</span></li>
+                    </ul>
+                </div>
+
+                <!-- Category 5 -->
+                <div class="bg-white p-8 rounded-3xl shadow-lg border-2 border-hyYellow">
+                    <h3 class="text-2xl font-black text-hyGreen mb-6 border-b-2 border-hyYellow pb-2">🥘 Lẩu Chay</h3>
+                    <ul class="space-y-4">
+                        <li class="flex justify-between items-center"><span class="font-medium">Lẩu Thái Chay</span> <span class="font-bold text-hyGreen">230K</span></li>
+                        <li class="flex justify-between items-center"><span class="font-medium">Lẩu Chao Chay</span> <span class="font-bold text-hyGreen">230K</span></li>
+                    </ul>
+                    <div class="mt-8 bg-hyYellow/20 p-4 rounded-xl">
+                        <p class="text-sm font-bold text-hyGreen">💡 Phù hợp cho nhóm gia đình từ 3 - 5 người thưởng thức ấm cúng.</p>
+                    </div>
+                </div>
+
+                <!-- Category 6 -->
+                <div class="bg-white p-8 rounded-3xl shadow-lg border-2 border-hyYellow">
+                    <h3 class="text-2xl font-black text-hyGreen mb-6 border-b-2 border-hyYellow pb-2">☕ Café, Trà & Nước Ép</h3>
+                    <ul class="space-y-4">
+                        <li class="flex justify-between items-center"><span class="font-medium">Cafe Đen / Sữa</span> <span class="font-bold text-hyGreen">17K - 19K</span></li>
+                        <li class="flex justify-between items-center"><span class="font-medium">Cafe Muối</span> <span class="font-bold text-hyGreen">25K</span></li>
+                        <li class="flex justify-between items-center"><span class="font-medium">Latte / Matcha / Cacao</span> <span class="font-bold text-hyGreen">25K - 35K</span></li>
+                        <li class="flex justify-between items-center"><span class="font-medium">Trà Trái Cây (Đào, Tắc, Ổi...)</span> <span class="font-bold text-hyGreen">15K - 25K</span></li>
+                        <li class="flex justify-between items-center"><span class="font-medium">Nước Ép Trái Cây Tươi</span> <span class="font-bold text-hyGreen">20K - 25K</span></li>
+                        <li class="flex justify-between items-center"><span class="font-medium">Yaourt & Soda các loại</span> <span class="font-bold text-hyGreen">20K - 25K</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="ai-assistant" class="py-24 bg-white">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-hyGreen text-white rounded-3xl shadow-2xl p-8 md:p-12 border-4 border-hyYellow">
+                <div class="text-center mb-8">
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-hyYellow text-hyGreen rounded-full mb-4 text-2xl shadow-lg">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+                    <h2 class="text-3xl md:text-4xl font-black text-hyYellow mb-2">Trợ Lý Ảo AI Hy Chay</h2>
+                    <p class="text-gray-200">Bạn muốn tìm món ăn chay phù hợp? Hãy hỏi trợ lý AI của chúng tôi ngay bên dưới!</p>
+                </div>
+
+                <!-- Chat Box -->
+                <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-hyYellow/30 mb-6 h-80 overflow-y-auto flex flex-col space-y-4" id="chatContainer">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-full bg-hyYellow text-hyGreen flex items-center justify-center font-bold flex-shrink-0">AI</div>
+                        <div class="bg-white text-hyDark p-4 rounded-2xl rounded-tl-none shadow-md max-w-[80%] text-sm leading-relaxed">
+                            Xin chào! Tôi là Trợ lý AI của <strong>Hy Chay</strong> (280 Trần Hưng Đạo, Phan Thiết). Tôi có thể giúp gì cho bạn hôm nay? (Ví dụ: <em>"Quán có những món lẩu nào?", "Gợi ý món ăn sáng ngon", "Giá mì Quảng bao nhiêu?"</em>)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Form -->
+                <form id="aiForm" class="flex gap-3">
+                    <input type="text" id="aiInput" placeholder="Nhập câu hỏi của bạn cho trợ lý AI..." class="flex-1 px-5 py-4 rounded-xl bg-white text-hyDark focus:outline-none font-medium shadow-md">
+                    <button type="submit" id="aiSubmitBtn" class="bg-hyYellow text-hyGreen hover:bg-white px-8 py-4 rounded-xl font-black transition-all shadow-md flex items-center gap-2">
+                        <span>Gửi</span>
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section id="booking" class="py-24 bg-hyYellow/20">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-hyYellow rounded-3xl shadow-2xl p-10 md:p-14 border-4 border-hyGreen">
+                <div class="text-center mb-10">
+                    <h2 class="text-4xl font-black text-hyGreen mb-3">Đặt Bàn / Đặt Món Nhanh</h2>
+                    <div class="w-24 h-1.5 bg-hyGreen mx-auto mb-3"></div>
+                    <p class="text-hyDark font-medium">Hãy điền thông tin bên dưới, chúng tôi sẽ liên hệ xác nhận ngay lập tức.</p>
+                </div>
+
+                <form id="bookingForm" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-bold text-hyGreen mb-2">Họ và Tên</label>
+                            <input type="text" id="name" required placeholder="Nhập tên của bạn..." class="w-full px-4 py-3.5 rounded-xl border-2 border-hyGreen bg-white focus:outline-none font-medium">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-hyGreen mb-2">Số Điện Thoại</label>
+                            <input type="tel" id="phone" required placeholder="Nhập số điện thoại..." class="w-full px-4 py-3.5 rounded-xl border-2 border-hyGreen bg-white focus:outline-none font-medium">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-hyGreen mb-2">Yêu Cầu Của Bạn</label>
+                        <select id="requestType" class="w-full px-4 py-3.5 rounded-xl border-2 border-hyGreen bg-white focus:outline-none font-medium">
+                            <option value="Đặt Bàn Tại Quán">Đặt Bàn Tại Quán</option>
+                            <option value="Đặt Món Mang Về / Giao Hàng">Đặt Món Mang Về / Giao Hàng</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-hyGreen mb-2">Chi Tiết Đơn Đặt / Lời Nhắn</label>
+                        <textarea id="message" rows="4" placeholder="Nhập tên món, số lượng, thời gian đến hoặc ghi chú..." required class="w-full px-4 py-3.5 rounded-xl border-2 border-hyGreen bg-white focus:outline-none font-medium"></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full bg-hyGreen text-hyYellow hover:bg-hyDark py-4 rounded-xl font-black text-lg transition-all shadow-lg">GỬI YÊU CẦU NGAY</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer id="contact" class="bg-hyGreen text-white py-16 border-t-4 border-hyYellow">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+                <div>
+                    <h3 class="text-hyYellow font-black text-2xl mb-6 tracking-wider">HY CHAY</h3>
+                    <p class="mb-4 leading-relaxed">
+                        <i class="fa-solid fa-location-dot text-hyYellow mr-2"></i>
+                        280 Trần Hưng Đạo, phường Phan Thiết, tỉnh Lâm Đồng
+                    </p>
+                    <p class="mb-4">
+                        <i class="fa-solid fa-phone text-hyYellow mr-2"></i>
+                        Hotline / Zalo: 0903 242 400
+                    </p>
+                    <div class="flex space-x-5 mt-6">
+                        <a href="https://facebook.com/hychayphanthiet" target="_blank" class="text-hyYellow hover:text-white text-2xl transition-colors"><i class="fa-brands fa-facebook"></i></a>
+                        <a href="#" class="text-hyYellow hover:text-white text-2xl transition-colors"><i class="fa-brands fa-instagram"></i></a>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-hyYellow font-bold text-xl mb-6">Giờ Hoạt Động</h3>
+                    <p class="mb-2">Thứ Hai - Chủ Nhật:</p>
+                    <p class="text-hyYellow font-bold text-lg mb-4">07:00 AM - 21:30 PM</p>
+                    <p class="text-sm text-gray-300">Luôn sẵn sàng phục vụ các món chay thanh tịnh mỗi ngày.</p>
+                </div>
+
+                <div>
+                    <h3 class="text-hyYellow font-bold text-xl mb-6">Kết Nối Trực Tuyến</h3>
+                    <div class="bg-white/10 p-6 rounded-2xl border border-hyYellow/30">
+                        <p class="mb-4 text-sm">Ghé thăm Fanpage chính thức để cập nhật món mới:</p>
+                        <a href="https://facebook.com/hychayphanthiet" target="_blank" class="inline-block bg-hyYellow text-hyGreen font-bold px-6 py-2.5 rounded-full hover:bg-white transition-all shadow-md">Fanpage Hy Chay</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-white/20 pt-8 text-center text-sm text-gray-300">
+                <p>&copy; 2026 Hy Chay. All rights reserved. Địa chỉ: 280 Trần Hưng Đạo, phường Phan Thiết, tỉnh Lâm Đồng.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // Booking form submission handler
+        document.getElementById('bookingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const requestType = document.getElementById('requestType').value;
+            const toast = document.getElementById('toast');
+            
+            toast.textContent = `Gửi yêu cầu ${requestType} của ${name} thành công! Chúng tôi sẽ liên hệ sớm.`;
+            toast.className = "toast show";
+            
+            setTimeout(function() { toast.className = toast.className.replace("show", ""); }, 4000);
+            document.getElementById('bookingForm').reset();
+        });
+
+        // Gemini AI Assistant Integration
+        const chatContainer = document.getElementById('chatContainer');
+        const aiForm = document.getElementById('aiForm');
+        const aiInput = document.getElementById('aiInput');
+        const aiSubmitBtn = document.getElementById('aiSubmitBtn');
+
+        const systemPrompt = `Bạn là Trợ lý AI chuyên nghiệp của nhà hàng 'Hy Chay' tại địa chỉ 280 Trần Hưng Đạo, phường Phan Thiết, tỉnh Lâm Đồng. 
+        Hãy tư vấn nhiệt tình, lịch sự và ngắn gọn cho khách hàng về thực đơn, giá cả và món ăn của quán dựa trên dữ liệu sau:
+        - Món Bún (30K - 35K): Bún Mọc (30k), Bún Thái (35k), Bún Riêu (30k), Bún Huế (30k), Bún Mắm (35k), Bún Bò Kho (30k), Bún Chua Thì Là (35k).
+        - Mì & Phở / Hủ Tiếu (30K - 55K): Mì Quảng (30k), Mì Tiềm (35k), Mì Hoành Thánh (35k), Phở Bò/Gà (30k), Hủ Tiếu Trộn Khô (35k), Bánh Mì Bò Kho (30k), Mì Ý Sốt Bò Bằm (55k).
+        - Cơm & Món Khô (25K - 40K): Cơm Gà (35k), Cơm Tấm (35k), Cơm Dĩa Thập Cẩm (35k), Cơm Chiên Rau Củ Nấm (40k), Cháo Nấm (30k), Xôi Thập Cẩm (25k), Bánh Hỏi/Ướt (25-30k).
+        - Món Chiên & Đặc Biệt (60K - 70K): Chả Giò Chiên (60k), Bào Ngư Chiên Xù (70k), Nấm Cuộn Thính (70k), Nấm Xúc Bánh Đa (70k), Gỏi Bắp Chuối (70k), Bò Lúc Lắc Khoai Tây (70k).
+        - Lẩu Chay (230K): Lẩu Thái Chay (230k), Lẩu Chao Chay (230k).
+        - Đồ uống: Café (17k-25k), Latte/Matcha (25k-35k), Trà trái cây (15k-25k), Nước ép (20k-25k).
+        Giờ mở cửa: 07:00 - 21:30 hàng ngày. Hotline/Zalo: 0903 242 400.`;
+
+        aiForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const userQuery = aiInput.value.trim();
+            if (!userQuery) return;
+
+            // Append user message
+            appendMessage('User', userQuery);
+            aiInput.value = '';
+            aiSubmitBtn.disabled = true;
+            aiSubmitBtn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i>';
+
+            // Append loading bubble
+            const loadingId = appendLoadingMessage();
+
+            try {
+                const apiKey = ""; // Canvas runtime environment automatically supplies this
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+                
+                const payload = {
+                    contents: [{ parts: [{ text: userQuery }] }],
+                    systemInstruction: {
+                        parts: [{ text: systemPrompt }]
+                    }
+                };
+
+                let response = null;
+                let data = null;
+                // Exponential backoff retry loop
+                for (let attempt = 0; attempt < 3; attempt++) {
+                    try {
+                        response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        if (response.ok) {
+                            data = await response.json();
+                            break;
+                        }
+                    } catch (err) {
+                        await new Promise(function(res) {
+                            setTimeout(res, Math.pow(2, attempt) * 1000);
+                        });
+                    }
+                }
+
+                removeMessage(loadingId);
+
+                if (data && data.candidates && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0].text) {
+                    const aiReply = data.candidates[0].content.parts[0].text;
+                    appendMessage('AI', aiReply);
+                } else {
+                    appendMessage('AI', 'Xin lỗi quý khách, hệ thống AI đang bận một chút. Quý khách vui lòng gọi trực tiếp hotline 0903 242 400 để được hỗ trợ ngay nhé!');
+                }
+            } catch (error) {
+                removeMessage(loadingId);
+                appendMessage('AI', 'Đã có lỗi xảy ra. Quý khách vui lòng thử lại sau.');
+            } finally {
+                aiSubmitBtn.disabled = false;
+                aiSubmitBtn.innerHTML = '<span>Gửi</span><i class="fa-solid fa-paper-plane"></i>';
+            }
+        });
+
+        function appendMessage(sender, text) {
+            const isUser = sender === 'User';
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `flex items-start gap-3 ${isUser ? 'flex-row-reverse' : ''}`;
+            
+            messageDiv.innerHTML = `
+                <div class="w-8 h-8 rounded-full ${isUser ? 'bg-hyGreen text-hyYellow' : 'bg-hyYellow text-hyGreen'} flex items-center justify-center font-bold flex-shrink-0">${isUser ? 'Q' : 'AI'}</div>
+                <div class="${isUser ? 'bg-hyYellow text-hyDark rounded-tr-none' : 'bg-white text-hyDark rounded-tl-none'} p-4 rounded-2xl shadow-md max-w-[80%] text-sm leading-relaxed">${formatText(text)}</div>
+            `;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function appendLoadingMessage() {
+            const id = 'loading-' + Date.now();
+            const messageDiv = document.createElement('div');
+            messageDiv.id = id;
+            messageDiv.className = `flex items-start gap-3`;
+            messageDiv.innerHTML = `
+                <div class="w-8 h-8 rounded-full bg-hyYellow text-hyGreen flex items-center justify-center font-bold flex-shrink-0">AI</div>
+                <div class="bg-white text-hyDark p-4 rounded-2xl rounded-tl-none shadow-md text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-circle-notch animate-spin text-hyGreen"></i> Trợ lý AI đang suy nghĩ...
+                </div>
+            `;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            return id;
+        }
+
+        function removeMessage(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+
+        function formatText(text) {
+            return text.replace(/\n/g, '<br>');
+        }
+    </script>
+</body>
+</html>
