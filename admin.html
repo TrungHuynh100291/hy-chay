@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản Lý Đơn Hàng - Hy Chay POS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f3f4f6; color: #1f2937; margin: 0; padding: 20px; }
+    header { background: #1e5e3a; color: #fff; padding: 15px 25px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+    h1 { margin: 0; font-size: 1.5rem; }
+    .status-badge { background: #ffd800; color: #1a3826; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.9rem; }
+    
+    .orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+    .order-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: 6px solid #e53e3e; position: relative; animation: pulse-border 1.5s infinite; }
+    @keyframes pulse-border { 0% { border-left-color: #e53e3e; } 50% { border-left-color: #ffd800; } 100% { border-left-color: #e53e3e; } }
+    
+    .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+    .order-time { font-size: 0.85rem; color: #666; }
+    .customer-info p { margin: 4px 0; font-size: 0.95rem; }
+    .items-list { background: #f9fafb; padding: 10px; border-radius: 8px; margin: 12px 0; font-size: 0.9rem; }
+    .items-list div { display: flex; justify-content: space-between; margin-bottom: 4px; }
+    
+    .btn-confirm { background: #1e5e3a; color: #fff; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 1rem; transition: background 0.2s; }
+    .btn-confirm:hover { background: #2b7a4d; }
+
+    #soundControl { background: #fff; padding: 15px 25px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+    .btn-audio { background: #ffd800; color: #1a3826; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🔔 Hệ Thống Nhận Đơn Hy Chay</h1>
+    <div class="status-badge" id="orderCountBadge">Đang chờ: 0 đơn</div>
+  </header>
+
+  <div id="soundControl">
+    <span>⚠️ Trình duyệt cần kích hoạt âm thanh để chuông báo reo khi có đơn mới:</span>
+    <button class="btn-audio" onclick="enableAudio()">Bật Âm Thanh Báo Đơn</button>
+  </div>
+
+  <div id="ordersContainer" class="orders-grid">
+    <p style="color: #666;">Đang kết nối dữ liệu đơn hàng thời gian thực...</p>
+  </div>
+
+  <!-- ÂM THANH THÔNG BÁO GIỌNG ĐÓNG (SỬ DỤNG TEXT-TO-SPEECH HOẶC FILE MP3) -->
+  <audio id="alertSound" loop>
+    <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
+  </audio>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB7CH4HUqEozclN38P_iGtSFzDB_w7sOUk",
+      authDomain: "hy-chay.firebaseapp.com",
+      projectId: "hy-chay",
+      storageBucket: "hy-chay.firebasestorage.app",
+      messagingSenderId: "215026977682",
+      appId: "1:215026977682:web:52b136c7f09a62cc488f4b"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let audioEnabled = false;
+    window.enableAudio = function() {
+      let sound = document.getElementById('alertSound');
+      sound.play().then(() => {
+        sound.pause();
+        sound.currentTime = 0;
+        audioEnabled = true;
+        document.getElementById('soundControl').style.background = '#d1fae5';
+        document.getElementById('soundControl').innerHTML = '✅ Âm thanh báo đơn đã sẵn sàng hoạt động!';
+      }).catch(e => {
+        alert("Vui lòng bấm lại hoặc kiểm tra cài đặt âm thanh trình duyệt.");
+      });
+    };
+
+    const ordersRef = ref(db, 'orders');
+    onValue(ordersRef, (snapshot) => {
+      const data = snapshot.val();
+      const container = document.getElementById('ordersContainer');
+      const badge = document.getElementById('orderCountBadge');
+      
+      if (!data) {
+        container.innerHTML = '<p style="color: #666; grid-column: 1/-1; text-align: center; padding: 40px;">Chưa có đơn hàng nào.</p>';
+        badge.innerText = 'Đang chờ: 0 đơn';
+        document.getElementById('alertSound').pause();
+        return;
+      }
+
+      let html = '';
+      let count = 0;
+      let hasNewOrder = false;
+
+      for (let id in data) {
+        let order = data[id];
+        count++;
+        hasNewOrder = true;
+
+        let itemsHtml = '';
+        let totalPrice = 0;
+        for (let key in order.items) {
+          let i = order.items[key];
+          let sub = i.price * i.qty;
+          totalPrice += sub;
+          itemsHtml += `<div><span>${i.name} (x${i.qty})</span><b>${sub.toLocaleString()}đ</b></div>`;
+        }
+
+        html += `
+          <div class="order-card">
+            <div class="order-header">
+              <b>Khách: ${order.customerName}</b>
+              <span class="order-time">${new Date(order.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+            </div>
+            <div class="customer-info">
+              <p>📞 SĐT: <a href="tel:${order.phone}" style="color: #2563eb; font-weight:bold;">${order.phone}</a></p>
+              <p>📍 Địa chỉ: <b>${order.address}</b></p>
+              ${order.note ? `<p>📝 Ghi chú: <span style="color:#e53e3e">${order.note}</span></p>` : ''}
+            </div>
+            <div class="items-list">${itemsHtml}</div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; font-size: 1.05rem;">
+              <span>Tổng tiền:</span>
+              <span style="color: #e53e3e;">${totalPrice.toLocaleString()}đ</span>
+            </div>
+            <button class="btn-confirm" onclick="confirmOrder('${id}')">✓ ĐÃ XÁC NHẬN / IN ĐƠN</button>
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+      badge.innerText = `Đang chờ: ${count} đơn`;
+
+      // Phát chuông báo reo liên tục nếu có đơn mới và đã bật âm thanh
+      if (hasNewOrder && audioEnabled) {
+        let sound = document.getElementById('alertSound');
+        if (sound.paused) {
+          sound.play().catch(err => console.log("Chờ tương tác bật âm thanh"));
+        }
+      }
+    });
+
+    window.confirmOrder = function(orderId) {
+      if (confirm("Xác nhận đã tiếp nhận và xử lý đơn này? Chuông báo sẽ ngưng.")) {
+        // Dừng chuông
+        document.getElementById('alertSound').pause();
+        document.getElementById('alertSound').currentTime = 0;
+        
+        // Xóa đơn khỏi danh sách chờ trên Firebase (hoặc chuyển trạng thái)
+        remove(ref(db, 'orders/' + orderId));
+      }
+    };
+  </script>
+</body>
+</html>
