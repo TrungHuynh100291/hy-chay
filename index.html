@@ -6,16 +6,23 @@
   <title>Hy Chay - Ẩm Thực Chay Rau Củ Nấm | Bảo Anh Lâm</title>
   <meta name="description" content="Nhà hàng Hy Chay - Ẩm thực chay thanh khiết từ rau củ nấm tự nhiên tại 280 Trần Hưng Đạo, P. Phan Thiết, T. Lâm Đồng.">
 
-  <!-- Favicon & Open Graph -->
-  <link rel="icon" type="image/png" href="Logo nho.png">
-  <link rel="apple-touch-icon" href="Logo nho.png">
+  <!-- 1. FAVICON TRÊN THANH CỬA SỔ -->
+  <link rel="icon" type="image/png" href="https://hychayfood.vercel.app/Logo%20nho.png">
+  <link rel="shortcut icon" type="image/png" href="https://hychayfood.vercel.app/Logo%20nho.png">
+  <link rel="apple-touch-icon" href="https://hychayfood.vercel.app/Logo%20nho.png">
+
+  <!-- 2. HÌNH ẢNH & THÔNG TIN KHI CHIA SẺ QUA ZALO / FACEBOOK -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://hychayfood.vercel.app/">
   <meta property="og:title" content="Hy Chay - Ẩm Thực Chay Rau Củ Nấm | Bảo Anh Lâm">
-  <meta property="og:description" content="Nhà hàng Hy Chay - Ẩm thực chay thanh khiết, cơm trưa, món nước tại 280 Trần Hưng Đạo, P. Phan Thiết, T. Lâm Đồng.">
+  <meta property="og:description" content="Đặt món chay thanh khiết giao tận nơi tại Phan Thiết, trực tiếp từ quán không qua trung gian.">
   <meta property="og:image" content="https://hychayfood.vercel.app/Logo%20Lon.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://hychayfood.vercel.app/Logo%20Lon.png">
 
-  <!-- Google Fonts -->
+  <!-- GOOGLE FONTS -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
@@ -74,9 +81,16 @@
     .tag-pill { display: inline-block; background: #eaf5ed; color: var(--primary); padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; margin-right: 8px; margin-bottom: 12px; }
 
     .dish-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; }
-    .dish-card { background: var(--card-bg); border-radius: 16px; overflow: hidden; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04); border: 1px solid var(--border); display: flex; flex-direction: column; }
-    .dish-img-wrap { width: 100%; height: 210px; overflow: hidden; background: #eaeaea; }
+    .dish-card { background: var(--card-bg); border-radius: 16px; overflow: hidden; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04); border: 1px solid var(--border); display: flex; flex-direction: column; position: relative; transition: all 0.3s ease; }
+    .dish-img-wrap { width: 100%; height: 210px; overflow: hidden; background: #eaeaea; position: relative; }
     .dish-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+    
+    /* BADGE TẠM HẾT MÓN */
+    .sold-out-badge { display: none; position: absolute; top: 12px; right: 12px; background: #ef4444; color: #fff; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+    .dish-card.is-sold-out { opacity: 0.65; }
+    .dish-card.is-sold-out .sold-out-badge { display: block; }
+    .dish-card.is-sold-out .btn-add-cart { background: #9ca3af !important; cursor: not-allowed; }
+
     .dish-body { padding: 18px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
     .dish-body h3 { font-size: 1.15rem; margin-bottom: 6px; }
     .dish-body p { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 14px; }
@@ -84,7 +98,7 @@
     .dish-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
     .dish-price { font-weight: 700; color: #e53e3e; font-size: 1.05rem; }
     .btn-add-cart { background: var(--primary); color: #fff; border: none; padding: 8px 14px; border-radius: 20px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: background 0.2s; }
-    .btn-add-cart:hover { background: var(--primary-light); }
+    .btn-add-cart:hover:not(:disabled) { background: var(--primary-light); }
 
     .menu-cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; margin-top: 20px; }
     .menu-poster-card { background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.06); border: 1px solid var(--border); }
@@ -173,109 +187,143 @@
 
     <div class="section-title" id="mon-dac-sac">
       <h2>Món Ngon Đặc Sắc</h2>
-      <p>Bấm chọn món nhanh để đặt hàng trực tiếp không qua trung gian sàn</p>
+      <p>Bấm chọn món nhanh để đặt hàng trực tiếp giao tận nơi tại Phan Thiết</p>
       <div class="divider"></div>
     </div>
 
+    <!-- 8 MÓN ĐẶC SẮC (ĐÃ GẮN DATA-ID ĐỒNG BỘ VỚI ADMIN) -->
     <div class="dish-grid">
-      <div class="dish-card">
-        <div class="dish-img-wrap"><img src="BunChaGio.png" alt="Bún Chả Giò Chay"></div>
+      <!-- 1. Bún Chả Giò -->
+      <div class="dish-card" data-dish-id="bunchagio">
+        <div class="dish-img-wrap">
+          <img src="BunChaGio.png" alt="Bún Chả Giò Chay">
+          <span class="sold-out-badge">Tạm Hết</span>
+        </div>
         <div class="dish-body">
           <h3>Bún Chả Giò Chay</h3>
           <p>Chả giò khoai môn nấm bùi béo, chà bông nấm và rau sống giòn mát.</p>
           <div class="dish-footer">
             <span class="dish-price">35.000đ</span>
-            <button class="btn-add-cart" onclick="addToCart('Bún Chả Giò Chay', 35000)">+ Chọn Món</button>
+            <button class="btn-add-cart" onclick="addToCart('bunchagio', 'Bún Chả Giò Chay', 35000)">+ Chọn Món</button>
           </div>
         </div>
       </div>
 
-      <div class="dish-card">
-        <div class="dish-img-wrap"><img src="Banh Canh Chay.png" alt="Bánh Canh Chay"></div>
+      <!-- 2. Bánh Canh -->
+      <div class="dish-card" data-dish-id="banhcanh">
+        <div class="dish-img-wrap">
+          <img src="Banh Canh Chay.png" alt="Bánh Canh Chay">
+          <span class="sold-out-badge">Tạm Hết</span>
+        </div>
         <div class="dish-body">
           <h3>Bánh Canh Chay</h3>
           <p>Nước dùng bắp ngọt rau củ, chả lụa chay dai mềm cùng nấm rơm tươi.</p>
           <div class="dish-footer">
             <span class="dish-price">30.000đ</span>
-            <button class="btn-add-cart" onclick="addToCart('Bánh Canh Chay', 30000)">+ Chọn Món</button>
+            <button class="btn-add-cart" onclick="addToCart('banhcanh', 'Bánh Canh Chay', 30000)">+ Chọn Món</button>
           </div>
         </div>
       </div>
 
-      <div class="dish-card">
-        <div class="dish-img-wrap"><img src="Hoanh Thanh Mi.png" alt="Mì Hoành Thánh Chay"></div>
+      <!-- 3. Mì Hoành Thánh -->
+      <div class="dish-card" data-dish-id="hoanhthanhmi">
+        <div class="dish-img-wrap">
+          <img src="Hoanh Thanh Mi.png" alt="Mì Hoành Thánh Chay">
+          <span class="sold-out-badge">Tạm Hết</span>
+        </div>
         <div class="dish-body">
           <h3>Mì Hoành Thánh Chay</h3>
           <p>Sợi mì trứng dai mềm, hoành thánh chiên giòn tan và cải thìa tươi ngọt.</p>
           <div class="dish-footer">
             <span class="dish-price">35.000đ</span>
-            <button class="btn-add-cart" onclick="addToCart('Mì Hoành Thánh Chay', 35000)">+ Chọn Món</button>
+            <button class="btn-add-cart" onclick="addToCart('hoanhthanhmi', 'Mì Hoành Thánh Chay', 35000)">+ Chọn Món</button>
           </div>
         </div>
       </div>
 
-      <div class="dish-card">
-        <div class="dish-img-wrap"><img src="Mi Quang Chay.png" alt="Mì Quảng Chay"></div>
+      <!-- 4. Mì Quảng -->
+      <div class="dish-card" data-dish-id="miquang">
+        <div class="dish-img-wrap">
+          <img src="Mi Quang Chay.png" alt="Mì Quảng Chay">
+          <span class="sold-out-badge">Tạm Hết</span>
+        </div>
         <div class="dish-body">
           <h3>Mì Quảng Chay</h3>
           <p>Nấm đùi gà thấm vị, đậu phộng rang giòn và bánh tráng mè nướng.</p>
           <div class="dish-footer">
             <span class="dish-price">35.000đ</span>
-            <button class="btn-add-cart" onclick="addToCart('Mì Quảng Chay', 35000)">+ Chọn Món</button>
+            <button class="btn-add-cart" onclick="addToCart('miquang', 'Mì Quảng Chay', 35000)">+ Chọn Món</button>
           </div>
         </div>
       </div>
 
-      <div class="dish-card">
-        <div class="dish-img-wrap"><img src="Com Ga.png" alt="Cơm Gà Chay"></div>
+      <!-- 5. Cơm Gà -->
+      <div class="dish-card" data-dish-id="comga">
+        <div class="dish-img-wrap">
+          <img src="Com Ga.png" alt="Cơm Gà Chay">
+          <span class="sold-out-badge">Tạm Hết</span>
+        </div>
         <div class="dish-body">
           <h3>Cơm Gà Chay</h3>
           <p>Cơm thơm dẻo, gà tàu hũ ky chiên giòn rụm kèm nước sốt chua ngọt.</p>
           <div class="dish-footer">
             <span class="dish-price">35.000đ</span>
-            <button class="btn-add-cart" onclick="addToCart('Cơm Gà Chay', 35000)">+ Chọn Món</button>
+            <button class="btn-add-cart" onclick="addToCart('comga', 'Cơm Gà Chay', 35000)">+ Chọn Món</button>
           </div>
         </div>
       </div>
 
-      <div class="dish-card">
-        <div class="dish-img-wrap"><img src="Xoi.png" alt="Xôi Thập Cẩm Chay"></div>
+      <!-- 6. Xôi Thập Cẩm -->
+      <div class="dish-card" data-dish-id="xoi">
+        <div class="dish-img-wrap">
+          <img src="Xoi.png" alt="Xôi Thập Cẩm Chay">
+          <span class="sold-out-badge">Tạm Hết</span>
+        </div>
         <div class="dish-body">
           <h3>Xôi Thập Cẩm Chay</h3>
           <p>Xôi nếp dẻo pate hạt điều, chà bông nấm hương đậm vị.</p>
           <div class="dish-footer">
             <span class="dish-price">25.000đ</span>
-            <button class="btn-add-cart" onclick="addToCart('Xôi Thập Cẩm Chay', 25000)">+ Chọn Món</button>
+            <button class="btn-add-cart" onclick="addToCart('xoi', 'Xôi Thập Cẩm Chay', 25000)">+ Chọn Món</button>
           </div>
         </div>
       </div>
 
-      <div class="dish-card">
-        <div class="dish-img-wrap"><img src="Nom Hoa Chuoi.png" alt="Nộm Hoa Chuối Tri Kỷ"></div>
+      <!-- 7. Nộm Hoa Chuối -->
+      <div class="dish-card" data-dish-id="nomhoachuoi">
+        <div class="dish-img-wrap">
+          <img src="Nom Hoa Chuoi.png" alt="Nộm Hoa Chuối Tri Kỷ">
+          <span class="sold-out-badge">Tạm Hết</span>
+        </div>
         <div class="dish-body">
           <h3>Nộm Hoa Chuối Tri Kỷ</h3>
           <p>Hoa chuối tươi giòn tan, vị chua thanh ngọt ăn kèm phồng tôm chay.</p>
           <div class="dish-footer">
             <span class="dish-price">70.000đ</span>
-            <button class="btn-add-cart" onclick="addToCart('Nộm Hoa Chuối Tri Kỷ', 70000)">+ Chọn Món</button>
+            <button class="btn-add-cart" onclick="addToCart('nomhoachuoi', 'Nộm Hoa Chuối Tri Kỷ', 70000)">+ Chọn Món</button>
           </div>
         </div>
       </div>
 
-      <div class="dish-card">
-        <div class="dish-img-wrap"><img src="Mi Spaghetti Chay.png" alt="Mì Ý Sốt Bò Bằm Chay"></div>
+      <!-- 8. Mì Ý Bò Bằm -->
+      <div class="dish-card" data-dish-id="mispaghetti">
+        <div class="dish-img-wrap">
+          <img src="Mi Spaghetti Chay.png" alt="Mì Ý Sốt Bò Bằm Chay">
+          <span class="sold-out-badge">Tạm Hết</span>
+        </div>
         <div class="dish-body">
           <h3>Mì Ý Sốt Bò Bằm Chay</h3>
           <p>Sợi mì Ý sốt cà chua tươi nấu cùng nấm hương băm nhỏ.</p>
           <div class="dish-footer">
             <span class="dish-price">55.000đ</span>
-            <button class="btn-add-cart" onclick="addToCart('Mì Ý Sốt Bò Bằm Chay', 55000)">+ Chọn Món</button>
+            <button class="btn-add-cart" onclick="addToCart('mispaghetti', 'Mì Ý Sốt Bò Bằm Chay', 55000)">+ Chọn Món</button>
           </div>
         </div>
       </div>
     </div>
   </section>
 
+  <!-- THỰC ĐƠN ĐẦY ĐỦ -->
   <section class="section" id="thuc-don" style="padding-top: 10px;">
     <div class="section-title">
       <h2>Thực Đơn Chi Tiết</h2>
@@ -322,15 +370,15 @@
         </div>
         <div class="form-group">
           <label>Số điện thoại liên hệ (*)</label>
-          <input type="tel" id="cusPhone" required placeholder="Nhập số điện thoại">
+          <input type="tel" id="cusPhone" required placeholder="Nhập số điện thoại nhận hàng">
         </div>
         <div class="form-group">
           <label>Địa chỉ giao hàng tại Phan Thiết (*)</label>
           <textarea id="cusAddress" rows="2" required placeholder="Số nhà, tên đường, khu vực..."></textarea>
         </div>
         <div class="form-group">
-          <label>Ghi chú cho quán</label>
-          <input type="text" id="cusNote" placeholder="Ví dụ: Không hành, ít cay, giao gấp...">
+          <label>Ghi chú cho bếp</label>
+          <input type="text" id="cusNote" placeholder="Ví dụ: Không hành, ít cay, giao gấp trước 11h30...">
         </div>
         <button type="submit" class="btn-primary" style="width: 100%; padding: 14px; font-size: 1.05rem;">GỬI ĐƠN NGAY (SHIP TẬN NƠI)</button>
       </form>
@@ -369,10 +417,10 @@
     </div>
   </footer>
 
-  <!-- SCRIPT KẾT NỐI DATABASE VÙNG SINGAPORE -->
+  <!-- SCRIPT FIREBASE SDK & ĐỒNG BỘ TRẠNG THÁI HẾT MÓN TỨC THÌ -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyB7CH4HUqEozclN38P_iGtSFzDB_w7sOUk",
@@ -386,9 +434,37 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app, "https://hy-chay-default-rtdb.asia-southeast1.firebasedatabase.app");
 
+    let soldOutStatus = {};
     let cart = {};
 
-    window.addToCart = function(name, price) {
+    // LẮNG NGHE TÍN HIỆU BẬT/TẮT MÓN TỪ ADMIN
+    onValue(ref(db, 'menu_status'), (snapshot) => {
+      soldOutStatus = snapshot.val() || {};
+      
+      document.querySelectorAll('.dish-card').forEach(card => {
+        const dishId = card.getAttribute('data-dish-id');
+        const isSoldOut = soldOutStatus[dishId] && soldOutStatus[dishId].soldOut;
+        const btn = card.querySelector('.btn-add-cart');
+
+        if (isSoldOut) {
+          card.classList.add('is-sold-out');
+          btn.innerText = "TẠM HẾT MÓN";
+          btn.disabled = true;
+        } else {
+          card.classList.remove('is-sold-out');
+          btn.innerText = "+ Chọn Món";
+          btn.disabled = false;
+        }
+      });
+    });
+
+    // CHỨC NĂNG GIỎ HÀNG
+    window.addToCart = function(dishId, name, price) {
+      if (soldOutStatus[dishId] && soldOutStatus[dishId].soldOut) {
+        alert("Rất tiếc, món này hiện tại quán vừa tạm hết!");
+        return;
+      }
+
       if (cart[name]) {
         cart[name].qty += 1;
       } else {
@@ -446,15 +522,15 @@
         html += `<div class="cart-item-row">
           <span><b>${item.name}</b> (${item.price.toLocaleString()}đ)</span>
           <div>
-            <button type="button" onclick="updateCartQty('${item.name}', -1)" style="padding:2px 8px;">-</button>
-            <span style="margin: 0 8px;">${item.qty}</span>
-            <button type="button" onclick="updateCartQty('${item.name}', 1)" style="padding:2px 8px;">+</button>
+            <button type="button" onclick="updateCartQty('${item.name}', -1)" style="padding:2px 8px; cursor:pointer;">-</button>
+            <span style="margin: 0 8px; font-weight:bold;">${item.qty}</span>
+            <button type="button" onclick="updateCartQty('${item.name}', 1)" style="padding:2px 8px; cursor:pointer;">+</button>
             <b style="margin-left: 10px;">${sub.toLocaleString()}đ</b>
           </div>
         </div>`;
       }
       if (html === '') html = '<p>Giỏ hàng đang trống.</p>';
-      else html += `<div style="text-align:right; font-weight:bold; margin-top:10px; font-size:1.1rem;">Tổng cộng: ${totalPrice.toLocaleString()}đ</div>`;
+      else html += `<div style="text-align:right; font-weight:bold; margin-top:10px; font-size:1.1rem; color:#dc2626;">Tổng cộng: ${totalPrice.toLocaleString()}đ</div>`;
       listDiv.innerHTML = html;
     }
 
@@ -477,7 +553,7 @@
 
       push(ref(db, 'orders'), orderData)
         .then(() => {
-          alert("Gửi đơn hàng thành công! Quán sẽ gọi điện xác nhận ngay.");
+          alert("🎉 Gửi đơn hàng thành công! Quán Hy Chay sẽ gọi xác nhận và giao tận nơi cho bạn.");
           cart = {};
           updateCartUI();
           closeCheckoutModal();
