@@ -347,7 +347,8 @@
   <!-- =============================== -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    // NÂNG CẤP BẢO MẬT: Bổ sung các hàm query, orderByChild, equalTo để truy xuất dữ liệu an toàn
+    import { getDatabase, ref, push, onValue, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = { apiKey: "AIzaSyB7CH4HUqEozclN38P_iGtSFzDB_w7sOUk", authDomain: "hy-chay.firebaseapp.com", projectId: "hy-chay", storageBucket: "hy-chay.firebasestorage.app", messagingSenderId: "215026977682", appId: "1:215026977682:web:52b136c7f09a62cc488f4b" };
     const app = initializeApp(firebaseConfig);
@@ -449,6 +450,7 @@
 
     function getDishData(dish) {
       const c = menuCustomCache[dish.id] || {};
+      // NÂNG CẤP: Tương thích với link URL ảnh từ Firebase Storage, fallback về ảnh gốc hoặc Logo nếu lỗi
       return { id: dish.id, name: dish.name, cat: dish.cat, catName: dish.catName, price: c.price !== undefined ? c.price : dish.defaultPrice, image: c.image || dish.defaultImg || 'Logo nho.png', isSoldOut: !!c.soldOut, isHot: dish.isHot };
     }
 
@@ -528,38 +530,53 @@
     };
     window.logoutUser = function() { localStorage.removeItem('hyChayUserProfile'); openAccountModal(); };
 
-    // THEO DÕI VẬN CHUYỂN
+    // ==========================================
+    // NÂNG CẤP BẢO MẬT: Hàm Tracking Đơn Hàng Mới
+    // ==========================================
     function loadOrderHistoryTracker(phone) {
-      onValue(ref(db, 'orders'), (snap) => {
-        const orders = snap.val() || {}; let totalSpent = 0, html = '';
-        Object.keys(orders).reverse().forEach(id => {
-          if (orders[id].phone === phone) {
-            if (orders[id].status === 'Đã hoàn tất') totalSpent += (orders[id].subtotal || 0);
-            let itemsStr = []; for (let k in orders[id].items) itemsStr.push(`${orders[id].items[k].qty}x ${orders[id].items[k].name}`);
-            
-            const st = orders[id].status; let trackerClass = '', trackerText = '';
-            if (st === 'Chờ xác nhận') { trackerClass = ''; trackerText = '⏳ Quán đang xác nhận đơn'; }
-            else if (st === 'Đang chế biến') { trackerClass = 'delivering'; trackerText = '🍳 Bếp đang lên món cho bạn'; }
-            else if (st === 'Đang giao hàng') { trackerClass = 'delivering'; trackerText = '🛵 Shipper đang trên đường giao. Vui lòng chú ý điện thoại!'; }
-            else if (st === 'Đã hoàn tất') { trackerClass = ''; trackerText = '✅ Đơn hàng đã giao thành công'; }
-            else if (st === 'Đã hủy') { trackerClass = 'canceled'; trackerText = `❌ Đã hủy: ${orders[id].cancelReason || 'Lý do khác'}`; }
+      document.getElementById('orderHistoryList').innerHTML = '<p style="text-align:center; color:#94a3b8;">Đang tải dữ liệu...</p>';
+      
+      // CHỈ tải những đơn hàng có số điện thoại khớp với SĐT của khách, ngăn chặn rò rỉ toàn bộ Database
+      const ordersQuery = query(ref(db, 'orders'), orderByChild('phone'), equalTo(phone));
+      
+      get(ordersQuery).then((snapshot) => {
+        const orders = snapshot.val() || {}; 
+        let totalSpent = 0, html = '';
+        
+        // Sắp xếp đơn hàng mới nhất lên đầu
+        const sortedIds = Object.keys(orders).sort((a, b) => new Date(orders[b].createdAt) - new Date(orders[a].createdAt));
+        
+        sortedIds.forEach(id => {
+          const order = orders[id];
+          if (order.status === 'Đã hoàn tất') totalSpent += (order.subtotal || 0);
+          let itemsStr = []; for (let k in order.items) itemsStr.push(`${order.items[k].qty}x ${order.items[k].name}`);
+          
+          const st = order.status; let trackerClass = '', trackerText = '';
+          if (st === 'Chờ xác nhận') { trackerClass = ''; trackerText = '⏳ Quán đang xác nhận đơn'; }
+          else if (st === 'Đang chế biến') { trackerClass = 'delivering'; trackerText = '🍳 Bếp đang lên món cho bạn'; }
+          else if (st === 'Đang giao hàng') { trackerClass = 'delivering'; trackerText = '🛵 Shipper đang trên đường giao. Vui lòng chú ý điện thoại!'; }
+          else if (st === 'Đã hoàn tất') { trackerClass = ''; trackerText = '✅ Đơn hàng đã giao thành công'; }
+          else if (st === 'Đã hủy') { trackerClass = 'canceled'; trackerText = `❌ Đã hủy: ${order.cancelReason || 'Lý do khác'}`; }
 
-            html += `
-              <div class="history-card">
-                <div class="history-header"><span>${new Date(orders[id].createdAt).toLocaleDateString('vi-VN')}</span><span style="color:#2b7a4d;">#HC-${id.substring(id.length-5).toUpperCase()}</span></div>
-                <div class="status-tracker ${trackerClass}">${trackerText}</div>
-                <p style="color:#334155; margin-top:8px; margin-bottom:6px;"><b>Món:</b> ${itemsStr.join(', ')}</p>
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <b style="color:#dc2626; font-size:1.05rem;">${(orders[id].grandTotal || 0).toLocaleString()}đ</b>
-                  <button class="btn-reorder" style="width:auto;" onclick='reorderPastOrder(${JSON.stringify(orders[id].items)})'>🍲 Đặt Lại</button>
-                </div>
-              </div>`;
-          }
+          html += `
+            <div class="history-card">
+              <div class="history-header"><span>${new Date(order.createdAt).toLocaleDateString('vi-VN')}</span><span style="color:#2b7a4d;">#HC-${id.substring(id.length-5).toUpperCase()}</span></div>
+              <div class="status-tracker ${trackerClass}">${trackerText}</div>
+              <p style="color:#334155; margin-top:8px; margin-bottom:6px;"><b>Món:</b> ${itemsStr.join(', ')}</p>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <b style="color:#dc2626; font-size:1.05rem;">${(order.grandTotal || 0).toLocaleString()}đ</b>
+                <button class="btn-reorder" style="width:auto;" onclick='reorderPastOrder(${JSON.stringify(order.items)})'>🍲 Đặt Lại</button>
+              </div>
+            </div>`;
         });
+        
         const points = Math.floor(totalSpent / 10000);
         document.getElementById('profPoints').innerText = points.toLocaleString();
         document.getElementById('profRank').innerText = points >= 200 ? "Hạng Vàng ⭐" : (points >= 50 ? "Hạng Bạc 🥈" : "Thành Viên Mới");
         document.getElementById('orderHistoryList').innerHTML = html || '<p style="text-align:center;">Bạn chưa có đơn hàng nào.</p>';
+      }).catch((error) => {
+        console.error("Lỗi khi tải lịch sử đơn:", error);
+        document.getElementById('orderHistoryList').innerHTML = '<p style="text-align:center; color:#ef4444;">Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại sau.</p>';
       });
     }
 
