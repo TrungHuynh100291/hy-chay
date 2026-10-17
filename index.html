@@ -17,7 +17,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
 
   <style>
-    :root { --primary: #1e5e3a; --primary-light: #2b7a4d; --accent: #ffd800; --text-dark: #1f2937; --text-muted: #64748b; --bg-light: #faf9f5; --card-bg: #ffffff; --border: #e2e8f0; }
+    :root {
+      --primary: #1e5e3a; --primary-light: #2b7a4d;
+      --accent: #ffd800; --text-dark: #1f2937; 
+      --text-muted: #64748b; --bg-light: #faf9f5; 
+      --card-bg: #ffffff; --border: #e2e8f0;
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
     body { font-family: 'Inter', sans-serif; color: var(--text-dark); background-color: var(--bg-light); line-height: 1.6; padding-bottom: 90px; }
@@ -25,16 +30,19 @@
     a { text-decoration: none; color: inherit; }
     img { max-width: 100%; height: auto; display: block; }
 
-    /* CACHING, INSTALL & IOS GUIDES */
-    .app-install-banner { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); width: calc(100% - 24px); max-width: 480px; background: #ffffff; border: 2px solid var(--primary); border-radius: 16px; padding: 12px 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.18); z-index: 9999; display: none; align-items: center; gap: 12px; }
+    /* POPUP CÀI ĐẶT APP (PWA) & IOS GUIDE */
+    .app-install-banner { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); width: calc(100% - 24px); max-width: 480px; background: #ffffff; border: 2px solid var(--primary); border-radius: 16px; padding: 12px 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.18); z-index: 9999; display: none; align-items: center; gap: 12px; animation: slideDown 0.4s ease; }
+    @keyframes slideDown { from { top: -100px; opacity: 0; } to { top: 10px; opacity: 1; } }
     .install-icon { width: 44px; height: 44px; border-radius: 10px; flex-shrink: 0; }
     .install-text { flex-grow: 1; font-size: 0.86rem; line-height: 1.35; }
     .install-text b { color: var(--primary); font-size: 0.95rem; display: block; }
-    .btn-install-act { background: var(--primary); color: #fff; border: none; padding: 8px 14px; border-radius: 20px; font-weight: 700; cursor: pointer; }
+    .btn-install-act { background: var(--primary); color: #fff; border: none; padding: 8px 14px; border-radius: 20px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+    .install-close { color: #94a3b8; font-size: 1.2rem; cursor: pointer; padding: 0 4px; }
     
     .ios-guide-modal { position: fixed; bottom: 0; left: 0; width: 100%; background: #ffffff; border-radius: 20px 20px 0 0; padding: 24px 20px; box-shadow: 0 -4px 25px rgba(0,0,0,0.2); z-index: 10000; display: none; text-align: center; }
     .ios-step { font-size: 0.92rem; color: #334155; margin: 10px 0; line-height: 1.5; }
     .ios-step span { background: #f1f5f9; padding: 3px 8px; border-radius: 6px; font-weight: 700; }
+    .btn-close-ios { background: #e2e8f0; border: none; padding: 8px 24px; border-radius: 20px; font-weight: 700; margin-top: 10px; cursor: pointer; }
 
     /* HEADER & TÀI KHOẢN */
     header { background: #ffffff; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); }
@@ -42,107 +50,130 @@
     .brand-logo { display: flex; align-items: center; gap: 12px; }
     .brand-logo img { height: 40px; width: auto; border-radius: 8px; }
     .brand-logo span { font-size: 1.25rem; font-weight: 800; color:var(--primary); }
+    .nav-actions { display: flex; align-items: center; gap: 12px; }
     .btn-account { background: #eaf5ed; color: var(--primary); border: 1px solid #c7e5d2; padding: 8px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 6px; }
 
-    /* HERO */
+    /* HERO BANNER */
     .hero { background: linear-gradient(135deg, rgba(30, 94, 58, 0.94), rgba(20, 60, 38, 0.92)), url('combo 7 mon chay.png') center/cover no-repeat; color: #ffffff; padding: 60px 20px; text-align: center; }
     .hero-badge { display: inline-block; background: var(--accent); color: var(--primary); font-weight: 700; padding: 6px 18px; border-radius: 20px; text-transform: uppercase; margin-bottom: 18px; font-size: 0.85rem; }
-    .hero h1 { font-size: 2.3rem; margin-bottom: 18px; color: #ffffff; }
+    .hero h1 { font-size: 2.3rem; line-height: 1.25; margin-bottom: 18px; color: #ffffff; }
     .hero p { font-size: 1.1rem; color: #f3f4f6; max-width: 800px; margin: 0 auto 26px; }
-    .btn-primary { background: var(--accent); color: #1a3826; font-weight: 700; padding: 12px 26px; border-radius: 30px; border: none; cursor: pointer; display: inline-block; font-size: 1rem; }
+    .btn-primary { background: var(--accent); color: #1a3826; font-weight: 700; padding: 12px 26px; border-radius: 30px; box-shadow: 0 4px 15px rgba(255, 216, 0, 0.3); border: none; cursor: pointer; display: inline-block; font-size: 1rem; }
 
+    /* SECTION CHUNG */
     .section { padding: 45px 20px; max-width: 1200px; margin: 0 auto; }
     .section-title { text-align: center; margin-bottom: 30px; }
     .section-title h2 { font-size: 1.85rem; margin-bottom: 8px; }
+    .section-title p { color: var(--text-muted); font-size: 0.95rem; }
     .divider { width: 50px; height: 4px; background: var(--accent); margin: 10px auto 0; border-radius: 2px; }
 
-    /* MÂM CỖ 7 MÓN */
+    /* MÂM CỖ 7 MÓN (GIỮ NGUYÊN BẢN GỐC) */
     .featured-banner { background: #ffffff; border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: center; margin-bottom: 40px; }
-    .featured-banner img { width: 100%; border-radius: 14px; }
+    .featured-banner img { width: 100%; border-radius: 14px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+    .featured-info h3 { font-size: 1.6rem; margin-bottom: 12px; }
+    .featured-info p { color: var(--text-muted); margin-bottom: 18px; line-height: 1.6; }
     .tag-pill { display: inline-block; background: #eaf5ed; color: var(--primary); padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-right: 6px; margin-bottom: 10px; }
 
     /* 8 MÓN ĐẶC SẮC CHÍNH */
     .dish-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
-    .dish-card { background: var(--card-bg); border-radius: 16px; overflow: hidden; border: 1px solid var(--border); display: flex; flex-direction: column; position: relative; }
-    .dish-img-wrap { width: 100%; height: 210px; background: #eaeaea; position: relative; }
-    .dish-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+    .dish-card { background: var(--card-bg); border-radius: 16px; overflow: hidden; border: 1px solid var(--border); display: flex; flex-direction: column; position: relative; transition: all 0.3s; }
+    .dish-card:hover { box-shadow: 0 8px 25px rgba(0,0,0,0.08); transform: translateY(-5px); }
+    .dish-img-wrap { width: 100%; height: 210px; background: #eaeaea; position: relative; overflow: hidden; }
+    .dish-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+    .dish-card:hover .dish-img-wrap img { transform: scale(1.05); }
     .hot-badge { position: absolute; top: 12px; left: 12px; background: #ea580c; color: #fff; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; display: none; }
     .sold-out-badge { display: none; position: absolute; top: 12px; right: 12px; background: #ef4444; color: #fff; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
     .dish-card.is-hot .hot-badge { display: block; }
     .dish-card.is-sold-out { opacity: 0.65; }
     .dish-card.is-sold-out .sold-out-badge { display: block; }
     .dish-card.is-sold-out .hot-badge { display: none; }
+    .dish-card.is-sold-out .btn-add-cart { background: #9ca3af !important; cursor: not-allowed; }
     .dish-body { padding: 16px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
-    .dish-price { font-weight: 700; color: #e53e3e; font-size: 1.05rem; }
-    .btn-add-cart { background: var(--primary); color: #fff; border: none; padding: 8px 14px; border-radius: 20px; font-weight: 600; cursor: pointer; }
+    .dish-body h3 { font-size: 1.15rem; margin-bottom: 6px; }
+    .dish-body p { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 14px; }
+    .dish-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
+    .dish-price { font-weight: 800; color: #dc2626; font-size: 1.05rem; }
+    .btn-add-cart { background: var(--primary); color: #fff; border: none; padding: 8px 14px; border-radius: 20px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .btn-add-cart:hover:not(:disabled) { background: var(--primary-light); }
 
-    /* MENU LƯỚI CHI TIẾT (ĐÃ LỘT XÁC GIAO DIỆN CÓ ẢNH THUMBNAIL) */
-    .menu-filter-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px; }
-    .filter-chip { background: #ffffff; border: 1px solid var(--border); padding: 8px 16px; border-radius: 24px; font-size: 0.88rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
-    .filter-chip.active { background: var(--primary); color: #ffffff; border-color: var(--primary); }
-    
+    /* MENU LƯỚI TỔNG HỢP (THUMBNAIL ẢNH MÓN) */
+    .menu-filter-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px; scrollbar-width: none; }
+    .menu-filter-bar::-webkit-scrollbar { display: none; }
+    .filter-chip { background: #ffffff; border: 1px solid var(--border); padding: 8px 16px; border-radius: 24px; font-size: 0.88rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+    .filter-chip.active { background: var(--primary); color: #ffffff; border-color: var(--primary); box-shadow: 0 4px 10px rgba(30, 94, 58, 0.2); }
     .full-menu-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
     .menu-item-row { background: #ffffff; border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; gap: 12px; transition: transform 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
-    .menu-item-row:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-    .item-thumb { width: 68px; height: 68px; border-radius: 10px; overflow: hidden; flex-shrink: 0; background: #f1f5f9; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; }
+    .menu-item-row:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+    .item-thumb { width: 68px; height: 68px; border-radius: 10px; overflow: hidden; flex-shrink: 0; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; background: #f8fafc; }
     .item-thumb img { width: 100%; height: 100%; object-fit: cover; }
     .item-meta { flex-grow: 1; }
     .item-cat-label { font-size: 0.72rem; color: #64748b; background: #f1f5f9; padding: 2px 6px; border-radius: 8px; }
-    .item-price-tag { font-weight: 800; color: #dc2626; font-size: 0.95rem; display: block; margin-top: 4px; }
-    .btn-quick-add { background: #eaf5ed; color: var(--primary); border: 1px solid #c7e5d2; font-weight: 700; padding: 8px 14px; border-radius: 16px; font-size: 0.8rem; cursor: pointer; white-space: nowrap; }
+    .item-meta h4 { font-size: 0.95rem; margin-top: 4px; margin-bottom: 2px; }
+    .item-price-tag { font-weight: 800; color: #dc2626; font-size: 0.95rem; display: block; }
+    .btn-quick-add { background: #eaf5ed; color: var(--primary); border: 1px solid #c7e5d2; font-weight: 700; padding: 8px 14px; border-radius: 16px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+    .btn-quick-add:hover:not(:disabled) { background: var(--primary); color: #fff; }
     .menu-item-row.is-sold-out { opacity: 0.6; }
     .menu-item-row.is-sold-out .btn-quick-add { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; border-color: #cbd5e1; }
-    .hot-label-small { color: #ea580c; font-size: 0.7rem; font-weight: 700; margin-left: 6px; border: 1px solid #fdba74; padding: 1px 4px; border-radius: 4px; }
+    .hot-label-small { color: #ea580c; font-size: 0.7rem; font-weight: 700; margin-left: 6px; border: 1px solid #fdba74; padding: 1px 4px; border-radius: 4px; background: #fff7ed; }
 
-    /* MENU GỐC LỚN Ở CUỐI TRANG */
-    .menu-cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-top: 10px; }
-    .menu-poster-card { background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid var(--border); }
-    .menu-poster-header { padding: 12px; font-weight: 700; text-align: center; color: #ffffff; }
+    /* MENU GỐC LỚN 3 BẢNG CUỐI TRANG */
+    .menu-cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; margin-top: 20px; }
+    .menu-poster-card { background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .menu-poster-header { padding: 15px; font-weight: 700; text-align: center; color: #ffffff; font-size: 1.05rem; letter-spacing: 0.5px; }
+    .menu-poster-card a { display: block; overflow: hidden; }
+    .menu-poster-card img { width: 100%; display: block; transition: transform 0.4s ease; }
+    .menu-poster-card a:hover img { transform: scale(1.05); }
+    .menu-poster-desc { padding: 12px; text-align: center; font-size: 0.85rem; color: var(--text-muted); background: #fbfbfb; }
 
-    /* GIỎ HÀNG NỔI & THANH CÔNG CỤ DINE-IN */
+    /* GIỎ HÀNG NỔI & THANH CÔNG CỤ TẠI BÀN (DINE-IN) */
     .cart-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #1e5e3a; color: #fff; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 -4px 20px rgba(0,0,0,0.15); z-index: 2000; transform: translateY(100%); transition: transform 0.3s ease; }
     .cart-bar.active { transform: translateY(0); }
-    .btn-checkout { background: var(--accent); color: #1a3826; border: none; padding: 10px 20px; border-radius: 24px; font-weight: 700; cursor: pointer; }
+    .btn-checkout { background: var(--accent); color: #1a3826; border: none; padding: 10px 22px; border-radius: 24px; font-weight: 700; cursor: pointer; font-size: 0.95rem; box-shadow: 0 2px 10px rgba(255,216,0,0.3); }
     
-    .dine-in-toolbar { position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%); display: none; gap: 10px; z-index: 1999; background: rgba(255,255,255,0.9); padding: 8px 12px; border-radius: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); backdrop-filter: blur(5px); }
+    .dine-in-toolbar { position: fixed; bottom: 75px; left: 50%; transform: translateX(-50%); display: none; gap: 10px; z-index: 1999; background: rgba(255,255,255,0.95); padding: 8px 14px; border-radius: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); backdrop-filter: blur(5px); border: 1px solid var(--border); }
     .dine-in-toolbar.active { display: flex; }
-    .btn-service { background: #f8fafc; border: 1px solid #cbd5e1; color: #334155; font-weight: 700; font-size: 0.85rem; padding: 8px 16px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+    .btn-service { background: #f8fafc; border: 1px solid #cbd5e1; color: #334155; font-weight: 700; font-size: 0.85rem; padding: 10px 18px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
     .btn-service.bill { color: #0369a1; border-color: #bae6fd; background: #e0f2fe; }
 
-    /* MODAL CHUNG */
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; display: none; justify-content: center; align-items: center; padding: 16px; }
+    /* MODAL CHUNG DÙNG CHO CÁC POPUP */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); z-index: 3000; display: none; justify-content: center; align-items: center; padding: 16px; }
     .modal-overlay.active { display: flex; }
-    .modal-content { background: #fff; border-radius: 16px; width: 100%; max-width: 480px; padding: 22px; max-height: 90vh; overflow-y: auto; position: relative; }
+    .modal-content { background: #fff; border-radius: 20px; width: 100%; max-width: 480px; padding: 24px; max-height: 90vh; overflow-y: auto; position: relative; box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
     .modal-close { position: absolute; top: 12px; right: 16px; font-size: 1.5rem; cursor: pointer; color: #64748b; }
-    .form-group { margin-bottom: 12px; }
-    .form-group label { display: block; font-weight: 600; margin-bottom: 4px; font-size: 0.86rem; }
-    .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 9px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.9rem; font-family: inherit; }
+    
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.88rem; }
+    .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.95rem; font-family: inherit; }
 
-    /* TÀI KHOẢN KHÁCH HÀNG */
-    .loyalty-card { background: linear-gradient(135deg, #1e5e3a, #2b7a4d); border-radius: 12px; padding: 16px; color: #fff; margin-bottom: 16px; position: relative; overflow: hidden; }
-    .loyalty-points { font-size: 1.8rem; font-weight: 800; margin-bottom: 4px; }
-    .profile-info-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 16px; font-size: 0.88rem; }
-    .history-card { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px; font-size: 0.85rem; }
-    .history-header { display: flex; justify-content: space-between; border-bottom: 1px dashed #cbd5e1; padding-bottom: 6px; margin-bottom: 6px; font-weight: 700; }
-    .btn-reorder { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; padding: 6px 10px; border-radius: 6px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 8px; }
+    /* TÀI KHOẢN KHÁCH & LỊCH SỬ ĐƠN HÀNG */
+    .loyalty-card { background: linear-gradient(135deg, #1e5e3a, #2b7a4d); border-radius: 12px; padding: 18px; color: #fff; margin-bottom: 18px; position: relative; overflow: hidden; box-shadow: 0 5px 15px rgba(30,94,58,0.2); }
+    .loyalty-points { font-size: 2rem; font-weight: 800; margin-bottom: 4px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    .profile-info-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 16px; font-size: 0.9rem; }
+    .history-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 12px; font-size: 0.85rem; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+    .history-header { display: flex; justify-content: space-between; border-bottom: 1px dashed #cbd5e1; padding-bottom: 8px; margin-bottom: 8px; font-weight: 700; }
+    .btn-reorder { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; padding: 8px 12px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 10px; transition: background 0.2s; }
+    .btn-reorder:hover { background: #bae6fd; }
 
-    /* CƯỚC SHIP & VIETQR */
-    .shipping-calculator-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 12px; font-size: 0.86rem; }
-    .ship-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
-    .vietqr-box { background: #f0fdf4; border: 2px dashed #16a34a; border-radius: 12px; padding: 14px; text-align: center; margin-bottom: 14px; display: none; }
-    .vietqr-box img { max-width: 200px; margin: 8px auto; border-radius: 8px; }
-    .birthday-badge { background: #fef3c7; color: #d97706; padding: 8px; border-radius: 8px; border: 1px dashed #f59e0b; margin-bottom: 12px; font-size: 0.85rem; font-weight: 700; text-align: center; display: none; }
-    .cart-item-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.9rem; border-bottom: 1px solid #f0f0f0; padding-bottom: 6px; }
+    /* CƯỚC SHIP, VIETQR & CHECKOUT */
+    .shipping-calculator-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-bottom: 16px; font-size: 0.88rem; }
+    .ship-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+    .vietqr-box { background: #f0fdf4; border: 2px dashed #16a34a; border-radius: 12px; padding: 16px; text-align: center; margin-bottom: 16px; display: none; }
+    .vietqr-box img { max-width: 220px; margin: 10px auto; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .birthday-badge { background: #fef3c7; color: #d97706; padding: 10px; border-radius: 10px; border: 1px dashed #f59e0b; margin-bottom: 16px; font-size: 0.85rem; font-weight: 700; text-align: center; display: none; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+    .cart-item-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 0.95rem; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px; }
+    .cart-item-row button { border: 1px solid #cbd5e1; background: #fff; border-radius: 4px; padding: 2px 8px; cursor: pointer; font-weight: bold; }
 
     /* MODAL BÁO HỦY ĐƠN CHÂN THÀNH */
-    .canceled-alert-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.65); z-index: 10000; display: none; justify-content: center; align-items: center; padding: 16px; }
+    .canceled-alert-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 10000; display: none; justify-content: center; align-items: center; padding: 16px; }
     .canceled-alert-modal.active { display: flex; }
-    .canceled-alert-box { background: #fff; border-radius: 18px; max-width: 460px; width: 100%; padding: 24px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-
-    /* NÚT ZALO GÓC PHẢI */
-    .floating-contact { position: fixed; bottom: 85px; right: 25px; display: flex; flex-direction: column; gap: 10px; z-index: 1500; }
-    .float-btn { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; box-shadow: 0 4px 15px rgba(0,0,0,0.25); }
+    .canceled-alert-box { background: #fff; border-radius: 20px; max-width: 460px; width: 100%; padding: 30px 24px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.3); }
+    
+    /* NÚT ZALO & ĐIỆN THOẠI GÓC PHẢI DƯỚI */
+    .floating-contact { position: fixed; bottom: 85px; right: 20px; display: flex; flex-direction: column; gap: 12px; z-index: 1500; }
+    .float-btn { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; box-shadow: 0 4px 15px rgba(0,0,0,0.25); text-decoration: none; font-size: 0.85rem; }
     .float-zalo { background: #0068ff; }
+    .float-call { background: #dc2626; font-size: 1.2rem; }
 
     footer { background: #142e1d; color: #e5e7eb; padding: 50px 20px 25px; margin-top: 60px; font-size: 0.9rem; }
     .footer-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1.2fr 1.5fr; gap: 30px; margin-bottom: 30px; }
@@ -154,13 +185,14 @@
 </head>
 <body>
 
-  <!-- BANNER TỰ ĐỘNG CÀI ICON -->
+  <!-- BANNER CÀI ĐẶT APP -->
   <div id="pwaInstallBanner" class="app-install-banner">
     <img src="Logo nho.png" alt="Hy Chay App" class="install-icon">
-    <div class="install-text"><b>Cài đặt App Hy Chay</b><span>Thêm biểu tượng ra màn hình để gọi món 1-chạm</span></div>
+    <div class="install-text"><b>Cài đặt App Hy Chay</b><span>Thêm biểu tượng ra màn hình để đặt món 1-chạm</span></div>
     <button id="btnTriggerInstall" class="btn-install-act">Cài Đặt</button>
     <span class="install-close" onclick="closeInstallBanner()">&times;</span>
   </div>
+  
   <div id="iosGuideModal" class="ios-guide-modal">
     <h3>📲 Cài App Hy Chay Lên iPhone</h3>
     <p class="ios-step">1. Bấm nút <span>Chia sẻ ⎋</span> ở đáy Safari.</p>
@@ -169,6 +201,7 @@
     <button class="btn-close-ios" onclick="closeIosGuide()">Đã Hiểu</button>
   </div>
 
+  <!-- HEADER -->
   <header>
     <div class="nav-container">
       <a href="#" class="brand-logo"><img src="Logo nho.png" alt="Hy Chay Logo"><span>HY CHAY</span></a>
@@ -178,6 +211,7 @@
     </div>
   </header>
 
+  <!-- HERO -->
   <section class="hero">
     <div class="hero-content">
       <span class="hero-badge">Ẩm Thực Chay Rau Củ Nấm Tự Nhiên</span>
@@ -189,7 +223,7 @@
     </div>
   </section>
 
-  <!-- MÂM CỖ 7 MÓN -->
+  <!-- 1. MÂM CỖ 7 MÓN (GIỮ NGUYÊN BẢN GỐC) -->
   <section class="section" id="gioi-thieu">
     <div class="featured-banner">
       <img src="combo 7 mon chay.png" alt="Mâm cỗ 7 món Hy Chay">
@@ -201,16 +235,17 @@
       </div>
     </div>
 
-    <!-- 8 MÓN ĐẶC SẮC CHÍNH -->
+    <!-- 2. 8 MÓN ĐẶC SẮC -->
     <div class="section-title" id="mon-dac-sac">
       <h2>Món Ngon Đặc Sắc</h2>
       <p>Các món chay tinh hoa được đông đảo thực khách yêu thích tại Hy Chay</p>
       <div class="divider"></div>
     </div>
+    <!-- KHUNG ĐỔ DỮ LIỆU JS MÓN ĐẶC SẮC -->
     <div class="dish-grid" id="featuredDishGrid"></div>
   </section>
 
-  <!-- TOÀN BỘ THỰC ĐƠN ĐẶT NHANH (GIAO DIỆN CÓ ẢNH THUMBNAIL) -->
+  <!-- 3. TOÀN BỘ THỰC ĐƠN ĐẶT NHANH (CÓ THUMBNAIL) -->
   <section class="section" id="toan-bo-menu" style="background:#fff; border-radius:24px; padding:40px 20px;">
     <div class="section-title">
       <h2>Thực Đơn Đặt Món Trực Tuyến</h2>
@@ -227,11 +262,11 @@
       <button class="filter-chip" onclick="filterCat('soche', this)">Sơ Chế & Đóng Gói</button>
       <button class="filter-chip" onclick="filterCat('douong', this)">Đồ Uống BAL'S HOUSE</button>
     </div>
-    <!-- KHUNG ĐỔ DỮ LIỆU JS -->
+    <!-- KHUNG ĐỔ DỮ LIỆU MENU JS -->
     <div class="full-menu-container" id="fullMenuContainer"></div>
   </section>
 
-  <!-- BẢNG THỰC ĐƠN GỐC (HÌNH ẢNH LỚN CUỐI TRANG) -->
+  <!-- 4. BẢNG THỰC ĐƠN GỐC 3 ẢNH -->
   <section class="section" id="thuc-don-anh" style="padding-top: 20px;">
     <div class="section-title">
       <h2>Bảng Thực Đơn Chi Tiết (Bản Gốc)</h2>
@@ -242,130 +277,166 @@
       <div class="menu-poster-card">
         <div class="menu-poster-header" style="background: #1e5e3a;">ẨM THỰC PHỤC VỤ TẠI CHỖ</div>
         <a href="menu 1.jpg" target="_blank"><img src="menu 1.jpg" alt="Menu Món Ăn Hy Chay"></a>
+        <div class="menu-poster-desc">Gồm các món Bún, Phở, Mì Ý, Cơm Chiên, Lẩu Thái & Lẩu Chao thanh tịnh.</div>
       </div>
       <div class="menu-poster-card">
         <div class="menu-poster-header" style="background: #c88900;">THỰC PHẨM SƠ CHẾ & ĂN LIỀN</div>
         <a href="Menu 3.jpg" target="_blank"><img src="Menu 3.jpg" alt="Menu Sơ Chế"></a>
+        <div class="menu-poster-desc">Đặc sản Chà Bông Nấm Hương, Chả Mít Non Độc Quyền, Pate Hạt Điều.</div>
       </div>
       <div class="menu-poster-card">
         <div class="menu-poster-header" style="background: #4a2e1b;">ĐỒ UỐNG BAL'S HOUSE</div>
         <a href="Menu 4.jpg" target="_blank"><img src="Menu 4.jpg" alt="Menu Đồ Uống"></a>
+        <div class="menu-poster-desc">Menu giải khát với Cà Phê Muối, Latte Matcha, Yaourt & Nước Ép Tươi.</div>
       </div>
     </div>
   </section>
 
-  <!-- THANH CÔNG CỤ DINE-IN (CHỈ HIỆN KHI CÓ THAM SỐ BÀN) -->
+  <!-- THANH CÔNG CỤ DINE-IN TẠI BÀN -->
   <div id="dineInToolbar" class="dine-in-toolbar">
     <button class="btn-service" onclick="callService('nv')">🔔 Gọi Phục Vụ</button>
-    <button class="btn-service bill" onclick="callService('bill')">💳 Yêu Cầu Tính Tiền</button>
+    <button class="btn-service bill" onclick="callService('bill')">💳 Tính Tiền</button>
   </div>
 
+  <!-- THANH GIỎ HÀNG -->
   <div id="cartBar" class="cart-bar" onclick="openCheckoutModal()">
-    <div>🛒 Giỏ hàng: <b id="cartCount">0</b> món (<b id="cartTotal">0đ</b>)</div>
+    <div style="font-size:1.05rem;">🛒 Giỏ hàng: <b id="cartCount">0</b> món (<b id="cartTotal">0đ</b>)</div>
     <button class="btn-checkout">Xem Giỏ & Đặt Món</button>
   </div>
 
-  <!-- MODAL TÀI KHOẢN -->
+  <!-- MODAL TÀI KHOẢN KHÁCH HÀNG (LOYALTY) -->
   <div id="accountModal" class="modal-overlay">
     <div class="modal-content">
       <span class="modal-close" onclick="closeAccountModal()">&times;</span>
-      <h3 style="color:var(--primary); margin-bottom:14px;">Hồ Sơ Khách Hàng Hy Chay</h3>
+      <h3 style="color:var(--primary); margin-bottom:16px;">Hồ Sơ Khách Hàng Hy Chay</h3>
+      
+      <!-- ĐĂNG KÝ / ĐĂNG NHẬP -->
       <div id="loginView">
-        <p style="font-size:0.88rem; color:#64748b; margin-bottom:14px;">Nhập thông tin 1 lần, hệ thống tự lưu giỏ hàng và tự động điền đơn cho các lần sau.</p>
-        <div class="form-group"><label>Họ và Tên:</label><input type="text" id="loginName"></div>
-        <div class="form-group"><label>Số điện thoại:</label><input type="tel" id="loginPhone"></div>
+        <p style="font-size:0.9rem; color:#64748b; margin-bottom:16px;">Nhập thông tin 1 lần, hệ thống tự động ghi nhớ giỏ hàng, điền form tự động và tích điểm cho mọi đơn hàng sau này.</p>
+        <div class="form-group"><label>Họ và Tên (*):</label><input type="text" id="loginName"></div>
+        <div class="form-group"><label>Số điện thoại (*):</label><input type="tel" id="loginPhone"></div>
         <div class="form-group"><label>Ngày Sinh (Để nhận mã giảm 5%):</label><input type="date" id="loginBirthday"></div>
         <div class="form-group"><label>Địa chỉ nhận hàng mặc định:</label><textarea id="loginAddress" rows="2"></textarea></div>
-        <button onclick="saveUserProfile()" class="btn-primary" style="width:100%;">💾 LƯU HỒ SƠ & TÍCH ĐIỂM</button>
+        <button onclick="saveUserProfile()" class="btn-primary" style="width:100%; margin-top:10px;">💾 LƯU HỒ SƠ & TÍCH ĐIỂM</button>
       </div>
+
+      <!-- QUẢN LÝ THÀNH VIÊN -->
       <div id="profileView" style="display:none;">
         <div class="loyalty-card">
           <h4 id="profRank">Thành Viên Mới</h4>
           <div class="loyalty-points"><span id="profPoints">0</span> Điểm</div>
-          <p style="font-size:0.8rem; color:#e2e8f0;">Tích lũy 10.000đ = 1 điểm.</p>
+          <p style="font-size:0.85rem; color:#e2e8f0; margin-top:4px;">Quy đổi: 10.000đ chi tiêu = 1 điểm tích lũy.</p>
         </div>
         <div class="profile-info-box">
-          <p>Xin chào, <b id="profName"></b></p><p>📞 SĐT: <span id="profPhone"></span></p>
-          <button onclick="logoutUser()" style="background:none; border:none; color:#dc2626; text-decoration:underline; font-weight:bold; margin-top:8px; cursor:pointer;">Sửa thông tin / Đăng xuất</button>
+          <p>Xin chào, <b id="profName" style="color:var(--primary); font-size:1.05rem;"></b></p>
+          <p>📞 SĐT: <span id="profPhone" style="font-weight:600;"></span></p>
+          <button onclick="logoutUser()" style="background:none; border:none; color:#dc2626; text-decoration:underline; font-weight:bold; margin-top:10px; cursor:pointer;">Sửa thông tin / Đăng xuất</button>
         </div>
-        <h4 style="margin-bottom:8px; font-size:1rem;">Lịch sử đặt món</h4>
-        <div id="orderHistoryList" style="max-height: 250px; overflow-y: auto;"><p style="text-align:center;">Đang tải...</p></div>
+        <h4 style="margin-bottom:10px; font-size:1.05rem; color:var(--text-dark);">Lịch sử đặt món gần đây</h4>
+        <div id="orderHistoryList" style="max-height: 250px; overflow-y: auto; padding-right:5px;"><p style="text-align:center; color:#94a3b8;">Đang tải...</p></div>
       </div>
     </div>
   </div>
 
-  <!-- CHECKOUT MODAL -->
+  <!-- MODAL ĐẶT HÀNG (CHECKOUT) -->
   <div id="checkoutModal" class="modal-overlay">
     <div class="modal-content">
       <span class="modal-close" onclick="closeCheckoutModal()">&times;</span>
       <h3 style="color:var(--primary); margin-bottom:12px;">Xác Nhận Đơn Hàng Hy Chay</h3>
-      <div id="cartItemsList" style="margin-bottom: 14px;"></div>
+      <div id="openStatusTag" class="tag-open-status tag-open">Đang kiểm tra giờ hoạt động...</div>
+      
+      <div id="cartItemsList" style="margin-bottom: 16px;"></div>
       
       <form id="orderForm" onsubmit="submitOrder(event)">
-        <div class="form-group"><label>Họ và tên (*)</label><input type="text" id="cusName" required></div>
-        <div class="form-group" id="groupPhone"><label>Số điện thoại (*)</label><input type="tel" id="cusPhone" required></div>
+        <div class="form-group"><label>Họ và tên người nhận (*)</label><input type="text" id="cusName" required></div>
+        <div class="form-group" id="groupPhone"><label>Số điện thoại liên hệ (*)</label><input type="tel" id="cusPhone" required></div>
         <div class="form-group" id="groupAddress">
-          <label>Địa chỉ nhận hàng (*)</label>
-          <textarea id="cusAddress" rows="2" required onblur="calcDistance(this.value)"></textarea>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <label>Địa chỉ nhận hàng tại Phan Thiết (*)</label>
+            <button type="button" class="btn-quick-add" style="padding:4px 10px; margin-bottom:4px;" onclick="getLocationByGPS()">📍 Định vị GPS</button>
+          </div>
+          <textarea id="cusAddress" rows="2" required placeholder="Số nhà, tên đường, phường..." onblur="calcDistance(this.value)"></textarea>
         </div>
 
         <div id="birthdayDiscountBadge" class="birthday-badge">🎂 CHÚC MỪNG SINH NHẬT! Tặng Bạn Giảm 5% Toàn Bộ Món Ăn</div>
 
         <div class="shipping-calculator-box" id="shippingBox">
+          <div class="ship-row"><span>Khoảng cách ước tính:</span><b id="shipDistanceText" style="color:var(--primary);">~2.0 km</b></div>
           <div class="ship-row"><span>Tiền món ăn:</span><b id="subtotalText">0đ</b></div>
-          <div class="ship-row" id="birthdayDiscountRow" style="display:none; color:#16a34a;"><span>Giảm sinh nhật (5%):</span><b id="birthdayDiscountText">-0đ</b></div>
-          <div class="ship-row"><span>Phí vận chuyển:</span><b id="shipFeeText" style="color: #e53e3e;">14.000đ</b></div>
-          <div class="ship-row" style="border-top: 1px dashed #cbd5e1; margin-top: 6px; padding-top: 6px; font-size: 1.05rem;"><span style="font-weight: 700;">TỔNG THANH TOÁN:</span><b id="grandTotalText" style="color: #dc2626; font-size: 1.25rem;">0đ</b></div>
+          <div class="ship-row" id="birthdayDiscountRow" style="display:none; color:#16a34a;"><span>Giảm ưu đãi sinh nhật (5%):</span><b id="birthdayDiscountText">-0đ</b></div>
+          <div class="ship-row"><span>Phí vận chuyển (<span id="shipTimeSlotText" style="font-weight:normal;">Tiêu chuẩn</span>):</span><b id="shipFeeText" style="color: #e53e3e;">14.000đ</b></div>
+          <div id="freeshipBadge" style="display:none; color: #16a34a; font-weight: bold; margin-top: 6px; font-size: 0.85rem;">🎉 Đơn trên 200k: Đã được FREESHIP trong bán kính 5km!</div>
+          <div class="ship-row" style="border-top: 1px dashed #cbd5e1; margin-top: 8px; padding-top: 8px; font-size: 1.1rem;">
+            <span style="font-weight: 800;">TỔNG THANH TOÁN:</span><b id="grandTotalText" style="color: #dc2626; font-size: 1.35rem;">0đ</b>
+          </div>
         </div>
 
         <div class="form-group">
           <label>Phương thức thanh toán:</label>
           <select id="paymentMethodSelect" onchange="togglePaymentMethod(this.value)">
-            <option value="COD">Thanh toán tiền mặt (COD)</option>
-            <option value="VIETQR">Chuyển khoản VietQR tự động</option>
+            <option value="COD">Thanh toán tiền mặt khi nhận món (COD)</option>
+            <option value="VIETQR">Chuyển khoản VietQR tự động (Quét App Ngân hàng)</option>
           </select>
         </div>
         <div id="vietqrBox" class="vietqr-box">
-          <p style="font-weight:700; color:#166534; font-size:0.9rem;">Quét Mã QR Chuyển Khoản Nhanh:</p>
-          <img id="vietqrImg" src="" style="max-width:200px; margin:8px auto; border-radius:8px;">
-          <p style="font-size:0.8rem; color:#334155;">Số TK: <b id="qrAccNo">--</b> | NH: <b id="qrBank">--</b><br>Chủ TK: <b id="qrAccName">--</b></p>
+          <p style="font-weight:800; color:#166534; font-size:0.95rem;">Quét Mã QR Dưới Đây Để Chuyển Khoản:</p>
+          <img id="vietqrImg" src="" alt="Mã VietQR" style="max-width:240px; margin:12px auto; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.1);">
+          <p style="font-size:0.85rem; color:#334155; line-height:1.5;">Số TK: <b id="qrAccNo" style="font-size:1rem; color:#dc2626;">--</b><br>Ngân hàng: <b id="qrBank">--</b><br>Chủ TK: <b id="qrAccName">--</b></p>
         </div>
 
-        <div class="form-group"><label>Ghi chú cho bếp:</label><input type="text" id="cusNote" placeholder="Ví dụ: Không hành tỏi, không cay..."></div>
-        <button type="submit" id="btnSubmitOrder" class="btn-primary" style="width: 100%; padding: 14px; font-size:1rem;">GỬI ĐƠN NGAY</button>
+        <div class="form-group"><label>Ghi chú cho bếp (Chay kiêng ngũ vị tân...):</label><input type="text" id="cusNote" placeholder="Ví dụ: Không hành tỏi, ít cay..."></div>
+        <button type="submit" id="btnSubmitOrder" class="btn-primary" style="width: 100%; padding: 15px; font-size:1.05rem;">XÁC NHẬN GỬI ĐƠN</button>
       </form>
     </div>
   </div>
 
+  <!-- MODAL BÁO HỦY ĐƠN CHÂN THÀNH -->
   <div id="canceledAlertModal" class="canceled-alert-modal">
     <div class="canceled-alert-box">
-      <div class="canceled-icon">🌿</div>
-      <h3 style="color:#b91c1c; margin-bottom:8px;">Hy Chay Rất Tiếc Vì Sự Cố Này</h3>
-      <div style="background:#fff1f2; border-left:4px solid #ef4444; padding:12px; border-radius:6px; text-align:left; font-size:0.88rem; margin-bottom:16px;">
-        <p style="color:#991b1b; font-weight:700;" id="alertCancelReason">--</p>
-        <p style="color:#475569; margin-top:4px;" id="alertCancelSuggestion">--</p>
+      <div style="font-size:3rem; margin-bottom:10px;">🌿</div>
+      <h3 style="color:#b91c1c; margin-bottom:10px;">Hy Chay Rất Tiếc Vì Sự Cố Này</h3>
+      <p style="font-size:0.95rem; color:#334155; margin-bottom:14px;">Đơn hàng của bạn rất tiếc chưa thể hoàn tất với lý do:</p>
+      <div style="background:#fff1f2; border-left:5px solid #ef4444; padding:14px; border-radius:8px; text-align:left; font-size:0.9rem; margin-bottom:20px;">
+        <p style="color:#991b1b; font-weight:800; font-size:1rem;" id="alertCancelReason">--</p>
+        <p style="color:#475569; margin-top:6px; line-height:1.5;" id="alertCancelSuggestion">--</p>
       </div>
-      <button onclick="reOrderSuggestedDish()" class="btn-primary" style="width:100%; margin-bottom:10px;">🍲 Đặt Lại Món Khác Ngay</button>
-      <button onclick="closeCanceledAlert()" style="background:none; border:none; color:#64748b; font-size:0.85rem; cursor:pointer;">Đóng</button>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button onclick="reOrderSuggestedDish()" class="btn-primary" style="width:100%; padding:12px; font-size:1rem;">🍲 Đặt Lại Món Khác Ngay</button>
+        <a href="tel:0903242400" style="display:block; padding:12px; background:#f1f5f9; border-radius:30px; font-weight:800; color:#334155; text-decoration:none;">📞 Gọi Hotline Quán: 0903.242.400</a>
+        <button onclick="closeCanceledAlert()" style="background:none; border:none; color:#94a3b8; font-size:0.9rem; cursor:pointer; margin-top:6px; font-weight:600;">Đóng thông báo</button>
+      </div>
     </div>
   </div>
 
+  <!-- NÚT GỌI KHẨN CẤP / ZALO MÀN HÌNH CHÍNH -->
   <div class="floating-contact">
-    <a href="https://zalo.me/0903242400" target="_blank" class="float-btn float-zalo">Zalo</a>
+    <a href="https://zalo.me/0903242400" target="_blank" class="float-btn float-zalo" title="Chat Zalo">Zalo</a>
+    <a href="tel:0903242400" class="float-btn float-call" title="Gọi Hotline">📞</a>
   </div>
 
   <footer>
     <div class="footer-grid">
-      <div class="footer-col"><h4>HY CHAY</h4><p>Đơn vị chủ quản: <strong>CTY BẢO ANH LÂM</strong></p><p>MST: <strong>3401289271</strong> | Đ/c: <strong>280 Trần Hưng Đạo, P. Phan Thiết</strong></p></div>
-      <div class="footer-col"><h4>GIỜ MỞ CỬA</h4><p><strong>06:30 - 20:15</strong> (Tất cả các ngày)</p></div>
-      <div class="footer-col"><h4>LIÊN HỆ</h4><p>Hotline / Zalo: <a href="tel:0903242400" style="color:var(--accent); font-weight:bold;">0903.242.400</a></p></div>
+      <div class="footer-col">
+        <h4>HY CHAY</h4>
+        <p>Đơn vị chủ quản: <strong>CÔNG TY TNHH TMDV VÀ SẢN XUẤT BẢO ANH LÂM</strong></p>
+        <p>MST: <strong>3401289271</strong> | Đ/c: <strong>280 Trần Hưng Đạo, P. Phan Thiết, T. Lâm Đồng</strong></p>
+      </div>
+      <div class="footer-col">
+        <h4>GIỜ MỞ CỬA</h4>
+        <p><strong>06:30 - 20:15</strong> (Tất cả các ngày trong tuần)</p>
+      </div>
+      <div class="footer-col">
+        <h4>LIÊN HỆ</h4>
+        <p>Hotline / Zalo: <a href="tel:0903242400" style="color:var(--accent); font-weight:bold;">0903.242.400</a></p>
+      </div>
     </div>
     <div class="footer-bottom">© 2026 HY CHAY - BẢO ANH LÂM. All rights reserved.</div>
   </footer>
 
+  <!-- SCRIPT ENGINE FULL TRỌN BỘ -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, get, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, push, onValue, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = { apiKey: "AIzaSyB7CH4HUqEozclN38P_iGtSFzDB_w7sOUk", authDomain: "hy-chay.firebaseapp.com", projectId: "hy-chay", storageBucket: "hy-chay.firebasestorage.app", messagingSenderId: "215026977682", appId: "1:215026977682:web:52b136c7f09a62cc488f4b" };
     const app = initializeApp(firebaseConfig);
@@ -376,10 +447,10 @@
     const tableParam = urlParams.get('ban') || urlParams.get('table');
 
     let bankConfig = { bankId: "MB", accountNo: "0903242400", accountName: "HOANG HUYNH HUY BAO" };
-    let menuCustomCache = {}; let cart = {}; let calculatedKm = 2.0; let shippingFee = 14000; let birthdayDiscountAmt = 0; let currentFilterCat = 'all';
+    let menuCustomCache = {}; let cart = {}; let calculatedKm = 2.0; let shippingFee = 14000; let birthdayDiscountAmt = 0; let currentFilterCat = 'all'; let isStoreOpen = true;
 
+    // DATA MÓN (70+ MÓN KHÔNG RÚT GỌN)
     const FEATURED_IDS = ["bunchagio", "banhcanh", "hoanhthanhmi", "miquang", "comga", "xoi", "nomhoachuoi", "mispaghetti"];
-    
     const ALL_MENU_DATA = [
       { id: "bunmoc", name: "Bún Mọc Chay", defaultPrice: 30000, cat: "bun", catName: "Món Bún", defaultImg: "menu 1.jpg" },
       { id: "bunthai", name: "Bún Thái Chay", defaultPrice: 35000, cat: "bun", catName: "Món Bún", defaultImg: "menu 1.jpg" },
@@ -413,31 +484,31 @@
       { id: "banhhoi", name: "Bánh Hỏi Chay", defaultPrice: 30000, cat: "com_kho", catName: "Cơm & Khô", defaultImg: "menu 1.jpg" },
       { id: "bunchagio", name: "Bún Chả Giò Chay", defaultPrice: 35000, cat: "com_kho", catName: "Cơm & Khô", defaultImg: "BunChaGio.png", isHot: true },
       { id: "bunmamnem", name: "Bún Mắm Nêm Chay", defaultPrice: 30000, cat: "com_kho", catName: "Cơm & Khô", defaultImg: "menu 1.jpg" },
-      { id: "chagiochien", name: "Chả Giò Chiên Giòn", defaultPrice: 60000, cat: "chien_dacbiet", catName: "Đặc Biệt", defaultImg: "combo 7 mon chay.png" },
-      { id: "baonguchienxu", name: "Bào Ngư Chiên Xù", defaultPrice: 70000, cat: "chien_dacbiet", catName: "Đặc Biệt", defaultImg: "menu 1.jpg" },
-      { id: "khoaitaychien", name: "Khoai Tây Chiên", defaultPrice: 40000, cat: "chien_dacbiet", catName: "Đặc Biệt", defaultImg: "menu 1.jpg" },
-      { id: "phomaivienchien", name: "Phô Mai Viên Chiên", defaultPrice: 70000, cat: "chien_dacbiet", catName: "Đặc Biệt", defaultImg: "menu 1.jpg" },
-      { id: "hoanhthanhchien", name: "Hoành Thánh Chiên Giòn", defaultPrice: 60000, cat: "chien_dacbiet", catName: "Đặc Biệt", defaultImg: "menu 1.jpg" },
-      { id: "dauhuchien", name: "Đậu Hũ Chiên Giòn", defaultPrice: 40000, cat: "chien_dacbiet", catName: "Đặc Biệt", defaultImg: "menu 1.jpg" },
-      { id: "namcuonthinh", name: "Nấm Cuộn Thính", defaultPrice: 70000, cat: "chien_dacbiet", catName: "Đặc Biệt", defaultImg: "menu 1.jpg" },
-      { id: "namxucbanhda", name: "Nấm Xúc Bánh Đa", defaultPrice: 70000, cat: "chien_dacbiet", catName: "Đặc Biệt", defaultImg: "menu 1.jpg" },
-      { id: "nomhoachuoi", name: "Nộm Hoa Chuối Tri Kỷ", defaultPrice: 70000, cat: "chien_dacbiet", catName: "Đặc Biệt", defaultImg: "Nom Hoa Chuoi.png" },
-      { id: "boluclacbanhmi", name: "Bò Lúc Lắc - Bánh Mì", defaultPrice: 60000, cat: "chien_dacbiet", catName: "Đặc Biệt", defaultImg: "menu 1.jpg" },
-      { id: "boluclackhoaitay", name: "Bò Lúc Lắc - Khoai Tây", defaultPrice: 70000, cat: "chien_dacbiet", catName: "Đặc Biệt", defaultImg: "menu 1.jpg" },
+      { id: "chagiochien", name: "Chả Giò Chiên Giòn", defaultPrice: 60000, cat: "chien_dacbiet", catName: "Chiên & Đặc Biệt", defaultImg: "combo 7 mon chay.png" },
+      { id: "baonguchienxu", name: "Bào Ngư Chiên Xù", defaultPrice: 70000, cat: "chien_dacbiet", catName: "Chiên & Đặc Biệt", defaultImg: "menu 1.jpg" },
+      { id: "khoaitaychien", name: "Khoai Tây Chiên", defaultPrice: 40000, cat: "chien_dacbiet", catName: "Chiên & Đặc Biệt", defaultImg: "menu 1.jpg" },
+      { id: "phomaivienchien", name: "Phô Mai Viên Chiên", defaultPrice: 70000, cat: "chien_dacbiet", catName: "Chiên & Đặc Biệt", defaultImg: "menu 1.jpg" },
+      { id: "hoanhthanhchien", name: "Hoành Thánh Chiên Giòn", defaultPrice: 60000, cat: "chien_dacbiet", catName: "Chiên & Đặc Biệt", defaultImg: "menu 1.jpg" },
+      { id: "dauhuchien", name: "Đậu Hũ Chiên Giòn", defaultPrice: 40000, cat: "chien_dacbiet", catName: "Chiên & Đặc Biệt", defaultImg: "menu 1.jpg" },
+      { id: "namcuonthinh", name: "Nấm Cuộn Thính", defaultPrice: 70000, cat: "chien_dacbiet", catName: "Chiên & Đặc Biệt", defaultImg: "menu 1.jpg" },
+      { id: "namxucbanhda", name: "Nấm Xúc Bánh Đa", defaultPrice: 70000, cat: "chien_dacbiet", catName: "Chiên & Đặc Biệt", defaultImg: "menu 1.jpg" },
+      { id: "nomhoachuoi", name: "Nộm Hoa Chuối Tri Kỷ", defaultPrice: 70000, cat: "chien_dacbiet", catName: "Chiên & Đặc Biệt", defaultImg: "Nom Hoa Chuoi.png" },
+      { id: "boluclacbanhmi", name: "Bò Lúc Lắc - Bánh Mì", defaultPrice: 60000, cat: "chien_dacbiet", catName: "Chiên & Đặc Biệt", defaultImg: "menu 1.jpg" },
+      { id: "boluclackhoaitay", name: "Bò Lúc Lắc - Khoai Tây", defaultPrice: 70000, cat: "chien_dacbiet", catName: "Chiên & Đặc Biệt", defaultImg: "menu 1.jpg" },
       { id: "lauthai", name: "Lẩu Thái Chay (Nồi Lớn)", defaultPrice: 230000, cat: "lau", catName: "Lẩu Chay", defaultImg: "menu 1.jpg" },
       { id: "lauchao", name: "Lẩu Chao Chay (Nồi Lớn)", defaultPrice: 230000, cat: "lau", catName: "Lẩu Chay", defaultImg: "menu 1.jpg" },
       { id: "chanamhuong", name: "Chả Nấm Hương (Đòn)", defaultPrice: 65000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
       { id: "charaucunam", name: "Chả Rau Củ Nấm (Đòn)", defaultPrice: 70000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
       { id: "chamitnon", name: "Chả Mít Non", defaultPrice: 75000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
       { id: "channamhuong", name: "Chân Nấm Hương Thượng Hạng", defaultPrice: 120000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
-      { id: "gahukychuachien", name: "Gà Hũ Ky Cuộn Nấm", defaultPrice: 75000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
-      { id: "chagiochuachien", name: "Chả Giò Hộp", defaultPrice: 60000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
+      { id: "gahukychuachien", name: "Gà Hũ Ky Cuộn Nấm (Chưa Chiên)", defaultPrice: 75000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
+      { id: "chagiochuachien", name: "Chả Giò (Hộp)", defaultPrice: 60000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
       { id: "patehatdieu", name: "Pate Hạt Điều Béo Bùi", defaultPrice: 75000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
       { id: "chabongnamhuonganlien", name: "Chà Bông Nấm Hương (Hũ)", defaultPrice: 120000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
       { id: "chabongsuonanlien", name: "Chà Bông Sườn", defaultPrice: 70000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
       { id: "rongbiensayanlien", name: "Rong Biển Sấy Giòn", defaultPrice: 40000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
       { id: "suonsaymeanlien", name: "Sườn Sấy Mè Giòn", defaultPrice: 70000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
-      { id: "suonrimcayanlien", name: "Sườn Rim Cay", defaultPrice: 70000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
+      { id: "suonrimcayanlien", name: "Sườn Rim Cay Đậm Vị", defaultPrice: 70000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
       { id: "cafeda", name: "Cà Phê Đen Đá", defaultPrice: 17000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
       { id: "cafesua", name: "Cà Phê Sữa Đá", defaultPrice: 19000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
       { id: "bacxiu", name: "Bạc Xỉu BAL", defaultPrice: 20000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
@@ -450,12 +521,26 @@
       { id: "epcam", name: "Nước Ép Cam Tươi", defaultPrice: 20000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
       { id: "yaourtda", name: "Yaourt Đá", defaultPrice: 20000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
       { id: "sodadau", name: "Soda Dâu Tươi", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
-      { id: "nuocmia", name: "Nước Mía Sạch", defaultPrice: 10000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" }
+      { id: "nuocmia", name: "Nước Mía Sạch", defaultPrice: 10000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "nuocngot", name: "Nước Ngọt Các Loại", defaultPrice: 15000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" }
     ];
 
+    // AUTO-SAVE CART
     function saveCartLocal() { localStorage.setItem('hyChayCart', JSON.stringify(cart)); }
     function loadCartLocal() { const c = localStorage.getItem('hyChayCart'); if(c) { cart = JSON.parse(c); updateCartUI(); } }
 
+    // INSTALL PWA (APP)
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; document.getElementById('pwaInstallBanner').style.display = 'flex'; });
+    document.getElementById('btnTriggerInstall').addEventListener('click', async () => { if (deferredPrompt) { deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; document.getElementById('pwaInstallBanner').style.display = 'none'; } });
+    window.closeInstallBanner = () => { document.getElementById('pwaInstallBanner').style.display = 'none'; };
+
+    const isIos = () => /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+    const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
+    if (isIos() && !isInStandaloneMode()) { setTimeout(() => { document.getElementById('iosGuideModal').style.display = 'block'; }, 1500); }
+    window.closeIosGuide = () => { document.getElementById('iosGuideModal').style.display = 'none'; };
+
+    // LẮNG NGHE DỮ LIỆU FIREBASE (VIETQR VÀ MENU ADMIN CẬP NHẬT TỰ ĐỘNG)
     onValue(ref(db, 'restaurant_config/bank'), (s) => { if(s.val()) bankConfig = s.val(); });
 
     onValue(ref(db, 'menu_customizations'), (snap) => {
@@ -470,20 +555,16 @@
     }
 
     function renderFeaturedDishes() {
-      const el = document.getElementById('featuredDishGrid');
-      let html = '';
+      const el = document.getElementById('featuredDishGrid'); let html = '';
       FEATURED_IDS.forEach(id => {
         const base = ALL_MENU_DATA.find(d => d.id === id); if(!base) return;
         const it = getDishData(base);
         html += `
-          <div class="dish-card ${it.isSoldOut ? 'is-sold-out' : ''} ${it.isHot ? 'is-hot' : ''}">
+          <div class="dish-card ${it.isSoldOut ? 'is-sold-out' : ''} ${it.isHot ? 'is-hot' : ''}" data-dish-id="${it.id}">
             <div class="dish-img-wrap"><span class="hot-badge">🔥 Bán chạy</span><img src="${it.image}" onerror="this.src='Logo nho.png'"><span class="sold-out-badge">Tạm Hết</span></div>
             <div class="dish-body">
               <h3>${it.name}</h3>
-              <div class="dish-footer">
-                <span class="dish-price">${it.price.toLocaleString()}đ</span>
-                <button class="btn-add-cart" ${it.isSoldOut ? 'disabled' : ''} onclick="addToCart('${it.id}', '${it.name}', ${it.price})">${it.isSoldOut ? 'Tạm Hết' : '+ Chọn Món'}</button>
-              </div>
+              <div class="dish-footer"><span class="dish-price">${it.price.toLocaleString()}đ</span><button class="btn-add-cart" ${it.isSoldOut ? 'disabled' : ''} onclick="addToCart('${it.id}', '${it.name}', ${it.price})">${it.isSoldOut ? 'Tạm Hết' : '+ Chọn Món'}</button></div>
             </div>
           </div>`;
       });
@@ -491,22 +572,15 @@
     }
 
     function renderFullMenu() {
-      const el = document.getElementById('fullMenuContainer');
-      let html = '';
+      const el = document.getElementById('fullMenuContainer'); let html = '';
       ALL_MENU_DATA.forEach(dish => {
         if (currentFilterCat !== 'all' && dish.cat !== currentFilterCat) return;
         const it = getDishData(dish);
         html += `
           <div class="menu-item-row ${it.isSoldOut ? 'is-sold-out' : ''}">
             <div class="item-thumb"><img src="${it.image}" onerror="this.src='Logo nho.png'"></div>
-            <div class="item-meta">
-              <span class="item-cat-label">${it.catName}</span>
-              <h4>${it.name} ${it.isHot ? '<span class="hot-label-small">🔥</span>' : ''}</h4>
-              <span class="item-price-tag">${it.price.toLocaleString()}đ</span>
-            </div>
-            <button class="btn-quick-add" ${it.isSoldOut ? 'disabled' : ''} onclick="addToCart('${it.id}', '${it.name}', ${it.price})">
-              ${it.isSoldOut ? 'Tạm Hết' : '+ Chọn Món'}
-            </button>
+            <div class="item-meta"><span class="item-cat-label">${it.catName}</span><h4>${it.name} ${it.isHot ? '<span class="hot-label-small">🔥</span>' : ''}</h4><span class="item-price-tag">${it.price.toLocaleString()}đ</span></div>
+            <button class="btn-quick-add" ${it.isSoldOut ? 'disabled' : ''} onclick="addToCart('${it.id}', '${it.name}', ${it.price})">${it.isSoldOut ? 'Tạm Hết' : '+ Chọn Món'}</button>
           </div>`;
       });
       el.innerHTML = html;
@@ -527,15 +601,13 @@
     };
 
     function updateCartUI() {
-      let c = 0, t = 0;
-      for (let k in cart) { c += cart[k].qty; t += cart[k].price * cart[k].qty; }
-      document.getElementById('cartCount').innerText = c;
-      document.getElementById('cartTotal').innerText = t.toLocaleString() + 'đ';
+      let c = 0, t = 0; for (let k in cart) { c += cart[k].qty; t += cart[k].price * cart[k].qty; }
+      document.getElementById('cartCount').innerText = c; document.getElementById('cartTotal').innerText = t.toLocaleString() + 'đ';
       const b = document.getElementById('cartBar');
       if (c > 0) b.classList.add('active'); else { b.classList.remove('active'); closeCheckoutModal(); }
     }
 
-    // TÀI KHOẢN KHÁCH HÀNG (LOYALTY)
+    // TÀI KHOẢN (LOYALTY) AUTO-FILL
     window.openAccountModal = function() {
       const userStr = localStorage.getItem('hyChayUserProfile');
       if (userStr) {
@@ -551,8 +623,7 @@
     window.closeAccountModal = () => document.getElementById('accountModal').classList.remove('active');
 
     window.saveUserProfile = function() {
-      const name = document.getElementById('loginName').value.trim(); const phone = document.getElementById('loginPhone').value.trim();
-      const birthday = document.getElementById('loginBirthday').value; const address = document.getElementById('loginAddress').value.trim();
+      const name = document.getElementById('loginName').value.trim(), phone = document.getElementById('loginPhone').value.trim(), birthday = document.getElementById('loginBirthday').value, address = document.getElementById('loginAddress').value.trim();
       if (!name || !phone) return alert("Vui lòng nhập Họ Tên và Số điện thoại!");
       localStorage.setItem('hyChayUserProfile', JSON.stringify({ name, phone, address, birthday }));
       alert("✅ Lưu hồ sơ thành công!"); openAccountModal();
@@ -566,12 +637,12 @@
           if (orders[id].phone === phone) {
             if (orders[id].status === 'Đã hoàn tất') totalSpent += (orders[id].subtotal || 0);
             let itemsStr = []; for (let k in orders[id].items) itemsStr.push(`${orders[id].items[k].qty}x ${orders[id].items[k].name}`);
-            html += `<div class="history-card"><div class="history-header"><span>${new Date(orders[id].createdAt).toLocaleDateString('vi-VN')}</span><span>${orders[id].status}</span></div><p><b>Món:</b> ${itemsStr.join(', ')}</p><button class="btn-reorder" onclick='reorderPastOrder(${JSON.stringify(orders[id].items)})'>🍲 Đặt Lại Đơn Này</button></div>`;
+            html += `<div class="history-card"><div class="history-header"><span>${new Date(orders[id].createdAt).toLocaleDateString('vi-VN')}</span><span>${orders[id].status}</span></div><p style="color:#334155; margin-bottom:6px;"><b>Món:</b> ${itemsStr.join(', ')}</p><button class="btn-reorder" onclick='reorderPastOrder(${JSON.stringify(orders[id].items)})'>🍲 Đặt Lại Đơn Này</button></div>`;
           }
         });
         const points = Math.floor(totalSpent / 10000);
         document.getElementById('profPoints').innerText = points.toLocaleString();
-        document.getElementById('profRank').innerText = points >= 200 ? "Hạng Vàng ⭐" : (points >= 50 ? "Hạng Bạc 🥈" : "Thành Viên");
+        document.getElementById('profRank').innerText = points >= 200 ? "Hạng Vàng ⭐" : (points >= 50 ? "Hạng Bạc 🥈" : "Thành Viên Mới");
         document.getElementById('orderHistoryList').innerHTML = html || '<p style="text-align:center;">Bạn chưa có đơn hàng nào.</p>';
       });
     }
@@ -582,15 +653,30 @@
       updateCartUI(); saveCartLocal(); closeAccountModal(); openCheckoutModal();
     };
 
-    // DINE-IN SERVICE
+    // DINE-IN SERVICE (GỌI PHỤC VỤ KHI QUÉT MÃ BÀN)
     if (tableParam) { const bar = document.getElementById('dineInToolbar'); if (bar) bar.classList.add('active'); }
     window.callService = function(type) {
-      const msg = type === 'bill' ? `💳 Đã gửi yêu cầu Tính Tiền.` : `🔔 Đã Gọi Phục Vụ.`;
+      const msg = type === 'bill' ? `💳 Bàn ${tableParam} yêu cầu Tính Tiền.` : `🔔 Bàn ${tableParam} đã Gọi Phục Vụ.`;
       push(ref(db, 'service_calls'), { table: `Bàn ${tableParam}`, type: type, timestamp: new Date().toISOString() }).then(() => alert(msg));
     };
 
+    // CHECKOUT MODAL & TÍNH SHIP & VIETQR
+    function checkOperatingHours() {
+      const now = new Date(); const mins = now.getHours() * 60 + now.getMinutes(); const openTime = 6 * 60 + 30; const closeTime = 20 * 60 + 15;
+      const st = document.getElementById('openStatusTag'), btn = document.getElementById('btnSubmitOrder');
+      if (mins < openTime || mins > closeTime) {
+        isStoreOpen = false;
+        if (st) { st.className = "tag-open-status tag-closed"; st.innerText = "⛔ Quán đóng cửa (Mở: 06:30 - 20:15)"; }
+        if (btn) { btn.disabled = true; btn.innerText = "QUÁN ĐÃ ĐÓNG CỬA"; btn.style.background = "#9ca3af"; }
+      } else {
+        isStoreOpen = true;
+        if (st) { st.className = "tag-open-status tag-open"; st.innerText = tableParam ? `🍽️ Bàn ${tableParam}` : "🟢 Quán đang mở cửa nhận đơn"; }
+        if (btn) { btn.disabled = false; btn.innerText = tableParam ? `XÁC NHẬN GỌI MÓN (BÀN ${tableParam})` : "XÁC NHẬN GỬI ĐƠN"; btn.style.background = "var(--accent)"; }
+      }
+    }
+
     window.openCheckoutModal = function() {
-      renderCartItems(); updateCalc();
+      checkOperatingHours(); renderCartItems(); updateCalc();
       const userStr = localStorage.getItem('hyChayUserProfile');
       if (userStr && !tableParam) {
         const u = JSON.parse(userStr);
@@ -610,13 +696,14 @@
       let h = '';
       for (let k in cart) {
         const it = cart[k]; const sub = it.price * it.qty;
-        h += `<div class="cart-item-row"><span><b>${it.name}</b></span><div><button type="button" onclick="updateCartQty('${it.name}', -1)">-</button><span style="margin:0 6px;">${it.qty}</span><button type="button" onclick="updateCartQty('${it.name}', 1)">+</button><b style="margin-left:10px;">${sub.toLocaleString()}đ</b></div></div>`;
+        h += `<div class="cart-item-row"><span><b style="color:var(--primary);">${it.name}</b></span><div style="display:flex; align-items:center;"><button type="button" onclick="updateCartQty('${it.name}', -1)">-</button><span style="margin:0 10px; font-weight:bold;">${it.qty}</span><button type="button" onclick="updateCartQty('${it.name}', 1)">+</button><b style="margin-left:14px; width:70px; text-align:right;">${sub.toLocaleString()}đ</b></div></div>`;
       }
       document.getElementById('cartItemsList').innerHTML = h; updateCalc();
     }
 
     function updateCalc() {
       let sub = 0; for (let k in cart) sub += cart[k].price * cart[k].qty;
+      
       birthdayDiscountAmt = 0;
       const uStr = localStorage.getItem('hyChayUserProfile');
       if (uStr && sub > 0) {
@@ -634,7 +721,10 @@
 
       if (tableParam) shippingFee = 0;
       else {
-        shippingFee = calculatedKm <= 2 ? 14000 : Math.round((16000 + (calculatedKm - 2) * 5000) * 0.9 / 1000) * 1000;
+        const h = new Date().getHours(), m = new Date().getMinutes(), mins = h*60+m;
+        const peak = (mins >= 11*60 && mins <= 13*60) || (mins >= 17*60+30 && mins <= 19*60+30);
+        document.getElementById('shipTimeSlotText').innerHTML = peak ? '<span style="color:#ea580c; font-weight:bold;">⚡ Cao điểm</span>' : 'Tiêu chuẩn (Rẻ hơn 10% sàn)';
+        shippingFee = calculatedKm <= 2 ? (peak?19000:14000) : Math.round(((peak?21000:16000) + (calculatedKm - 2) * 5000) * 0.9 / 1000) * 1000;
         document.getElementById('freeshipBadge').style.display = sub >= 200000 ? 'block' : 'none';
         if (sub >= 200000) shippingFee = Math.max(0, shippingFee - 28000);
       }
@@ -643,23 +733,22 @@
       document.getElementById('subtotalText').innerText = sub.toLocaleString() + 'đ';
       document.getElementById('shipFeeText').innerText = shippingFee === 0 ? "0đ" : shippingFee.toLocaleString() + 'đ';
       document.getElementById('grandTotalText').innerText = finalTotal.toLocaleString() + 'đ';
-      updateVietQR(finalTotal);
-    }
-
-    window.togglePaymentMethod = (v) => document.getElementById('vietqrBox').style.display = v === 'VIETQR' ? 'block' : 'none';
-    function updateVietQR(t) {
-      if (t <= 0) return; const p = document.getElementById('cusPhone').value || 'HYCHAY';
-      document.getElementById('vietqrImg').src = `https://img.vietqr.io/image/${bankConfig.bankId}-${bankConfig.accountNo}-compact2.png?amount=${t}&addInfo=HC%20${p}&accountName=${encodeURIComponent(bankConfig.accountName)}`;
+      
+      const p = document.getElementById('cusPhone').value || 'HYCHAY';
+      document.getElementById('vietqrImg').src = `https://img.vietqr.io/image/${bankConfig.bankId}-${bankConfig.accountNo}-compact2.png?amount=${finalTotal}&addInfo=HC%20${p}&accountName=${encodeURIComponent(bankConfig.accountName)}`;
       document.getElementById('qrAccNo').innerText = bankConfig.accountNo; document.getElementById('qrBank').innerText = bankConfig.bankId; document.getElementById('qrAccName').innerText = bankConfig.accountName;
     }
 
+    window.togglePaymentMethod = (v) => document.getElementById('vietqrBox').style.display = v === 'VIETQR' ? 'block' : 'none';
+
     window.getLocationByGPS = function() {
+      if (!navigator.geolocation) return alert("Không hỗ trợ GPS.");
       navigator.geolocation.getCurrentPosition(p => {
         const R = 6371, dLat = (p.coords.latitude-STORE_LAT)*Math.PI/180, dLon = (p.coords.longitude-STORE_LON)*Math.PI/180;
         const a = Math.sin(dLat/2)**2 + Math.cos(STORE_LAT*Math.PI/180)*Math.cos(p.coords.latitude*Math.PI/180)*Math.sin(dLon/2)**2;
         calculatedKm = Math.max(1.0, Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)) * 1.25 * 10) / 10);
         document.getElementById('shipDistanceText').innerText = `Khoảng ${calculatedKm} km`; updateCalc();
-      });
+      }, () => alert("Lỗi GPS, quán tính theo địa chỉ gõ."));
     };
 
     window.calcDistance = function(addr) {
@@ -676,10 +765,10 @@
     };
 
     window.submitOrder = function(e) {
-      e.preventDefault();
+      e.preventDefault(); checkOperatingHours(); if (!isStoreOpen) return alert("Quán đã đóng cửa!");
       let sub = 0; for (let k in cart) sub += cart[k].price * cart[k].qty; if (sub === 0) return;
 
-      const name = document.getElementById('cusName').value; const phone = document.getElementById('cusPhone').value || (tableParam ? 'Ăn tại chỗ' : '');
+      const name = document.getElementById('cusName').value; const phone = document.getElementById('cusPhone').value || (tableParam ? 'Tại quán' : '');
       const addr = tableParam ? `Ăn tại quán (Bàn ${tableParam})` : document.getElementById('cusAddress').value;
 
       if (!tableParam && phone && name && !localStorage.getItem('hyChayUserProfile')) { localStorage.setItem('hyChayUserProfile', JSON.stringify({ name, phone, address: addr, birthday: '' })); }
@@ -689,7 +778,7 @@
         customerName: name, phone: phone, address: addr, note: document.getElementById('cusNote').value, items: cart,
         subtotal: sub, shippingFee: tableParam ? 0 : shippingFee, discount: birthdayDiscountAmt, grandTotal: sub - birthdayDiscountAmt + (tableParam ? 0 : shippingFee),
         paymentMethod: document.getElementById('paymentMethodSelect') ? document.getElementById('paymentMethodSelect').value : 'COD',
-        status: tableParam ? 'Đang chế biến' : 'Chờ xác nhận', createdAt: new Date().toISOString()
+        status: tableParam ? 'Đang chế biến' : 'Chờ xác nhận', createdAt: new Date().toISOString(), archived: false
       };
 
       push(ref(db, 'orders'), orderData).then((nRef) => {
@@ -699,6 +788,7 @@
       });
     };
 
+    // THEO DÕI HỦY ĐƠN ĐỂ CHĂM SÓC KHÁCH HÀNG
     function listenOrderCancellation(id) {
       onValue(ref(db, 'orders/' + id), (snap) => {
         const o = snap.val();
@@ -715,6 +805,7 @@
 
     const sid = localStorage.getItem('last_hy_chay_order_id'); if (sid) listenOrderCancellation(sid);
     loadCartLocal();
+    renderFeaturedDishes(); renderFullMenu(); setInterval(checkOperatingHours, 60000);
   </script>
 </body>
 </html>
