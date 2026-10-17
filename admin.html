@@ -153,7 +153,7 @@
       <h2 style="color:var(--primary); margin-bottom:5px;">HỆ THỐNG QUẢN TRỊ</h2>
       <p style="font-size:0.85rem; color:#64748b;">Vui lòng nhập tên ca trực để lưu vết thao tác.</p>
       <input type="text" id="managerNameInput" placeholder="Ví dụ: Anh Bảo, Ca Sáng - Thảo..." required>
-      <button id="btnLoginManager">BẮT ĐẦU CA LÀM VIỆC</button>
+      <button onclick="dangNhapQuanLy()">BẮT ĐẦU CA LÀM VIỆC</button>
     </div>
   </div>
 
@@ -383,16 +383,23 @@
 
     setInterval(() => { document.getElementById('liveClock').innerText = new Date().toLocaleTimeString('vi-VN'); }, 1000);
 
-    // ĐĂNG NHẬP XÁC THỰC QUẢN LÝ
-    // SỰ KIỆN ĐĂNG NHẬP QUẢN LÝ (MODULE SAFE)
-    document.getElementById('btnLoginManager').addEventListener('click', () => {
-      const n = document.getElementById('managerNameInput').value.trim();
-      if (!n) return alert("Vui lòng nhập tên người trực ca!");
+ // HÀM ĐĂNG NHẬP TOÀN CỤC (CHẮC CHẮN GỌI ĐƯỢC TỪ HTML)
+    window.dangNhapQuanLy = function() {
+      const inputEl = document.getElementById('managerNameInput');
+      if (!inputEl) {
+        alert("Không tìm thấy ô nhập tên!");
+        return;
+      }
+      const n = inputEl.value.trim();
+      if (!n) {
+        alert("Vui lòng nhập tên người trực ca!");
+        return;
+      }
       currentManager = n;
       document.getElementById('activeManagerDisplay').innerText = "👨‍💼 Quản lý: " + currentManager;
       document.getElementById('managerAuthOverlay').style.display = 'none';
       document.getElementById('mainDashboard').style.display = 'block';
-    });
+    };
 
     // BẬT GIỌNG ĐỌC AI
     window.toggleAudioEngine = function() {
