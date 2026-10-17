@@ -275,7 +275,7 @@
       <div class="report-card">
         <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px; margin-bottom:16px;">
           <h3 style="color:var(--primary); font-size:1.05rem;">CÔNG TY TNHH TMDV VÀ SẢN XUẤT BẢO ANH LÂM</h3>
-          <p style="font-size:0.85rem; color:#166534;">MST: <b>3401289271</b> | Đ/c: 280 Trần Hưng Đạo, P. Phan Thiết<br><i>Bóc tách rõ Doanh thu đồ ăn uống chịu thuế và Khoản thu hộ cước ship (Không chịu thuế).</i></p>
+          <p style="font-size:0.85rem; color:#166534;">MST: <b>3401289271</b> | Đ/c: 280 Trần Hưng Đạo, P. Phan Thiết<br><i>Bóc tách rõ Doanh thu theo mã ngành (5610, 5630) và Khoản thu hộ cước ship (Không chịu thuế).</i></p>
         </div>
 
         <div class="report-filter-bar">
@@ -294,9 +294,9 @@
           <button onclick="exportTaxReportCSV()" style="background:#059669; color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:700;">📥 Xuất Bảng Kê Excel</button>
         </div>
 
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:16px;">
-          <div class="rep-box"><span>DOANH THU MÓN (CHỊU THUẾ)</span><h3 id="repTaxableRev" style="color:var(--primary);">0đ</h3></div>
-          <div class="rep-box"><span>TIỀN TẠI BÀN</span><h3 id="repDineInRev" style="color:#d97706;">0đ</h3></div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-bottom:16px;">
+          <div class="rep-box"><span>DOANH THU 5610 (HY CHAY)</span><h3 id="repTaxable5610" style="color:var(--primary);">0đ</h3></div>
+          <div class="rep-box"><span>DOANH THU 5630 (BAL'S HOUSE)</span><h3 id="repTaxable5630" style="color:#d97706;">0đ</h3></div>
           <div class="rep-box"><span>TIỀN SHIP THU HỘ</span><h3 id="repDeliveryRev" style="color:#2563eb;">0đ</h3></div>
           <div class="rep-box"><span>TỔNG ĐƠN ĐÃ XONG</span><h3 id="repDoneCount" style="color:#16a34a;">0 đơn</h3></div>
         </div>
@@ -304,7 +304,7 @@
         <!-- BẢNG 1: DOANH THU TỪNG NGÀY -->
         <h3 style="font-size:1.05rem; color:var(--primary); margin-bottom:8px;">1. BẢNG DOANH THU THEO TỪNG NGÀY TRONG KỲ</h3>
         <table class="report-table">
-          <thead><tr style="background:#f1f5f9; text-align:left;"><th>Ngày Thực Hiện</th><th style="text-align:center;">Số Đơn</th><th style="text-align:right; color:#1e5e3a;">Doanh Thu Món</th><th style="text-align:right; color:#2563eb;">Tiền Ship Hộ</th><th style="text-align:right;">Tổng Thu Thực Tế</th></tr></thead>
+          <thead><tr style="background:#f1f5f9; text-align:left;"><th>Ngày Thực Hiện</th><th style="text-align:center;">Số Đơn</th><th style="text-align:right; color:#1e5e3a;">Doanh Thu 5610 (Chay)</th><th style="text-align:right; color:#d97706;">Doanh Thu 5630 (Đồ Uống)</th><th style="text-align:right; color:#2563eb;">Tiền Ship Hộ</th><th style="text-align:right;">Tổng Thu Thực Tế</th></tr></thead>
           <tbody id="repDailyBreakdownBody"></tbody>
         </table>
 
@@ -357,6 +357,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, onValue, update, remove, set, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    // TODO: Khi Giám đốc cấu hình xong, sẽ import thêm getStorage, refStorage, uploadString, getDownloadURL tại đây.
 
     const firebaseConfig = { apiKey: "AIzaSyB7CH4HUqEozclN38P_iGtSFzDB_w7sOUk", authDomain: "hy-chay.firebaseapp.com", projectId: "hy-chay", storageBucket: "hy-chay.firebasestorage.app", messagingSenderId: "215026977682", appId: "1:215026977682:web:52b136c7f09a62cc488f4b" };
     const app = initializeApp(firebaseConfig);
@@ -513,6 +514,7 @@
       tbody.innerHTML = html;
     };
 
+    // TODO: Sẽ thay thế hàm này bằng Firebase Storage sau khi cấu hình để tránh nặng Database
     window.uploadDishImageDirect = function(input, dishId) {
       const file = input.files[0]; if (!file) return; const reader = new FileReader();
       reader.onload = (e) => {
@@ -520,7 +522,7 @@
         img.onload = () => {
           const cv = document.createElement('canvas'); let w = img.width, h = img.height; if (w > 380) { h = Math.round(h * 380 / w); w = 380; }
           cv.width = w; cv.height = h; cv.getContext('2d').drawImage(img, 0, 0, w, h);
-          update(ref(db, `menu_customizations/${dishId}`), { image: cv.toDataURL('image/jpeg', 0.82), updatedAt: new Date().toISOString() }).then(() => alert("✅ Đã cập nhật ảnh món thành công!"));
+          update(ref(db, `menu_customizations/${dishId}`), { image: cv.toDataURL('image/jpeg', 0.82), updatedAt: new Date().toISOString() }).then(() => alert("✅ Đã cập nhật ảnh tạm thời (Base64) thành công!"));
         };
         img.src = e.target.result;
       };
@@ -652,8 +654,13 @@
       renderShiftReport();
     };
 
+    // ==========================================
+    // NÂNG CẤP KẾ TOÁN: Bóc tách mã ngành 5610 và 5630
+    // ==========================================
     function getTaxReportData() {
-      const mode = document.getElementById('filterMode').value; let labelPeriod = ""; let totalTaxable = 0, totalShip = 0, count = 0, daily = {}, dishStats = {}, rawList = [];
+      const mode = document.getElementById('filterMode').value; let labelPeriod = ""; 
+      let total5610 = 0, total5630 = 0, totalShip = 0, count = 0, daily = {}, dishStats = {}, rawList = [];
+      
       for (let id in ordersCache) {
         const o = ordersCache[id]; if (o.status !== 'Đã hoàn tất') continue;
         const dObj = new Date(o.createdAt), y = dObj.getFullYear(), m = dObj.getMonth() + 1, dStr = dObj.toISOString().split('T')[0];
@@ -663,33 +670,51 @@
         else if (mode === 'day') { labelPeriod = `Ngày ${document.getElementById('filterDayInput').value}`; if (dStr === document.getElementById('filterDayInput').value) match = true; }
 
         if (match) {
-          count++; let sub = o.subtotal || 0, ship = o.shippingFee || 0; totalTaxable += sub; totalShip += ship;
-          if (!daily[dStr]) daily[dStr] = { count: 0, taxable: 0, ship: 0 };
-          daily[dStr].count++; daily[dStr].taxable += sub; daily[dStr].ship += ship;
+          count++; let ship = o.shippingFee || 0; totalShip += ship;
+          if (!daily[dStr]) daily[dStr] = { count: 0, tax5610: 0, tax5630: 0, ship: 0 };
+          daily[dStr].count++; daily[dStr].ship += ship;
+          
+          let orderTotal5610 = 0, orderTotal5630 = 0;
           
           for (let k in o.items) {
-            const it = o.items[k]; if (!dishStats[it.name]) dishStats[it.name] = { qty: 0, total: 0 };
-            dishStats[it.name].qty += it.qty; dishStats[it.name].total += (it.price * it.qty);
+            const it = o.items[k]; 
+            const lineTotal = it.price * it.qty;
+            const dishBase = ALL_MENU_DATA.find(d => d.name === it.name);
+            
+            // Nếu thuộc nhóm "Đồ Uống" -> Mã ngành 5630 (BAL'S HOUSE), còn lại là 5610 (Hy Chay)
+            if (dishBase && dishBase.cat === 'douong') {
+                orderTotal5630 += lineTotal;
+                total5630 += lineTotal;
+                daily[dStr].tax5630 += lineTotal;
+            } else {
+                orderTotal5610 += lineTotal;
+                total5610 += lineTotal;
+                daily[dStr].tax5610 += lineTotal;
+            }
+            
+            if (!dishStats[it.name]) dishStats[it.name] = { qty: 0, total: 0 };
+            dishStats[it.name].qty += it.qty; dishStats[it.name].total += lineTotal;
           }
+          o.calc5610 = orderTotal5610; o.calc5630 = orderTotal5630;
           rawList.push(o);
         }
       }
-      return { labelPeriod, totalTaxable, totalShip, count, daily, dishStats, rawList };
+      return { labelPeriod, total5610, total5630, totalShip, count, daily, dishStats, rawList };
     }
 
     window.renderShiftReport = function() {
       const data = getTaxReportData();
-      document.getElementById('repTaxableRev').innerText = data.totalTaxable.toLocaleString() + 'đ';
-      document.getElementById('repDineInRev').innerText = data.totalTaxable.toLocaleString() + 'đ';
+      document.getElementById('repTaxable5610').innerText = data.total5610.toLocaleString() + 'đ';
+      document.getElementById('repTaxable5630').innerText = data.total5630.toLocaleString() + 'đ';
       document.getElementById('repDeliveryRev').innerText = data.totalShip.toLocaleString() + 'đ';
       document.getElementById('repDoneCount').innerText = data.count + ' đơn';
 
       let dailyHtml = '';
       Object.keys(data.daily).sort().forEach(day => {
         const r = data.daily[day];
-        dailyHtml += `<tr><td style="padding:10px;"><b>${day}</b></td><td style="text-align:center;">${r.count}</td><td style="text-align:right; font-weight:bold; color:#1e5e3a;">${r.taxable.toLocaleString()}đ</td><td style="text-align:right; color:#2563eb;">${r.ship.toLocaleString()}đ</td><td style="text-align:right; font-weight:bold;">${(r.taxable + r.ship).toLocaleString()}đ</td></tr>`;
+        dailyHtml += `<tr><td style="padding:10px;"><b>${day}</b></td><td style="text-align:center;">${r.count}</td><td style="text-align:right; font-weight:bold; color:#1e5e3a;">${r.tax5610.toLocaleString()}đ</td><td style="text-align:right; font-weight:bold; color:#d97706;">${r.tax5630.toLocaleString()}đ</td><td style="text-align:right; color:#2563eb;">${r.ship.toLocaleString()}đ</td><td style="text-align:right; font-weight:bold;">${(r.tax5610 + r.tax5630 + r.ship).toLocaleString()}đ</td></tr>`;
       });
-      document.getElementById('repDailyBreakdownBody').innerHTML = dailyHtml || '<tr><td colspan="5" style="text-align:center; padding:20px;">Không có dữ liệu.</td></tr>';
+      document.getElementById('repDailyBreakdownBody').innerHTML = dailyHtml || '<tr><td colspan="6" style="text-align:center; padding:20px;">Không có dữ liệu.</td></tr>';
 
       let dishHtml = '';
       Object.keys(data.dishStats).forEach(name => {
@@ -701,8 +726,8 @@
 
     window.exportTaxReportCSV = function() {
       const data = getTaxReportData();
-      let csv = "\uFEFFCÔNG TY TNHH TMDV VÀ SẢN XUẤT BẢO ANH LÂM\nMST: 3401289271 - 280 Trần Hưng Đạo, P. Phan Thiết\nBẢNG KÊ DOANH THU THUẾ BÁN LẺ (BÓC TÁCH TIỀN SHIP)\n\nSTT,Mã Đơn,Thời Gian,Loại Hình,Khách Hàng,Doanh Thu Món (Chịu Thuế),Tiền Ship (Ko Tính Thuế),Tổng Thu Thực Tế\n";
-      data.rawList.forEach((o, i) => { csv += `${i+1},#HC-${o.id.substring(o.id.length-5).toUpperCase()},"${new Date(o.createdAt).toLocaleString('vi-VN')}","${o.orderType}","${o.customerName}",${o.subtotal || 0},${o.shippingFee || 0},${(o.subtotal||0) + (o.shippingFee||0)}\n`; });
+      let csv = "\uFEFFCÔNG TY TNHH TMDV VÀ SẢN XUẤT BẢO ANH LÂM\nMST: 3401289271 - 280 Trần Hưng Đạo, P. Phan Thiết\nBẢNG KÊ DOANH THU THUẾ BÁN LẺ (BÓC TÁCH MÃ NGÀNH & TIỀN SHIP)\n\nSTT,Mã Đơn,Thời Gian,Loại Hình,Khách Hàng,Doanh Thu 5610 (Hy Chay),Doanh Thu 5630 (BAL'S HOUSE),Tiền Ship (Ko Tính Thuế),Tổng Thu Thực Tế\n";
+      data.rawList.forEach((o, i) => { csv += `${i+1},#HC-${o.id.substring(o.id.length-5).toUpperCase()},"${new Date(o.createdAt).toLocaleString('vi-VN')}","${o.orderType}","${o.customerName}",${o.calc5610 || 0},${o.calc5630 || 0},${o.shippingFee || 0},${(o.calc5610||0) + (o.calc5630||0) + (o.shippingFee||0)}\n`; });
       const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" })); a.download = `Bang_Ke_Thue_BaoAnhLam.csv`; a.click();
     };
 
@@ -722,8 +747,8 @@
 
     window.printShiftReport = function() {
       const data = getTaxReportData(); let dailyRows = '';
-      for (let d in data.daily) { const r = data.daily[d]; dailyRows += `<tr><td style="padding:4px 0;">${d}</td><td style="text-align:center;">${r.count}</td><td style="text-align:right;">${r.taxable.toLocaleString()}</td></tr>`; }
-      document.getElementById('printArea').innerHTML = `<div style="text-align:center; margin-bottom:8px;"><h2 style="margin:0; font-size:16px;">CTY BẢO ANH LÂM</h2><p style="margin:6px 0; border-top:1px dashed #000; border-bottom:1px dashed #000; padding:4px 0; font-weight:bold; font-size:13px;">BẢNG KẾT CA<br>(${data.labelPeriod})</p></div><p style="margin:2px 0; font-size:11px;"><b>Số đơn:</b> ${data.count} | <b>In lúc:</b> ${new Date().toLocaleTimeString('vi-VN')}</p><div style="border-top:1px dashed #000; border-bottom:1px dashed #000; margin:6px 0; padding:4px 0; font-size:12px;"><div style="display:flex; justify-content:space-between;"><span>Doanh thu tính thuế:</span><b>${data.totalTaxable.toLocaleString()}đ</b></div><div style="display:flex; justify-content:space-between;"><span>Ship thu hộ (Ko thuế):</span><b>${data.totalShip.toLocaleString()}đ</b></div></div><p style="font-weight:bold; margin-top:8px; font-size:12px;">CHI TIẾT TỪNG NGÀY:</p><table style="width:100%; border-collapse:collapse; font-size:11px; margin-top:4px;"><tr style="border-bottom:1px dashed #000;"><th style="text-align:left;">Ngày</th><th>Đơn</th><th style="text-align:right;">Doanh Thu Món</th></tr>${dailyRows || '<tr><td colspan="3" style="text-align:center;">Không có dữ liệu</td></tr>'}</table><div style="margin-top:20px; display:flex; justify-content:space-between; text-align:center; font-size:10px;"><div><b>Kế Toán / Thu Ngân</b><br><br><br>(Ký tên)</div><div><b>Đại Diện Quản Lý</b><br><br><br><b>Hoàng Huỳnh Huy Bảo</b></div></div>`;
+      for (let d in data.daily) { const r = data.daily[d]; dailyRows += `<tr><td style="padding:4px 0;">${d}</td><td style="text-align:center;">${r.count}</td><td style="text-align:right;">${r.tax5610.toLocaleString()}</td><td style="text-align:right;">${r.tax5630.toLocaleString()}</td></tr>`; }
+      document.getElementById('printArea').innerHTML = `<div style="text-align:center; margin-bottom:8px;"><h2 style="margin:0; font-size:16px;">CTY BẢO ANH LÂM</h2><p style="margin:6px 0; border-top:1px dashed #000; border-bottom:1px dashed #000; padding:4px 0; font-weight:bold; font-size:13px;">BẢNG KẾT CA<br>(${data.labelPeriod})</p></div><p style="margin:2px 0; font-size:11px;"><b>Số đơn:</b> ${data.count} | <b>In lúc:</b> ${new Date().toLocaleTimeString('vi-VN')}</p><div style="border-top:1px dashed #000; border-bottom:1px dashed #000; margin:6px 0; padding:4px 0; font-size:12px;"><div style="display:flex; justify-content:space-between;"><span>DT 5610 (Chay):</span><b>${data.total5610.toLocaleString()}đ</b></div><div style="display:flex; justify-content:space-between;"><span>DT 5630 (Đồ Uống):</span><b>${data.total5630.toLocaleString()}đ</b></div><div style="display:flex; justify-content:space-between; margin-top:4px; padding-top:4px; border-top:1px dashed #ccc;"><span>Ship thu hộ (Ko thuế):</span><b>${data.totalShip.toLocaleString()}đ</b></div></div><p style="font-weight:bold; margin-top:8px; font-size:12px;">CHI TIẾT TỪNG NGÀY:</p><table style="width:100%; border-collapse:collapse; font-size:11px; margin-top:4px;"><tr style="border-bottom:1px dashed #000;"><th style="text-align:left;">Ngày</th><th>Đơn</th><th style="text-align:right;">5610</th><th style="text-align:right;">5630</th></tr>${dailyRows || '<tr><td colspan="4" style="text-align:center;">Không có dữ liệu</td></tr>'}</table><div style="margin-top:20px; display:flex; justify-content:space-between; text-align:center; font-size:10px;"><div><b>Kế Toán / Thu Ngân</b><br><br><br>(Ký tên)</div><div><b>Đại Diện Quản Lý</b><br><br><br><b>Hoàng Huỳnh Huy Bảo</b></div></div>`;
       window.print();
     };
   </script>
