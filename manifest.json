@@ -7,12 +7,12 @@
   "theme_color": "#1e5e3a",
   "icons": [
     {
-      "src": "https://hychayfood.vercel.app/Logo%20nho.png",
+      "src": "https://hychayfood.vercel.app/Logo nho.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://hychayfood.vercel.app/Logo%20nho.png",
+      "src": "https://hychayfood.vercel.app/Logo nho.png",
       "sizes": "512x512",
       "type": "image/png"
     }
