@@ -169,7 +169,10 @@
   <header>
     <div class="nav-container">
       <a href="#" class="brand-logo"><img src="Logo nho.png" alt="Hy Chay Logo"><span>HY CHAY</span></a>
-      <div class="nav-actions">
+<div class="nav-actions" style="display:flex; gap:10px; align-items:center;">
+        <button class="btn-account" style="background:#0284c7; color:#fff; border:none;" onclick="openInstallGuideModal()">📲 Cài App</button>
+        <button id="btnHeaderAccount" class="btn-account" onclick="openAccountModal()">👤 Đăng nhập</button>
+      </div>
         <!-- Đổi thành Tài Khoản, sẽ hiển thị Tên hoặc SĐT khi có User -->
         <button id="btnHeaderAccount" class="btn-account" onclick="openAccountModal()">👤 Đăng nhập</button>
       </div>
@@ -239,6 +242,31 @@
   <div id="dineInToolbar" class="dine-in-toolbar">
     <button class="btn-service" onclick="callService('nv')">🔔 Gọi Phục Vụ</button>
     <button class="btn-service bill" onclick="callService('bill')">💳 Yêu Cầu Tính Tiền</button>
+  </div>
+  <!-- MODAL HƯỚNG DẪN CÀI ICON APP CHO KHÁCH HÀNG (SAU KHI QUÉT QR) -->
+  <div id="installGuideModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 420px; text-align:center;">
+      <span class="modal-close" onclick="closeInstallGuideModal()">&times;</span>
+      <h3 style="color:var(--primary); margin-bottom:12px;">📲 Cài App Hy Chay</h3>
+      <p style="font-size:0.88rem; color:#64748b; margin-bottom:15px;">Thêm vào màn hình chính điện thoại để gọi món nhanh hơn, không cần tải qua App Store!</p>
+      
+      <!-- Nút này mặc định ẩn, chỉ hiện trên Android Chrome khi đủ điều kiện -->
+      <button id="btnNativeInstall" style="display:none; width:100%; padding:14px; background:var(--accent); color:var(--text-dark); border:none; border-radius:10px; font-weight:800; cursor:pointer; margin-bottom:15px; font-size:1.05rem; box-shadow: 0 4px 15px rgba(255,216,0,0.3);" onclick="triggerNativeInstall()">🚀 CÀI ĐẶT APP TỰ ĐỘNG NGAY</button>
+      
+      <div class="install-step-card" style="background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 12px; text-align:left; font-size:0.9rem;">
+        <b style="color:var(--primary);">🍎 Dành cho iPhone / iPad (Safari):</b>
+        <p style="margin-top:6px;">1. Bấm nút <b>Chia sẻ (⎋ ô vuông mũi tên)</b> ở thanh dưới cùng.</p>
+        <p>2. Cuộn xuống, chọn <b>"Thêm vào MH chính" (➕)</b>.</p>
+      </div>
+      
+      <div class="install-step-card" id="androidManualGuide" style="background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 15px; text-align:left; font-size:0.9rem;">
+        <b style="color:var(--primary);">🤖 Dành cho Android (Chrome):</b>
+        <p style="margin-top:6px;">1. Bấm nút <b>3 chấm (⋮)</b> ở góc trên bên phải.</p>
+        <p>2. Chọn dòng <b>"Thêm vào màn hình chính"</b>.</p>
+      </div>
+      
+      <button onclick="closeInstallGuideModal()" class="btn-primary" style="width:100%;">Đã Hiểu & Đóng</button>
+    </div>
   </div>
 
   <!-- GIỎ HÀNG NỔI -->
@@ -429,6 +457,52 @@
     let bankConfig = { bankId: "MB", accountNo: "0903242400", accountName: "HOANG HUYNH HUY BAO" };
     let menuCustomCache = {}; let cart = {}; let calculatedKm = 2.0; let shippingFee = 14000; let birthdayDiscountAmt = 0; let currentFilterCat = 'all'; let isStoreOpen = true;
     let currentUserPhone = null; let currentUserId = null;
+
+    // ==========================================
+    // LOGIC CÀI ĐẶT PWA (APP RA MÀN HÌNH)
+    // ==========================================
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      // Ngăn Chrome tự động hiện popup mặc định
+      e.preventDefault();
+      // Lưu lại event để kích hoạt sau
+      deferredPrompt = e;
+      // Hiện nút cài đặt 1-chạm (Chỉ hoạt động trên Android)
+      const btnNative = document.getElementById('btnNativeInstall');
+      const androidManual = document.getElementById('androidManualGuide');
+      if(btnNative) {
+          btnNative.style.display = 'block';
+          androidManual.style.display = 'none'; // Đã có nút tự động thì ẩn hướng dẫn tay
+      }
+    });
+
+    window.triggerNativeInstall = async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          console.log('Khách hàng đã chấp nhận cài đặt App');
+          deferredPrompt = null;
+          document.getElementById('btnNativeInstall').style.display = 'none';
+          window.closeInstallGuideModal();
+        }
+      }
+    };
+
+    window.openInstallGuideModal = () => document.getElementById('installGuideModal').classList.add('active');
+    window.closeInstallGuideModal = () => document.getElementById('installGuideModal').classList.remove('active');
+
+    // Tự động nhắc cài app nếu khách vào web lần 2 mà chưa cài (Tùy chọn Marketing)
+    window.addEventListener('DOMContentLoaded', () => {
+        let visitCount = localStorage.getItem('hyChayVisits') || 0;
+        visitCount++;
+        localStorage.setItem('hyChayVisits', visitCount);
+        
+        // Nếu vào lần thứ 2 và chưa mở app dạng Standalone (nghĩa là đang dùng trên trình duyệt)
+        if(visitCount === 2 && !window.matchMedia('(display-mode: standalone)').matches) {
+            setTimeout(() => { window.openInstallGuideModal(); }, 5000); // Đợi 5 giây rồi pop-up
+        }
+    });
 
     // HỆ THỐNG AUTHENTICATION (Bẻ khóa dùng SĐT + Password thay cho Email)
     const getFakeEmail = (phone) => `${phone}@hychay.com`;
