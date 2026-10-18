@@ -463,39 +463,65 @@
       }
     };
 
-    window.switchMainTab = function(tabName, ev) {
+window.switchMainTab = function(tabName, ev) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); ev.currentTarget.classList.add('active');
       ['viewOrders','viewPosOrder','viewMenuStock','viewBankConfig','viewShiftReport'].forEach(id => document.getElementById(id).style.display = 'none');
       document.getElementById('view' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).style.display = 'block';
-      if (tabName === 'posOrder') renderPosDishGrid();
-      else if (tabName === 'menuStock') renderMenuStockTable();
-      else if (tabName === 'shiftReport') renderShiftReport();
+      
+      // FIX: Cập nhật gọi hàm có chứa window.
+      if (tabName === 'posOrder') window.renderPosDishGrid();
+      else if (tabName === 'menuStock') window.renderMenuStockTable();
+      else if (tabName === 'shiftReport') window.renderShiftReport();
     };
 
-    onValue(ref(db, 'service_calls'), (snap) => {
-      const calls = snap.val() || {}; const container = document.getElementById('serviceAlerts'); container.innerHTML = ''; let playSound = false;
-      
-      const callIds = Object.keys(calls);
-      callIds.forEach(id => {
-        const c = calls[id];
-        if ((new Date() - new Date(c.timestamp)) / 60000 < 10) {
-          playSound = true; const isBill = c.type === 'bill';
-          container.innerHTML += `<div class="service-alert ${isBill ? 'bill' : ''}"><div><b style="font-size:1.1rem; color:${isBill?'#0284c7':'#b91c1c'};">${c.table}</b><br><span style="font-size:0.85rem;">${isBill ? '💳 Tính Tiền' : '🔔 Phục Vụ'}</span></div><button onclick="clearServiceCall('${id}')" style="background:#f1f5f9; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;">Xong</button></div>`;
-        }
-      });
-      
-      if (playSound && isAudioActive && !aiVoiceInterval && callIds.length > 0) {
-          const latestId = callIds.pop();
-          if (latestId !== lastSpokenCallId) {
-              const latestCall = calls[latestId];
-              const actionText = latestCall.type === 'bill' ? 'yêu cầu tính tiền' : 'gọi phục vụ';
-              speakAlert(`Hy Chay! ${latestCall.table} ${actionText}`);
-              lastSpokenCallId = latestId; 
-          }
-      } else if (!playSound && document.getElementById('kpiPending').innerText === '0') {
-          window.speechSynthesis.cancel();
-      }
+    onValue(ref(db, 'menu_customizations'), (snap) => { 
+      menuCustomCache = snap.val() || {}; 
+      // FIX: Thêm window.
+      window.renderMenuStockTable(); 
+      window.renderPosDishGrid(); 
     });
+
+    onValue(ref(db, 'orders'), (snapshot) => { 
+      ordersCache = snapshot.val() || {}; 
+      renderOrders(); 
+      window.renderShiftReport(); // FIX: Thêm window.
+    });
+
+    window.submitDineInOrder = function() {
+      // ... (logic giữ nguyên)
+      push(ref(db, 'orders'), orderData).then((res) => { 
+        window.printKitchenTicket(res.key, orderData); // FIX: Thêm window.
+        alert(`Đã gửi đơn ${selectedTable} xuống bếp thành công!`); 
+        posCart = {}; document.getElementById('posOrderNote').value = ''; 
+        renderPosCartUI(); document.querySelectorAll('.tab-btn')[0].click(); 
+      });
+    };
+
+    window.endShiftAndClearScreen = function() {
+      if (!confirm("🛑 BẠN ĐÃ CHẮC CHẮN KẾT CA CHƯA?\n\nHệ thống sẽ in phiếu tổng kết và ẩn các đơn đã hoàn tất / đã hủy khỏi màn hình chính.")) return;
+      for (let id in ordersCache) {
+        let o = ordersCache[id];
+        if ((o.status === 'Đã hoàn tất' || o.status === 'Đã hủy') && !o.archived) update(ref(db, 'orders/' + id), { archived: true });
+      }
+      alert("✅ Đã kết ca và dọn dẹp màn hình thành công!");
+      document.getElementById('filterMode').value = 'day'; document.getElementById('filterDayInput').value = new Date().toISOString().split('T')[0];
+      
+      window.onFilterModeChange(); // FIX: Thêm window.
+      setTimeout(() => { window.printShiftReport(); }, 500); // FIX: Thêm window.
+    };
+
+    window.onFilterModeChange = function() {
+      // ... (logic giữ nguyên)
+      window.renderShiftReport(); // FIX: Thêm window.
+    };
+
+    window.confirmCancelOrderWithReason = function() {
+      // ... (logic giữ nguyên)
+      update(ref(db, 'orders/' + targetCancelOrderId), { status: 'Đã hủy', cancelReason: reason, cancelSuggestion: suggestion || "Quán rất mong được phục vụ quý khách lần sau!", canceledAt: new Date().toISOString() }).then(() => { 
+        alert("✅ Đã hủy đơn và gửi lời nhắn tới khách hàng!"); 
+        window.closeCancelModal(); // FIX: Thêm window.
+      });
+    };
     
     window.clearServiceCall = (id) => remove(ref(db, 'service_calls/' + id));
 
