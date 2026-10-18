@@ -521,7 +521,7 @@
         }
     });
 
-    window.saveUserProfile = function(e) {
+window.saveUserProfile = function(e) {
         e.preventDefault();
         if (!currentUser) return;
         
@@ -535,6 +535,8 @@
             userDbProfile = newData;
             document.getElementById('btnHeaderAccount').innerText = `👤 ${name || phone}`;
             alert("✅ Đã lưu thông tin hồ sơ thành công!");
+            
+            // ✅ Đã thêm lệnh đóng modal để thoát ra ngoài màn hình chính mượt mà
             closeAccountModal();
         });
     };
