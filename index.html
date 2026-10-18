@@ -180,7 +180,7 @@
       <!-- KHU VỰC NÚT BẤM (ĐÃ GỘP CHUNG, KHÔNG BAO GIỜ BỊ RỚT DÒNG HAY NHÂN ĐÔI) -->
       <div class="nav-actions" style="display: flex; gap: 8px; align-items: center;">
         <button id="btnInstallApp" class="btn-account" style="background: #0284c7; color: #fff; border: none; padding: 8px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" onclick="openInstallGuideModal()">📲 Cài App</button>
-        <button id="btnHeaderAccount" class="btn-account" style="background: #eaf5ed; color: #1e5e3a; border: 1px solid #c7e5d2; padding: 8px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" onclick="openAccountModal()">👤 Đăng nhập</button>
+       <button id="btnHeaderAccount" class="btn-account" style="background: #eaf5ed; color: #1e5e3a; border: 1px solid #c7e5d2; padding: 8px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" onclick="openAccountModal()">👤 Đăng nhập</button>
       </div>
     </div>
   </header>
@@ -878,19 +878,33 @@ window.saveUserProfile = function() {
     }
 
 window.openAccountModal = function() {
-      // Ép hiển thị đúng khung giao diện tùy theo trạng thái đã đăng nhập hay chưa
+      const modal = document.getElementById('accountModal');
+      if (!modal) return;
+
+      const authView = document.getElementById('authView');
+      const profileView = document.getElementById('profileView');
+
       if (currentUserId) {
-        document.getElementById('authView').style.display = 'none'; 
-        document.getElementById('profileView').style.display = 'block';
+        if(authView) authView.style.display = 'none'; 
+        if(profileView) profileView.style.display = 'block';
         loadOrderHistoryTracker(currentUserPhone);
       } else {
-        document.getElementById('authView').style.display = 'block'; 
-        document.getElementById('profileView').style.display = 'none';
-        window.switchAuthTab('login'); // Mặc định mở tab Đăng Nhập kèm khung nhập liệu
+        if(authView) authView.style.display = 'block'; 
+        if(profileView) profileView.style.display = 'none';
+        window.switchAuthTab('login'); // Mở tab Đăng Nhập
       }
-      document.getElementById('accountModal').classList.add('active');
+      
+      modal.classList.add('active');
+      modal.style.display = 'flex';
     };
-    window.closeAccountModal = () => document.getElementById('accountModal').classList.remove('active');
+
+    window.closeAccountModal = function() {
+      const modal = document.getElementById('accountModal');
+      if (modal) {
+        modal.classList.remove('active');
+        modal.style.display = 'none';
+      }
+    };
 
     function loadOrderHistoryTracker(phone) {
       document.getElementById('orderHistoryList').innerHTML = '<p style="text-align:center; color:#94a3b8;">Đang tải dữ liệu...</p>';
