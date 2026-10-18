@@ -357,6 +357,13 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, onValue, update, remove, set, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getStorage, ref as sRef, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+    const firebaseConfig = { apiKey: "AIzaSyB7CH4HUqEozclN38P_iGtSFzDB_w7sOUk", authDomain: "hy-chay.firebaseapp.com", projectId: "hy-chay", storageBucket: "hy-chay.firebasestorage.app", messagingSenderId: "215026977682", appId: "1:215026977682:web:52b136c7f09a62cc488f4b" };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app, "https://hy-chay-default-rtdb.asia-southeast1.firebasedatabase.app");
+    const storage = getStorage(app); // Khởi tạo kho chứa ảnh
+    const storage = getStorage(app); // Khởi tạo kho chứa ảnh
     // TODO: Khi Giám đốc cấu hình xong, sẽ import thêm getStorage, refStorage, uploadString, getDownloadURL tại đây.
 
     const firebaseConfig = { apiKey: "AIzaSyB7CH4HUqEozclN38P_iGtSFzDB_w7sOUk", authDomain: "hy-chay.firebaseapp.com", projectId: "hy-chay", storageBucket: "hy-chay.firebasestorage.app", messagingSenderId: "215026977682", appId: "1:215026977682:web:52b136c7f09a62cc488f4b" };
@@ -372,28 +379,50 @@
     window.closeInstallGuideModal = () => document.getElementById('installGuideModal').classList.remove('active');
 
     window.toggleAudioEngine = function() {
-      const audio = document.getElementById('audioNotification');
-      audio.play().then(() => { audio.pause(); audio.currentTime = 0; isAudioActive = true; document.getElementById('btnSoundTrigger').classList.add('active'); document.getElementById('soundText').innerText = 'Chuông Đang Bật'; });
+let ordersCache = {}; let menuCustomCache = {}; let isAudioActive = false; let targetCancelOrderId = null; let selectedTable = "Bàn 1"; let posCart = {};
+    let aiVoiceInterval = null; // Biến kiểm soát vòng lặp AI đọc nhắc nhở
+
+    const tDay = new Date(); document.getElementById('filterDayInput').value = tDay.toISOString().split('T')[0]; document.getElementById('filterMonthInput').value = tDay.toISOString().slice(0, 7);
+
+    setInterval(() => { document.getElementById('liveClock').innerText = new Date().toLocaleTimeString('vi-VN'); }, 1000);
+
+    window.openInstallGuideModal = () => document.getElementById('installGuideModal').classList.add('active');
+    window.closeInstallGuideModal = () => document.getElementById('installGuideModal').classList.remove('active');
+
+    // NÂNG CẤP: Hàm gọi AI Voice đọc văn bản tiếng Việt
+    function speakAlert(text) {
+        if (!isAudioActive || !('speechSynthesis' in window)) return;
+        window.speechSynthesis.cancel(); // Dừng câu cũ để đọc câu mới
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.lang = 'vi-VN'; // Giọng Việt Nam
+        msg.rate = 1.0;     // Tốc độ đọc chuẩn
+        window.speechSynthesis.speak(msg);
+    }
+
+    window.toggleAudioEngine = function() {
+      if (isAudioActive) {
+          isAudioActive = false;
+          clearInterval(aiVoiceInterval); aiVoiceInterval = null;
+          window.speechSynthesis.cancel();
+          document.getElementById('btnSoundTrigger').classList.remove('active');
+          document.getElementById('soundText').innerText = 'Bật Chuông Báo';
+      } else {
+          isAudioActive = true;
+          document.getElementById('btnSoundTrigger').classList.add('active');
+          document.getElementById('soundText').innerText = 'Chuông Đang Bật';
+          speakAlert("Hệ thống âm thanh AI đã kích hoạt thành công."); // Test giọng đọc ngay khi bật
+      }
     };
 
-    window.switchMainTab = function(tabName, ev) {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); ev.currentTarget.classList.add('active');
-      ['viewOrders','viewPosOrder','viewMenuStock','viewBankConfig','viewShiftReport'].forEach(id => document.getElementById(id).style.display = 'none');
-      document.getElementById('view' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).style.display = 'block';
-      if (tabName === 'posOrder') renderPosDishGrid();
-      else if (tabName === 'menuStock') renderMenuStockTable();
-      else if (tabName === 'shiftReport') renderShiftReport();
-    };
-
-    // SERVICE ALERTS (GỌI PHỤC VỤ TỪ BÀN)
-    onValue(ref(db, 'service_calls'), (snap) => {
-      const calls = snap.val() || {}; const container = document.getElementById('serviceAlerts'); container.innerHTML = ''; let playSound = false;
-      Object.keys(calls).forEach(id => {
-        const c = calls[id];
-        if ((new Date() - new Date(c.timestamp)) / 60000 < 10) {
-          playSound = true; const isBill = c.type === 'bill';
-          container.innerHTML += `<div class="service-alert ${isBill ? 'bill' : ''}"><div><b style="font-size:1.1rem; color:${isBill?'#0284c7':'#b91c1c'};">${c.table}</b><br><span style="font-size:0.85rem;">${isBill ? '💳 Tính Tiền' : '🔔 Phục Vụ'}</span></div><button onclick="clearServiceCall('${id}')" style="background:#f1f5f9; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;">Xong</button></div>`;
-        }
+// CẬP NHẬT: Đọc đích danh bàn và loại yêu cầu
+      if (playSound && isAudioActive && !aiVoiceInterval) {
+          const latestId = Object.keys(calls).pop();
+          const latestCall = calls[latestId];
+          const actionText = latestCall.type === 'bill' ? 'yêu cầu tính tiền' : 'gọi phục vụ';
+          speakAlert(`Hy Chay! ${latestCall.table} ${actionText}`);
+      } else if (!playSound && document.getElementById('kpiPending').innerText === '0') {
+          window.speechSynthesis.cancel();
+      }
       });
       const audio = document.getElementById('audioNotification');
       if (playSound && isAudioActive && audio.paused) audio.play(); else if (!playSound && document.getElementById('kpiPending').innerText === '0') { audio.pause(); audio.currentTime = 0; }
@@ -515,14 +544,24 @@
     };
 
     // TODO: Sẽ thay thế hàm này bằng Firebase Storage sau khi cấu hình để tránh nặng Database
-    window.uploadDishImageDirect = function(input, dishId) {
+window.uploadDishImageDirect = function(input, dishId) {
       const file = input.files[0]; if (!file) return; const reader = new FileReader();
       reader.onload = (e) => {
         const img = new Image();
         img.onload = () => {
           const cv = document.createElement('canvas'); let w = img.width, h = img.height; if (w > 380) { h = Math.round(h * 380 / w); w = 380; }
           cv.width = w; cv.height = h; cv.getContext('2d').drawImage(img, 0, 0, w, h);
-          update(ref(db, `menu_customizations/${dishId}`), { image: cv.toDataURL('image/jpeg', 0.82), updatedAt: new Date().toISOString() }).then(() => alert("✅ Đã cập nhật ảnh tạm thời (Base64) thành công!"));
+          const base64Data = cv.toDataURL('image/jpeg', 0.82);
+
+          // NÂNG CẤP: Đẩy ảnh lên Firebase Storage
+          const imageRef = sRef(storage, `menu_images/${dishId}_${Date.now()}.jpg`);
+          uploadString(imageRef, base64Data, 'data_url').then((snapshot) => {
+            getDownloadURL(snapshot.ref).then((downloadURL) => {
+              // Chỉ lưu Link URL siêu nhẹ vào Realtime Database
+              update(ref(db, `menu_customizations/${dishId}`), { image: downloadURL, updatedAt: new Date().toISOString() })
+              .then(() => alert("✅ Đã đẩy ảnh lên hệ thống Đám mây (Storage) thành công!"));
+            });
+          });
         };
         img.src = e.target.result;
       };
@@ -617,9 +656,22 @@
       document.getElementById('kpiShippingRev').innerText = shipRevToday.toLocaleString() + 'đ';
       document.getElementById('badgePending').innerText = countPending;
 
-      const audio = document.getElementById('audioNotification');
-      if (countPending > 0 && isAudioActive && audio.paused && document.getElementById('serviceAlerts').innerHTML === '') audio.play();
-      else if (countPending === 0 && document.getElementById('serviceAlerts').innerHTML === '') { audio.pause(); audio.currentTime = 0; }
+// CẬP NHẬT: AI nhắc nhở đơn hàng Online theo chu kỳ 12 giây
+      if (countPending > 0 && isAudioActive && document.getElementById('serviceAlerts').innerHTML === '') {
+          if (!aiVoiceInterval) {
+              speakAlert(`Hy Chay! Bạn có ${countPending} đơn hàng mới từ Hy Chay Food.`);
+              aiVoiceInterval = setInterval(() => {
+                  if (document.getElementById('kpiPending').innerText !== '0') {
+                      speakAlert("Hy Chay! Chú ý, có đơn hàng mới chưa xác nhận.");
+                  } else {
+                      clearInterval(aiVoiceInterval); aiVoiceInterval = null;
+                  }
+              }, 12000); 
+          }
+      } else if (countPending === 0) {
+          clearInterval(aiVoiceInterval); aiVoiceInterval = null; 
+          if (document.getElementById('serviceAlerts').innerHTML === '') window.speechSynthesis.cancel();
+      }
 
       container.innerHTML = cardsHtml || '<p style="text-align:center; padding:40px; grid-column:1/-1; color:#64748b;">Màn hình đã được làm sạch. Đang chờ đơn hàng mới...</p>';
     }
