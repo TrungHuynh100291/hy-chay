@@ -372,24 +372,56 @@
   <div id="printArea"></div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, onValue, update, remove, set, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
     import { getStorage, ref as sRef, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
-    // NÂNG CẤP: Import thư viện Authentication của Firebase
-import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-const auth = getAuth(app);
+    const firebaseConfig = { apiKey: "AIzaSyB7CH4HUqEozclN38P_iGtSFzDB_w7sOUk", authDomain: "hy-chay.firebaseapp.com", projectId: "hy-chay", storageBucket: "hy-chay.firebasestorage.app", messagingSenderId: "215026977682", appId: "1:215026977682:web:52b136c7f09a62cc488f4b" };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app, "https://hy-chay-default-rtdb.asia-southeast1.firebasedatabase.app");
+    const storage = getStorage(app); 
+    const auth = getAuth(app);
 
-// Hàm tạo tài khoản quản lý mới
-window.createNewAdminAccount = function(managerEmail, managerPassword) {
-    createUserWithEmailAndPassword(auth, managerEmail, managerPassword)
-      .then((userCredential) => {
-          alert("✅ Tạo tài khoản quản lý thành công!");
-      })
-      .catch((error) => {
-          alert("❌ Lỗi tạo tài khoản: " + error.message);
-      });
-};
+    // BẮT TRẠNG THÁI ĐĂNG NHẬP
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        document.getElementById('adminLoginOverlay').style.opacity = '0';
+        setTimeout(() => document.getElementById('adminLoginOverlay').style.display = 'none', 500);
+        document.getElementById('mainAppWrapper').style.display = 'block';
+      } else {
+        document.getElementById('mainAppWrapper').style.display = 'none';
+        document.getElementById('adminLoginOverlay').style.display = 'flex';
+        document.getElementById('adminLoginOverlay').style.opacity = '1';
+        if(typeof isAudioActive !== 'undefined' && isAudioActive) window.toggleAudioEngine(); 
+      }
+    });
+
+    // XỬ LÝ LOGIN AN TOÀN
+    window.handleAdminLogin = function(e) {
+      e.preventDefault();
+      const email = document.getElementById('adminEmail').value.trim();
+      const pass = document.getElementById('adminPassword').value;
+      const btn = document.getElementById('btnLoginSubmit');
+      const errBox = document.getElementById('loginErrorMsg');
+      
+      btn.innerText = "ĐANG XÁC THỰC..."; btn.disabled = true; errBox.style.display = 'none';
+      
+      signInWithEmailAndPassword(auth, email, pass)
+        .then(() => {
+          btn.innerText = "VÀO HỆ THỐNG POS"; btn.disabled = false;
+        })
+        .catch((error) => {
+          errBox.style.display = 'block';
+          // Bóc tách chi tiết lỗi để Giám đốc dễ nhận biết
+          if(error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+              errBox.innerText = "Sai Email hoặc Mật khẩu quản trị!";
+          } else {
+              errBox.innerText = "Lỗi Firebase Auth: " + error.message;
+          }
+          btn.innerText = "VÀO HỆ THỐNG POS"; btn.disabled = false;
+        });
+    };
 
     const firebaseConfig = { apiKey: "AIzaSyB7CH4HUqEozclN38P_iGtSFzDB_w7sOUk", authDomain: "hy-chay.firebaseapp.com", projectId: "hy-chay", storageBucket: "hy-chay.firebasestorage.app", messagingSenderId: "215026977682", appId: "1:215026977682:web:52b136c7f09a62cc488f4b" };
     const app = initializeApp(firebaseConfig);
