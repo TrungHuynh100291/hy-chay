@@ -205,12 +205,14 @@
         <div class="stat-card"><div class="stat-info"><span>Tiền Ship Thu Hộ (Hôm Nay)</span><h2 id="kpiShippingRev" style="color: #2563eb;">0đ</h2></div></div>
       </section>
 
-      <div class="tabs-bar">
+<div class="tabs-bar">
         <button class="tab-btn active" onclick="switchMainTab('orders', event)">📦 Màn Hình Đơn Hàng <span class="tab-badge badge-danger" id="badgePending">0</span></button>
         <button class="tab-btn" onclick="switchMainTab('posOrder', event)">➕ Order Tại Bàn</button>
-        <button class="tab-btn" onclick="switchMainTab('menuStock', event)">🍽️ Quản Lý Món Ăn (Giá/Ảnh)</button>
+        <button class="tab-btn" onclick="switchMainTab('menuStock', event)">🍽️ Quản Lý Món Ăn</button>
         <button class="tab-btn" onclick="switchMainTab('bankConfig', event)">⚙️ Cấu Hình VietQR</button>
-        <button class="tab-btn" onclick="switchMainTab('shiftReport', event)">📊 Báo Cáo Kế Toán</button>
+        <button class="tab-btn" id="tabShiftReport" onclick="switchMainTab('shiftReport', event)">📊 Báo Cáo Kế Toán</button>
+        <!-- BỔ SUNG NÚT PHÂN QUYỀN (CHỈ GIÁM ĐỐC THẤY) -->
+        <button class="tab-btn" id="tabUsers" onclick="switchMainTab('users', event)" style="color:#2563eb;">👥 Phân Quyền</button>
         <button class="btn-end-shift" onclick="endShiftAndClearScreen()">🛑 KẾT CA & XÓA MÀN HÌNH</button>
       </div>
 
@@ -341,6 +343,26 @@
           </table>
         </div>
       </div>
+      
+      <!-- VIEW 6: PHÂN QUYỀN TÀI KHOẢN -->
+      <div id="viewUsers" style="display: none;">
+        <div class="report-card">
+          <h3 style="color:var(--primary); margin-bottom:8px;">Tạo Tài Khoản Cho Quản Lý / Thu Ngân</h3>
+          <p style="font-size:0.85rem; color:#64748b; margin-bottom:15px;">Các tài khoản phụ này chỉ có quyền bán hàng và xem báo cáo, không có quyền tạo tài khoản mới.</p>
+          
+          <div style="display:flex; gap:10px; margin-bottom: 25px; flex-wrap:wrap;">
+            <input type="text" id="newUsername" placeholder="Tên đăng nhập (VD: thungan1)..." style="padding:10px; border:1px solid #cbd5e1; border-radius:8px; flex:1; min-width:200px;">
+            <input type="text" id="newPassword" placeholder="Mật khẩu..." style="padding:10px; border:1px solid #cbd5e1; border-radius:8px; flex:1; min-width:200px;">
+            <button onclick="createSubAccount()" style="background:var(--primary); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-weight:700; cursor:pointer;">+ TẠO TÀI KHOẢN</button>
+          </div>
+
+          <h3 style="font-size:1.05rem; color:var(--text-dark); margin-bottom:10px;">Danh Sách Tài Khoản Phụ</h3>
+          <table class="report-table">
+            <thead><tr style="background:#f1f5f9; text-align:left;"><th>Tên Đăng Nhập</th><th>Mật Khẩu</th><th>Quyền Hạn</th><th>Hành Động</th></tr></thead>
+            <tbody id="subAccountsBody"></tbody>
+          </table>
+        </div>
+      </div>
     </main>
   </div> <!-- HẾT mainAppWrapper -->
 
@@ -383,12 +405,29 @@
     const db = getDatabase(app, "https://hy-chay-default-rtdb.asia-southeast1.firebasedatabase.app");
     const storage = getStorage(app); 
 
+// ==========================================
+    // 1. HỆ THỐNG XÁC THỰC PHÂN QUYỀN ROOT - MANAGER
     // ==========================================
-    // QUẢN LÝ ĐĂNG NHẬP NỘI BỘ (AN TOÀN & KHÔNG LỖI)
-    // ==========================================
+    
+    // Tài khoản ROOT cố định (Giám đốc có thể đổi mật khẩu ở đây)
+    const ROOT_USER = "admin";
+    const ROOT_PASS = "baochay2026";
+
+    // Hàm thiết lập giao diện theo quyền
+    function applyRoleUI(role) {
+       if (role !== 'root') {
+           document.getElementById('tabUsers').style.display = 'none'; // Giấu tab phân quyền với nhân viên
+       } else {
+           document.getElementById('tabUsers').style.display = 'inline-block';
+       }
+    }
+
+    // Kiểm tra phiên làm việc khi vừa mở app
     window.addEventListener('DOMContentLoaded', () => {
-      const activeManager = localStorage.getItem('hy_chay_active_manager');
-      if (activeManager) {
+      const activeUser = localStorage.getItem('hy_chay_active_user');
+      const activeRole = localStorage.getItem('hy_chay_active_role');
+      if (activeUser) {
+        applyRoleUI(activeRole);
         document.getElementById('adminLoginOverlay').style.display = 'none';
         document.getElementById('mainAppWrapper').style.display = 'block';
       } else {
@@ -397,41 +436,105 @@
       }
     });
 
-    // Mật khẩu quản trị cố định của hệ thống
-    const ADMIN_SECRET_PASS = "baochay2026"; 
-
     window.handleAdminLogin = function(e) {
       e.preventDefault();
-      const email = document.getElementById('adminEmail').value.trim();
+      const user = document.getElementById('adminEmail').value.trim(); // Dùng trường Email làm Tên đăng nhập
       const pass = document.getElementById('adminPassword').value;
       const btn = document.getElementById('btnLoginSubmit');
       const errBox = document.getElementById('loginErrorMsg');
       
       errBox.style.display = 'none';
+      btn.innerText = "ĐANG XÁC THỰC..."; btn.disabled = true;
 
-      if (email && pass === ADMIN_SECRET_PASS) {
-        btn.innerText = "ĐANG VÀO HỆ THỐNG...";
-        localStorage.setItem('hy_chay_active_manager', email);
-        
+      // 1. Kiểm tra tài khoản ROOT (Giám đốc)
+      if (user === ROOT_USER && pass === ROOT_PASS) {
+          loginSuccess(user, 'root');
+          return;
+      }
+
+      // 2. Kiểm tra tài khoản Quản lý phụ từ Database
+      import("https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js").then((mod) => {
+          mod.get(mod.ref(db, 'admin_users/' + user)).then((snap) => {
+              if (snap.exists() && snap.val().password === pass) {
+                  loginSuccess(user, 'manager');
+              } else {
+                  showLoginError("Sai tên đăng nhập hoặc mật khẩu!", btn, errBox);
+              }
+          }).catch(() => showLoginError("Lỗi kết nối máy chủ!", btn, errBox));
+      });
+    };
+
+    function loginSuccess(user, role) {
+        localStorage.setItem('hy_chay_active_user', user);
+        localStorage.setItem('hy_chay_active_role', role);
+        applyRoleUI(role);
+
+        document.getElementById('adminLoginOverlay').style.opacity = '0';
         setTimeout(() => {
-          document.getElementById('adminLoginOverlay').style.opacity = '0';
-          setTimeout(() => {
             document.getElementById('adminLoginOverlay').style.display = 'none';
             document.getElementById('mainAppWrapper').style.display = 'block';
-            btn.innerText = "VÀO HỆ THỐNG POS";
-          }, 300);
-        }, 400);
-      } else {
-        errBox.style.display = 'block';
-        errBox.innerText = "Sai Mật khẩu quản trị! (Mật khẩu mặc định: baochay2026)";
+            document.getElementById('btnLoginSubmit').innerText = "VÀO HỆ THỐNG POS";
+            document.getElementById('btnLoginSubmit').disabled = false;
+        }, 300);
+    }
+
+    function showLoginError(msg, btn, errBox) {
+        errBox.style.display = 'block'; errBox.innerText = msg;
+        btn.innerText = "VÀO HỆ THỐNG POS"; btn.disabled = false;
+    }
+
+    window.logoutAdmin = function() {
+      if(confirm("Bạn có chắc chắn muốn kết thúc ca trực?")) {
+        localStorage.removeItem('hy_chay_active_user');
+        localStorage.removeItem('hy_chay_active_role');
+        location.reload();
       }
     };
 
-    window.logoutAdmin = function() {
-      if(confirm("Bạn có chắc chắn muốn kết thúc ca trực và thoát khỏi hệ thống?")) {
-        localStorage.removeItem('hy_chay_active_manager');
-        location.reload();
-      }
+    // ==========================================
+    // 2. CÁC HÀM QUẢN LÝ TÀI KHOẢN PHỤ
+    // ==========================================
+    window.createSubAccount = function() {
+        const user = document.getElementById('newUsername').value.trim();
+        const pass = document.getElementById('newPassword').value.trim();
+        if (!user || !pass) return alert("Vui lòng nhập đủ Tên đăng nhập và Mật khẩu!");
+        if (user === ROOT_USER) return alert("Không được dùng trùng tên với tài khoản Gốc!");
+
+        set(ref(db, 'admin_users/' + user), { password: pass, role: 'manager', createdAt: new Date().toISOString() })
+        .then(() => {
+            alert("✅ Tạo tài khoản quản lý phụ thành công!");
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newPassword').value = '';
+        });
+    };
+
+    window.deleteSubAccount = function(user) {
+        if(confirm(`⚠️ Xóa vĩnh viễn tài khoản: ${user}?`)) {
+            remove(ref(db, 'admin_users/' + user));
+        }
+    };
+
+    // Lắng nghe danh sách tài khoản để in ra bảng
+    onValue(ref(db, 'admin_users'), (snap) => {
+        const users = snap.val() || {}; let html = '';
+        for (let u in users) {
+            html += `<tr><td><b>${u}</b></td><td>${users[u].password}</td><td><span style="background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:12px; font-size:0.8rem; font-weight:bold;">Nhân viên</span></td><td><button onclick="deleteSubAccount('${u}')" style="background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; padding:4px 10px; border-radius:6px; font-weight:bold; cursor:pointer;">Xóa</button></td></tr>`;
+        }
+        const tbody = document.getElementById('subAccountsBody');
+        if (tbody) tbody.innerHTML = html || '<tr><td colspan="4" style="text-align:center;">Chưa có tài khoản phụ nào.</td></tr>';
+    });
+
+    // Cập nhật hàm switchMainTab để thêm viewUsers
+    window.switchMainTab = function(tabName, ev) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); ev.currentTarget.classList.add('active');
+      ['viewOrders','viewPosOrder','viewMenuStock','viewBankConfig','viewShiftReport','viewUsers'].forEach(id => {
+          if(document.getElementById(id)) document.getElementById(id).style.display = 'none';
+      });
+      document.getElementById('view' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).style.display = 'block';
+      
+      if (tabName === 'posOrder') window.renderPosDishGrid();
+      else if (tabName === 'menuStock') window.renderMenuStockTable();
+      else if (tabName === 'shiftReport') window.renderShiftReport();
     };
 
     let ordersCache = {}; let menuCustomCache = {}; let isAudioActive = false; let targetCancelOrderId = null; let selectedTable = "Bàn 1"; let posCart = {};
