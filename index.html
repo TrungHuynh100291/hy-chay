@@ -293,26 +293,32 @@
           <div class="auth-tab" id="tabRegisterBtn" onclick="switchAuthTab('register')">Đăng Ký</div>
         </div>
         
-        <!-- Form Đăng Nhập -->
-        <div id="formLogin">
-          <p style="font-size:0.9rem; color:#64748b; margin-bottom:16px;">Sử dụng số điện thoại của bạn để quản lý đơn hàng.</p>
-          <div class="form-group"><label>Số điện thoại:</label><input type="tel" id="lPhone" placeholder="09xxxxxxx" required></div>
-          <div class="form-group"><label>Mật khẩu:</label><input type="password" id="lPass" placeholder="Nhập mật khẩu..." required></div>
-          <div id="lError" class="error-msg">Sai số điện thoại hoặc mật khẩu!</div>
-          <button onclick="handleLogin()" class="btn-primary" style="margin-top:10px;">ĐĂNG NHẬP</button>
-        </div>
+<!-- KHUNG FORM ĐĂNG NHẬP CHUẨN KHÔNG LỖI -->
+<div class="form-group">
+  <label for="lPhone">Số điện thoại:</label>
+  <input type="tel" id="lPhone" name="lPhone" placeholder="09xxxxxxx" required autocomplete="tel">
+</div>
 
-        <!-- Form Đăng Ký -->
-        <div id="formRegister" style="display:none;">
-          <p style="font-size:0.9rem; color:#64748b; margin-bottom:16px;">Tạo tài khoản để tích điểm và tự động điền thông tin khi mua hàng.</p>
-          <div class="form-group"><label>Số điện thoại (Dùng làm ID):</label><input type="tel" id="rPhone" placeholder="09xxxxxxx" required></div>
-          <div class="form-group"><label>Mật khẩu:</label><input type="password" id="rPass" placeholder="Ít nhất 6 ký tự..." required></div>
-          <div class="form-group"><label>Xác nhận mật khẩu:</label><input type="password" id="rPassConfirm" placeholder="Nhập lại mật khẩu..." required></div>
-          <div id="rError" class="error-msg">Mật khẩu không khớp!</div>
-          <div id="rSuccess" class="success-msg">Tạo tài khoản thành công! Tự động chuyển qua đăng nhập...</div>
-          <button onclick="handleRegister()" class="btn-primary" style="margin-top:10px;">ĐĂNG KÝ NGAY</button>
-        </div>
-      </div>
+<div class="form-group">
+  <label for="lPass">Mật khẩu:</label>
+  <input type="password" id="lPass" name="lPass" placeholder="Nhập mật khẩu..." required autocomplete="current-password">
+</div>
+
+<!-- KHUNG FORM ĐĂNG KÝ CHUẨN KHÔNG LỖI -->
+<div class="form-group">
+  <label for="rPhone">Số điện thoại (Dùng làm ID):</label>
+  <input type="tel" id="rPhone" name="rPhone" placeholder="09xxxxxxx" required autocomplete="tel">
+</div>
+
+<div class="form-group">
+  <label for="rPass">Mật khẩu:</label>
+  <input type="password" id="rPass" name="rPass" placeholder="Ít nhất 6 ký tự..." required autocomplete="new-password">
+</div>
+
+<div class="form-group">
+  <label for="rPassConfirm">Xác nhận mật khẩu:</label>
+  <input type="password" id="rPassConfirm" name="rPassConfirm" placeholder="Nhập lại mật khẩu..." required autocomplete="new-password">
+</div>
 
       <!-- KHUNG ĐÃ ĐĂNG NHẬP (HỒ SƠ KHÁCH HÀNG) -->
       <div id="profileView" style="display:none;">
