@@ -1146,5 +1146,14 @@ let cancelUnsubscribe = null;
     const sid = localStorage.getItem('last_hy_chay_order_id'); if (sid) listenCanceledAlert(sid);
     loadCartLocal(); renderFeaturedDishes(); renderFullMenu(); setInterval(checkOperatingHours, 60000);
   </script>
+
+  <script>
+    // Khởi chạy Service Worker để mở khóa tính năng cài đặt App PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW Lỗi:', err));
+      });
+    }
+  </script>
 </body>
 </html>
