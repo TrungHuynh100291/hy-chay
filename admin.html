@@ -1057,5 +1057,14 @@ let wakeLock = null;
       window.print();
     };
   </script>
+
+  <script>
+    // Khởi chạy Service Worker để mở khóa tính năng cài đặt App PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW Lỗi:', err));
+      });
+    }
+  </script>
 </body>
 </html>
