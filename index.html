@@ -390,8 +390,8 @@
       <div id="cartItemsList" style="margin-bottom: 16px;"></div>
       
       <form id="orderForm" onsubmit="submitOrder(event)">
-        <div class="form-group">Họ và tên người nhận (*)</label><input type="text" id="cusName" required></div>
-        <div class="form-group" id="groupPhone">Số điện thoại liên hệ (*)</label><input type="tel" id="cusPhone" required></div>
+<div class="form-group"><label>Họ và tên người nhận (*)</label><input type="text" id="cusName" required></div>
+<div class="form-group" id="groupPhone"><label>Số điện thoại liên hệ (*)</label><input type="tel" id="cusPhone" required></div>
         <div class="form-group" id="groupAddress">
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <label>Địa chỉ nhận hàng tại Phan Thiết (*)</label>
@@ -639,20 +639,29 @@ onAuthStateChanged(auth, (user) => {
     window.logoutUser = function() { signOut(auth).then(() => { closeAccountModal(); }); };
 
 window.saveUserProfile = function() {
-        // ... (giữ nguyên logic ở trên)
-        // Lưu vào DB và thêm .catch để bắt lỗi hiển thị cho khách
-        update(ref(db, `users/${currentUserId}`), { name, email, birthday, house, ward, province, fullAddress, updatedAt: new Date().toISOString() })
-        .then(() => {
-            localStorage.setItem('hyChayUserProfile', JSON.stringify({ name, phone: currentUserPhone, address: fullAddress, birthday }));
-            alert("✅ Cập nhật thông tin thành công!");
-            
-            window.closeAccountModal(); // FIX: Thêm window. vào đây
-            
-            const displayName = name ? name : currentUserPhone;
-            document.getElementById('btnHeaderAccount').innerText = `👤 ${displayName}`;
-        })
-        // ... (giữ nguyên logic catch)
-    };
+    const name = document.getElementById('updName').value.trim();
+    const email = document.getElementById('updEmail').value.trim();
+    const birthday = document.getElementById('updBirthday').value;
+    const house = document.getElementById('updHouse').value.trim();
+    const ward = document.getElementById('updWard').value.trim();
+    const province = document.getElementById('updProvince').value.trim();
+    
+    // Gộp địa chỉ chuẩn xác để tính quãng đường ship
+    const fullAddress = house ? `${house}, ${ward}, ${province}`.replace(/^, | ,/g, '').trim() : '';
+
+    if (!name) return alert("Vui lòng nhập Họ Tên!");
+
+    update(ref(db, `users/${currentUserId}`), { name, email, birthday, house, ward, province, fullAddress, updatedAt: new Date().toISOString() })
+    .then(() => {
+        localStorage.setItem('hyChayUserProfile', JSON.stringify({ name, phone: currentUserPhone, address: fullAddress, birthday }));
+        alert("✅ Cập nhật thông tin thành công!");
+        
+        window.closeAccountModal(); 
+        
+        const displayName = name ? name : currentUserPhone;
+        document.getElementById('btnHeaderAccount').innerText = `👤 ${displayName}`;
+    }).catch(err => alert("❌ Lỗi hệ thống khi lưu: " + err.message));
+};
 
     window.logoutUser = function() { 
         // FIX: Thêm window.
@@ -1141,7 +1150,6 @@ let cancelUnsubscribe = null;
       window.closeCanceledAlert(); // FIX: Thêm window. để tránh ReferenceError
       window.scrollTo({ top: document.getElementById('toan-bo-menu').offsetTop - 60, behavior: 'smooth' }); 
     };
-    window.reOrderSuggestedDish = () => { closeCanceledAlert(); window.scrollTo({ top: document.getElementById('toan-bo-menu').offsetTop - 60, behavior: 'smooth' }); };
 
     const sid = localStorage.getItem('last_hy_chay_order_id'); if (sid) listenCanceledAlert(sid);
     loadCartLocal(); renderFeaturedDishes(); renderFullMenu(); setInterval(checkOperatingHours, 60000);
