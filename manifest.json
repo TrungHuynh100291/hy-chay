@@ -3,8 +3,8 @@
   "short_name": "Hy Chay",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#faf9f5",
-  "theme_color": "#1e5e3a",
+  "background_color": "#ffd800",
+  "theme_color": "#ffd800",
   "icons": [
     {
       "src": "Logo%20nho.png",
