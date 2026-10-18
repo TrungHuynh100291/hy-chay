@@ -281,7 +281,7 @@
     <button class="btn-checkout">Xem Giỏ & Đặt Món</button>
   </div>
 
-  <!-- MODAL TÀI KHOẢN (ĐĂNG NHẬP / ĐĂNG KÝ / CẬP NHẬT HỒ SƠ) -->
+<!-- MODAL TÀI KHOẢN (ĐĂNG NHẬP / ĐĂNG KÝ / CẬP NHẬT HỒ SƠ) -->
   <div id="accountModal" class="modal-overlay">
     <div class="modal-content">
       <span class="modal-close" onclick="closeAccountModal()">&times;</span>
@@ -293,32 +293,41 @@
           <div class="auth-tab" id="tabRegisterBtn" onclick="switchAuthTab('register')">Đăng Ký</div>
         </div>
         
-<!-- KHUNG FORM ĐĂNG NHẬP CHUẨN KHÔNG LỖI -->
-<div class="form-group">
-  <label for="lPhone">Số điện thoại:</label>
-  <input type="tel" id="lPhone" name="lPhone" placeholder="09xxxxxxx" required autocomplete="tel">
-</div>
+        <!-- Form Đăng Nhập -->
+        <div id="formLogin">
+          <p style="font-size:0.9rem; color:#64748b; margin-bottom:16px;">Sử dụng số điện thoại của bạn để quản lý đơn hàng.</p>
+          <div class="form-group">
+            <label for="lPhone">Số điện thoại:</label>
+            <input type="tel" id="lPhone" name="lPhone" placeholder="09xxxxxxx" required autocomplete="tel">
+          </div>
+          <div class="form-group">
+            <label for="lPass">Mật khẩu:</label>
+            <input type="password" id="lPass" name="lPass" placeholder="Nhập mật khẩu..." required autocomplete="current-password">
+          </div>
+          <div id="lError" class="error-msg">Sai số điện thoại hoặc mật khẩu!</div>
+          <button onclick="handleLogin()" class="btn-primary" style="margin-top:10px;">ĐĂNG NHẬP</button>
+        </div>
 
-<div class="form-group">
-  <label for="lPass">Mật khẩu:</label>
-  <input type="password" id="lPass" name="lPass" placeholder="Nhập mật khẩu..." required autocomplete="current-password">
-</div>
-
-<!-- KHUNG FORM ĐĂNG KÝ CHUẨN KHÔNG LỖI -->
-<div class="form-group">
-  <label for="rPhone">Số điện thoại (Dùng làm ID):</label>
-  <input type="tel" id="rPhone" name="rPhone" placeholder="09xxxxxxx" required autocomplete="tel">
-</div>
-
-<div class="form-group">
-  <label for="rPass">Mật khẩu:</label>
-  <input type="password" id="rPass" name="rPass" placeholder="Ít nhất 6 ký tự..." required autocomplete="new-password">
-</div>
-
-<div class="form-group">
-  <label for="rPassConfirm">Xác nhận mật khẩu:</label>
-  <input type="password" id="rPassConfirm" name="rPassConfirm" placeholder="Nhập lại mật khẩu..." required autocomplete="new-password">
-</div>
+        <!-- Form Đăng Ký -->
+        <div id="formRegister" style="display:none;">
+          <p style="font-size:0.9rem; color:#64748b; margin-bottom:16px;">Tạo tài khoản để tích điểm và tự động điền thông tin khi mua hàng.</p>
+          <div class="form-group">
+            <label for="rPhone">Số điện thoại (Dùng làm ID):</label>
+            <input type="tel" id="rPhone" name="rPhone" placeholder="09xxxxxxx" required autocomplete="tel">
+          </div>
+          <div class="form-group">
+            <label for="rPass">Mật khẩu:</label>
+            <input type="password" id="rPass" name="rPass" placeholder="Ít nhất 6 ký tự..." required autocomplete="new-password">
+          </div>
+          <div class="form-group">
+            <label for="rPassConfirm">Xác nhận mật khẩu:</label>
+            <input type="password" id="rPassConfirm" name="rPassConfirm" placeholder="Nhập lại mật khẩu..." required autocomplete="new-password">
+          </div>
+          <div id="rError" class="error-msg">Mật khẩu không khớp!</div>
+          <div id="rSuccess" class="success-msg">Tạo tài khoản thành công! Tự động chuyển qua đăng nhập...</div>
+          <button onclick="handleRegister()" class="btn-primary" style="margin-top:10px;">ĐĂNG KÝ NGAY</button>
+        </div>
+      </div>
 
       <!-- KHUNG ĐÃ ĐĂNG NHẬP (HỒ SƠ KHÁCH HÀNG) -->
       <div id="profileView" style="display:none;">
@@ -335,16 +344,16 @@
         <!-- Form Cập Nhật Thông Tin -->
         <div class="profile-info-box">
           <h4 style="margin-bottom:10px; color:var(--text-dark);">Cập nhật thông tin giao hàng</h4>
-          <div class="form-group"><label>Họ và Tên:</label><input type="text" id="updName" placeholder="Tên của bạn"></div>
-          <div class="form-group">Email:</label><input type="email" id="updEmail" placeholder="email@gmail.com"></div>
-          <div class="form-group">Số điện thoại (SĐT Đăng nhập):</label><input type="tel" id="updPhone" disabled style="background:#f1f5f9; color:#64748b;"></div>
-          <div class="form-group">Ngày Sinh (Để nhận mã giảm 5%):</label><input type="date" id="updBirthday"></div>
+          <div class="form-group"><label for="updName">Họ và Tên:</label><input type="text" id="updName" name="updName" placeholder="Tên của bạn"></div>
+          <div class="form-group"><label for="updEmail">Email:</label><input type="email" id="updEmail" name="updEmail" placeholder="email@gmail.com"></div>
+          <div class="form-group"><label for="updPhone">Số điện thoại (SĐT Đăng nhập):</label><input type="tel" id="updPhone" name="updPhone" disabled style="background:#f1f5f9; color:#64748b;"></div>
+          <div class="form-group"><label for="updBirthday">Ngày Sinh (Để nhận mã giảm 5%):</label><input type="date" id="updBirthday" name="updBirthday"></div>
           
           <h4 style="margin-top:15px; margin-bottom:10px; color:var(--text-dark);">Địa chỉ mặc định</h4>
-          <div class="form-group">Số nhà, Tên đường:</label><input type="text" id="updHouse" placeholder="VD: 280 Trần Hưng Đạo"></div>
+          <div class="form-group"><label for="updHouse">Số nhà, Tên đường:</label><input type="text" id="updHouse" name="updHouse" placeholder="VD: 280 Trần Hưng Đạo"></div>
           <div style="display:flex; gap:10px;">
-             <div class="form-group" style="flex:1;">Phường/Xã:</label><input type="text" id="updWard" placeholder="VD: Phường Phan Thiết"></div>
-             <div class="form-group" style="flex:1;">Tỉnh/Thành phố:</label><input type="text" id="updProvince" placeholder="VD: Lâm Đồng" value="Lâm Đồng"></div>
+             <div class="form-group" style="flex:1;"><label for="updWard">Phường/Xã:</label><input type="text" id="updWard" name="updWard" placeholder="VD: Phường Phan Thiết"></div>
+             <div class="form-group" style="flex:1;"><label for="updProvince">Tỉnh/Thành phố:</label><input type="text" id="updProvince" name="updProvince" placeholder="VD: Lâm Đồng" value="Lâm Đồng"></div>
           </div>
           <button onclick="saveUserProfile()" class="btn-primary" style="margin-top:10px;">💾 LƯU THÔNG TIN</button>
         </div>
@@ -894,7 +903,6 @@ window.openAccountModal = function() {
         window.switchAuthTab('login'); // Mở tab Đăng Nhập
       }
       
-      // Thêm class active và ép hiển thị bằng CSS trực tiếp để chống bị đè ẩn
       modal.classList.add('active');
       modal.style.display = 'flex';
     };
