@@ -167,10 +167,11 @@
   <!-- PHẦN 2: HTML - CẤU TRÚC WEB    -->
   <!-- =============================== -->
   <header>
-    <div class="nav-container">
-      <a href="#" class="brand-logo"><img src="Logo nho.png" alt="Hy Chay Logo"><span>HY CHAY</span></a>
 <div class="nav-actions" style="display:flex; gap:10px; align-items:center;">
-        <button class="btn-account" style="background:#0284c7; color:#fff; border:none;" onclick="openInstallGuideModal()">📲 Cài App</button>
+        <!-- Nút Cài App sẽ tự động biến mất khi mở app trên Laptop/Mobile ở chế độ Standalone -->
+        <button id="btnInstallApp" class="btn-account" style="background:#0284c7; color:#fff; border:none; display:none;" onclick="openInstallGuideModal()">📲 Cài App</button>
+        
+        <!-- Nút Tài Khoản / Đăng Nhập duy nhất -->
         <button id="btnHeaderAccount" class="btn-account" onclick="openAccountModal()">👤 Đăng nhập</button>
       </div>
         <!-- Đổi thành Tài Khoản, sẽ hiển thị Tên hoặc SĐT khi có User -->
@@ -507,15 +508,26 @@
     // HỆ THỐNG AUTHENTICATION (Bẻ khóa dùng SĐT + Password thay cho Email)
     const getFakeEmail = (phone) => `${phone}@hychay.com`;
 
-    onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, (user) => {
+      // Ẩn nút Cài App nếu app đang chạy ở chế độ Standalone (đã cài ra máy tính/điện thoại)
+      if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+          const btnInst = document.getElementById('btnInstallApp');
+          if (btnInst) btnInst.style.display = 'none';
+      } else {
+          const btnInst = document.getElementById('btnInstallApp');
+          if (btnInst) btnInst.style.display = 'flex';
+      }
+
       if (user) {
         currentUserId = user.uid;
         currentUserPhone = user.email.replace('@hychay.com', '');
-        document.getElementById('authView').style.display = 'none';
-        document.getElementById('profileView').style.display = 'block';
+        
+        // Đã đăng nhập: Ẩn view auth, hiện view profile
+        if(document.getElementById('authView')) document.getElementById('authView').style.display = 'none';
+        if(document.getElementById('profileView')) document.getElementById('profileView').style.display = 'block';
+        
         document.getElementById('updPhone').value = currentUserPhone;
         
-        // Tải dữ liệu Profile từ DB
         get(ref(db, `users/${currentUserId}`)).then(snap => {
             if(snap.exists()) {
                 const u = snap.val();
@@ -526,7 +538,6 @@
                 document.getElementById('updWard').value = u.ward || '';
                 document.getElementById('updProvince').value = u.province || 'Lâm Đồng';
                 
-                // Cập nhật Header
                 const displayName = u.name ? u.name : currentUserPhone;
                 document.getElementById('btnHeaderAccount').innerText = `👤 ${displayName}`;
             } else {
@@ -536,8 +547,8 @@
         loadOrderHistoryTracker(currentUserPhone);
       } else {
         currentUserId = null; currentUserPhone = null;
-        document.getElementById('authView').style.display = 'block';
-        document.getElementById('profileView').style.display = 'none';
+        if(document.getElementById('authView')) document.getElementById('authView').style.display = 'block';
+        if(document.getElementById('profileView')) document.getElementById('profileView').style.display = 'none';
         document.getElementById('btnHeaderAccount').innerText = `👤 Đăng nhập`;
       }
     });
