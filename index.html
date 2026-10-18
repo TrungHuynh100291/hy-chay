@@ -5,8 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Hy Chay - Ẩm Thực Chay Rau Củ Nấm | Bảo Anh Lâm</title>
   
-  <link rel="icon" type="image/png" href="https://hychayfood.vercel.app/Logo%20nho.png">
+  <!-- KHAI BÁO ICON TRỰC TIẾP CHUẨN XÁC ĐỂ TRÁNH LỖI CHỮ H -->
+  <link rel="icon" type="image/png" sizes="192x192" href="https://hychayfood.vercel.app/Logo%20nho.png">
   <link rel="apple-touch-icon" href="https://hychayfood.vercel.app/Logo%20nho.png">
+  
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#1e5e3a">
@@ -327,15 +330,15 @@
         <div class="profile-info-box">
           <h4 style="margin-bottom:10px; color:var(--text-dark);">Cập nhật thông tin giao hàng</h4>
           <div class="form-group"><label>Họ và Tên:</label><input type="text" id="updName" placeholder="Tên của bạn"></div>
-          <div class="form-group"><label>Email:</label><input type="email" id="updEmail" placeholder="email@gmail.com"></div>
-          <div class="form-group"><label>Số điện thoại (SĐT Đăng nhập):</label><input type="tel" id="updPhone" disabled style="background:#f1f5f9; color:#64748b;"></div>
-          <div class="form-group"><label>Ngày Sinh (Để nhận mã giảm 5%):</label><input type="date" id="updBirthday"></div>
+          <div class="form-group">Email:</label><input type="email" id="updEmail" placeholder="email@gmail.com"></div>
+          <div class="form-group">Số điện thoại (SĐT Đăng nhập):</label><input type="tel" id="updPhone" disabled style="background:#f1f5f9; color:#64748b;"></div>
+          <div class="form-group">Ngày Sinh (Để nhận mã giảm 5%):</label><input type="date" id="updBirthday"></div>
           
           <h4 style="margin-top:15px; margin-bottom:10px; color:var(--text-dark);">Địa chỉ mặc định</h4>
-          <div class="form-group"><label>Số nhà, Tên đường:</label><input type="text" id="updHouse" placeholder="VD: 280 Trần Hưng Đạo"></div>
+          <div class="form-group">Số nhà, Tên đường:</label><input type="text" id="updHouse" placeholder="VD: 280 Trần Hưng Đạo"></div>
           <div style="display:flex; gap:10px;">
-             <div class="form-group" style="flex:1;"><label>Phường/Xã:</label><input type="text" id="updWard" placeholder="VD: Phường Phan Thiết"></div>
-             <div class="form-group" style="flex:1;"><label>Tỉnh/Thành phố:</label><input type="text" id="updProvince" placeholder="VD: Lâm Đồng" value="Lâm Đồng"></div>
+             <div class="form-group" style="flex:1;">Phường/Xã:</label><input type="text" id="updWard" placeholder="VD: Phường Phan Thiết"></div>
+             <div class="form-group" style="flex:1;">Tỉnh/Thành phố:</label><input type="text" id="updProvince" placeholder="VD: Lâm Đồng" value="Lâm Đồng"></div>
           </div>
           <button onclick="saveUserProfile()" class="btn-primary" style="margin-top:10px;">💾 LƯU THÔNG TIN</button>
         </div>
@@ -367,8 +370,8 @@
       <div id="cartItemsList" style="margin-bottom: 16px;"></div>
       
       <form id="orderForm" onsubmit="submitOrder(event)">
-        <div class="form-group"><label>Họ và tên người nhận (*)</label><input type="text" id="cusName" required></div>
-        <div class="form-group" id="groupPhone"><label>Số điện thoại liên hệ (*)</label><input type="tel" id="cusPhone" required></div>
+        <div class="form-group">Họ và tên người nhận (*)</label><input type="text" id="cusName" required></div>
+        <div class="form-group" id="groupPhone">Số điện thoại liên hệ (*)</label><input type="tel" id="cusPhone" required></div>
         <div class="form-group" id="groupAddress">
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <label>Địa chỉ nhận hàng tại Phan Thiết (*)</label>
