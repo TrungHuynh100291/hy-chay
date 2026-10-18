@@ -270,7 +270,7 @@
       </div>
     </div>
 
-    <!-- VIEW 5: BÁO CÁO KẾ TOÁN & KẾT CA (CHI TIẾT TỪNG NGÀY & KIỂM KÊ MÓN) -->
+    <!-- VIEW 5: BÁO CÁO THUẾ & KẾT CA -->
     <div id="viewShiftReport" style="display: none;">
       <div class="report-card">
         <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px; margin-bottom:16px;">
@@ -301,23 +301,15 @@
           <div class="rep-box"><span>TỔNG ĐƠN ĐÃ XONG</span><h3 id="repDoneCount" style="color:#16a34a;">0 đơn</h3></div>
         </div>
 
-        <!-- BẢNG 1: DOANH THU TỪNG NGÀY -->
         <h3 style="font-size:1.05rem; color:var(--primary); margin-bottom:8px;">1. BẢNG DOANH THU THEO TỪNG NGÀY TRONG KỲ</h3>
         <table class="report-table">
           <thead><tr style="background:#f1f5f9; text-align:left;"><th>Ngày Thực Hiện</th><th style="text-align:center;">Số Đơn</th><th style="text-align:right; color:#1e5e3a;">Doanh Thu 5610 (Chay)</th><th style="text-align:right; color:#d97706;">Doanh Thu 5630 (Đồ Uống)</th><th style="text-align:right; color:#2563eb;">Tiền Ship Hộ</th><th style="text-align:right;">Tổng Thu Thực Tế</th></tr></thead>
           <tbody id="repDailyBreakdownBody"></tbody>
         </table>
 
-        <!-- BẢNG 2: KIỂM KÊ SỐ LƯỢNG MÓN BÁN RA -->
         <h3 style="font-size:1.05rem; color:var(--primary); margin-top:20px; margin-bottom:8px;">2. KIỂM KÊ SỐ LƯỢNG MÓN BÁN RA</h3>
         <table class="report-table">
-          <thead>
-            <tr style="background:#f1f5f9; text-align:left;">
-              <th>Tên Món Ăn</th>
-              <th style="text-align:center;">Số Lượng Đã Bán</th>
-              <th style="text-align:right;">Thành Tiền (VNĐ)</th>
-            </tr>
-          </thead>
+          <thead><tr style="background:#f1f5f9; text-align:left;"><th>Tên Món Ăn</th><th style="text-align:center;">Số Lượng Đã Bán</th><th style="text-align:right;">Thành Tiền (VNĐ)</th></tr></thead>
           <tbody id="repDishTableBody"></tbody>
         </table>
       </div>
@@ -365,6 +357,7 @@
 
     let ordersCache = {}; let menuCustomCache = {}; let isAudioActive = false; let targetCancelOrderId = null; let selectedTable = "Bàn 1"; let posCart = {};
     let aiVoiceInterval = null; 
+    let lastSpokenCallId = null; // NÂNG CẤP: Chốt chặn bộ nhớ AI để không đọc nhại lại
 
     const tDay = new Date(); document.getElementById('filterDayInput').value = tDay.toISOString().split('T')[0]; document.getElementById('filterMonthInput').value = tDay.toISOString().slice(0, 7);
 
@@ -408,7 +401,9 @@
 
     onValue(ref(db, 'service_calls'), (snap) => {
       const calls = snap.val() || {}; const container = document.getElementById('serviceAlerts'); container.innerHTML = ''; let playSound = false;
-      Object.keys(calls).forEach(id => {
+      
+      const callIds = Object.keys(calls);
+      callIds.forEach(id => {
         const c = calls[id];
         if ((new Date() - new Date(c.timestamp)) / 60000 < 10) {
           playSound = true; const isBill = c.type === 'bill';
@@ -416,11 +411,15 @@
         }
       });
       
-      if (playSound && isAudioActive && !aiVoiceInterval) {
-          const latestId = Object.keys(calls).pop();
-          const latestCall = calls[latestId];
-          const actionText = latestCall.type === 'bill' ? 'yêu cầu tính tiền' : 'gọi phục vụ';
-          speakAlert(`Hy Chay! ${latestCall.table} ${actionText}`);
+      // NÂNG CẤP: Chặn lỗi nhại giọng - Kiểm tra ID cuộc gọi cuối cùng
+      if (playSound && isAudioActive && !aiVoiceInterval && callIds.length > 0) {
+          const latestId = callIds.pop();
+          if (latestId !== lastSpokenCallId) {
+              const latestCall = calls[latestId];
+              const actionText = latestCall.type === 'bill' ? 'yêu cầu tính tiền' : 'gọi phục vụ';
+              speakAlert(`Hy Chay! ${latestCall.table} ${actionText}`);
+              lastSpokenCallId = latestId; // Đánh dấu đã đọc
+          }
       } else if (!playSound && document.getElementById('kpiPending').innerText === '0') {
           window.speechSynthesis.cancel();
       }
