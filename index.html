@@ -641,32 +641,6 @@
         });
     };
 
-    window.handleRegister = function() {
-        const phone = document.getElementById('rPhone').value.trim();
-        const pass = document.getElementById('rPass').value;
-        const passConfirm = document.getElementById('rPassConfirm').value;
-        const errBox = document.getElementById('rError');
-        const succBox = document.getElementById('rSuccess');
-        
-        errBox.style.display = 'none'; succBox.style.display = 'none';
-        if(!phone || pass.length < 6) return errBox.innerText = "SĐT và Mật khẩu (tối thiểu 6 ký tự) là bắt buộc!", errBox.style.display = 'block';
-        if(pass !== passConfirm) return errBox.innerText = "Mật khẩu không khớp!", errBox.style.display = 'block';
-
-        createUserWithEmailAndPassword(auth, getFakeEmail(phone), pass)
-        .then((userCred) => {
-            succBox.style.display = 'block';
-            // Tạo profile rỗng trên Realtime DB
-            set(ref(db, `users/${userCred.user.uid}`), { phone: phone, createdAt: new Date().toISOString() });
-            
-            // Tự động SignOut để quay lại tab Login đúng ý Giám đốc
-            signOut(auth).then(() => {
-                setTimeout(() => {
-                    document.getElementById('lPhone').value = phone;
-                    switchAuthTab('login');
-                    succBox.style.display = 'none';
-                    document.getElementById('rPhone').value = ''; document.getElementById('rPass').value = ''; document.getElementById('rPassConfirm').value = '';
-                }, 1500);
-            });
         }).catch(err => {
             errBox.innerText = (err.code === 'auth/email-already-in-use') ? "Số điện thoại này đã được đăng ký!" : "Lỗi đăng ký, vui lòng thử lại!";
             errBox.style.display = 'block';
