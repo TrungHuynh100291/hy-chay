@@ -9,16 +9,13 @@
   <link rel="apple-touch-icon" href="https://hychayfood.vercel.app/Logo%20nho.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="theme-color" content="#1e5e3a">
-  <link rel="manifest" href='data:application/manifest+json,{"name":"Hy Chay Food","short_name":"Hy Chay","start_url":"/","display":"standalone","background_color":"#faf9f5","theme_color":"#1e5e3a","icons":[{"src":"https://hychayfood.vercel.app/Logo%20nho.png","sizes":"192x192","type":"image/png"}]}'>
+  <meta name="theme-color" content="#ffd800">
+  <link rel="manifest" href='data:application/manifest+json,{"name":"Hy Chay Food","short_name":"Hy Chay","start_url":"/","display":"standalone","background_color":"#faf9f5","theme_color":"#ffd800","icons":[{"src":"https://hychayfood.vercel.app/Logo%20nho.png","sizes":"192x192","type":"image/png"}]}'>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
 
-  <!-- =============================== -->
-  <!-- PHẦN 1: CSS - THIẾT KẾ GIAO DIỆN  -->
-  <!-- =============================== -->
   <style>
     :root { --primary: #1e5e3a; --primary-light: #2b7a4d; --accent: #ffd800; --text-dark: #1f2937; --text-muted: #64748b; --bg-light: #faf9f5; --card-bg: #ffffff; --border: #e2e8f0; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -27,6 +24,16 @@
     h1, h2, h3, h4 { font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--primary); }
     a { text-decoration: none; color: inherit; }
     img { max-width: 100%; height: auto; display: block; }
+
+    /* MÀN HÌNH ĐĂNG NHẬP KHÁCH HÀNG (NỀN VÀNG) */
+    .customer-login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #ffd800, #ffb700); z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
+    .customer-login-box { background: #ffffff; padding: 40px 30px; border-radius: 20px; box-shadow: 0 25px 50px rgba(0,0,0,0.15); width: 100%; max-width: 400px; text-align: center; position: relative; }
+    .customer-login-box img.logo-img { width: 110px; margin-bottom: 20px; border-radius: 16px; box-shadow: 0 4px 15px rgba(30, 94, 58, 0.2); }
+    .customer-login-box h2 { color: var(--primary); font-family: 'Montserrat', sans-serif; font-size: 1.4rem; font-weight: 800; margin-bottom: 5px; }
+    .customer-login-box p { color: #64748b; font-size: 0.9rem; margin-bottom: 25px; }
+    .btn-google-login { background: #fff; border: 1px solid #cbd5e1; color: #334155; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .btn-google-login:hover { background: #f8fafc; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-2px); }
+    .close-login-btn { position: absolute; top: 15px; right: 20px; font-size: 1.8rem; color: #94a3b8; cursor: pointer; line-height: 1; }
 
     header { background: #ffffff; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); }
     .nav-container { max-width: 1200px; margin: 0 auto; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
@@ -149,13 +156,25 @@
 </head>
 <body>
 
-  <!-- =============================== -->
-  <!-- PHẦN 2: HTML - CẤU TRÚC WEB    -->
-  <!-- =============================== -->
+  <!-- OVERLAY ĐĂNG NHẬP KHÁCH HÀNG (NỀN VÀNG) -->
+  <div id="customerLoginOverlay" class="customer-login-overlay" style="display:none;">
+    <div class="customer-login-box">
+      <span class="close-login-btn" onclick="closeCustomerLogin()">&times;</span>
+      <img src="Logo nho.png" alt="Hy Chay Logo" class="logo-img" onerror="this.src='https://hychayfood.vercel.app/Logo%20nho.png'">
+      <h2>THÀNH VIÊN HY CHAY</h2>
+      <p>Đăng nhập 1 chạm để đặt món, tích điểm và theo dõi đơn hàng dễ dàng.</p>
+      
+      <button onclick="loginWithGoogle()" class="btn-google-login">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24px" height="24px"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>
+        Tiếp tục bằng Google
+      </button>
+    </div>
+  </div>
+
   <header>
     <div class="nav-container">
-      <a href="#" class="brand-logo"><img src="Logo nho.png" alt="Hy Chay Logo"><span>HY CHAY</span></a>
-      <div class="nav-actions"><button class="btn-account" onclick="openAccountModal()">👤 Theo Dõi Đơn Hàng</button></div>
+      <a href="#" class="brand-logo"><img src="Logo nho.png" alt="Hy Chay Logo" onerror="this.src='https://hychayfood.vercel.app/Logo%20nho.png'"><span>HY CHAY</span></a>
+      <div class="nav-actions"><button class="btn-account" onclick="openAccountModal()">👤 Tài Khoản & Đơn Hàng</button></div>
     </div>
   </header>
 
@@ -234,28 +253,36 @@
   <div id="accountModal" class="modal-overlay">
     <div class="modal-content">
       <span class="modal-close" onclick="closeAccountModal()">&times;</span>
-      <h3 style="color:var(--primary); margin-bottom:16px;">Theo Dõi Đơn Hàng & Tài Khoản</h3>
+      <h3 style="color:var(--primary); margin-bottom:16px;">Tài Khoản Hy Chay</h3>
       
-      <div id="loginView">
-        <p style="font-size:0.9rem; color:#64748b; margin-bottom:16px;">Nhập số điện thoại để hệ thống ghi nhớ giỏ hàng, điền form tự động và cập nhật trạng thái đơn hàng thời gian thực.</p>
-        <div class="form-group"><label>Họ và Tên (*):</label><input type="text" id="loginName"></div>
-        <div class="form-group"><label>Số điện thoại (*):</label><input type="tel" id="loginPhone"></div>
-        <div class="form-group"><label>Ngày Sinh (Để nhận mã giảm 5%):</label><input type="date" id="loginBirthday"></div>
-        <div class="form-group"><label>Địa chỉ nhận hàng mặc định:</label><textarea id="loginAddress" rows="2"></textarea></div>
-        <button onclick="saveUserProfile()" class="btn-primary" style="width:100%; margin-top:10px;">💾 LƯU HỒ SƠ & TÍCH ĐIỂM</button>
-      </div>
-
       <div id="profileView" style="display:none;">
         <div class="loyalty-card">
           <h4 id="profRank">Thành Viên Mới</h4><div class="loyalty-points"><span id="profPoints">0</span> Điểm</div>
           <p style="font-size:0.85rem; color:#e2e8f0; margin-top:4px;">Quy đổi: 10.000đ chi tiêu = 1 điểm tích lũy.</p>
         </div>
+        
         <div class="profile-info-box">
-          <p>Xin chào, <b id="profName" style="color:var(--primary); font-size:1.05rem;"></b></p><p>📞 SĐT: <span id="profPhone" style="font-weight:600;"></span></p>
-          <button onclick="logoutUser()" style="background:none; border:none; color:#dc2626; text-decoration:underline; font-weight:bold; margin-top:10px; cursor:pointer;">Đăng xuất</button>
+          <p>Xin chào, <b id="profName" style="color:var(--primary); font-size:1.05rem;"></b></p>
+          <p style="margin-bottom: 10px; font-size: 0.85rem; color: #64748b;">📧 <span id="profEmail"></span></p>
+          
+          <div style="border-top:1px dashed #cbd5e1; padding-top:14px;">
+            <p style="font-weight: 700; color: var(--primary); margin-bottom: 8px;">Cập Nhật Thông Tin Nhận Hàng</p>
+            <div class="form-group"><label>Số điện thoại liên hệ (*):</label><input type="tel" id="profPhoneInput" placeholder="Ví dụ: 0903242400"></div>
+            <div class="form-group"><label>Ngày Sinh (Để nhận mã giảm 5%):</label><input type="date" id="profBirthdayInput"></div>
+            <div class="form-group">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <label>Địa chỉ nhận hàng (Phan Thiết):</label>
+                    <button type="button" class="btn-quick-add" style="padding:4px 10px; margin-bottom:4px; border-radius:8px;" onclick="getProfileGPS()">📍 Ghim vị trí (GPS)</button>
+                </div>
+                <textarea id="profAddressInput" rows="2" placeholder="Số nhà, tên đường..."></textarea>
+            </div>
+            <button onclick="saveProfileData()" class="btn-primary" style="width:100%; margin-top:5px; padding:10px;">💾 LƯU THÔNG TIN ĐỂ ĐẶT MÓN</button>
+            <button onclick="logoutUser()" style="width:100%; background:none; border:none; color:#dc2626; text-decoration:underline; font-weight:bold; margin-top:12px; cursor:pointer;">Đăng xuất tài khoản</button>
+          </div>
         </div>
-        <h4 style="margin-bottom:10px; font-size:1.05rem; color:var(--text-dark);">Trạng thái & Lịch sử đơn hàng</h4>
-        <div id="orderHistoryList" style="max-height: 350px; overflow-y: auto; padding-right:5px;"><p style="text-align:center; color:#94a3b8;">Đang tải...</p></div>
+
+        <h4 style="margin-bottom:10px; font-size:1.05rem; color:var(--text-dark);">Lịch sử đơn hàng</h4>
+        <div id="orderHistoryList" style="max-height: 300px; overflow-y: auto; padding-right:5px;"><p style="text-align:center; color:#94a3b8;">Đang tải...</p></div>
       </div>
     </div>
   </div>
@@ -342,17 +369,16 @@
     <div class="footer-bottom">© 2026 HY CHAY - BẢO ANH LÂM. All rights reserved.</div>
   </footer>
 
-  <!-- =============================== -->
-  <!-- PHẦN 3: JAVASCRIPT - XỬ LÝ LOGIC  -->
-  <!-- =============================== -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    // NÂNG CẤP BẢO MẬT: Bổ sung các hàm query, orderByChild, equalTo để truy xuất dữ liệu an toàn
-    import { getDatabase, ref, push, onValue, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, push, onValue, get, set, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = { apiKey: "AIzaSyB7CH4HUqEozclN38P_iGtSFzDB_w7sOUk", authDomain: "hy-chay.firebaseapp.com", projectId: "hy-chay", storageBucket: "hy-chay.firebasestorage.app", messagingSenderId: "215026977682", appId: "1:215026977682:web:52b136c7f09a62cc488f4b" };
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app, "https://hy-chay-default-rtdb.asia-southeast1.firebasedatabase.app");
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
 
     const STORE_LAT = 10.9328; const STORE_LON = 108.1025;
     const urlParams = new URLSearchParams(window.location.search);
@@ -360,8 +386,120 @@
 
     let bankConfig = { bankId: "MB", accountNo: "0903242400", accountName: "HOANG HUYNH HUY BAO" };
     let menuCustomCache = {}; let cart = {}; let calculatedKm = 2.0; let shippingFee = 14000; let birthdayDiscountAmt = 0; let currentFilterCat = 'all'; let isStoreOpen = true;
+    
+    // BIẾN TOÀN CỤC CHỨA USER ĐĂNG NHẬP
+    let currentUserAuth = null;
+    let currentUserProfile = { phone: '', address: '', birthday: '' };
 
-    // DỮ LIỆU FULL 70 MÓN (KHÔNG BỊ CẮT XÉN)
+    // ==========================================
+    // MODULE: GOOGLE LOGIN & PROFILE MANAGEMENT
+    // ==========================================
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            currentUserAuth = user;
+            // Fetch hồ sơ khách hàng (SĐT, Địa chỉ) từ Firebase Database
+            get(ref(db, `customers/${user.uid}`)).then((snap) => {
+                if (snap.exists()) {
+                    currentUserProfile = snap.val();
+                }
+                updateProfileUI();
+            });
+            document.getElementById('customerLoginOverlay').style.display = 'none';
+        } else {
+            currentUserAuth = null;
+            currentUserProfile = { phone: '', address: '', birthday: '' };
+        }
+    });
+
+    window.loginWithGoogle = function() {
+        signInWithPopup(auth, provider).then((result) => {
+            closeCustomerLogin(); openAccountModal();
+        }).catch((error) => alert("Đăng nhập thất bại: " + error.message));
+    };
+
+    window.logoutUser = function() {
+        if(confirm("Bạn muốn đăng xuất khỏi tài khoản Hy Chay?")) {
+            signOut(auth).then(() => {
+                closeAccountModal();
+                alert("Đã đăng xuất thành công!");
+            });
+        }
+    };
+
+    function updateProfileUI() {
+        if (!currentUserAuth) return;
+        document.getElementById('profileView').style.display = 'block';
+        document.getElementById('profName').innerText = currentUserAuth.displayName;
+        document.getElementById('profEmail').innerText = currentUserAuth.email;
+        document.getElementById('profPhoneInput').value = currentUserProfile.phone || '';
+        document.getElementById('profBirthdayInput').value = currentUserProfile.birthday || '';
+        document.getElementById('profAddressInput').value = currentUserProfile.address || '';
+        
+        if (currentUserProfile.phone) {
+            loadOrderHistoryTracker(currentUserProfile.phone);
+        } else {
+            document.getElementById('orderHistoryList').innerHTML = '<p style="text-align:center; color:#eab308; font-weight:bold;">Vui lòng lưu Số điện thoại để hệ thống tìm đơn hàng của bạn!</p>';
+        }
+    }
+
+    window.saveProfileData = function() {
+        if (!currentUserAuth) return;
+        const phone = document.getElementById('profPhoneInput').value.trim();
+        const address = document.getElementById('profAddressInput').value.trim();
+        const birthday = document.getElementById('profBirthdayInput').value;
+        
+        if (!phone) return alert("Vui lòng nhập Số điện thoại liên hệ để quán giao món!");
+        
+        const profileData = { phone, address, birthday, name: currentUserAuth.displayName, email: currentUserAuth.email, updatedAt: new Date().toISOString() };
+        
+        set(ref(db, `customers/${currentUserAuth.uid}`), profileData).then(() => {
+            currentUserProfile = profileData;
+            alert("✅ Đã cập nhật thông tin thành công!");
+            loadOrderHistoryTracker(phone);
+        });
+    };
+
+    window.openCustomerLogin = () => { document.getElementById('customerLoginOverlay').style.display = 'flex'; };
+    window.closeCustomerLogin = () => { document.getElementById('customerLoginOverlay').style.display = 'none'; };
+
+    window.openAccountModal = function() {
+      if (currentUserAuth) {
+          document.getElementById('profileView').style.display = 'block';
+          document.getElementById('accountModal').classList.add('active');
+          updateProfileUI();
+      } else {
+          openCustomerLogin();
+      }
+    };
+    window.closeAccountModal = () => document.getElementById('accountModal').classList.remove('active');
+
+    // Tích hợp ghim định vị GPS cho Profile
+    window.getProfileGPS = function() {
+      if (!navigator.geolocation) return alert("Trình duyệt không hỗ trợ định vị GPS.");
+      document.getElementById('profAddressInput').value = "Đang quét tọa độ vệ tinh...";
+      
+      navigator.geolocation.getCurrentPosition(p => {
+        const lat = p.coords.latitude, lon = p.coords.longitude;
+        // Dùng Nominatim OpenStreetMap để dịch ngược tọa độ (Reverse Geocoding)
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+        .then(r => r.json())
+        .then(d => {
+          if (d && d.display_name) {
+            // Hiển thị tên đường, xã/phường cho khách dễ sửa
+            document.getElementById('profAddressInput').value = d.display_name;
+          } else {
+            document.getElementById('profAddressInput').value = `Tọa độ: ${lat}, ${lon}`;
+          }
+        }).catch(() => { document.getElementById('profAddressInput').value = `Tọa độ: ${lat}, ${lon}`; });
+      }, () => { 
+          alert("Lỗi GPS. Vui lòng bật cấp quyền Vị trí hoặc tự nhập tay địa chỉ."); 
+          document.getElementById('profAddressInput').value = ""; 
+      });
+    };
+
+    // ==========================================
+    // MODULE: DATA FETCHING & UI RENDER
+    // ==========================================
     const FEATURED_IDS = ["bunchagio", "banhcanh", "hoanhthanhmi", "miquang", "comga", "xoi", "nomhoachuoi", "mispaghetti"];
     const ALL_MENU_DATA = [
       { id: "bunmoc", name: "Bún Mọc Chay", defaultPrice: 30000, cat: "bun", catName: "Món Bún", defaultImg: "menu 1.jpg" },
@@ -450,7 +588,6 @@
 
     function getDishData(dish) {
       const c = menuCustomCache[dish.id] || {};
-      // NÂNG CẤP: Tương thích với link URL ảnh từ Firebase Storage, fallback về ảnh gốc hoặc Logo nếu lỗi
       return { id: dish.id, name: dish.name, cat: dish.cat, catName: dish.catName, price: c.price !== undefined ? c.price : dish.defaultPrice, image: c.image || dish.defaultImg || 'Logo nho.png', isSoldOut: !!c.soldOut, isHot: dish.isHot };
     }
 
@@ -507,43 +644,15 @@
       if (c > 0) b.classList.add('active'); else { b.classList.remove('active'); closeCheckoutModal(); }
     }
 
-    // TÀI KHOẢN KHÁCH & TRACKING VẬN CHUYỂN
-    window.openAccountModal = function() {
-      const userStr = localStorage.getItem('hyChayUserProfile');
-      if (userStr) {
-        const u = JSON.parse(userStr);
-        document.getElementById('loginView').style.display = 'none'; document.getElementById('profileView').style.display = 'block';
-        document.getElementById('profName').innerText = u.name; document.getElementById('profPhone').innerText = u.phone;
-        loadOrderHistoryTracker(u.phone);
-      } else {
-        document.getElementById('loginView').style.display = 'block'; document.getElementById('profileView').style.display = 'none';
-      }
-      document.getElementById('accountModal').classList.add('active');
-    };
-    window.closeAccountModal = () => document.getElementById('accountModal').classList.remove('active');
-
-    window.saveUserProfile = function() {
-      const name = document.getElementById('loginName').value.trim(), phone = document.getElementById('loginPhone').value.trim(), birthday = document.getElementById('loginBirthday').value, address = document.getElementById('loginAddress').value.trim();
-      if (!name || !phone) return alert("Vui lòng nhập Họ Tên và Số điện thoại!");
-      localStorage.setItem('hyChayUserProfile', JSON.stringify({ name, phone, address, birthday }));
-      alert("✅ Lưu hồ sơ thành công!"); openAccountModal();
-    };
-    window.logoutUser = function() { localStorage.removeItem('hyChayUserProfile'); openAccountModal(); };
-
-    // ==========================================
-    // NÂNG CẤP BẢO MẬT: Hàm Tracking Đơn Hàng Mới
-    // ==========================================
     function loadOrderHistoryTracker(phone) {
       document.getElementById('orderHistoryList').innerHTML = '<p style="text-align:center; color:#94a3b8;">Đang tải dữ liệu...</p>';
       
-      // CHỈ tải những đơn hàng có số điện thoại khớp với SĐT của khách, ngăn chặn rò rỉ toàn bộ Database
       const ordersQuery = query(ref(db, 'orders'), orderByChild('phone'), equalTo(phone));
       
       get(ordersQuery).then((snapshot) => {
         const orders = snapshot.val() || {}; 
         let totalSpent = 0, html = '';
         
-        // Sắp xếp đơn hàng mới nhất lên đầu
         const sortedIds = Object.keys(orders).sort((a, b) => new Date(orders[b].createdAt) - new Date(orders[a].createdAt));
         
         sortedIds.forEach(id => {
@@ -575,8 +684,7 @@
         document.getElementById('profRank').innerText = points >= 200 ? "Hạng Vàng ⭐" : (points >= 50 ? "Hạng Bạc 🥈" : "Thành Viên Mới");
         document.getElementById('orderHistoryList').innerHTML = html || '<p style="text-align:center;">Bạn chưa có đơn hàng nào.</p>';
       }).catch((error) => {
-        console.error("Lỗi khi tải lịch sử đơn:", error);
-        document.getElementById('orderHistoryList').innerHTML = '<p style="text-align:center; color:#ef4444;">Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại sau.</p>';
+        document.getElementById('orderHistoryList').innerHTML = '<p style="text-align:center; color:#ef4444;">Lỗi tải dữ liệu. Vui lòng thử lại sau.</p>';
       });
     }
 
@@ -607,20 +715,30 @@
     }
 
     window.openCheckoutModal = function() {
-      checkOperatingHours(); renderCartItems(); updateCalc();
-      const userStr = localStorage.getItem('hyChayUserProfile');
-      if (userStr && !tableParam) {
-        const u = JSON.parse(userStr);
-        if(!document.getElementById('cusName').value) document.getElementById('cusName').value = u.name;
-        if(!document.getElementById('cusPhone').value) document.getElementById('cusPhone').value = u.phone;
-        if(!document.getElementById('cusAddress').value && u.address) { document.getElementById('cusAddress').value = u.address; window.calcDistance(u.address); }
+      // Yêu cầu đăng nhập trước khi Checkout nếu là đơn giao hàng
+      if (!tableParam && !currentUserAuth) {
+          openCustomerLogin();
+          return;
       }
+      
+      checkOperatingHours(); renderCartItems(); updateCalc();
+      
+      if (currentUserAuth && !tableParam) {
+        if(!document.getElementById('cusName').value) document.getElementById('cusName').value = currentUserAuth.displayName;
+        if(!document.getElementById('cusPhone').value) document.getElementById('cusPhone').value = currentUserProfile.phone;
+        if(!document.getElementById('cusAddress').value && currentUserProfile.address) { 
+            document.getElementById('cusAddress').value = currentUserProfile.address; 
+            window.calcDistance(currentUserProfile.address); 
+        }
+      }
+      
       if (tableParam) {
         document.getElementById('groupAddress').style.display = 'none'; document.getElementById('shippingBox').style.display = 'none';
         document.getElementById('cusName').value = `Bàn ${tableParam}`; document.getElementById('cusPhone').required = false;
       }
       document.getElementById('checkoutModal').classList.add('active');
     };
+    
     window.closeCheckoutModal = () => document.getElementById('checkoutModal').classList.remove('active');
 
     function renderCartItems() {
@@ -636,19 +754,16 @@
       let sub = 0; for (let k in cart) sub += cart[k].price * cart[k].qty;
       
       birthdayDiscountAmt = 0;
-      const uStr = localStorage.getItem('hyChayUserProfile');
-      if (uStr && sub > 0) {
-        const u = JSON.parse(uStr);
-        if (u.birthday) {
-          const d = new Date(), bM = u.birthday.split('-')[1], bD = u.birthday.split('-')[2];
+      if (currentUserProfile.birthday && sub > 0) {
+          const d = new Date(), bM = currentUserProfile.birthday.split('-')[1], bD = currentUserProfile.birthday.split('-')[2];
           if (bM === String(d.getMonth()+1).padStart(2,'0') && bD === String(d.getDate()).padStart(2,'0')) {
             birthdayDiscountAmt = Math.round(sub * 0.05);
             document.getElementById('birthdayDiscountBadge').style.display = 'block'; document.getElementById('birthdayDiscountRow').style.display = 'flex';
             document.getElementById('birthdayDiscountText').innerText = '-' + birthdayDiscountAmt.toLocaleString() + 'đ';
           }
-        }
+      } else { 
+          document.getElementById('birthdayDiscountBadge').style.display = 'none'; document.getElementById('birthdayDiscountRow').style.display = 'none'; 
       }
-      if (birthdayDiscountAmt === 0) { document.getElementById('birthdayDiscountBadge').style.display = 'none'; document.getElementById('birthdayDiscountRow').style.display = 'none'; }
 
       if (tableParam) shippingFee = 0;
       else {
@@ -674,20 +789,20 @@
 
     window.getLocationByGPS = function() {
       if (!navigator.geolocation) return alert("Không hỗ trợ GPS.");
+      document.getElementById('cusAddress').value = "Đang quét tọa độ...";
       navigator.geolocation.getCurrentPosition(p => {
-        const R = 6371, dLat = (p.coords.latitude-STORE_LAT)*Math.PI/180, dLon = (p.coords.longitude-STORE_LON)*Math.PI/180;
-        const a = Math.sin(dLat/2)**2 + Math.cos(STORE_LAT*Math.PI/180)*Math.cos(p.coords.latitude*Math.PI/180)*Math.sin(dLon/2)**2;
-        calculatedKm = Math.max(1.0, Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)) * 1.25 * 10) / 10);
-        document.getElementById('shipDistanceText').innerText = `Khoảng ${calculatedKm} km`; updateCalc();
+        const lat = p.coords.latitude, lon = p.coords.longitude;
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+        .then(r => r.json()).then(d => {
+            document.getElementById('cusAddress').value = d.display_name || `${lat}, ${lon}`;
+            window.calcDistance(document.getElementById('cusAddress').value);
+        }).catch(() => { document.getElementById('cusAddress').value = `${lat}, ${lon}`; });
       }, () => alert("Lỗi GPS, quán tính theo địa chỉ gõ."));
     };
 
-window.calcDistance = function(addr) {
+    window.calcDistance = function(addr) {
       if (!addr || addr.length < 4) return;
-      
-      // Khuyến nghị: Giám đốc tạo tài khoản tại account.goong.io để lấy API Key dán vào đây
       const GOONG_API_KEY = 'YOUR_GOONG_API_KEY_HERE'; 
-      
       fetch(`https://rsapi.goong.io/geocode?address=${encodeURIComponent(addr + ", Phan Thiết")}&api_key=${GOONG_API_KEY}`)
       .then(r => r.json()).then(d => {
         if (d && d.results && d.results.length > 0) {
@@ -695,7 +810,6 @@ window.calcDistance = function(addr) {
           const lat = parseFloat(loc.lat), lon = parseFloat(loc.lng);
           const R = 6371, dLat = (lat-STORE_LAT)*Math.PI/180, dLon = (lon-STORE_LON)*Math.PI/180;
           const a = Math.sin(dLat/2)**2 + Math.cos(STORE_LAT*Math.PI/180)*Math.cos(lat*Math.PI/180)*Math.sin(dLon/2)**2;
-          // Nhân hệ số 1.25 để bù trừ độ dài thực tế của đường gấp khúc/đường hẻm
           calculatedKm = Math.max(1.0, Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)) * 1.25 * 10) / 10);
         } else calculatedKm = 2.5;
         document.getElementById('shipDistanceText').innerText = `Khoảng ${calculatedKm} km`; updateCalc();
@@ -706,10 +820,17 @@ window.calcDistance = function(addr) {
       e.preventDefault(); checkOperatingHours(); if (!isStoreOpen) return alert("Quán đã đóng cửa!");
       let sub = 0; for (let k in cart) sub += cart[k].price * cart[k].qty; if (sub === 0) return;
 
-      const name = document.getElementById('cusName').value; const phone = document.getElementById('cusPhone').value || (tableParam ? 'Tại quán' : '');
+      const name = document.getElementById('cusName').value; 
+      const phone = document.getElementById('cusPhone').value || (tableParam ? 'Tại quán' : '');
       const addr = tableParam ? `Ăn tại quán (Bàn ${tableParam})` : document.getElementById('cusAddress').value;
 
-      if (!tableParam && phone && name && !localStorage.getItem('hyChayUserProfile')) { localStorage.setItem('hyChayUserProfile', JSON.stringify({ name, phone, address: addr, birthday: '' })); }
+      // NÂNG CẤP: Tự động cập nhật SĐT/Địa chỉ vào hồ sơ nếu khách thay đổi lúc Checkout
+      if (!tableParam && currentUserAuth) {
+          if (phone !== currentUserProfile.phone || addr !== currentUserProfile.address) {
+              set(ref(db, `customers/${currentUserAuth.uid}`), { ...currentUserProfile, phone, address: addr, name, updatedAt: new Date().toISOString() });
+              currentUserProfile.phone = phone; currentUserProfile.address = addr;
+          }
+      }
 
       const orderData = {
         orderType: tableParam ? 'dine_in' : 'delivery', table: tableParam ? `Bàn ${tableParam}` : null,
