@@ -634,14 +634,8 @@
                     document.getElementById('rPhone').value = ''; document.getElementById('rPass').value = ''; document.getElementById('rPassConfirm').value = '';
                 }, 1500);
             });
-        }).catch(err => {
+}).catch(err => {
             isRegistering = false; // Tắt cờ nếu có lỗi
-            errBox.innerText = (err.code === 'auth/email-already-in-use') ? "Số điện thoại này đã được đăng ký!" : "Lỗi đăng ký, vui lòng thử lại!";
-            errBox.style.display = 'block';
-        });
-    };
-
-        }).catch(err => {
             errBox.innerText = (err.code === 'auth/email-already-in-use') ? "Số điện thoại này đã được đăng ký!" : "Lỗi đăng ký, vui lòng thử lại!";
             errBox.style.display = 'block';
         });
