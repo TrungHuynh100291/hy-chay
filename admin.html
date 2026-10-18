@@ -409,20 +409,23 @@
     // 1. HỆ THỐNG XÁC THỰC PHÂN QUYỀN ROOT - MANAGER
     // ==========================================
     
-    // Tài khoản ROOT cố định (Giám đốc có thể đổi mật khẩu ở đây)
-    const ROOT_USER = "balshousevn@gmail.com";
-    const ROOT_PASS = "hychayfood";
+    // Tài khoản ROOT cố định
+    const ROOT_USER = "admin";
+    const ROOT_PASS = "baochay2026";
 
-    // Hàm thiết lập giao diện theo quyền
+    // HÀM BẢO VỆ: Chuẩn hóa ID tài khoản (Loại bỏ dấu chấm của @gmail.com)
+    function sanitizeUser(username) {
+        return username.replace(/\./g, '_').replace(/[#$\[\]\/]/g, '-');
+    }
+
     function applyRoleUI(role) {
        if (role !== 'root') {
-           document.getElementById('tabUsers').style.display = 'none'; // Giấu tab phân quyền với nhân viên
+           document.getElementById('tabUsers').style.display = 'none';
        } else {
            document.getElementById('tabUsers').style.display = 'inline-block';
        }
     }
 
-    // Kiểm tra phiên làm việc khi vừa mở app
     window.addEventListener('DOMContentLoaded', () => {
       const activeUser = localStorage.getItem('hy_chay_active_user');
       const activeRole = localStorage.getItem('hy_chay_active_role');
@@ -438,7 +441,7 @@
 
     window.handleAdminLogin = function(e) {
       e.preventDefault();
-      const user = document.getElementById('adminEmail').value.trim(); // Dùng trường Email làm Tên đăng nhập
+      const rawUser = document.getElementById('adminEmail').value.trim(); 
       const pass = document.getElementById('adminPassword').value;
       const btn = document.getElementById('btnLoginSubmit');
       const errBox = document.getElementById('loginErrorMsg');
@@ -446,21 +449,27 @@
       errBox.style.display = 'none';
       btn.innerText = "ĐANG XÁC THỰC..."; btn.disabled = true;
 
-      // 1. Kiểm tra tài khoản ROOT (Giám đốc)
-      if (user === ROOT_USER && pass === ROOT_PASS) {
-          loginSuccess(user, 'root');
+      // Kiểm tra tài khoản ROOT
+      if (rawUser === ROOT_USER && pass === ROOT_PASS) {
+          loginSuccess(rawUser, 'root');
           return;
       }
 
-      // 2. Kiểm tra tài khoản Quản lý phụ từ Database
+      // Chuẩn hóa tên đăng nhập trước khi truy vấn
+      const safeUser = sanitizeUser(rawUser);
+
       import("https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js").then((mod) => {
-          mod.get(mod.ref(db, 'admin_users/' + user)).then((snap) => {
-              if (snap.exists() && snap.val().password === pass) {
-                  loginSuccess(user, 'manager');
-              } else {
-                  showLoginError("Sai tên đăng nhập hoặc mật khẩu!", btn, errBox);
-              }
-          }).catch(() => showLoginError("Lỗi kết nối máy chủ!", btn, errBox));
+          try {
+              mod.get(mod.ref(db, 'admin_users/' + safeUser)).then((snap) => {
+                  if (snap.exists() && snap.val().password === pass) {
+                      loginSuccess(rawUser, 'manager');
+                  } else {
+                      showLoginError("Sai tên đăng nhập hoặc mật khẩu!", btn, errBox);
+                  }
+              }).catch(() => showLoginError("Lỗi kết nối máy chủ!", btn, errBox));
+          } catch(err) {
+              showLoginError("Lỗi dữ liệu: Hệ thống từ chối ký tự đặc biệt.", btn, errBox);
+          }
       });
     };
 
@@ -492,33 +501,46 @@
     };
 
     // ==========================================
-    // 2. CÁC HÀM QUẢN LÝ TÀI KHOẢN PHỤ
+    // 2. CÁC HÀM QUẢN LÝ TÀI KHOẢN PHỤ (ĐÃ VÁ LỖI GMAIL)
     // ==========================================
     window.createSubAccount = function() {
-        const user = document.getElementById('newUsername').value.trim();
+        const rawUser = document.getElementById('newUsername').value.trim();
         const pass = document.getElementById('newPassword').value.trim();
-        if (!user || !pass) return alert("Vui lòng nhập đủ Tên đăng nhập và Mật khẩu!");
-        if (user === ROOT_USER) return alert("Không được dùng trùng tên với tài khoản Gốc!");
+        if (!rawUser || !pass) return alert("Vui lòng nhập đủ Tên đăng nhập và Mật khẩu!");
+        if (rawUser === ROOT_USER) return alert("Không được dùng trùng tên với tài khoản Gốc!");
 
-        set(ref(db, 'admin_users/' + user), { password: pass, role: 'manager', createdAt: new Date().toISOString() })
-        .then(() => {
-            alert("✅ Tạo tài khoản quản lý phụ thành công!");
-            document.getElementById('newUsername').value = '';
-            document.getElementById('newPassword').value = '';
-        });
-    };
+        // Khử trùng các ký tự độc hại với Firebase
+        const safeUser = sanitizeUser(rawUser);
 
-    window.deleteSubAccount = function(user) {
-        if(confirm(`⚠️ Xóa vĩnh viễn tài khoản: ${user}?`)) {
-            remove(ref(db, 'admin_users/' + user));
+        try {
+            set(ref(db, 'admin_users/' + safeUser), { 
+                password: pass, 
+                role: 'manager', 
+                originalName: rawUser, // Lưu lại nguyên bản để in ra cho đẹp
+                createdAt: new Date().toISOString() 
+            }).then(() => {
+                alert("✅ Tạo tài khoản quản lý phụ thành công!");
+                document.getElementById('newUsername').value = '';
+                document.getElementById('newPassword').value = '';
+            }).catch(err => alert("❌ Lỗi hệ thống: " + err.message));
+        } catch(err) {
+            alert("❌ Không thể tạo: Vui lòng bỏ bớt ký tự đặc biệt.");
         }
     };
 
-    // Lắng nghe danh sách tài khoản để in ra bảng
+    window.deleteSubAccount = function(userKey) {
+        if(confirm(`⚠️ Xóa vĩnh viễn tài khoản này?`)) {
+            remove(ref(db, 'admin_users/' + userKey));
+        }
+    };
+
+    // Lắng nghe và in danh sách tài khoản
     onValue(ref(db, 'admin_users'), (snap) => {
         const users = snap.val() || {}; let html = '';
-        for (let u in users) {
-            html += `<tr><td><b>${u}</b></td><td>${users[u].password}</td><td><span style="background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:12px; font-size:0.8rem; font-weight:bold;">Nhân viên</span></td><td><button onclick="deleteSubAccount('${u}')" style="background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; padding:4px 10px; border-radius:6px; font-weight:bold; cursor:pointer;">Xóa</button></td></tr>`;
+        for (let key in users) {
+            // Lấy lại tên gốc (có @gmail.com) để hiển thị
+            const displayUser = users[key].originalName || key;
+            html += `<tr><td><b>${displayUser}</b></td><td>${users[key].password}</td><td><span style="background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:12px; font-size:0.8rem; font-weight:bold;">Nhân viên</span></td><td><button onclick="deleteSubAccount('${key}')" style="background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; padding:4px 10px; border-radius:6px; font-weight:bold; cursor:pointer;">Xóa</button></td></tr>`;
         }
         const tbody = document.getElementById('subAccountsBody');
         if (tbody) tbody.innerHTML = html || '<tr><td colspan="4" style="text-align:center;">Chưa có tài khoản phụ nào.</td></tr>';
