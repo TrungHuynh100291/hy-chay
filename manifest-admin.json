@@ -1,0 +1,20 @@
+{
+  "name": "Hy Chay - Trung Tâm Điều Hành POS",
+  "short_name": "Hy Chay POS",
+  "start_url": "/admin.html",
+  "display": "standalone",
+  "background_color": "#1e5e3a",
+  "theme_color": "#1e5e3a",
+  "icons": [
+    {
+      "src": "Logo nho.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "Logo nho.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
