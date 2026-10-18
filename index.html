@@ -166,16 +166,18 @@
   <!-- =============================== -->
   <!-- PHẦN 2: HTML - CẤU TRÚC WEB    -->
   <!-- =============================== -->
-  <header>
-<div class="nav-actions" style="display: flex; gap: 8px; align-items: center;">
-        <!-- Nút Cài App: Ẩn tuyệt đối nếu đang chạy app dạng cửa sổ độc lập trên máy tính/điện thoại -->
-        <button id="btnInstallApp" class="btn-account" style="background: #0284c7; color: #fff; border: none; display: inline-flex; align-items: center; gap: 4px;" onclick="openInstallGuideModal()">📲 Cài App</button>
-        
-        <!-- Nút Tài Khoản / Đăng Nhập DUY NHẤT -->
-        <button id="btnHeaderAccount" class="btn-account" style="display: inline-flex; align-items: center; gap: 4px;" onclick="openAccountModal()">👤 Đăng nhập</button>
-      </div>
-        <!-- Đổi thành Tài Khoản, sẽ hiển thị Tên hoặc SĐT khi có User -->
-        <button id="btnHeaderAccount" class="btn-account" onclick="openAccountModal()">👤 Đăng nhập</button>
+<header style="background: #ffffff; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);">
+    <div class="nav-container" style="max-width: 1200px; margin: 0 auto; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center;">
+      <!-- LOGO HY CHAY CHUẨN XÁC -->
+      <a href="#" class="brand-logo" style="display: flex; align-items: center; gap: 12px; text-decoration: none;">
+        <img src="Logo nho.png" alt="Hy Chay Logo" style="height: 40px; width: auto; border-radius: 8px;" onerror="this.src='https://hychayfood.vercel.app/Logo%20nho.png'">
+        <span style="font-size: 1.25rem; font-weight: 800; color: #1e5e3a; font-family: 'Montserrat', sans-serif;">HY CHAY</span>
+      </a>
+      
+      <!-- KHU VỰC NÚT BẤM (ĐÃ GỘP CHUNG, KHÔNG BAO GIỜ BỊ RỚT DÒNG HAY NHÂN ĐÔI) -->
+      <div class="nav-actions" style="display: flex; gap: 8px; align-items: center;">
+        <button id="btnInstallApp" class="btn-account" style="background: #0284c7; color: #fff; border: none; padding: 8px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" onclick="openInstallGuideModal()">📲 Cài App</button>
+        <button id="btnHeaderAccount" class="btn-account" style="background: #eaf5ed; color: #1e5e3a; border: 1px solid #c7e5d2; padding: 8px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" onclick="openAccountModal()">👤 Đăng nhập</button>
       </div>
     </div>
   </header>
