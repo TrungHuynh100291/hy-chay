@@ -532,10 +532,14 @@
         }
     });
 
-    // HỆ THỐNG AUTHENTICATION (Bẻ khóa dùng SĐT + Password thay cho Email)
+// HỆ THỐNG AUTHENTICATION (Bẻ khóa dùng SĐT + Password thay cho Email)
     const getFakeEmail = (phone) => `${phone}@hychay.com`;
 
-onAuthStateChanged(auth, (user) => {
+    // 1. THÊM BIẾN CỜ HIỆU ĐỂ SỬA LỖI ZOMBIE LISTENER
+    let isRegistering = false;
+
+    // 2. HÀM LẮNG NGHE ĐĂNG NHẬP (ĐÃ VÁ LỖI)
+    onAuthStateChanged(auth, (user) => {
       // Ẩn nút Cài App nếu app đang chạy ở chế độ Standalone (đã cài ra máy tính/điện thoại)
       if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
           const btnInst = document.getElementById('btnInstallApp');
@@ -571,7 +575,12 @@ onAuthStateChanged(auth, (user) => {
                 document.getElementById('btnHeaderAccount').innerText = `👤 ${currentUserPhone}`;
             }
         });
-        loadOrderHistoryTracker(currentUserPhone);
+        
+        // FIX LỖI: Chỉ tải lịch sử khi Đang đăng nhập bình thường (không phải đang xử lý tạo tài khoản)
+        if (!isRegistering) {
+            loadOrderHistoryTracker(currentUserPhone);
+        }
+        
       } else {
         currentUserId = null; currentUserPhone = null;
         if(document.getElementById('authView')) document.getElementById('authView').style.display = 'block';
@@ -591,6 +600,45 @@ onAuthStateChanged(auth, (user) => {
             document.getElementById('formLogin').style.display = 'none';
             document.getElementById('formRegister').style.display = 'block';
         }
+    };
+
+    // 3. HÀM ĐĂNG KÝ (ĐÃ VÁ LỖI)
+    window.handleRegister = function() {
+        const phone = document.getElementById('rPhone').value.trim();
+        const pass = document.getElementById('rPass').value;
+        const passConfirm = document.getElementById('rPassConfirm').value;
+        const errBox = document.getElementById('rError');
+        const succBox = document.getElementById('rSuccess');
+        
+        errBox.style.display = 'none'; succBox.style.display = 'none';
+        if(!phone || pass.length < 6) return errBox.innerText = "SĐT và Mật khẩu (tối thiểu 6 ký tự) là bắt buộc!", errBox.style.display = 'block';
+        if(pass !== passConfirm) return errBox.innerText = "Mật khẩu không khớp!", errBox.style.display = 'block';
+
+        // BẬT CỜ BÁO HIỆU: Đang xử lý đăng ký
+        isRegistering = true;
+
+        createUserWithEmailAndPassword(auth, getFakeEmail(phone), pass)
+        .then((userCred) => {
+            succBox.style.display = 'block';
+            // Tạo profile rỗng trên Realtime DB
+            set(ref(db, `users/${userCred.user.uid}`), { phone: phone, createdAt: new Date().toISOString() });
+            
+            // Tự động SignOut để quay lại tab Login đúng ý Giám đốc
+            signOut(auth).then(() => {
+                // TẮT CỜ SAU KHI ĐĂNG XUẤT XONG
+                isRegistering = false;
+                setTimeout(() => {
+                    document.getElementById('lPhone').value = phone;
+                    switchAuthTab('login');
+                    succBox.style.display = 'none';
+                    document.getElementById('rPhone').value = ''; document.getElementById('rPass').value = ''; document.getElementById('rPassConfirm').value = '';
+                }, 1500);
+            });
+        }).catch(err => {
+            isRegistering = false; // Tắt cờ nếu có lỗi
+            errBox.innerText = (err.code === 'auth/email-already-in-use') ? "Số điện thoại này đã được đăng ký!" : "Lỗi đăng ký, vui lòng thử lại!";
+            errBox.style.display = 'block';
+        });
     };
 
     window.handleRegister = function() {
