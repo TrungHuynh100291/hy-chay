@@ -167,12 +167,12 @@
   <!-- PHẦN 2: HTML - CẤU TRÚC WEB    -->
   <!-- =============================== -->
   <header>
-<div class="nav-actions" style="display:flex; gap:10px; align-items:center;">
-        <!-- Nút Cài App sẽ tự động biến mất khi mở app trên Laptop/Mobile ở chế độ Standalone -->
-        <button id="btnInstallApp" class="btn-account" style="background:#0284c7; color:#fff; border:none; display:none;" onclick="openInstallGuideModal()">📲 Cài App</button>
+<div class="nav-actions" style="display: flex; gap: 8px; align-items: center;">
+        <!-- Nút Cài App: Ẩn tuyệt đối nếu đang chạy app dạng cửa sổ độc lập trên máy tính/điện thoại -->
+        <button id="btnInstallApp" class="btn-account" style="background: #0284c7; color: #fff; border: none; display: inline-flex; align-items: center; gap: 4px;" onclick="openInstallGuideModal()">📲 Cài App</button>
         
-        <!-- Nút Tài Khoản / Đăng Nhập duy nhất -->
-        <button id="btnHeaderAccount" class="btn-account" onclick="openAccountModal()">👤 Đăng nhập</button>
+        <!-- Nút Tài Khoản / Đăng Nhập DUY NHẤT -->
+        <button id="btnHeaderAccount" class="btn-account" style="display: inline-flex; align-items: center; gap: 4px;" onclick="openAccountModal()">👤 Đăng nhập</button>
       </div>
         <!-- Đổi thành Tài Khoản, sẽ hiển thị Tên hoặc SĐT khi có User -->
         <button id="btnHeaderAccount" class="btn-account" onclick="openAccountModal()">👤 Đăng nhập</button>
@@ -493,15 +493,13 @@
     window.openInstallGuideModal = () => document.getElementById('installGuideModal').classList.add('active');
     window.closeInstallGuideModal = () => document.getElementById('installGuideModal').classList.remove('active');
 
-    // Tự động nhắc cài app nếu khách vào web lần 2 mà chưa cài (Tùy chọn Marketing)
+// Kiểm tra và ẩn nút Cài App ngay lập tức nếu đang mở App độc lập trên máy tính/điện thoại
     window.addEventListener('DOMContentLoaded', () => {
-        let visitCount = localStorage.getItem('hyChayVisits') || 0;
-        visitCount++;
-        localStorage.setItem('hyChayVisits', visitCount);
-        
-        // Nếu vào lần thứ 2 và chưa mở app dạng Standalone (nghĩa là đang dùng trên trình duyệt)
-        if(visitCount === 2 && !window.matchMedia('(display-mode: standalone)').matches) {
-            setTimeout(() => { window.openInstallGuideModal(); }, 5000); // Đợi 5 giây rồi pop-up
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+            const btnInst = document.getElementById('btnInstallApp');
+            if (btnInst) {
+                btnInst.style.setProperty('display', 'none', 'important');
+            }
         }
     });
 
