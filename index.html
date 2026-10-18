@@ -877,13 +877,16 @@ window.saveUserProfile = function() {
       if (c > 0) b.classList.add('active'); else { b.classList.remove('active'); closeCheckoutModal(); }
     }
 
-    window.openAccountModal = function() {
+window.openAccountModal = function() {
+      // Ép hiển thị đúng khung giao diện tùy theo trạng thái đã đăng nhập hay chưa
       if (currentUserId) {
-        document.getElementById('authView').style.display = 'none'; document.getElementById('profileView').style.display = 'block';
+        document.getElementById('authView').style.display = 'none'; 
+        document.getElementById('profileView').style.display = 'block';
         loadOrderHistoryTracker(currentUserPhone);
       } else {
-        document.getElementById('authView').style.display = 'block'; document.getElementById('profileView').style.display = 'none';
-        switchAuthTab('login');
+        document.getElementById('authView').style.display = 'block'; 
+        document.getElementById('profileView').style.display = 'none';
+        window.switchAuthTab('login'); // Mặc định mở tab Đăng Nhập kèm khung nhập liệu
       }
       document.getElementById('accountModal').classList.add('active');
     };
