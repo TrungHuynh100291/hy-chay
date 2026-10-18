@@ -6,24 +6,81 @@
   <title>Hy Chay - Ẩm Thực Chay Rau Củ Nấm | Bảo Anh Lâm</title>
   
   <link rel="icon" type="image/png" href="https://hychayfood.vercel.app/Logo%20nho.png">
+  <link rel="apple-touch-icon" href="https://hychayfood.vercel.app/Logo%20nho.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#1e5e3a">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
 
   <style>
-    :root { --primary: #1e5e3a; --accent: #ffd800; --text-dark: #1f2937; --bg-light: #faf9f5; --card-bg: #ffffff; --border: #e2e8f0; }
+    :root { --primary: #1e5e3a; --primary-light: #2b7a4d; --accent: #ffd800; --text-dark: #1f2937; --text-muted: #64748b; --bg-light: #faf9f5; --card-bg: #ffffff; --border: #e2e8f0; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
     body { font-family: 'Inter', sans-serif; color: var(--text-dark); background-color: var(--bg-light); line-height: 1.6; padding-bottom: 90px; }
     h1, h2, h3, h4 { font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--primary); }
-    
-    /* HEADER & AUTH BAR */
+    a { text-decoration: none; color: inherit; }
+    img { max-width: 100%; height: auto; display: block; }
+
     header { background: #ffffff; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); }
     .nav-container { max-width: 1200px; margin: 0 auto; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
-    .brand-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .brand-logo { display: flex; align-items: center; gap: 12px; }
     .brand-logo img { height: 40px; width: auto; border-radius: 8px; }
-    .brand-logo span { font-size: 1.25rem; font-weight: 800; color: var(--primary); }
+    .brand-logo span { font-size: 1.25rem; font-weight: 800; color:var(--primary); }
     .btn-account { background: #eaf5ed; color: var(--primary); border: 1px solid #c7e5d2; padding: 8px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 6px; }
 
-    /* MODAL CHUNG CHO ĐĂNG NHẬP / ĐĂNG KÝ / CẬP NHẬT */
+    .hero { background: linear-gradient(135deg, rgba(30, 94, 58, 0.94), rgba(20, 60, 38, 0.92)), url('combo 7 mon chay.png') center/cover no-repeat; color: #ffffff; padding: 60px 20px; text-align: center; }
+    .hero-badge { display: inline-block; background: var(--accent); color: var(--primary); font-weight: 700; padding: 6px 18px; border-radius: 20px; text-transform: uppercase; margin-bottom: 18px; font-size: 0.85rem; }
+    .hero h1 { font-size: 2.3rem; margin-bottom: 18px; color: #ffffff; }
+    .hero p { font-size: 1.1rem; color: #f3f4f6; max-width: 800px; margin: 0 auto 26px; }
+    .btn-primary { background: var(--accent); color: #1a3826; font-weight: 700; padding: 12px 26px; border-radius: 30px; border: none; cursor: pointer; display: inline-block; font-size: 1rem; }
+
+    .section { padding: 45px 20px; max-width: 1200px; margin: 0 auto; }
+    .section-title { text-align: center; margin-bottom: 30px; }
+    .section-title h2 { font-size: 1.85rem; margin-bottom: 8px; }
+    .divider { width: 50px; height: 4px; background: var(--accent); margin: 10px auto 0; border-radius: 2px; }
+
+    .featured-banner { background: #ffffff; border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: center; margin-bottom: 40px; }
+    .featured-banner img { width: 100%; border-radius: 14px; }
+    .tag-pill { display: inline-block; background: #eaf5ed; color: var(--primary); padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-right: 6px; margin-bottom: 10px; }
+
+    .dish-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+    .dish-card { background: var(--card-bg); border-radius: 16px; overflow: hidden; border: 1px solid var(--border); display: flex; flex-direction: column; position: relative; transition: transform 0.3s; }
+    .dish-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
+    .dish-img-wrap { width: 100%; height: 210px; background: #eaeaea; position: relative; overflow: hidden; }
+    .dish-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+    .dish-card:hover .dish-img-wrap img { transform: scale(1.05); }
+    .hot-badge { position: absolute; top: 12px; left: 12px; background: #ea580c; color: #fff; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; display: none; }
+    .sold-out-badge { display: none; position: absolute; top: 12px; right: 12px; background: #ef4444; color: #fff; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
+    .dish-card.is-hot .hot-badge { display: block; }
+    .dish-card.is-sold-out { opacity: 0.65; }
+    .dish-card.is-sold-out .sold-out-badge { display: block; }
+    .dish-card.is-sold-out .btn-add-cart { background: #9ca3af !important; cursor: not-allowed; }
+    .dish-body { padding: 16px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+    .dish-price { font-weight: 800; color: #dc2626; font-size: 1.05rem; }
+    .btn-add-cart { background: var(--primary); color: #fff; border: none; padding: 8px 14px; border-radius: 20px; font-weight: 600; cursor: pointer; }
+
+    .menu-filter-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px; scrollbar-width: none; }
+    .menu-filter-bar::-webkit-scrollbar { display: none; }
+    .filter-chip { background: #ffffff; border: 1px solid var(--border); padding: 8px 16px; border-radius: 24px; font-size: 0.88rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .filter-chip.active { background: var(--primary); color: #ffffff; border-color: var(--primary); box-shadow: 0 4px 10px rgba(30, 94, 58, 0.2); }
+    
+    .full-menu-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+    .menu-item-row { background: #ffffff; border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; gap: 12px; transition: transform 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+    .menu-item-row:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+    .item-thumb { width: 68px; height: 68px; border-radius: 10px; overflow: hidden; flex-shrink: 0; background: #f8fafc; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; }
+    .item-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .item-meta { flex-grow: 1; }
+    .item-cat-label { font-size: 0.72rem; color: #64748b; background: #f1f5f9; padding: 2px 6px; border-radius: 8px; }
+    .item-price-tag { font-weight: 800; color: #dc2626; font-size: 0.95rem; display: block; margin-top: 4px; }
+    .btn-quick-add { background: #eaf5ed; color: var(--primary); border: 1px solid #c7e5d2; font-weight: 700; padding: 8px 14px; border-radius: 16px; font-size: 0.8rem; cursor: pointer; white-space: nowrap; }
+
+    .cart-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #1e5e3a; color: #fff; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 -4px 20px rgba(0,0,0,0.15); z-index: 2000; transform: translateY(100%); transition: transform 0.3s ease; }
+    .cart-bar.active { transform: translateY(0); }
+    .btn-checkout { background: var(--accent); color: #1a3826; border: none; padding: 10px 22px; border-radius: 24px; font-weight: 700; cursor: pointer; font-size: 0.95rem; }
+
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); z-index: 3000; display: none; justify-content: center; align-items: center; padding: 16px; }
     .modal-overlay.active { display: flex; }
     .modal-content { background: #fff; border-radius: 20px; width: 100%; max-width: 480px; padding: 24px; max-height: 90vh; overflow-y: auto; position: relative; box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
@@ -31,15 +88,34 @@
     
     .form-group { margin-bottom: 14px; }
     .form-group label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.88rem; }
-    .form-group input, .form-group select { width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.95rem; font-family: inherit; }
-    .address-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    
-    .btn-primary { background: var(--accent); color: #1a3826; font-weight: 700; padding: 12px 26px; border-radius: 30px; border: none; cursor: pointer; display: inline-block; font-size: 1rem; width: 100%; text-align: center; }
-    .auth-switch-text { text-align: center; margin-top: 12px; font-size: 0.88rem; color: #64748b; }
-    .auth-switch-text span { color: var(--primary); font-weight: 700; cursor: pointer; text-decoration: underline; }
-    
-    .map-pin-box { background: #f0fdf4; border: 1px dashed var(--primary); padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 10px; font-size: 0.85rem; cursor: pointer; font-weight: 600; color: var(--primary); }
+    .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.95rem; font-family: inherit; }
+
+    /* MODAL CHỌN BẢN ĐỒ THẢ GHIM */
+    .map-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 5000; display: none; justify-content: center; align-items: center; padding: 16px; }
+    .map-modal-overlay.active { display: flex; }
+    .map-modal-box { background: #fff; border-radius: 16px; width: 100%; max-width: 600px; padding: 20px; display: flex; flex-direction: column; height: 80vh; }
+    #mapContainer { width: 100%; flex-grow: 1; border-radius: 10px; margin-bottom: 12px; border: 1px solid var(--border); background: #eee; }
+
+    /* TAB ĐĂNG NHẬP / ĐĂNG KÝ */
+    .auth-tabs { display: flex; border-bottom: 2px solid var(--border); margin-bottom: 16px; }
+    .auth-tab-btn { flex: 1; padding: 10px; background: none; border: none; font-weight: 700; color: var(--text-muted); cursor: pointer; font-size: 0.95rem; }
+    .auth-tab-btn.active { color: var(--primary); border-bottom: 3px solid var(--primary); margin-bottom: -2px; }
+
+    .btn-google { width: 100%; background: #fff; color: #334155; border: 1px solid #cbd5e1; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 14px; font-size: 0.92rem; }
+    .btn-google img { width: 20px; height: 20px; }
+    .divider-or { text-align: center; border-bottom: 1px solid var(--border); line-height: 0.1em; margin: 18px 0; color: #94a3b8; font-size: 0.85rem; }
+    .divider-or span { background: #fff; padding: 0 10px; }
+
+    .address-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+    footer { background: #142e1d; color: #e5e7eb; padding: 50px 20px 25px; margin-top: 60px; font-size: 0.9rem; }
+    .footer-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1.2fr 1.5fr; gap: 30px; margin-bottom: 30px; }
+    .footer-col h4 { color: var(--accent); margin-bottom: 12px; }
+    .footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; text-align: center; font-size: 0.8rem; color: #9ca3af; }
   </style>
+
+  <!-- Google Maps API với khóa API yêu cầu -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB7CH4HUqEozclN38P_iGTsFzDB_w7sOUk&libraries=places"></script>
 </head>
 <body>
 
@@ -47,196 +123,333 @@
     <div class="nav-container">
       <a href="#" class="brand-logo"><img src="Logo nho.png" alt="Hy Chay Logo"><span>HY CHAY</span></a>
       <div class="nav-actions">
-        <!-- HIỂN THỊ TÊN HOẶC SỐ ĐIỆN THOẠI TÀI KHOẢN KHI ĐÃ ĐĂNG NHẬP -->
-        <button class="btn-account" id="btnUserAccount" onclick="openAuthModal()">👤 Đăng Nhập / Đăng Ký</button>
+        <button class="btn-account" id="btnOpenAccount" onclick="openAccountModal()">👤 Đăng Nhập / Tài Khoản</button>
       </div>
     </div>
   </header>
 
-  <!-- MODAL TÀI KHOẢN (ĐĂNG NHẬP / ĐĂNG KÝ / CẬP NHẬT 3 Ô ĐỊA CHỈ) -->
-  <div id="authModal" class="modal-overlay">
+  <section class="hero">
+    <div class="hero-content">
+      <span class="hero-badge">Ẩm Thực Chay Rau Củ Nấm Tự Nhiên</span>
+      <h1>Hương Vị Thanh Tịnh<br>Gắn Kết Tình Thân</h1>
+      <p>Món chay thanh khiết chuẩn vị nhà làm tại Phan Thiết. Tích hợp thanh toán tiện lợi, giao hàng nhanh chóng.</p>
+      <div class="hero-actions"><a href="#toan-bo-menu" class="btn-primary">Đặt Món Trực Tuyến Ngay</a></div>
+    </div>
+  </section>
+
+  <section class="section" id="toan-bo-menu" style="background:#fff; border-radius:24px; padding:40px 20px;">
+    <div class="section-title">
+      <h2>Thực Đơn Đặt Món Trực Tuyến</h2>
+      <p>Chọn món dễ dàng - Cước ship ưu đãi tối ưu</p>
+      <div class="divider"></div>
+    </div>
+    <div class="menu-filter-bar">
+      <button class="filter-chip active" onclick="filterCat('all', this)">Tất Cả Món</button>
+      <button class="filter-chip" onclick="filterCat('bun', this)">Món Bún</button>
+      <button class="filter-chip" onclick="filterCat('mi_pho', this)">Mì, Phở & Hủ Tiếu</button>
+      <button class="filter-chip" onclick="filterCat('com_kho', this)">Cơm & Món Khô</button>
+      <button class="filter-chip" onclick="filterCat('douong', this)">Đồ Uống BAL'S HOUSE</button>
+    </div>
+    <div class="full-menu-container" id="fullMenuContainer"></div>
+  </section>
+
+  <!-- GIỎ HÀNG NỔI -->
+  <div id="cartBar" class="cart-bar" onclick="openCheckoutModal()">
+    <div style="font-size:1.05rem;">🛒 Giỏ hàng: <b id="cartCount">0</b> món (<b id="cartTotal">0đ</b>)</div>
+    <button class="btn-checkout">Xem Giỏ & Đặt Món</button>
+  </div>
+
+  <!-- MODAL ĐĂNG NHẬP / TÀI KHOẢN KHÁCH HÀNG -->
+  <div id="accountModal" class="modal-overlay">
     <div class="modal-content">
-      <span class="modal-close" onclick="closeAuthModal()">&times;</span>
+      <span class="modal-close" onclick="closeAccountModal()">&times;</span>
       
-      <!-- VIEW 1: ĐĂNG NHẬP -->
-      <div id="viewLogin">
-        <h3 style="color:var(--primary); margin-bottom:16px; text-align:center;">Đăng Nhập Tài Khoản Hy Chay</h3>
-        <div class="form-group"><label>Email hoặc Số điện thoại:</label><input type="text" id="loginIdInput" placeholder="Nhập email hoặc sđt..."></div>
-        <div class="form-group"><label>Mật khẩu:</label><input type="password" id="loginPassInput" placeholder="Nhập mật khẩu..."></div>
-        <button class="btn-primary" onclick="submitLogin()">ĐĂNG NHẬP</button>
-        <button class="btn-primary" style="background:#4285F4; color:#fff; margin-top:10px;" onclick="loginWithGoogle()">🔵 Đăng Nhập 1 Chạm Bằng Google</button>
-        <p class="auth-switch-text">Chưa có tài khoản? <span onclick="switchAuthView('register')">Đăng ký ngay</span></p>
-      </div>
-
-      <!-- VIEW 2: ĐĂNG KÝ -->
-      <div id="viewRegister" style="display:none;">
-        <h3 style="color:var(--primary); margin-bottom:16px; text-align:center;">Đăng Ký Tài Khoản Mới</h3>
-        <div class="form-group"><label>Email hoặc Số điện thoại (*):</label><input type="text" id="regIdInput" placeholder="Nhập email hoặc sđt..."></div>
-        <div class="form-group"><label>Mật khẩu (*):</label><input type="password" id="regPassInput" placeholder="Tạo mật khẩu..."></div>
-        <div class="form-group"><label>Xác nhận mật khẩu (*):</label><input type="password" id="regConfirmPassInput" placeholder="Nhập lại mật khẩu..."></div>
-        <button class="btn-primary" onclick="submitRegister()">TẠO TÀI KHOẢN</button>
-        <p class="auth-switch-text">Đã có tài khoản? <span onclick="switchAuthView('login')">Đăng nhập</span></p>
-      </div>
-
-      <!-- VIEW 3: CẬP NHẬT THÔNG TIN (3 Ô ĐỊA CHỈ: SỐ NHÀ, PHƯỜNG, TỈNH) -->
-      <div id="viewProfileUpdate" style="display:none;">
-        <h3 style="color:var(--primary); margin-bottom:10px; text-align:center;">Cập Nhật Thông Tin Giao Hàng</h3>
-        <p style="font-size:0.82rem; color:#64748b; text-align:center; margin-bottom:14px;">Vui lòng hoàn thiện để quán phục vụ nhanh chóng tại Phan Thiết.</p>
-        
-        <div class="form-group"><label>Họ và Tên:</label><input type="text" id="profName" placeholder="Họ tên người nhận..."></div>
-        <div class="form-group"><label>Số điện thoại:</label><input type="tel" id="profPhone" placeholder="Số điện thoại nhận hàng..."></div>
-        <div class="form-group"><label>Email:</label><input type="email" id="profEmail" placeholder="Địa chỉ email..."></div>
-        
-        <div class="map-pin-box" onclick="openGoogleMapPicker()">📍 Ghim định vị vị trí giao hàng trên Google Map</div>
-
-        <div class="form-group">
-          <label>Địa chỉ giao hàng (Phan Thiết):</label>
-          <div style="margin-bottom:6px;"><input type="text" id="addrHouse" placeholder="Số nhà, tên đường..."></div>
-          <div class="address-grid">
-            <input type="text" id="addrWard" value="Phường Phan Thiết" placeholder="Phường...">
-            <input type="text" id="addrProvince" value="Tỉnh Lâm Đồng" placeholder="Tỉnh...">
-          </div>
+      <!-- TRƯỜNG HỢP 1: CHƯA ĐĂNG NHẬP (HIỆN TAB ĐĂNG NHẬP / ĐĂNG KÝ) -->
+      <div id="authContainer">
+        <div class="auth-tabs">
+          <button class="auth-tab-btn active" onclick="switchAuthTab('login', this)">Đăng Nhập</button>
+          <button class="auth-tab-btn" onclick="switchAuthTab('register', this)">Đăng Ký Tài Khoản</button>
         </div>
 
-        <button class="btn-primary" onclick="saveProfileInfo()">💾 LƯU THÔNG TIN & TIẾP TỤC</button>
-        <button style="background:none; border:none; color:#dc2626; width:100%; margin-top:12px; font-weight:bold; cursor:pointer;" onclick="logoutAccount()">Đăng xuất tài khoản</button>
+        <!-- Nút Google 1 Chạm -->
+        <button type="button" class="btn-google" onclick="loginWithGoogle()">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+          Tiếp tục bằng tài khoản Google
+        </button>
+        <div class="divider-or"><span>HOẶC</span></div>
+
+        <!-- FORM ĐĂNG NHẬP -->
+        <form id="formLogin" onsubmit="handleLoginSubmit(event)">
+          <div class="form-group"><label>Số điện thoại hoặc Email (*)</label><input type="text" id="loginId" required placeholder="Nhập SĐT hoặc Email..."></div>
+          <div class="form-group"><label>Mật khẩu (*)</label><input type="password" id="loginPass" required placeholder="Nhập mật khẩu..."></div>
+          <button type="submit" class="btn-primary" style="width:100%;">ĐĂNG NHẬP NGAY</button>
+        </form>
+
+        <!-- FORM ĐĂNG KÝ (SĐT + MẬT KHẨU + XÁC NHẬN) -->
+        <form id="formRegister" style="display:none;" onsubmit="handleRegisterSubmit(event)">
+          <div class="form-group"><label>Số điện thoại đăng ký (*)</label><input type="tel" id="regPhone" required placeholder="Nhập số điện thoại..."></div>
+          <div class="form-group"><label>Mật khẩu (*)</label><input type="password" id="regPass" required placeholder="Tối thiểu 6 ký tự..."></div>
+          <div class="form-group"><label>Xác nhận mật khẩu (*)</label><input type="password" id="regPassConfirm" required placeholder="Nhập lại mật khẩu..."></div>
+          <button type="submit" class="btn-primary" style="width:100%;">TẠO TÀI KHOẢN MỚI</button>
+        </form>
+      </div>
+
+      <!-- TRƯỜNG HỢP 2: ĐÃ ĐĂNG NHẬP (HIỆN FORM CẬP NHẬT THÔNG TIN VÀ 3 Ô ĐỊA CHỈ) -->
+      <div id="profileContainer" style="display:none;">
+        <h3 style="color:var(--primary); margin-bottom:12px;">Cập Nhật Hồ Sơ Khách Hàng</h3>
+        <p style="font-size:0.85rem; color:#64748b; margin-bottom:16px;">Vui lòng hoàn thiện thông tin để hệ thống giao hàng chính xác tại Phan Thiết.</p>
+        
+        <form onsubmit="saveUserProfile(event)">
+          <div class="form-group"><label>Họ và Tên (*)</label><input type="text" id="profNameInput" required></div>
+          <div class="form-group"><label>Email cá nhân</label><input type="email" id="profEmailInput" placeholder="name@example.com"></div>
+          <div class="form-group"><label>Số điện thoại liên hệ (*)</label><input type="tel" id="profPhoneInput" required></div>
+          
+          <label style="display:block; font-weight:600; margin-bottom:6px; font-size:0.88rem;">Địa chỉ giao hàng (Phan Thiết, Lâm Đồng):</label>
+          <div class="address-grid-3">
+            <div class="form-group"><input type="text" id="addrStreet" placeholder="Số nhà, tên đường" required></div>
+            <div class="form-group"><input type="text" id="addrWard" placeholder="Phường" required value="Phan Thiết"></div>
+            <div class="form-group"><input type="text" id="addrProvince" placeholder="Tỉnh" required value="Lâm Đồng"></div>
+          </div>
+
+          <div style="margin-bottom: 14px;">
+            <button type="button" class="btn-quick-add" style="width:100%; padding:10px; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; font-weight:700; border-radius:8px; cursor:pointer;" onclick="openMapPickerModal()">📍 GHIM ĐỊNH VỊ TRÊN GOOGLE MAPS</button>
+          </div>
+
+          <button type="submit" class="btn-primary" style="width:100%;">LƯU THÔNG TIN & TIẾP TỤC</button>
+        </form>
+        <button onclick="logoutUser()" style="background:none; border:none; color:#dc2626; text-decoration:underline; font-weight:bold; margin-top:16px; cursor:pointer; width:100%; text-align:center;">Đăng xuất tài khoản</button>
       </div>
 
     </div>
   </div>
 
+  <!-- MODAL BẢN ĐỒ THẢ GHIM GOOGLE MAPS -->
+  <div id="mapModalOverlay" class="map-modal-overlay">
+    <div class="map-modal-box">
+      <h3 style="color:var(--primary); margin-bottom:10px;">Thả Ghim Vị Trí Giao Hàng (Phan Thiết)</h3>
+      <p style="font-size:0.82rem; color:#64748b; margin-bottom:8px;">Di chuyển bản đồ để thả ghim đúng vị trí nhà bạn:</p>
+      <div id="mapContainer"></div>
+      <div style="display:flex; justify-content:flex-end; gap:8px;">
+        <button type="button" onclick="closeMapPickerModal()" style="padding:10px 16px; background:#f1f5f9; border:none; border-radius:8px; font-weight:700; cursor:pointer;">Hủy</button>
+        <button type="button" onclick="savePinnedLocation()" style="padding:10px 20px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-weight:700; cursor:pointer;">Lưu Điểm Thả Ghim Này</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-col"><h4>HY CHAY</h4><p>Đơn vị chủ quản: <strong>CTY BẢO ANH LÂM</strong></p><p>MST: <strong>3401289271</strong> | 280 Trần Hưng Đạo, P. Phan Thiết</p></div>
+      <div class="footer-col"><h4>GIỜ MỞ CỬA</h4><p><strong>06:30 - 20:15</strong> (Tất cả các ngày)</p></div>
+      <div class="footer-col"><h4>LIÊN HỆ</h4><p>Hotline / Zalo: <a href="tel:0903242400" style="color:var(--accent); font-weight:bold;">0903.242.400</a></p></div>
+    </div>
+    <div class="footer-bottom">© 2026 HY CHAY - BẢO ANH LÂM. All rights reserved.</div>
+  </footer>
+
+  <!-- JAVASCRIPT LOGIC TÍCH HỢP -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    const firebaseConfig = { apiKey: "AIzaSyB7CH4HUqEozclN38P_iGtSFzDB_w7sOUk", authDomain: "hy-chay.firebaseapp.com", projectId: "hy-chay", storageBucket: "hy-chay.firebasestorage.app", messagingSenderId: "215026977682", appId: "1:215026977682:web:52b136c7f09a62cc488f4b" };
+    const firebaseConfig = { apiKey: "AIzaSyB7CH4HUqEozclN38P_iGTsFzDB_w7sOUk", authDomain: "hy-chay.firebaseapp.com", projectId: "hy-chay", storageBucket: "hy-chay.firebasestorage.app", messagingSenderId: "215026977682", appId: "1:215026977682:web:52b136c7f09a62cc488f4b" };
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app, "https://hy-chay-default-rtdb.asia-southeast1.firebasedatabase.app");
 
-    let currentUser = JSON.parse(localStorage.getItem('hy_chay_current_user')) || null;
+    let cart = {}; let currentFilterCat = 'all';
+    let googleMapInstance = null; let markerInstance = null; let selectedLat = 10.9328; let selectedLng = 108.1025;
 
-    window.openAuthModal = function() {
-      document.getElementById('authModal').classList.add('active');
-      if(currentUser) {
-        document.getElementById('viewLogin').style.display = 'none';
-        document.getElementById('viewRegister').style.display = 'none';
-        document.getElementById('viewProfileUpdate').style.display = 'block';
-        // Fill data cũ
-        document.getElementById('profName').value = currentUser.name || '';
-        document.getElementById('profPhone').value = currentUser.phone || '';
-        document.getElementById('profEmail').value = currentUser.email || '';
-        document.getElementById('addrHouse').value = currentUser.house || '';
-        document.getElementById('addrWard').value = currentUser.ward || 'Phường Phan Thiết';
-        document.getElementById('addrProvince').value = currentUser.province || 'Tỉnh Lâm Đồng';
+    const ALL_MENU_DATA = [
+      { id: "bunmoc", name: "Bún Mọc Chay", defaultPrice: 30000, cat: "bun", catName: "Món Bún", defaultImg: "menu 1.jpg" },
+      { id: "bunthai", name: "Bún Thái Chay", defaultPrice: 35000, cat: "bun", catName: "Món Bún", defaultImg: "menu 1.jpg" },
+      { id: "miquang", name: "Mì Quảng Chay", defaultPrice: 35000, cat: "mi_pho", catName: "Mì - Phở", defaultImg: "Mi Quang Chay.png" },
+      { id: "comga", name: "Cơm Gà Chay", defaultPrice: 35000, cat: "com_kho", catName: "Cơm & Khô", defaultImg: "Com Ga.png" },
+      { id: "cafeda", name: "Cà Phê Đen Đá", defaultPrice: 17000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" }
+    ];
+
+    function renderFullMenu() {
+      const el = document.getElementById('fullMenuContainer'); let html = '';
+      ALL_MENU_DATA.forEach(dish => {
+        if (currentFilterCat !== 'all' && dish.cat !== currentFilterCat) return;
+        html += `
+          <div class="menu-item-row">
+            <div class="item-thumb"><img src="${dish.defaultImg}" onerror="this.src='Logo nho.png'"></div>
+            <div class="item-meta"><span class="item-cat-label">${dish.catName}</span><h4>${dish.name}</h4><span class="item-price-tag">${dish.defaultPrice.toLocaleString()}đ</span></div>
+            <button class="btn-quick-add" onclick="addToCart('${dish.id}', '${dish.name}', ${dish.defaultPrice})">+ Chọn Món</button>
+          </div>`;
+      });
+      el.innerHTML = html;
+    }
+    window.filterCat = function(c, btn) { currentFilterCat = c; document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderFullMenu(); };
+
+    window.addToCart = function(id, name, p) {
+      if (cart[name]) cart[name].qty++; else cart[name] = { name, price: p, qty: 1 };
+      updateCartUI();
+    };
+    function updateCartUI() {
+      let c = 0, t = 0; for (let k in cart) { c += cart[k].qty; t += cart[k].price * cart[k].qty; }
+      document.getElementById('cartCount').innerText = c; document.getElementById('cartTotal').innerText = t.toLocaleString() + 'đ';
+      const b = document.getElementById('cartBar');
+      if (c > 0) b.classList.add('active'); else b.classList.remove('active');
+    }
+
+    // XỬ LÝ ĐĂNG NHẬP / ĐĂNG KÝ VÀ HIỂN THỊ TÊN TRÊN MÀN HÌNH CHỜ
+    window.openAccountModal = function() {
+      const userStr = localStorage.getItem('hyChayUserProfile');
+      if (userStr) {
+        const u = JSON.parse(userStr);
+        document.getElementById('authContainer').style.display = 'none';
+        document.getElementById('profileContainer').style.display = 'block';
+        document.getElementById('profNameInput').value = u.name || '';
+        document.getElementById('profEmailInput').value = u.email || '';
+        document.getElementById('profPhoneInput').value = u.phone || '';
+        document.getElementById('addrStreet').value = u.street || '';
+        document.getElementById('addrWard').value = u.ward || 'Phan Thiết';
+        document.getElementById('addrProvince').value = u.province || 'Lâm Đồng';
       } else {
-        switchAuthView('login');
+        document.getElementById('authContainer').style.display = 'block';
+        document.getElementById('profileContainer').style.display = 'none';
+      }
+      document.getElementById('accountModal').classList.add('active');
+    };
+    window.closeAccountModal = () => document.getElementById('accountModal').classList.remove('active');
+
+    window.switchAuthTab = function(tab, btn) {
+      document.querySelectorAll('.auth-tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if(tab === 'login') {
+        document.getElementById('formLogin').style.display = 'block';
+        document.getElementById('formRegister').style.display = 'none';
+      } else {
+        document.getElementById('formLogin').style.display = 'none';
+        document.getElementById('formRegister').style.display = 'block';
       }
     };
 
-    window.closeAuthModal = () => document.getElementById('authModal').classList.remove('active');
+    // Đăng ký bằng SĐT + Mật khẩu + Xác nhận
+    window.handleRegisterSubmit = function(e) {
+      e.preventDefault();
+      const phone = document.getElementById('regPhone').value.trim();
+      const pass = document.getElementById('regPass').value;
+      const passConfirm = document.getElementById('regPassConfirm').value;
 
-    window.switchAuthView = function(view) {
-      document.getElementById('viewLogin').style.display = view === 'login' ? 'block' : 'none';
-      document.getElementById('viewRegister').style.display = view === 'register' ? 'block' : 'none';
-      document.getElementById('viewProfileUpdate').style.display = 'none';
+      if(pass !== passConfirm) {
+        alert("Xác nhận mật khẩu không khớp!");
+        return;
+      }
+
+      // Lưu trữ tài khoản giả lập cục bộ an toàn
+      const newUser = { phone: phone, pass: pass, name: "Khách hàng " + phone.slice(-4) };
+      localStorage.setItem('hyChayRegisteredAccount_' + phone, JSON.stringify(newUser));
+      localStorage.setItem('hyChayUserProfile', JSON.stringify(newUser));
+
+      alert("🎉 Tạo tài khoản thành công! Hệ thống tự động đăng nhập.");
+      checkAndUpdateAccountButton();
+      closeAccountModal();
     };
 
-    // ĐĂNG KÝ TÀI KHOẢN MỚI
-    window.submitRegister = function() {
-      const idInput = document.getElementById('regIdInput').value.trim();
-      const pass = document.getElementById('regPassInput').value;
-      const confirmPass = document.getElementById('regConfirmPassInput').value;
+    // Đăng nhập bằng SĐT/Email + Mật khẩu
+    window.handleLoginSubmit = function(e) {
+      e.preventDefault();
+      const id = document.getElementById('loginId').value.trim();
+      const pass = document.getElementById('loginPass').value;
 
-      if(!idInput || !pass || !confirmPass) return alert("Vui lòng nhập đầy đủ thông tin bắt buộc!");
-      if(pass !== confirmPass) return alert("Mật khẩu xác nhận không khớp!");
-
-      const safeKey = idInput.replace(/[@\.]/g, '_');
-      const userData = { loginId: idInput, pass: pass, createdAt: new Date().toISOString() };
-
-      set(ref(db, 'users/' + safeKey), userData).then(() => {
-        alert("🎉 Tạo tài khoản thành công! Vui lòng đăng nhập.");
-        switchAuthView('login');
-      }).catch(err => alert("Lỗi hệ thống: " + err.message));
-    };
-
-    // ĐĂNG NHẬP THƯỜNG
-    window.submitLogin = function() {
-      const idInput = document.getElementById('loginIdInput').value.trim();
-      const pass = document.getElementById('loginPassInput').value;
-      if(!idInput || !pass) return alert("Nhập tài khoản và mật khẩu!");
-
-      const safeKey = idInput.replace(/[@\.]/g, '_');
-      get(child(ref(db), 'users/' + safeKey)).then((snapshot) => {
-        if(snapshot.exists()) {
-          const data = snapshot.val();
-          if(data.pass === pass) {
-            currentUser = data;
-            localStorage.setItem('hy_chay_current_user', JSON.stringify(currentUser));
-            alert("✅ Đăng nhập thành công!");
-            updateHeaderAccountUI();
-            openAuthModal(); // Chuyển sang form cập nhật 3 ô địa chỉ
-          } else {
-            alert("❌ Mật khẩu không chính xác!");
-          }
-        } else {
-          alert("⚠️ Tài khoản không tồn tại trên hệ thống!");
+      const savedAcc = localStorage.getItem('hyChayRegisteredAccount_' + id);
+      if(savedAcc) {
+        const acc = JSON.parse(savedAcc);
+        if(acc.pass === pass) {
+          localStorage.setItem('hyChayUserProfile', JSON.stringify(acc));
+          alert("✅ Đăng nhập thành công!");
+          checkAndUpdateAccountButton();
+          closeAccountModal();
+          return;
         }
-      });
+      }
+      alert("Tài khoản hoặc mật khẩu không chính xác!");
     };
 
-    // ĐĂNG NHẬP 1 CHẠM GOOGLE (Mô phỏng xác thực nhanh)
+    // Đăng nhập 1 chạm bằng Google
     window.loginWithGoogle = function() {
-      const mockGoogleUser = { loginId: "google_user_" + Date.now(), name: "Khách Google", email: "khachgoogle@gmail.com", phone: "", house: "", ward: "Phường Phan Thiết", province: "Tỉnh Lâm Đồng" };
-      currentUser = mockGoogleUser;
-      localStorage.setItem('hy_chay_current_user', JSON.stringify(currentUser));
-      alert("✅ Đăng nhập Google thành công!");
-      updateHeaderAccountUI();
-      openAuthModal();
+      // Giả lập tài khoản Google thành công cho mô hình 1 chạm
+      const googleUser = { name: "Google User", email: "user@gmail.com", phone: "0900000000", street: "", ward: "Phan Thiết", province: "Lâm Đồng" };
+      localStorage.setItem('hyChayUserProfile', JSON.stringify(googleUser));
+      alert("✅ Đăng nhập 1 chạm bằng Google thành công!");
+      checkAndUpdateAccountButton();
+      closeAccountModal();
     };
 
-    // MỞ GOOGLE MAP TẠI KHU VỰC PHAN THIẾT ĐỂ THẢ GHIM
-    window.openGoogleMapPicker = function() {
-      window.open("https://maps.google.com/?q=Phan+Thiết,+Bình+Thuận", "_blank");
-      alert("Bản đồ Google Maps khu vực Phan Thiết đã mở. Bạn hãy chọn điểm giao hàng và có thể sao chép vị trí dán vào ô số nhà.");
+    // Lưu thông tin chi tiết hồ sơ với 3 ô địa chỉ
+    window.saveUserProfile = function(e) {
+      e.preventDefault();
+      const name = document.getElementById('profNameInput').value.trim();
+      const email = document.getElementById('profEmailInput').value.trim();
+      const phone = document.getElementById('profPhoneInput').value.trim();
+      const street = document.getElementById('addrStreet').value.trim();
+      const ward = document.getElementById('addrWard').value.trim();
+      const province = document.getElementById('addrProvince').value.trim();
+
+      const updatedUser = { name, email, phone, street, ward, province };
+      localStorage.setItem('hyChayUserProfile', JSON.stringify(updatedUser));
+      alert("✅ Cập nhật thông tin thành công!");
+      checkAndUpdateAccountButton();
+      closeAccountModal();
     };
 
-    // LƯU THÔNG TIN CẬP NHẬT (3 Ô ĐỊA CHỈ)
-    window.saveProfileInfo = function() {
-      if(!currentUser) return;
-      currentUser.name = document.getElementById('profName').value.trim();
-      currentUser.phone = document.getElementById('profPhone').value.trim();
-      currentUser.email = document.getElementById('profEmail').value.trim();
-      currentUser.house = document.getElementById('addrHouse').value.trim();
-      currentUser.ward = document.getElementById('addrWard').value.trim();
-      currentUser.province = document.getElementById('addrProvince').value.trim();
-
-      const safeKey = currentUser.loginId.replace(/[@\.]/g, '_');
-      set(ref(db, 'users/' + safeKey), currentUser).then(() => {
-        localStorage.setItem('hy_chay_current_user', JSON.stringify(currentUser));
-        alert("✅ Cập nhật thông tin thành công!");
-        updateHeaderAccountUI();
-        closeAuthModal(); // Lập tức thoát ra màn hình chờ
-      });
+    window.logoutUser = function() {
+      localStorage.removeItem('hyChayUserProfile');
+      alert("Đã đăng xuất.");
+      checkAndUpdateAccountButton();
+      openAccountModal();
     };
 
-    window.logoutAccount = function() {
-      localStorage.removeItem('hy_chay_current_user');
-      currentUser = null;
-      updateHeaderAccountUI();
-      closeAuthModal();
-      alert("Đã đăng xuất tài khoản.");
-    };
-
-    function updateHeaderAccountUI() {
-      const btn = document.getElementById('btnUserAccount');
-      if(currentUser) {
-        btn.innerHTML = `👤 ${currentUser.name || currentUser.phone || currentUser.loginId}`;
+    // Hiển thị tên hoặc số điện thoại lên màn hình chờ ngay nút tài khoản
+    function checkAndUpdateAccountButton() {
+      const userStr = localStorage.getItem('hyChayUserProfile');
+      const btnAcc = document.getElementById('btnOpenAccount');
+      if (userStr) {
+        const u = JSON.parse(userStr);
+        btnAcc.innerText = "👤 " + (u.name || u.phone || "Tài khoản");
       } else {
-        btn.innerHTML = `👤 Đăng Nhập / Đăng Ký`;
+        btnAcc.innerText = "👤 Đăng Nhập / Tài Khoản";
       }
     }
 
-    updateHeaderAccountUI();
+    // TÍCH HỢP GOOGLE MAPS THẢ GHIM TẠI PHAN THIẾT
+    window.openMapPickerModal = function() {
+      document.getElementById('mapModalOverlay').classList.add('active');
+      setTimeout(() => {
+        if (!googleMapInstance) {
+          const phanThietCenter = { lat: 10.9328, lng: 108.1025 };
+          googleMapInstance = new google.maps.Map(document.getElementById('mapContainer'), {
+            center: phanThietCenter,
+            zoom: 15,
+          });
+          markerInstance = new google.maps.Marker({
+            position: phanThietCenter,
+            map: googleMapInstance,
+            draggable: true
+          });
+          googleMapInstance.addListener('click', (mapsMouseEvent) => {
+            markerInstance.setPosition(mapsMouseEvent.latLng);
+            selectedLat = mapsMouseEvent.latLng.lat();
+            selectedLng = mapsMouseEvent.latLng.lng();
+          });
+        }
+      }, 300);
+    };
+    window.closeMapPickerModal = () => document.getElementById('mapModalOverlay').classList.remove('active');
+
+    window.savePinnedLocation = function() {
+      if(markerInstance) {
+        const pos = markerInstance.getPosition();
+        selectedLat = pos.lat();
+        selectedLng = pos.lng();
+      }
+      document.getElementById('addrStreet').value = `Tọa độ ghim: ${selectedLat.toFixed(4)}, ${selectedLng.toFixed(4)}`;
+      alert("📍 Đã lưu điểm thả ghìm cuối cùng!");
+      closeMapPickerModal();
+    };
+
+    checkAndUpdateAccountButton();
+    renderFullMenu();
   </script>
 </body>
 </html>
