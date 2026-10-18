@@ -804,27 +804,36 @@ let wakeLock = null;
       tbody.innerHTML = html;
     };
 
-    window.uploadDishImageDirect = function(input, dishId) {
-      const file = input.files[0]; if (!file) return; const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          const cv = document.createElement('canvas'); let w = img.width, h = img.height; if (w > 380) { h = Math.round(h * 380 / w); w = 380; }
-          cv.width = w; cv.height = h; cv.getContext('2d').drawImage(img, 0, 0, w, h);
-          const base64Data = cv.toDataURL('image/jpeg', 0.82);
+window.uploadDishImageDirect = function(input, dishId) {
+  const file = input.files[0]; 
+  if (!file) return; 
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const cv = document.createElement('canvas'); 
+      let w = img.width, h = img.height; 
+      if (w > 380) { 
+        h = Math.round(h * 380 / w); 
+        w = 380; 
+      }
+      cv.width = w; 
+      cv.height = h; 
+      cv.getContext('2d').drawImage(img, 0, 0, w, h);
+      const base64Data = cv.toDataURL('image/jpeg', 0.82);
 
-          const imageRef = sRef(storage, `menu_images/${dishId}_${Date.now()}.jpg`);
-          uploadString(imageRef, base64Data, 'data_url').then((snapshot) => {
-            getDownloadURL(snapshot.ref).then((downloadURL) => {
-              update(ref(db, `menu_customizations/${dishId}`), { image: downloadURL, updatedAt: new Date().toISOString() })
-              .then(() => alert("✅ Đã đẩy ảnh lên hệ thống Đám mây (Storage) thành công!"));
-            });
-          });
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
+      // Lưu trực tiếp chuỗi ảnh nén vào Realtime Database (không cần dịch vụ Storage)
+      update(ref(db, `menu_customizations/${dishId}`), { 
+        image: base64Data, 
+        updatedAt: new Date().toISOString() 
+      })
+      .then(() => alert("✅ Đã cập nhật ảnh món thành công!"))
+      .catch((err) => alert("❌ Lỗi lưu ảnh: " + err.message));
     };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+};
 
     window.saveDishPrice = (id) => { const p = parseInt(document.getElementById(`p_in_${id}`).value); if (!isNaN(p)) update(ref(db, `menu_customizations/${id}`), { price: p, updatedAt: new Date().toISOString() }).then(() => alert("✅ Đã lưu giá mới!")); };
     window.toggleDishStock = (id, active) => update(ref(db, `menu_customizations/${id}`), { soldOut: !active, updatedAt: new Date().toISOString() });
