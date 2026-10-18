@@ -526,7 +526,7 @@
 
     window.logoutUser = function() { signOut(auth).then(() => { closeAccountModal(); }); };
 
-    window.saveUserProfile = function() {
+window.saveUserProfile = function() {
         if(!currentUserId) return;
         const name = document.getElementById('updName').value.trim();
         const email = document.getElementById('updEmail').value.trim();
@@ -535,20 +535,21 @@
         const ward = document.getElementById('updWard').value.trim();
         const province = document.getElementById('updProvince').value.trim();
 
-        // Gộp địa chỉ đầy đủ để lưu LocalStorage đồng bộ Checkout
         let fullAddress = "";
         if(house || ward || province) fullAddress = `${house ? house + ', ' : ''}${ward ? ward + ', ' : ''}${province}`;
 
-        // Lưu vào DB
+        // Lưu vào DB và thêm .catch để bắt lỗi hiển thị cho khách
         update(ref(db, `users/${currentUserId}`), { name, email, birthday, house, ward, province, fullAddress, updatedAt: new Date().toISOString() })
         .then(() => {
-            // Cập nhật ngầm LocalStorage để Checkout xài
             localStorage.setItem('hyChayUserProfile', JSON.stringify({ name, phone: currentUserPhone, address: fullAddress, birthday }));
             alert("✅ Cập nhật thông tin thành công!");
-            // Thoát ngay ra màn hình chờ
             closeAccountModal();
             const displayName = name ? name : currentUserPhone;
             document.getElementById('btnHeaderAccount').innerText = `👤 ${displayName}`;
+        })
+        .catch((error) => {
+            alert("⚠️ Không thể lưu: Hệ thống Database từ chối quyền. Vui lòng liên hệ Admin!");
+            console.error("Lỗi lưu hồ sơ:", error);
         });
     };
 
@@ -969,7 +970,17 @@
       });
     }
 
-    window.closeCanceledAlert = () => document.getElementById('canceledAlertModal').classList.remove('active');
+window.closeCanceledAlert = () => {
+      // Ẩn modal
+      document.getElementById('canceledAlertModal').classList.remove('active');
+      // XÓA HẲN ID ĐƠN HÀNG ĐỂ KHÔNG BỊ ÁM ẢNH LÚC REFRESH
+      localStorage.removeItem('last_hy_chay_order_id'); 
+    };
+
+    window.reOrderSuggestedDish = () => { 
+      closeCanceledAlert(); 
+      window.scrollTo({ top: document.getElementById('toan-bo-menu').offsetTop - 60, behavior: 'smooth' }); 
+    };
     window.reOrderSuggestedDish = () => { closeCanceledAlert(); window.scrollTo({ top: document.getElementById('toan-bo-menu').offsetTop - 60, behavior: 'smooth' }); };
 
     const sid = localStorage.getItem('last_hy_chay_order_id'); if (sid) listenCanceledAlert(sid);
