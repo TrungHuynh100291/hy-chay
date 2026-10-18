@@ -682,13 +682,20 @@
       }, () => alert("Lỗi GPS, quán tính theo địa chỉ gõ."));
     };
 
-    window.calcDistance = function(addr) {
+window.calcDistance = function(addr) {
       if (!addr || addr.length < 4) return;
-      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addr + ", Phan Thiết")}`).then(r => r.json()).then(d => {
-        if (d && d[0]) {
-          const lat = parseFloat(d[0].lat), lon = parseFloat(d[0].lon);
+      
+      // Khuyến nghị: Giám đốc tạo tài khoản tại account.goong.io để lấy API Key dán vào đây
+      const GOONG_API_KEY = 'YOUR_GOONG_API_KEY_HERE'; 
+      
+      fetch(`https://rsapi.goong.io/geocode?address=${encodeURIComponent(addr + ", Phan Thiết")}&api_key=${GOONG_API_KEY}`)
+      .then(r => r.json()).then(d => {
+        if (d && d.results && d.results.length > 0) {
+          const loc = d.results[0].geometry.location;
+          const lat = parseFloat(loc.lat), lon = parseFloat(loc.lng);
           const R = 6371, dLat = (lat-STORE_LAT)*Math.PI/180, dLon = (lon-STORE_LON)*Math.PI/180;
           const a = Math.sin(dLat/2)**2 + Math.cos(STORE_LAT*Math.PI/180)*Math.cos(lat*Math.PI/180)*Math.sin(dLon/2)**2;
+          // Nhân hệ số 1.25 để bù trừ độ dài thực tế của đường gấp khúc/đường hẻm
           calculatedKm = Math.max(1.0, Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)) * 1.25 * 10) / 10);
         } else calculatedKm = 2.5;
         document.getElementById('shipDistanceText').innerText = `Khoảng ${calculatedKm} km`; updateCalc();
