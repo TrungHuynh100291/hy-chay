@@ -10,11 +10,19 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#1e5e3a">
+  <link rel="manifest" href='data:application/manifest+json,{"name":"Hy Chay Food","short_name":"Hy Chay","start_url":"/","display":"standalone","background_color":"#faf9f5","theme_color":"#1e5e3a","icons":[{"src":"https://hychayfood.vercel.app/Logo%20nho.png","sizes":"192x192","type":"image/png"}]}'>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- NÂNG CẤP: Thư viện Bản đồ Leaflet cho tính năng kéo thả ghim GPS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
+  <!-- =============================== -->
+  <!-- PHẦN 1: CSS - THIẾT KẾ GIAO DIỆN  -->
+  <!-- =============================== -->
   <style>
     :root { --primary: #1e5e3a; --primary-light: #2b7a4d; --accent: #ffd800; --text-dark: #1f2937; --text-muted: #64748b; --bg-light: #faf9f5; --card-bg: #ffffff; --border: #e2e8f0; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -29,13 +37,13 @@
     .brand-logo { display: flex; align-items: center; gap: 12px; }
     .brand-logo img { height: 40px; width: auto; border-radius: 8px; }
     .brand-logo span { font-size: 1.25rem; font-weight: 800; color:var(--primary); }
-    .btn-account { background: #eaf5ed; color: var(--primary); border: 1px solid #c7e5d2; padding: 8px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+    .btn-account { background: #eaf5ed; color: var(--primary); border: 1px solid #c7e5d2; padding: 8px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; max-width: 160px; overflow: hidden; text-overflow: ellipsis; }
 
     .hero { background: linear-gradient(135deg, rgba(30, 94, 58, 0.94), rgba(20, 60, 38, 0.92)), url('combo 7 mon chay.png') center/cover no-repeat; color: #ffffff; padding: 60px 20px; text-align: center; }
     .hero-badge { display: inline-block; background: var(--accent); color: var(--primary); font-weight: 700; padding: 6px 18px; border-radius: 20px; text-transform: uppercase; margin-bottom: 18px; font-size: 0.85rem; }
     .hero h1 { font-size: 2.3rem; margin-bottom: 18px; color: #ffffff; }
     .hero p { font-size: 1.1rem; color: #f3f4f6; max-width: 800px; margin: 0 auto 26px; }
-    .btn-primary { background: var(--accent); color: #1a3826; font-weight: 700; padding: 12px 26px; border-radius: 30px; border: none; cursor: pointer; display: inline-block; font-size: 1rem; }
+    .btn-primary { background: var(--accent); color: #1a3826; font-weight: 700; padding: 12px 26px; border-radius: 30px; border: none; cursor: pointer; display: inline-block; font-size: 1rem; width: 100%; text-align: center;}
 
     .section { padding: 45px 20px; max-width: 1200px; margin: 0 auto; }
     .section-title { text-align: center; margin-bottom: 30px; }
@@ -106,8 +114,6 @@
     .form-group label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.88rem; }
     .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.95rem; font-family: inherit; }
 
-    .address-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-
     .loyalty-card { background: linear-gradient(135deg, #1e5e3a, #2b7a4d); border-radius: 12px; padding: 18px; color: #fff; margin-bottom: 18px; box-shadow: 0 5px 15px rgba(30,94,58,0.2); }
     .loyalty-points { font-size: 2rem; font-weight: 800; margin-bottom: 4px; }
     .profile-info-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 16px; font-size: 0.9rem; }
@@ -129,10 +135,13 @@
     .cart-item-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 0.95rem; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px; }
     .cart-item-row button { border: 1px solid #cbd5e1; background: #fff; border-radius: 4px; padding: 2px 8px; cursor: pointer; font-weight: bold; }
 
-    /* MODAL CHỌN BẢN ĐỒ THẢ GHIM */
-    .map-picker-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 5000; display: none; justify-content: center; align-items: center; padding: 16px; }
-    .map-picker-overlay.active { display: flex; }
-    .map-picker-box { background: #fff; width: 100%; max-width: 600px; border-radius: 16px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+    .canceled-alert-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 10000; display: none; justify-content: center; align-items: center; padding: 16px; }
+    .canceled-alert-modal.active { display: flex; }
+    .canceled-alert-box { background: #fff; border-radius: 20px; max-width: 460px; width: 100%; padding: 30px 24px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.3); }
+    
+    .floating-contact { position: fixed; bottom: 85px; right: 20px; display: flex; flex-direction: column; gap: 12px; z-index: 1500; }
+    .float-btn { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; box-shadow: 0 4px 15px rgba(0,0,0,0.25); text-decoration: none; font-size: 0.85rem; }
+    .float-zalo { background: #0068ff; } .float-call { background: #dc2626; font-size: 1.2rem; }
 
     footer { background: #142e1d; color: #e5e7eb; padding: 50px 20px 25px; margin-top: 60px; font-size: 0.9rem; }
     .footer-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1.2fr 1.5fr; gap: 30px; margin-bottom: 30px; }
@@ -140,15 +149,29 @@
     .footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; text-align: center; font-size: 0.8rem; color: #9ca3af; }
 
     @media (max-width: 768px) { .featured-banner { grid-template-columns: 1fr; gap: 20px; } .hero h1 { font-size: 2rem; } .footer-grid { grid-template-columns: 1fr; } }
+
+    /* CSS TAB ĐĂNG NHẬP / ĐĂNG KÝ & MAPS */
+    .auth-tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid var(--border); }
+    .auth-tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; font-weight: 700; color: var(--text-muted); }
+    .auth-tab.active { color: var(--primary); border-bottom: 3px solid var(--primary); }
+    
+    #mapModal { z-index: 4000; }
+    #leafletMap { height: 400px; width: 100%; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 15px; }
+    .error-msg { color: #ef4444; font-size: 0.85rem; margin-top: 5px; display: none; }
+    .success-msg { color: #10b981; font-size: 0.85rem; margin-top: 5px; display: none; background: #d1fae5; padding: 8px; border-radius: 6px; }
   </style>
 </head>
 <body>
 
+  <!-- =============================== -->
+  <!-- PHẦN 2: HTML - CẤU TRÚC WEB    -->
+  <!-- =============================== -->
   <header>
     <div class="nav-container">
       <a href="#" class="brand-logo"><img src="Logo nho.png" alt="Hy Chay Logo"><span>HY CHAY</span></a>
       <div class="nav-actions">
-        <button class="btn-account" id="btnOpenAccount" onclick="openAccountModal()">👤 <span id="accountButtonLabel">Đăng Nhập / Tài Khoản</span></button>
+        <!-- Đổi thành Tài Khoản, sẽ hiển thị Tên hoặc SĐT khi có User -->
+        <button id="btnHeaderAccount" class="btn-account" onclick="openAccountModal()">👤 Đăng nhập</button>
       </div>
     </div>
   </header>
@@ -158,7 +181,7 @@
       <span class="hero-badge">Ẩm Thực Chay Rau Củ Nấm Tự Nhiên</span>
       <h1>Hương Vị Thanh Tịnh<br>Gắn Kết Tình Thân</h1>
       <p>Món chay thanh khiết chuẩn vị nhà làm tại Phan Thiết. Tích hợp thanh toán tiện lợi, giao hàng nhanh chóng.</p>
-      <div class="hero-actions"><a href="#toan-bo-menu" class="btn-primary">Đặt Món Trực Tuyến Ngay</a></div>
+      <div class="hero-actions"><a href="#toan-bo-menu" class="btn-primary" style="width:auto;">Đặt Món Trực Tuyến Ngay</a></div>
     </div>
   </section>
 
@@ -169,7 +192,7 @@
         <span class="tag-pill">Gợi Ý Đặt Tiệc</span><span class="tag-pill">Trọn Vị Ngũ Hành</span>
         <h3>Mâm Cỗ Chay Sum Vầy 7 Món</h3>
         <p>Bữa tiệc thanh tịnh kết hợp trọn vẹn canh nấm bồ ngót thanh nhiệt, chả giò giòn thơm, rau củ ngũ sắc xào giòn, mì xào thập cẩm, sườn non chiên thơm lừng và gỏi hoa chuối thanh tao.</p>
-        <a href="tel:0903242400" class="btn-primary" style="margin-top: 10px;">Đặt Tiệc Ngay: 0903.242.400</a>
+        <a href="tel:0903242400" class="btn-primary" style="margin-top: 10px; width:auto;">Đặt Tiệc Ngay: 0903.242.400</a>
       </div>
     </div>
     <div class="section-title" id="mon-dac-sac">
@@ -224,98 +247,82 @@
     <button class="btn-checkout">Xem Giỏ & Đặt Món</button>
   </div>
 
-  <!-- MODAL TÀI KHOẢN & ĐĂNG NHẬP / ĐĂNG KÝ (NỀN VÀNG SANG TRỌNG) -->
+  <!-- MODAL TÀI KHOẢN (ĐĂNG NHẬP / ĐĂNG KÝ / CẬP NHẬT HỒ SƠ) -->
   <div id="accountModal" class="modal-overlay">
-    <div class="modal-content" style="background: linear-gradient(135deg, #fffdf0, #ffffff); border: 2px solid #ffd800;">
+    <div class="modal-content">
       <span class="modal-close" onclick="closeAccountModal()">&times;</span>
       
-      <!-- VIEW 1: CHỌN ĐĂNG NHẬP / ĐĂNG KÝ -->
-      <div id="authSwitchContainer">
-        <div style="text-align:center; margin-bottom:16px;">
-          <img src="Logo nho.png" style="width:70px; margin:0 auto 10px; border-radius:12px;">
-          <h3 style="color:var(--primary);">Hệ Thống Thành Viên Hy Chay</h3>
-          <p style="font-size:0.85rem; color:#64748b;">Đăng nhập để tích điểm và đồng bộ đơn hàng</p>
+      <!-- KHUNG CHƯA ĐĂNG NHẬP (AUTH) -->
+      <div id="authView">
+        <div class="auth-tabs">
+          <div class="auth-tab active" id="tabLoginBtn" onclick="switchAuthTab('login')">Đăng Nhập</div>
+          <div class="auth-tab" id="tabRegisterBtn" onclick="switchAuthTab('register')">Đăng Ký</div>
+        </div>
+        
+        <!-- Form Đăng Nhập -->
+        <div id="formLogin">
+          <p style="font-size:0.9rem; color:#64748b; margin-bottom:16px;">Sử dụng số điện thoại của bạn để quản lý đơn hàng.</p>
+          <div class="form-group"><label>Số điện thoại:</label><input type="tel" id="lPhone" placeholder="09xxxxxxx" required></div>
+          <div class="form-group"><label>Mật khẩu:</label><input type="password" id="lPass" placeholder="Nhập mật khẩu..." required></div>
+          <div id="lError" class="error-msg">Sai số điện thoại hoặc mật khẩu!</div>
+          <button onclick="handleLogin()" class="btn-primary" style="margin-top:10px;">ĐĂNG NHẬP</button>
         </div>
 
-        <!-- Đăng nhập 1 chạm Google -->
-        <button onclick="loginWithGoogle()" style="width:100%; background:#fff; color:#334155; border:1px solid #cbd5e1; padding:12px; border-radius:10px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:14px; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
-          <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.95H1.2v3.15C3.21 21.37 7.3 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.25c-.25-.72-.38-1.49-.38-2.25s.13-1.53.38-2.25V6.6H1.2C.43 8.15 0 9.89 0 12s.43 3.85 1.2 5.4l4.08-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.3 0 3.21 2.63 1.2 6.6l4.08 3.15c.95-2.84 3.6-4.95 6.72-4.95z"/></svg>
-          Đăng nhập 1 chạm bằng Tài khoản Google
-        </button>
-
-        <div style="display:flex; align-items:center; text-align:center; color:#94a3b8; margin:14px 0;"><hr style="flex:1; border-color:#e2e8f0;"><span style="padding:0 10px; font-size:0.8rem;">HOẶC ĐĂNG NHẬP MẬT KHẨU</span><hr style="flex:1; border-color:#e2e8f0;"></div>
-
-        <form onsubmit="handleEmailLogin(event)">
-          <div class="form-group"><label>Email hoặc SĐT đăng nhập:</label><input type="text" id="loginIdentifier" required placeholder="Nhập email hoặc SĐT..."></div>
-          <div class="form-group"><label>Mật khẩu:</label><input type="password" id="loginPassword" required placeholder="Nhập mật khẩu..."></div>
-          <button type="submit" class="btn-primary" style="width:100%; padding:12px; margin-top:6px;">ĐĂNG NHẬP</button>
-        </form>
-
-        <div style="text-align:center; margin-top:16px; font-size:0.88rem;">
-          Chưa có tài khoản? <a href="javascript:void(0)" onclick="switchAuthMode('register')" style="color:var(--primary); font-weight:bold; text-decoration:underline;">Đăng ký ngay tại đây</a>
-        </div>
-      </div>
-
-      <!-- VIEW 2: FORM ĐĂNG KÝ (SĐT + MẬT KHẨU + XÁC NHẬN) -->
-      <div id="registerView" style="display:none;">
-        <div style="text-align:center; margin-bottom:16px;">
-          <h3 style="color:var(--primary);">Đăng Ký Tài Khoản Mới</h3>
-          <p style="font-size:0.85rem; color:#64748b;">Trở thành thành viên thân thiết của Hy Chay</p>
-        </div>
-        <div id="regSuccessBanner" style="display:none; background:#dcfce7; color:#166534; padding:12px; border-radius:8px; font-weight:700; text-align:center; margin-bottom:12px;">
-          🎉 Tạo tài khoản thành công! Đang chuyển hướng về đăng nhập...
-        </div>
-        <form onsubmit="handleRegister(event)">
-          <div class="form-group"><label>Số điện thoại (ID đăng nhập) (*):</label><input type="tel" id="regPhone" required placeholder="Nhập số điện thoại..."></div>
-          <div class="form-group"><label>Mật khẩu (*):</label><input type="password" id="regPassword" required placeholder="Tối thiểu 6 ký tự..."></div>
-          <div class="form-group"><label>Xác nhận mật khẩu (*):</label><input type="password" id="regConfirmPassword" required placeholder="Nhập lại mật khẩu..."></div>
-          <button type="submit" class="btn-primary" style="width:100%; padding:12px; margin-top:6px;">HOÀN TẤT ĐĂNG KÝ</button>
-        </form>
-        <div style="text-align:center; margin-top:16px; font-size:0.88rem;">
-          Đã có tài khoản? <a href="javascript:void(0)" onclick="switchAuthMode('login')" style="color:var(--primary); font-weight:bold; text-decoration:underline;">Quay lại đăng nhập</a>
+        <!-- Form Đăng Ký -->
+        <div id="formRegister" style="display:none;">
+          <p style="font-size:0.9rem; color:#64748b; margin-bottom:16px;">Tạo tài khoản để tích điểm và tự động điền thông tin khi mua hàng.</p>
+          <div class="form-group"><label>Số điện thoại (Dùng làm ID):</label><input type="tel" id="rPhone" placeholder="09xxxxxxx" required></div>
+          <div class="form-group"><label>Mật khẩu:</label><input type="password" id="rPass" placeholder="Ít nhất 6 ký tự..." required></div>
+          <div class="form-group"><label>Xác nhận mật khẩu:</label><input type="password" id="rPassConfirm" placeholder="Nhập lại mật khẩu..." required></div>
+          <div id="rError" class="error-msg">Mật khẩu không khớp!</div>
+          <div id="rSuccess" class="success-msg">Tạo tài khoản thành công! Tự động chuyển qua đăng nhập...</div>
+          <button onclick="handleRegister()" class="btn-primary" style="margin-top:10px;">ĐĂNG KÝ NGAY</button>
         </div>
       </div>
 
-      <!-- VIEW 3: HỒ SƠ & FORM CẬP NHẬT THÔNG TIN SAU KHI VÀO TRONG -->
+      <!-- KHUNG ĐÃ ĐĂNG NHẬP (HỒ SƠ KHÁCH HÀNG) -->
       <div id="profileView" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+          <h3 style="color:var(--primary); margin:0;">Hồ Sơ Của Bạn</h3>
+          <button onclick="logoutUser()" style="background:none; border:none; color:#dc2626; text-decoration:underline; font-weight:bold; cursor:pointer;">Đăng xuất</button>
+        </div>
+        
         <div class="loyalty-card">
           <h4 id="profRank">Thành Viên Mới</h4><div class="loyalty-points"><span id="profPoints">0</span> Điểm</div>
           <p style="font-size:0.85rem; color:#e2e8f0; margin-top:4px;">Quy đổi: 10.000đ chi tiêu = 1 điểm tích lũy.</p>
         </div>
 
-        <h4 style="margin-bottom:8px; font-size:1rem; color:var(--primary);">✏️ Cập Nhật Thông Tin Giao Hàng</h4>
-        <div class="form-group"><label>Họ và Tên:</label><input type="text" id="upName" placeholder="Nhập họ tên..."></div>
-        <div class="form-group"><label>Email:</label><input type="email" id="upEmail" placeholder="Nhập địa chỉ email..."></div>
-        <div class="form-group"><label>Số điện thoại liên hệ:</label><input type="tel" id="upPhone" placeholder="Số điện thoại nhận hàng..."></div>
-        
-        <label style="font-weight:600; margin-bottom:6px; font-size:0.88rem; display:block;">Địa chỉ nhận hàng (3 ô):</label>
-        <div class="address-grid-3 form-group">
-          <input type="text" id="upHouseNum" placeholder="Số nhà, tên đường">
-          <input type="text" id="upWard" placeholder="Phường (VD: P.Phan Thiết)">
-          <input type="text" id="upProvince" value="Lâm Đồng" placeholder="Tỉnh">
+        <!-- Form Cập Nhật Thông Tin -->
+        <div class="profile-info-box">
+          <h4 style="margin-bottom:10px; color:var(--text-dark);">Cập nhật thông tin giao hàng</h4>
+          <div class="form-group"><label>Họ và Tên:</label><input type="text" id="updName" placeholder="Tên của bạn"></div>
+          <div class="form-group"><label>Email:</label><input type="email" id="updEmail" placeholder="email@gmail.com"></div>
+          <div class="form-group"><label>Số điện thoại (SĐT Đăng nhập):</label><input type="tel" id="updPhone" disabled style="background:#f1f5f9; color:#64748b;"></div>
+          <div class="form-group"><label>Ngày Sinh (Để nhận mã giảm 5%):</label><input type="date" id="updBirthday"></div>
+          
+          <h4 style="margin-top:15px; margin-bottom:10px; color:var(--text-dark);">Địa chỉ mặc định</h4>
+          <div class="form-group"><label>Số nhà, Tên đường:</label><input type="text" id="updHouse" placeholder="VD: 280 Trần Hưng Đạo"></div>
+          <div style="display:flex; gap:10px;">
+             <div class="form-group" style="flex:1;"><label>Phường/Xã:</label><input type="text" id="updWard" placeholder="VD: Phường Phan Thiết"></div>
+             <div class="form-group" style="flex:1;"><label>Tỉnh/Thành phố:</label><input type="text" id="updProvince" placeholder="VD: Lâm Đồng" value="Lâm Đồng"></div>
+          </div>
+          <button onclick="saveUserProfile()" class="btn-primary" style="margin-top:10px;">💾 LƯU THÔNG TIN</button>
         </div>
 
-        <button onclick="saveUserProfileAndExit()" class="btn-primary" style="width:100%; padding:12px; margin-top:4px;">💾 LƯU THÔNG TIN & THOÁT RA</button>
-        <button onclick="logoutUser()" style="background:none; border:none; color:#dc2626; text-decoration:underline; font-weight:bold; margin-top:14px; cursor:pointer; width:100%; text-align:center;">Đăng xuất tài khoản</button>
-        
-        <h4 style="margin-top:20px; margin-bottom:8px; font-size:1rem; color:var(--text-dark);">Lịch sử đơn hàng</h4>
-        <div id="orderHistoryList" style="max-height: 220px; overflow-y: auto; padding-right:5px;"><p style="text-align:center; color:#94a3b8;">Đang tải...</p></div>
+        <h4 style="margin-bottom:10px; font-size:1.05rem; color:var(--text-dark);">Lịch sử đơn hàng</h4>
+        <div id="orderHistoryList" style="max-height: 250px; overflow-y: auto; padding-right:5px;"><p style="text-align:center; color:#94a3b8;">Đang tải...</p></div>
       </div>
     </div>
   </div>
 
-  <!-- MODAL BẢN ĐỒ THẢ GHIM GOOGLE MAPS PHAN THIẾT -->
-  <div id="mapPickerModal" class="map-picker-overlay">
-    <div class="map-picker-box">
-      <h3 style="color:var(--primary); margin-bottom:8px;">📍 Chọn Điểm Giao Hàng Tại Phan Thiết</h3>
-      <p style="font-size:0.85rem; color:#64748b; margin-bottom:12px;">Hệ thống định vị khu vực Phan Thiết, Lâm Đồng. Vui lòng bấm chọn điểm chính xác hoặc dùng định vị GPS:</p>
-      <div style="background:#f1f5f9; height:260px; border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center; border:2px dashed #cbd5e1; position:relative; overflow:hidden;">
-        <iframe width="100%" height="100%" frameborder="0" style="border:0" src="https://www.google.com/maps/embed/v1/place?key=AIzaSyB7CH4HUqEozclN38P_iGTsFzDB_w7sOUk&q=Phan+Thiet,+Lam+Dong" allowfullscreen></iframe>
-      </div>
-      <div style="display:flex; gap:10px; margin-top:14px;">
-        <button onclick="confirmPinnedLocation()" class="btn-primary" style="flex:1; padding:10px;">💾 Lưu Điểm Thả Ghim Này</button>
-        <button onclick="closeMapPicker()" style="background:#e2e8f0; border:none; padding:10px 16px; border-radius:8px; font-weight:700; cursor:pointer;">Hủy</button>
-      </div>
+  <!-- BẢN ĐỒ GPS MODAL LẤY TỌA ĐỘ -->
+  <div id="mapModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 600px;">
+      <span class="modal-close" onclick="closeMapModal()">&times;</span>
+      <h3 style="color:var(--primary); margin-bottom:10px;">📍 Thả Ghim Định Vị</h3>
+      <p style="font-size:0.85rem; color:#64748b; margin-bottom:15px;">Kéo bản đồ để ghim màu đỏ rơi vào đúng vị trí bạn muốn nhận hàng.</p>
+      <div id="leafletMap"></div>
+      <button onclick="saveGPSLocation()" class="btn-primary">💾 LƯU TẠI ĐIỂM THẢ GHIM</button>
     </div>
   </div>
 
@@ -334,13 +341,9 @@
         <div class="form-group" id="groupAddress">
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <label>Địa chỉ nhận hàng tại Phan Thiết (*)</label>
-            <button type="button" class="btn-quick-add" style="padding:4px 10px; margin-bottom:4px;" onclick="openMapPicker()">📍 Ghim Bản Đồ GPS</button>
+            <button type="button" class="btn-quick-add" style="padding:4px 10px; margin-bottom:4px;" onclick="openMapModal()">📍 Định vị GPS (Bản Đồ)</button>
           </div>
-          <div class="address-grid-3">
-            <input type="text" id="chkHouseNum" required placeholder="Số nhà, tên đường">
-            <input type="text" id="chkWard" required placeholder="Phường (P.Phan Thiết)">
-            <input type="text" id="chkProvince" value="Lâm Đồng" required placeholder="Tỉnh">
-          </div>
+          <textarea id="cusAddress" rows="2" required placeholder="Số nhà, Phường, Tỉnh..." onblur="calcDistance(this.value)"></textarea>
         </div>
 
         <div id="birthdayDiscountBadge" class="birthday-badge">🎂 CHÚC MỪNG SINH NHẬT! Tặng Bạn Giảm 5% Toàn Bộ Món Ăn</div>
@@ -349,7 +352,8 @@
           <div class="ship-row"><span>Khoảng cách ước tính:</span><b id="shipDistanceText" style="color:var(--primary);">~2.0 km</b></div>
           <div class="ship-row"><span>Tiền món ăn:</span><b id="subtotalText">0đ</b></div>
           <div class="ship-row" id="birthdayDiscountRow" style="display:none; color:#16a34a;"><span>Giảm ưu đãi sinh nhật (5%):</span><b id="birthdayDiscountText">-0đ</b></div>
-          <div class="ship-row"><span>Phí vận chuyển:</span><b id="shipFeeText" style="color: #e53e3e;">14.000đ</b></div>
+          <div class="ship-row"><span>Phí vận chuyển (<span id="shipTimeSlotText" style="font-weight:normal;">Tiêu chuẩn</span>):</span><b id="shipFeeText" style="color: #e53e3e;">14.000đ</b></div>
+          <div id="freeshipBadge" style="display:none; color: #16a34a; font-weight: bold; margin-top: 6px; font-size: 0.85rem;">🎉 Đơn trên 200k: Đã được FREESHIP trong bán kính 5km!</div>
           <div class="ship-row" style="border-top: 1px dashed #cbd5e1; margin-top: 8px; padding-top: 8px; font-size: 1.1rem;">
             <span style="font-weight: 800;">TỔNG THANH TOÁN:</span><b id="grandTotalText" style="color: #dc2626; font-size: 1.35rem;">0đ</b>
           </div>
@@ -364,13 +368,29 @@
         </div>
         <div id="vietqrBox" class="vietqr-box">
           <p style="font-weight:800; color:#166534; font-size:0.95rem;">Quét Mã QR Dưới Đây Để Chuyển Khoản:</p>
-          <img id="vietqrImg" src="" alt="Mã VietQR" style="max-width:240px; margin:12px auto; border-radius:12px;">
+          <img id="vietqrImg" src="" alt="Mã VietQR" style="max-width:240px; margin:12px auto; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.1);">
           <p style="font-size:0.85rem; color:#334155; line-height:1.5;">Số TK: <b id="qrAccNo" style="font-size:1rem; color:#dc2626;">--</b><br>Ngân hàng: <b id="qrBank">--</b><br>Chủ TK: <b id="qrAccName">--</b></p>
         </div>
 
-        <div class="form-group"><label>Ghi chú cho bếp:</label><input type="text" id="cusNote" placeholder="Ví dụ: Không hành tỏi, ít cay..."></div>
-        <button type="submit" id="btnSubmitOrder" class="btn-primary" style="width: 100%; padding: 15px; font-size:1.05rem;">XÁC NHẬN GỬI ĐƠN</button>
+        <div class="form-group"><label>Ghi chú cho bếp (Chay kiêng ngũ vị tân...):</label><input type="text" id="cusNote" placeholder="Ví dụ: Không hành tỏi, ít cay..."></div>
+        <button type="submit" id="btnSubmitOrder" class="btn-primary" style="padding: 15px; font-size:1.05rem;">XÁC NHẬN GỬI ĐƠN</button>
       </form>
+    </div>
+  </div>
+
+  <div id="canceledAlertModal" class="canceled-alert-modal">
+    <div class="canceled-alert-box">
+      <div style="font-size:3rem; margin-bottom:10px;">🌿</div>
+      <h3 style="color:#b91c1c; margin-bottom:10px;">Hy Chay Rất Tiếc Vì Sự Cố Này</h3>
+      <p style="font-size:0.95rem; color:#334155; margin-bottom:14px;">Đơn hàng của bạn rất tiếc chưa thể hoàn tất với lý do:</p>
+      <div style="background:#fff1f2; border-left:5px solid #ef4444; padding:14px; border-radius:8px; text-align:left; font-size:0.9rem; margin-bottom:20px;">
+        <p style="color:#991b1b; font-weight:800; font-size:1rem;" id="alertCancelReason">--</p>
+        <p style="color:#475569; margin-top:6px; line-height:1.5;" id="alertCancelSuggestion">--</p>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button onclick="reOrderSuggestedDish()" class="btn-primary" style="padding:12px; font-size:1rem;">🍲 Đặt Lại Món Khác Ngay</button>
+        <button onclick="closeCanceledAlert()" style="background:none; border:none; color:#94a3b8; font-size:0.9rem; cursor:pointer; margin-top:6px; font-weight:600;">Đóng thông báo</button>
+      </div>
     </div>
   </div>
 
@@ -388,13 +408,19 @@
     <div class="footer-bottom">© 2026 HY CHAY - BẢO ANH LÂM. All rights reserved.</div>
   </footer>
 
+  <!-- =============================== -->
+  <!-- PHẦN 3: JAVASCRIPT - XỬ LÝ LOGIC  -->
+  <!-- =============================== -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, push, onValue, get, query, orderByChild, equalTo, update, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    // NÂNG CẤP: Import Firebase Auth cho đăng nhập
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = { apiKey: "AIzaSyB7CH4HUqEozclN38P_iGTsFzDB_w7sOUk", authDomain: "hy-chay.firebaseapp.com", projectId: "hy-chay", storageBucket: "hy-chay.firebasestorage.app", messagingSenderId: "215026977682", appId: "1:215026977682:web:52b136c7f09a62cc488f4b" };
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app, "https://hy-chay-default-rtdb.asia-southeast1.firebasedatabase.app");
+    const auth = getAuth(app);
 
     const STORE_LAT = 10.9328; const STORE_LON = 108.1025;
     const urlParams = new URLSearchParams(window.location.search);
@@ -402,7 +428,193 @@
 
     let bankConfig = { bankId: "MB", accountNo: "0903242400", accountName: "HOANG HUYNH HUY BAO" };
     let menuCustomCache = {}; let cart = {}; let calculatedKm = 2.0; let shippingFee = 14000; let birthdayDiscountAmt = 0; let currentFilterCat = 'all'; let isStoreOpen = true;
+    let currentUserPhone = null; let currentUserId = null;
 
+    // HỆ THỐNG AUTHENTICATION (Bẻ khóa dùng SĐT + Password thay cho Email)
+    const getFakeEmail = (phone) => `${phone}@hychay.com`;
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUserId = user.uid;
+        currentUserPhone = user.email.replace('@hychay.com', '');
+        document.getElementById('authView').style.display = 'none';
+        document.getElementById('profileView').style.display = 'block';
+        document.getElementById('updPhone').value = currentUserPhone;
+        
+        // Tải dữ liệu Profile từ DB
+        get(ref(db, `users/${currentUserId}`)).then(snap => {
+            if(snap.exists()) {
+                const u = snap.val();
+                document.getElementById('updName').value = u.name || '';
+                document.getElementById('updEmail').value = u.email || '';
+                document.getElementById('updBirthday').value = u.birthday || '';
+                document.getElementById('updHouse').value = u.house || '';
+                document.getElementById('updWard').value = u.ward || '';
+                document.getElementById('updProvince').value = u.province || 'Lâm Đồng';
+                
+                // Cập nhật Header
+                const displayName = u.name ? u.name : currentUserPhone;
+                document.getElementById('btnHeaderAccount').innerText = `👤 ${displayName}`;
+            } else {
+                document.getElementById('btnHeaderAccount').innerText = `👤 ${currentUserPhone}`;
+            }
+        });
+        loadOrderHistoryTracker(currentUserPhone);
+      } else {
+        currentUserId = null; currentUserPhone = null;
+        document.getElementById('authView').style.display = 'block';
+        document.getElementById('profileView').style.display = 'none';
+        document.getElementById('btnHeaderAccount').innerText = `👤 Đăng nhập`;
+      }
+    });
+
+    window.switchAuthTab = function(tab) {
+        document.querySelectorAll('.auth-tab').forEach(el => el.classList.remove('active'));
+        if(tab === 'login') {
+            document.getElementById('tabLoginBtn').classList.add('active');
+            document.getElementById('formLogin').style.display = 'block';
+            document.getElementById('formRegister').style.display = 'none';
+        } else {
+            document.getElementById('tabRegisterBtn').classList.add('active');
+            document.getElementById('formLogin').style.display = 'none';
+            document.getElementById('formRegister').style.display = 'block';
+        }
+    };
+
+    window.handleRegister = function() {
+        const phone = document.getElementById('rPhone').value.trim();
+        const pass = document.getElementById('rPass').value;
+        const passConfirm = document.getElementById('rPassConfirm').value;
+        const errBox = document.getElementById('rError');
+        const succBox = document.getElementById('rSuccess');
+        
+        errBox.style.display = 'none'; succBox.style.display = 'none';
+        if(!phone || pass.length < 6) return errBox.innerText = "SĐT và Mật khẩu (tối thiểu 6 ký tự) là bắt buộc!", errBox.style.display = 'block';
+        if(pass !== passConfirm) return errBox.innerText = "Mật khẩu không khớp!", errBox.style.display = 'block';
+
+        createUserWithEmailAndPassword(auth, getFakeEmail(phone), pass)
+        .then((userCred) => {
+            succBox.style.display = 'block';
+            // Tạo profile rỗng trên Realtime DB
+            set(ref(db, `users/${userCred.user.uid}`), { phone: phone, createdAt: new Date().toISOString() });
+            
+            // Tự động SignOut để quay lại tab Login đúng ý Giám đốc
+            signOut(auth).then(() => {
+                setTimeout(() => {
+                    document.getElementById('lPhone').value = phone;
+                    switchAuthTab('login');
+                    succBox.style.display = 'none';
+                    document.getElementById('rPhone').value = ''; document.getElementById('rPass').value = ''; document.getElementById('rPassConfirm').value = '';
+                }, 1500);
+            });
+        }).catch(err => {
+            errBox.innerText = (err.code === 'auth/email-already-in-use') ? "Số điện thoại này đã được đăng ký!" : "Lỗi đăng ký, vui lòng thử lại!";
+            errBox.style.display = 'block';
+        });
+    };
+
+    window.handleLogin = function() {
+        const phone = document.getElementById('lPhone').value.trim();
+        const pass = document.getElementById('lPass').value;
+        const errBox = document.getElementById('lError');
+        errBox.style.display = 'none';
+        if(!phone || !pass) return;
+
+        signInWithEmailAndPassword(auth, getFakeEmail(phone), pass)
+        .catch(err => { errBox.style.display = 'block'; });
+    };
+
+    window.logoutUser = function() { signOut(auth).then(() => { closeAccountModal(); }); };
+
+    window.saveUserProfile = function() {
+        if(!currentUserId) return;
+        const name = document.getElementById('updName').value.trim();
+        const email = document.getElementById('updEmail').value.trim();
+        const birthday = document.getElementById('updBirthday').value;
+        const house = document.getElementById('updHouse').value.trim();
+        const ward = document.getElementById('updWard').value.trim();
+        const province = document.getElementById('updProvince').value.trim();
+
+        // Gộp địa chỉ đầy đủ để lưu LocalStorage đồng bộ Checkout
+        let fullAddress = "";
+        if(house || ward || province) fullAddress = `${house ? house + ', ' : ''}${ward ? ward + ', ' : ''}${province}`;
+
+        // Lưu vào DB
+        update(ref(db, `users/${currentUserId}`), { name, email, birthday, house, ward, province, fullAddress, updatedAt: new Date().toISOString() })
+        .then(() => {
+            // Cập nhật ngầm LocalStorage để Checkout xài
+            localStorage.setItem('hyChayUserProfile', JSON.stringify({ name, phone: currentUserPhone, address: fullAddress, birthday }));
+            alert("✅ Cập nhật thông tin thành công!");
+            // Thoát ngay ra màn hình chờ
+            closeAccountModal();
+            const displayName = name ? name : currentUserPhone;
+            document.getElementById('btnHeaderAccount').innerText = `👤 ${displayName}`;
+        });
+    };
+
+    // ==========================================
+    // NÂNG CẤP: BẢN ĐỒ LEAFLET GPS KHU VỰC PHAN THIẾT
+    // ==========================================
+    let map = null; let marker = null; let mapSelectedLat = STORE_LAT; let mapSelectedLng = STORE_LON;
+
+    window.openMapModal = function() {
+        document.getElementById('mapModal').classList.add('active');
+        if(!map) {
+            // Khởi tạo bản đồ lần đầu
+            map = L.map('leafletMap').setView([STORE_LAT, STORE_LON], 15);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap Hy Chay'
+            }).addTo(map);
+
+            marker = L.marker([STORE_LAT, STORE_LON], {draggable: true}).addTo(map);
+            
+            // Sự kiện kéo thả ghim
+            marker.on('dragend', function(e) {
+                const pos = marker.getLatLng();
+                mapSelectedLat = pos.lat; mapSelectedLng = pos.lng;
+                map.panTo(new L.LatLng(pos.lat, pos.lng));
+            });
+
+            // Sự kiện click bản đồ dời ghim
+            map.on('click', function(e) {
+                mapSelectedLat = e.latlng.lat; mapSelectedLng = e.latlng.lng;
+                marker.setLatLng(e.latlng);
+                map.panTo(new L.LatLng(e.latlng.lat, e.latlng.lng));
+            });
+
+            // Tự động định vị người dùng nếu thiết bị cho phép
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(p => {
+                    mapSelectedLat = p.coords.latitude; mapSelectedLng = p.coords.longitude;
+                    map.setView([mapSelectedLat, mapSelectedLng], 16);
+                    marker.setLatLng([mapSelectedLat, mapSelectedLng]);
+                });
+            }
+        } else {
+            // Fix lỗi bản đồ bị xám khi mở lại modal
+            setTimeout(() => { map.invalidateSize(); }, 200);
+        }
+    };
+
+    window.closeMapModal = () => document.getElementById('mapModal').classList.remove('active');
+
+    window.saveGPSLocation = function() {
+        // Reverse Geocoding (Dịch tọa độ thành tên đường) dùng Nominatim miễn phí (Goong trả phí)
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${mapSelectedLat}&lon=${mapSelectedLng}&zoom=18&addressdetails=1`)
+        .then(res => res.json())
+        .then(data => {
+            const addr = data.display_name;
+            document.getElementById('cusAddress').value = addr;
+            closeMapModal();
+            calcDistance(addr, mapSelectedLat, mapSelectedLng); // Truyền luôn tọa độ để tính khoảng cách cho chuẩn
+        }).catch(() => {
+            document.getElementById('cusAddress').value = `${mapSelectedLat.toFixed(5)}, ${mapSelectedLng.toFixed(5)}`;
+            closeMapModal();
+            calcDistance("", mapSelectedLat, mapSelectedLng);
+        });
+    };
+
+    // DỮ LIỆU FULL 70 MÓN
     const FEATURED_IDS = ["bunchagio", "banhcanh", "hoanhthanhmi", "miquang", "comga", "xoi", "nomhoachuoi", "mispaghetti"];
     const ALL_MENU_DATA = [
       { id: "bunmoc", name: "Bún Mọc Chay", defaultPrice: 30000, cat: "bun", catName: "Món Bún", defaultImg: "menu 1.jpg" },
@@ -547,156 +759,64 @@
       if (c > 0) b.classList.add('active'); else { b.classList.remove('active'); closeCheckoutModal(); }
     }
 
-    // LOGIC QUẢN LÝ TÀI KHOẢN & ĐĂNG NHẬP / ĐĂNG KÝ
     window.openAccountModal = function() {
-      const userStr = localStorage.getItem('hyChayUserProfile');
-      if (userStr) {
-        const u = JSON.parse(userStr);
-        document.getElementById('authSwitchContainer').style.display = 'none';
-        document.getElementById('registerView').style.display = 'none';
-        document.getElementById('profileView').style.display = 'block';
-        
-        document.getElementById('upName').value = u.name || '';
-        document.getElementById('upEmail').value = u.email || '';
-        document.getElementById('upPhone').value = u.phone || '';
-        document.getElementById('upHouseNum').value = u.houseNum || '';
-        document.getElementById('upWard').value = u.ward || '';
-        document.getElementById('upProvince').value = u.province || 'Lâm Đồng';
-        
-        loadOrderHistoryTracker(u.phone || u.email);
+      if (currentUserId) {
+        document.getElementById('authView').style.display = 'none'; document.getElementById('profileView').style.display = 'block';
+        loadOrderHistoryTracker(currentUserPhone);
       } else {
-        switchAuthMode('login');
+        document.getElementById('authView').style.display = 'block'; document.getElementById('profileView').style.display = 'none';
+        switchAuthTab('login');
       }
       document.getElementById('accountModal').classList.add('active');
     };
     window.closeAccountModal = () => document.getElementById('accountModal').classList.remove('active');
 
-    window.switchAuthMode = function(mode) {
-      if(mode === 'login') {
-        document.getElementById('authSwitchContainer').style.display = 'block';
-        document.getElementById('registerView').style.display = 'none';
-        document.getElementById('profileView').style.display = 'none';
-      } else if(mode === 'register') {
-        document.getElementById('authSwitchContainer').style.display = 'none';
-        document.getElementById('registerView').style.display = 'block';
-        document.getElementById('profileView').style.display = 'none';
-      }
-    };
-
-    window.handleRegister = function(e) {
-      e.preventDefault();
-      const phone = document.getElementById('regPhone').value.trim();
-      const pass = document.getElementById('regPassword').value;
-      const confirmPass = document.getElementById('regConfirmPassword').value;
-
-      if(pass !== confirmPass) return alert("Mật khẩu xác nhận không khớp!");
-      if(pass.length < 6) return alert("Mật khẩu phải có ít nhất 6 ký tự!");
-
-      // Lưu tài khoản đăng ký giả lập cục bộ
-      let users = JSON.parse(localStorage.getItem('hyChayAllUsers') || '{}');
-      if(users[phone]) return alert("Số điện thoại này đã được đăng ký!");
-
-      users[phone] = { phone, password: pass, name: 'Khách hàng', houseNum: '', ward: '', province: 'Lâm Đồng' };
-      localStorage.setItem('hyChayAllUsers', JSON.stringify(users));
-
-      document.getElementById('regSuccessBanner').style.display = 'block';
-      setTimeout(() => {
-        document.getElementById('regSuccessBanner').style.display = 'none';
-        switchAuthMode('login');
-      }, 1500);
-    };
-
-    window.handleEmailLogin = function(e) {
-      e.preventDefault();
-      const identifier = document.getElementById('loginIdentifier').value.trim();
-      const pass = document.getElementById('loginPassword').value;
-
-      let users = JSON.parse(localStorage.getItem('hyChayAllUsers') || '{}');
-      if(users[identifier] && users[identifier].password === pass) {
-        localStorage.setItem('hyChayUserProfile', JSON.stringify(users[identifier]));
-        updateAccountButtonDisplay();
-        openAccountModal();
-      } else {
-        alert("Tài khoản hoặc mật khẩu không chính xác!");
-      }
-    };
-
-    window.loginWithGoogle = function() {
-      // Đăng nhập 1 chạm giả lập Google thông minh
-      const googleUser = { name: 'Thực Khách Google', email: 'khachhang@gmail.com', phone: '0900000000', houseNum: '', ward: '', province: 'Lâm Đồng' };
-      localStorage.setItem('hyChayUserProfile', JSON.stringify(googleUser));
-      updateAccountButtonDisplay();
-      openAccountModal();
-    };
-
-    window.saveUserProfileAndExit = function() {
-      const name = document.getElementById('upName').value.trim();
-      const email = document.getElementById('upEmail').value.trim();
-      const phone = document.getElementById('upPhone').value.trim();
-      const houseNum = document.getElementById('upHouseNum').value.trim();
-      const ward = document.getElementById('upWard').value.trim();
-      const province = document.getElementById('upProvince').value.trim();
-
-      if(!phone) return alert("Vui lòng nhập số điện thoại liên hệ!");
-
-      const user = { name, email, phone, houseNum, ward, province };
-      localStorage.setItem('hyChayUserProfile', JSON.stringify(user));
-      updateAccountButtonDisplay();
-      alert("✅ Cập nhật thông tin thành công!");
-      closeAccountModal();
-    };
-
-    window.logoutUser = function() {
-      localStorage.removeItem('hyChayUserProfile');
-      updateAccountButtonDisplay();
-      openAccountModal();
-    };
-
-    function updateAccountButtonDisplay() {
-      const uStr = localStorage.getItem('hyChayUserProfile');
-      const label = document.getElementById('accountButtonLabel');
-      if(uStr) {
-        const u = JSON.parse(uStr);
-        label.innerText = u.name || u.phone || "Tài khoản";
-      } else {
-        label.innerText = "Đăng Nhập / Tài Khoản";
-      }
-    }
-    updateAccountButtonDisplay();
-
-    function loadOrderHistoryTracker(phoneOrEmail) {
-      const ordersQuery = query(ref(db, 'orders'), orderByChild('phone'), equalTo(phoneOrEmail));
+    function loadOrderHistoryTracker(phone) {
+      document.getElementById('orderHistoryList').innerHTML = '<p style="text-align:center; color:#94a3b8;">Đang tải dữ liệu...</p>';
+      
+      const ordersQuery = query(ref(db, 'orders'), orderByChild('phone'), equalTo(phone));
+      
       get(ordersQuery).then((snapshot) => {
-        const orders = snapshot.val() || {}; 
-        let totalSpent = 0, html = '';
-        Object.keys(orders).reverse().forEach(id => {
+        const orders = snapshot.val() || {}; let totalSpent = 0, html = '';
+        const sortedIds = Object.keys(orders).sort((a, b) => new Date(orders[b].createdAt) - new Date(orders[a].createdAt));
+        
+        sortedIds.forEach(id => {
           const order = orders[id];
           if (order.status === 'Đã hoàn tất') totalSpent += (order.subtotal || 0);
           let itemsStr = []; for (let k in order.items) itemsStr.push(`${order.items[k].qty}x ${order.items[k].name}`);
+          
+          const st = order.status; let trackerClass = '', trackerText = '';
+          if (st === 'Chờ xác nhận') { trackerClass = ''; trackerText = '⏳ Quán đang xác nhận đơn'; }
+          else if (st === 'Đang chế biến') { trackerClass = 'delivering'; trackerText = '🍳 Bếp đang lên món cho bạn'; }
+          else if (st === 'Đang giao hàng') { trackerClass = 'delivering'; trackerText = '🛵 Shipper đang trên đường giao. Vui lòng chú ý điện thoại!'; }
+          else if (st === 'Đã hoàn tất') { trackerClass = ''; trackerText = '✅ Đơn hàng đã giao thành công'; }
+          else if (st === 'Đã hủy') { trackerClass = 'canceled'; trackerText = `❌ Đã hủy: ${order.cancelReason || 'Lý do khác'}`; }
+
           html += `
             <div class="history-card">
               <div class="history-header"><span>${new Date(order.createdAt).toLocaleDateString('vi-VN')}</span><span style="color:#2b7a4d;">#HC-${id.substring(id.length-5).toUpperCase()}</span></div>
-              <p style="color:#334155; margin-top:4px;"><b>Món:</b> ${itemsStr.join(', ')}</p>
-              <b style="color:#dc2626;">${(order.grandTotal || 0).toLocaleString()}đ</b>
+              <div class="status-tracker ${trackerClass}">${trackerText}</div>
+              <p style="color:#334155; margin-top:8px; margin-bottom:6px;"><b>Món:</b> ${itemsStr.join(', ')}</p>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <b style="color:#dc2626; font-size:1.05rem;">${(order.grandTotal || 0).toLocaleString()}đ</b>
+                <button class="btn-reorder" style="width:auto;" onclick='reorderPastOrder(${JSON.stringify(order.items)})'>🍲 Đặt Lại</button>
+              </div>
             </div>`;
         });
+        
         const points = Math.floor(totalSpent / 10000);
         document.getElementById('profPoints').innerText = points.toLocaleString();
         document.getElementById('profRank').innerText = points >= 200 ? "Hạng Vàng ⭐" : (points >= 50 ? "Hạng Bạc 🥈" : "Thành Viên Mới");
         document.getElementById('orderHistoryList').innerHTML = html || '<p style="text-align:center;">Bạn chưa có đơn hàng nào.</p>';
+      }).catch((error) => {
+        document.getElementById('orderHistoryList').innerHTML = '<p style="text-align:center; color:#ef4444;">Đã xảy ra lỗi khi tải dữ liệu.</p>';
       });
     }
 
-    // MODAL THẢ GHIM BẢN ĐỒ
-    window.openMapPicker = function() { document.getElementById('mapPickerModal').classList.add('active'); };
-    window.closeMapPicker = function() { document.getElementById('mapPickerModal').classList.remove('active'); };
-    window.confirmPinnedLocation = function() {
-      // Giả lập điểm thả ghim cuối cùng tại Phan Thiết
-      document.getElementById('chkHouseNum').value = "Số 280 (Điểm thả ghim GPS)";
-      document.getElementById('chkWard').value = "P.Phan Thiết";
-      document.getElementById('chkProvince').value = "Lâm Đồng";
-      closeMapPicker();
-      alert("📍 Đã lưu điểm thả ghim bản đồ thành công!");
+    window.reorderPastOrder = function(itemsObj) {
+      cart = {};
+      for(let k in itemsObj) { const c = menuCustomCache[k] || {}; cart[k] = { name: itemsObj[k].name, price: c.price !== undefined ? c.price : itemsObj[k].price, qty: itemsObj[k].qty }; }
+      updateCartUI(); saveCartLocal(); closeAccountModal(); openCheckoutModal();
     };
 
     if (tableParam) { const bar = document.getElementById('dineInToolbar'); if (bar) bar.classList.add('active'); }
@@ -706,11 +826,11 @@
     };
 
     function checkOperatingHours() {
-      const now = new Date(); const mins = now.getHours() * 60 + now.getMinutes();
+      const now = new Date(); const mins = now.getHours() * 60 + now.getMinutes(); const openTime = 6 * 60 + 30; const closeTime = 20 * 60 + 15;
       const st = document.getElementById('openStatusTag'), btn = document.getElementById('btnSubmitOrder');
-      if (mins < 390 || mins > 1215) {
+      if (mins < openTime || mins > closeTime) {
         isStoreOpen = false;
-        if (st) { st.className = "tag-open-status tag-closed"; st.innerText = "⛔ Quán đóng cửa"; }
+        if (st) { st.className = "tag-open-status tag-closed"; st.innerText = "⛔ Quán đóng cửa (Mở: 06:30 - 20:15)"; }
         if (btn) { btn.disabled = true; btn.innerText = "QUÁN ĐÃ ĐÓNG CỬA"; btn.style.background = "#9ca3af"; }
       } else {
         isStoreOpen = true;
@@ -724,11 +844,9 @@
       const userStr = localStorage.getItem('hyChayUserProfile');
       if (userStr && !tableParam) {
         const u = JSON.parse(userStr);
-        if(!document.getElementById('cusName').value) document.getElementById('cusName').value = u.name || '';
-        if(!document.getElementById('cusPhone').value) document.getElementById('cusPhone').value = u.phone || '';
-        if(u.houseNum) document.getElementById('chkHouseNum').value = u.houseNum;
-        if(u.ward) document.getElementById('chkWard').value = u.ward;
-        if(u.province) document.getElementById('chkProvince').value = u.province;
+        if(!document.getElementById('cusName').value) document.getElementById('cusName').value = u.name;
+        if(!document.getElementById('cusPhone').value) document.getElementById('cusPhone').value = u.phone;
+        if(!document.getElementById('cusAddress').value && u.address) { document.getElementById('cusAddress').value = u.address; window.calcDistance(u.address); }
       }
       if (tableParam) {
         document.getElementById('groupAddress').style.display = 'none'; document.getElementById('shippingBox').style.display = 'none';
@@ -749,42 +867,112 @@
 
     function updateCalc() {
       let sub = 0; for (let k in cart) sub += cart[k].price * cart[k].qty;
-      const finalTotal = sub + shippingFee;
+      
+      birthdayDiscountAmt = 0;
+      const uStr = localStorage.getItem('hyChayUserProfile');
+      if (uStr && sub > 0) {
+        const u = JSON.parse(uStr);
+        if (u.birthday) {
+          const d = new Date(), bM = u.birthday.split('-')[1], bD = u.birthday.split('-')[2];
+          if (bM === String(d.getMonth()+1).padStart(2,'0') && bD === String(d.getDate()).padStart(2,'0')) {
+            birthdayDiscountAmt = Math.round(sub * 0.05);
+            document.getElementById('birthdayDiscountBadge').style.display = 'block'; document.getElementById('birthdayDiscountRow').style.display = 'flex';
+            document.getElementById('birthdayDiscountText').innerText = '-' + birthdayDiscountAmt.toLocaleString() + 'đ';
+          }
+        }
+      }
+      if (birthdayDiscountAmt === 0) { document.getElementById('birthdayDiscountBadge').style.display = 'none'; document.getElementById('birthdayDiscountRow').style.display = 'none'; }
+
+      if (tableParam) shippingFee = 0;
+      else {
+        const h = new Date().getHours(), m = new Date().getMinutes(), mins = h*60+m;
+        const peak = (mins >= 11*60 && mins <= 13*60) || (mins >= 17*60+30 && mins <= 19*60+30);
+        document.getElementById('shipTimeSlotText').innerHTML = peak ? '<span style="color:#ea580c; font-weight:bold;">⚡ Cao điểm</span>' : 'Tiêu chuẩn (Rẻ hơn 10% sàn)';
+        shippingFee = calculatedKm <= 2 ? (peak?19000:14000) : Math.round(((peak?21000:16000) + (calculatedKm - 2) * 5000) * 0.9 / 1000) * 1000;
+        document.getElementById('freeshipBadge').style.display = sub >= 200000 ? 'block' : 'none';
+        if (sub >= 200000) shippingFee = Math.max(0, shippingFee - 28000);
+      }
+      
+      const finalTotal = sub - birthdayDiscountAmt + shippingFee;
       document.getElementById('subtotalText').innerText = sub.toLocaleString() + 'đ';
-      document.getElementById('shipFeeText').innerText = shippingFee.toLocaleString() + 'đ';
+      document.getElementById('shipFeeText').innerText = shippingFee === 0 ? "0đ" : shippingFee.toLocaleString() + 'đ';
       document.getElementById('grandTotalText').innerText = finalTotal.toLocaleString() + 'đ';
       
       const p = document.getElementById('cusPhone').value || 'HYCHAY';
-      document.getElementById('vietqrImg').src = `https://img.vietqr.io/image/MB-0903242400-compact2.png?amount=${finalTotal}&addInfo=HC%20${p}&accountName=HOANG%20HUYNH%20HUY%20BAO`;
+      document.getElementById('vietqrImg').src = `https://img.vietqr.io/image/${bankConfig.bankId}-${bankConfig.accountNo}-compact2.png?amount=${finalTotal}&addInfo=HC%20${p}&accountName=${encodeURIComponent(bankConfig.accountName)}`;
+      document.getElementById('qrAccNo').innerText = bankConfig.accountNo; document.getElementById('qrBank').innerText = bankConfig.bankId; document.getElementById('qrAccName').innerText = bankConfig.accountName;
     }
 
     window.togglePaymentMethod = (v) => document.getElementById('vietqrBox').style.display = v === 'VIETQR' ? 'block' : 'none';
+
+    window.calcDistance = function(addr, optLat, optLng) {
+      if (!addr || addr.length < 4) return;
+      
+      if(optLat && optLng) {
+          const R = 6371, dLat = (optLat-STORE_LAT)*Math.PI/180, dLon = (optLng-STORE_LON)*Math.PI/180;
+          const a = Math.sin(dLat/2)**2 + Math.cos(STORE_LAT*Math.PI/180)*Math.cos(optLat*Math.PI/180)*Math.sin(dLon/2)**2;
+          calculatedKm = Math.max(1.0, Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)) * 1.25 * 10) / 10);
+          document.getElementById('shipDistanceText').innerText = `Khoảng ${calculatedKm} km`; updateCalc();
+          return;
+      }
+
+      // NÂNG CẤP BẢN ĐỒ GOONG: Điền Goong API Key của Giám đốc vào đây
+      const GOONG_API_KEY = 'YOUR_GOONG_API_KEY_HERE'; 
+      fetch(`https://rsapi.goong.io/geocode?address=${encodeURIComponent(addr + ", Phan Thiết")}&api_key=${GOONG_API_KEY}`)
+      .then(r => r.json()).then(d => {
+        if (d && d.results && d.results.length > 0) {
+          const loc = d.results[0].geometry.location;
+          const lat = parseFloat(loc.lat), lon = parseFloat(loc.lng);
+          const R = 6371, dLat = (lat-STORE_LAT)*Math.PI/180, dLon = (lon-STORE_LON)*Math.PI/180;
+          const a = Math.sin(dLat/2)**2 + Math.cos(STORE_LAT*Math.PI/180)*Math.cos(lat*Math.PI/180)*Math.sin(dLon/2)**2;
+          calculatedKm = Math.max(1.0, Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)) * 1.25 * 10) / 10);
+        } else calculatedKm = 2.5;
+        document.getElementById('shipDistanceText').innerText = `Khoảng ${calculatedKm} km`; updateCalc();
+      }).catch(() => { calculatedKm = 2.5; updateCalc(); });
+    };
 
     window.submitOrder = function(e) {
       e.preventDefault(); checkOperatingHours(); if (!isStoreOpen) return alert("Quán đã đóng cửa!");
       let sub = 0; for (let k in cart) sub += cart[k].price * cart[k].qty; if (sub === 0) return;
 
-      const name = document.getElementById('cusName').value;
-      const phone = document.getElementById('cusPhone').value || (tableParam ? 'Tại quán' : '');
-      const houseNum = document.getElementById('chkHouseNum').value;
-      const ward = document.getElementById('chkWard').value;
-      const province = document.getElementById('chkProvince').value;
-      const fullAddr = `${houseNum}, ${ward}, ${province}`;
+      const name = document.getElementById('cusName').value; const phone = document.getElementById('cusPhone').value || (tableParam ? 'Tại quán' : '');
+      const addr = tableParam ? `Ăn tại quán (Bàn ${tableParam})` : document.getElementById('cusAddress').value;
+
+      // Không tự động đẻ profile nữa vì giờ đã quản lý bằng Auth Account
+      if (!tableParam && phone && name && !localStorage.getItem('hyChayUserProfile') && currentUserId) { 
+          localStorage.setItem('hyChayUserProfile', JSON.stringify({ name, phone, address: addr, birthday: '' })); 
+      }
 
       const orderData = {
         orderType: tableParam ? 'dine_in' : 'delivery', table: tableParam ? `Bàn ${tableParam}` : null,
-        customerName: name, phone: phone, address: fullAddr, note: document.getElementById('cusNote').value, items: cart,
-        subtotal: sub, shippingFee: tableParam ? 0 : shippingFee, grandTotal: sub + (tableParam ? 0 : shippingFee),
-        paymentMethod: document.getElementById('paymentMethodSelect').value,
+        customerName: name, phone: phone, address: addr, note: document.getElementById('cusNote').value, items: cart,
+        subtotal: sub, shippingFee: tableParam ? 0 : shippingFee, discount: birthdayDiscountAmt, grandTotal: sub - birthdayDiscountAmt + (tableParam ? 0 : shippingFee),
+        paymentMethod: document.getElementById('paymentMethodSelect') ? document.getElementById('paymentMethodSelect').value : 'COD',
         status: tableParam ? 'Đang chế biến' : 'Chờ xác nhận', createdAt: new Date().toISOString(), archived: false
       };
 
       push(ref(db, 'orders'), orderData).then((nRef) => {
-        alert(tableParam ? `🎉 Đã gửi order Bàn ${tableParam} xuống bếp!` : `🎉 Gửi đơn thành công!`);
+        localStorage.setItem('last_hy_chay_order_id', nRef.key); listenCanceledAlert(nRef.key);
+        alert(tableParam ? `🎉 Đã gửi order Bàn ${tableParam} xuống bếp!` : `🎉 Gửi đơn thành công! Khách vui lòng vào mục "Tài Khoản" để theo dõi tài xế.`);
         cart = {}; saveCartLocal(); updateCartUI(); closeCheckoutModal(); document.getElementById('orderForm').reset();
       });
     };
 
+    function listenCanceledAlert(id) {
+      onValue(ref(db, 'orders/' + id), (snap) => {
+        const o = snap.val();
+        if (o && o.status === 'Đã hủy') {
+          document.getElementById('alertCancelReason').innerText = "Lý do: " + (o.cancelReason || "Quán đang bận.");
+          document.getElementById('alertCancelSuggestion').innerText = "Lời nhắn: " + (o.cancelSuggestion || "Hy Chay mong bạn đổi món khác nhé!");
+          document.getElementById('canceledAlertModal').classList.add('active');
+        }
+      });
+    }
+
+    window.closeCanceledAlert = () => document.getElementById('canceledAlertModal').classList.remove('active');
+    window.reOrderSuggestedDish = () => { closeCanceledAlert(); window.scrollTo({ top: document.getElementById('toan-bo-menu').offsetTop - 60, behavior: 'smooth' }); };
+
+    const sid = localStorage.getItem('last_hy_chay_order_id'); if (sid) listenCanceledAlert(sid);
     loadCartLocal(); renderFeaturedDishes(); renderFullMenu(); setInterval(checkOperatingHours, 60000);
   </script>
 </body>
