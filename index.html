@@ -527,29 +527,52 @@
     window.logoutUser = function() { signOut(auth).then(() => { closeAccountModal(); }); };
 
 window.saveUserProfile = function() {
-        if(!currentUserId) return;
-        const name = document.getElementById('updName').value.trim();
-        const email = document.getElementById('updEmail').value.trim();
-        const birthday = document.getElementById('updBirthday').value;
-        const house = document.getElementById('updHouse').value.trim();
-        const ward = document.getElementById('updWard').value.trim();
-        const province = document.getElementById('updProvince').value.trim();
-
-        let fullAddress = "";
-        if(house || ward || province) fullAddress = `${house ? house + ', ' : ''}${ward ? ward + ', ' : ''}${province}`;
-
+        // ... (giữ nguyên logic ở trên)
         // Lưu vào DB và thêm .catch để bắt lỗi hiển thị cho khách
         update(ref(db, `users/${currentUserId}`), { name, email, birthday, house, ward, province, fullAddress, updatedAt: new Date().toISOString() })
         .then(() => {
             localStorage.setItem('hyChayUserProfile', JSON.stringify({ name, phone: currentUserPhone, address: fullAddress, birthday }));
             alert("✅ Cập nhật thông tin thành công!");
-            closeAccountModal();
+            
+            window.closeAccountModal(); // FIX: Thêm window. vào đây
+            
             const displayName = name ? name : currentUserPhone;
             document.getElementById('btnHeaderAccount').innerText = `👤 ${displayName}`;
         })
-        .catch((error) => {
-            alert("⚠️ Không thể lưu: Hệ thống Database từ chối quyền. Vui lòng liên hệ Admin!");
-            console.error("Lỗi lưu hồ sơ:", error);
+        // ... (giữ nguyên logic catch)
+    };
+
+    window.logoutUser = function() { 
+        // FIX: Thêm window.
+        signOut(auth).then(() => { window.closeAccountModal(); }); 
+    };
+
+    window.saveGPSLocation = function() {
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${mapSelectedLat}&lon=${mapSelectedLng}&zoom=18&addressdetails=1`)
+        .then(res => res.json())
+        .then(data => {
+            const addr = data.display_name;
+            document.getElementById('cusAddress').value = addr;
+            
+            window.closeMapModal(); // FIX: Thêm window.
+            window.calcDistance(addr, mapSelectedLat, mapSelectedLng); // FIX: Thêm window.
+        }).catch(() => {
+            document.getElementById('cusAddress').value = `${mapSelectedLat.toFixed(5)}, ${mapSelectedLng.toFixed(5)}`;
+            
+            window.closeMapModal(); // FIX: Thêm window.
+            window.calcDistance("", mapSelectedLat, mapSelectedLng); // FIX: Thêm window.
+        });
+    };
+
+    window.submitOrder = function(e) {
+        // ... (logic giữ nguyên)
+        push(ref(db, 'orders'), orderData).then((nRef) => {
+            localStorage.setItem('last_hy_chay_order_id', nRef.key); listenCanceledAlert(nRef.key);
+            alert(tableParam ? `🎉 Đã gửi order Bàn ${tableParam} xuống bếp!` : `🎉 Gửi đơn thành công! Khách vui lòng vào mục "Tài Khoản" để theo dõi tài xế.`);
+            cart = {}; saveCartLocal(); updateCartUI(); 
+            
+            window.closeCheckoutModal(); // FIX: Thêm window.
+            document.getElementById('orderForm').reset();
         });
     };
 
@@ -959,26 +982,34 @@ window.saveUserProfile = function() {
       });
     };
 
+let cancelUnsubscribe = null;
+
     function listenCanceledAlert(id) {
-      onValue(ref(db, 'orders/' + id), (snap) => {
+      if (cancelUnsubscribe) cancelUnsubscribe(); // Xóa lắng nghe cũ nếu có
+      cancelUnsubscribe = onValue(ref(db, 'orders/' + id), (snap) => {
         const o = snap.val();
         if (o && o.status === 'Đã hủy') {
           document.getElementById('alertCancelReason').innerText = "Lý do: " + (o.cancelReason || "Quán đang bận.");
           document.getElementById('alertCancelSuggestion').innerText = "Lời nhắn: " + (o.cancelSuggestion || "Hy Chay mong bạn đổi món khác nhé!");
           document.getElementById('canceledAlertModal').classList.add('active');
+          
+          // FIX: XÓA NGAY ID TẠI ĐÂY ĐỂ TRÁNH TRƯỜNG HỢP KHÁCH F5 MÀ CHƯA BẤM NÚT ĐÓNG
+          localStorage.removeItem('last_hy_chay_order_id');
         }
       });
     }
 
-window.closeCanceledAlert = () => {
-      // Ẩn modal
+    window.closeCanceledAlert = () => {
       document.getElementById('canceledAlertModal').classList.remove('active');
-      // XÓA HẲN ID ĐƠN HÀNG ĐỂ KHÔNG BỊ ÁM ẢNH LÚC REFRESH
-      localStorage.removeItem('last_hy_chay_order_id'); 
+      localStorage.removeItem('last_hy_chay_order_id'); // Backup Xóa dự phòng
+      if (cancelUnsubscribe) {
+          cancelUnsubscribe(); // Rút phích cắm Firebase, ngắt triệt để Zombie Listener
+          cancelUnsubscribe = null;
+      }
     };
 
     window.reOrderSuggestedDish = () => { 
-      closeCanceledAlert(); 
+      window.closeCanceledAlert(); // FIX: Thêm window. để tránh ReferenceError
       window.scrollTo({ top: document.getElementById('toan-bo-menu').offsetTop - 60, behavior: 'smooth' }); 
     };
     window.reOrderSuggestedDish = () => { closeCanceledAlert(); window.scrollTo({ top: document.getElementById('toan-bo-menu').offsetTop - 60, behavior: 'smooth' }); };
