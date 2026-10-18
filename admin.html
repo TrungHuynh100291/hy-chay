@@ -7,10 +7,16 @@
   
 <link rel="icon" type="image/png" href="https://hychayfood.vercel.app/Logo%20nho.png">
   <meta name="theme-color" content="#ffd800">
-  <meta name="mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <link rel="manifest" href="manifest-admin.json">
+  
+  <!-- BỔ SUNG: Ép tên Icon độc lập cho iOS -->
+  <meta name="apple-mobile-web-app-title" content="POS Admin">
+  <meta name="theme-color" content="#ffd800">
+  
+  <!-- NÂNG CẤP: Inline Manifest ép định danh ID tuyệt đối cho App Admin -->
+  <link rel="manifest" href='data:application/manifest+json,{"id":"/hychay-admin","name":"Hy Chay POS Admin","short_name":"POS Admin","start_url":"/admin.html","display":"standalone","background_color":"#ffd800","theme_color":"#ffd800","icons":[{"src":"https://hychayfood.vercel.app/Logo%20nho.png","sizes":"192x192","type":"image/png"}]}'>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
