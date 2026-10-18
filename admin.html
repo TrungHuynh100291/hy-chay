@@ -376,7 +376,20 @@
     import { getDatabase, ref, onValue, update, remove, set, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
     import { getStorage, ref as sRef, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
     // NÂNG CẤP: Import thư viện Authentication của Firebase
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+const auth = getAuth(app);
+
+// Hàm tạo tài khoản quản lý mới
+window.createNewAdminAccount = function(managerEmail, managerPassword) {
+    createUserWithEmailAndPassword(auth, managerEmail, managerPassword)
+      .then((userCredential) => {
+          alert("✅ Tạo tài khoản quản lý thành công!");
+      })
+      .catch((error) => {
+          alert("❌ Lỗi tạo tài khoản: " + error.message);
+      });
+};
 
     const firebaseConfig = { apiKey: "AIzaSyB7CH4HUqEozclN38P_iGtSFzDB_w7sOUk", authDomain: "hy-chay.firebaseapp.com", projectId: "hy-chay", storageBucket: "hy-chay.firebasestorage.app", messagingSenderId: "215026977682", appId: "1:215026977682:web:52b136c7f09a62cc488f4b" };
     const app = initializeApp(firebaseConfig);
