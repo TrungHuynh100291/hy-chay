@@ -5,8 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Hy Chay POS - Trung Tâm Điều Hành</title>
   
-  <link rel="icon" type="image/png" href="https://hychayfood.vercel.app/Logo%20nho.png">
+<link rel="icon" type="image/png" href="https://hychayfood.vercel.app/Logo%20nho.png">
   <meta name="theme-color" content="#ffd800">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="manifest" href="manifest-admin.json">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -426,7 +430,13 @@
        }
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', () => {
+      // Ẩn nút Cài Icon nếu đã ở trong ứng dụng đã cài đặt
+      if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+        const installBtn = document.querySelector('.btn-install-shortcut');
+        if (installBtn) installBtn.style.setProperty('display', 'none', 'important');
+      }
+
       const activeUser = localStorage.getItem('hy_chay_active_user');
       const activeRole = localStorage.getItem('hy_chay_active_role');
       if (activeUser) {
@@ -567,27 +577,77 @@
 
     window.openInstallGuideModal = () => document.getElementById('installGuideModal').classList.add('active');
     window.closeInstallGuideModal = () => document.getElementById('installGuideModal').classList.remove('active');
-
-    function speakAlert(text) {
-        if (!isAudioActive || !('speechSynthesis' in window)) return;
-        window.speechSynthesis.cancel(); 
-        const msg = new SpeechSynthesisUtterance(text);
-        msg.lang = 'vi-VN'; msg.rate = 1.0;     
-        window.speechSynthesis.speak(msg);
+  
+function speakAlert(text) {
+      if (!isAudioActive) return;
+      playHardwareBeep();
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel(); 
+      const msg = new SpeechSynthesisUtterance(text);
+      msg.lang = 'vi-VN'; 
+      msg.rate = 1.0;     
+      window.speechSynthesis.speak(msg);
     }
 
-    window.toggleAudioEngine = function() {
+let wakeLock = null;
+    let audioContext = null;
+
+    // Phát âm bip tần số cao chuẩn POS để đánh thức kênh âm thanh phần cứng
+    function playHardwareBeep() {
+      try {
+        if (!audioContext) {
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioContext.state === 'suspended') {
+          audioContext.resume();
+        }
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, audioContext.currentTime); // Nốt La (A5)
+        gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.35);
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+        osc.start();
+        osc.stop(audioContext.currentTime + 0.35);
+      } catch (e) {
+        console.warn('Lỗi AudioContext:', e);
+      }
+    }
+
+    window.toggleAudioEngine = async function() {
       if (isAudioActive) {
-          isAudioActive = false;
-          clearInterval(aiVoiceInterval); aiVoiceInterval = null;
-          window.speechSynthesis.cancel();
-          document.getElementById('btnSoundTrigger').classList.remove('active');
-          document.getElementById('soundText').innerText = 'Bật Chuông Báo';
+        isAudioActive = false;
+        clearInterval(aiVoiceInterval);
+        aiVoiceInterval = null;
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+        
+        // Nhả khóa giữ sáng màn hình
+        if (wakeLock !== null) {
+          try { await wakeLock.release(); wakeLock = null; } catch (_) {}
+        }
+
+        document.getElementById('btnSoundTrigger').classList.remove('active');
+        document.getElementById('soundText').innerText = 'Bật Chuông Báo';
       } else {
-          isAudioActive = true;
-          document.getElementById('btnSoundTrigger').classList.add('active');
-          document.getElementById('soundText').innerText = 'Chuông Đang Bật';
-          speakAlert("Hệ thống âm thanh AI đã kích hoạt thành công.");
+        // 1. Kích hoạt quyền Audio phần cứng bằng tương tác click trực tiếp
+        playHardwareBeep();
+
+        // 2. Yêu cầu quyền giữ sáng màn hình (Screen Wake Lock API) để máy không sleep mất đơn
+        if ('wakeLock' in navigator) {
+          try {
+            wakeLock = await navigator.wakeLock.request('screen');
+            wakeLock.addEventListener('release', () => { wakeLock = null; });
+          } catch (err) {
+            console.log('Thiết bị không hỗ trợ hoặc từ chối WakeLock:', err);
+          }
+        }
+
+        isAudioActive = true;
+        document.getElementById('btnSoundTrigger').classList.add('active');
+        document.getElementById('soundText').innerText = 'Chuông Đang Bật (Chạy Ngầm)';
+        speakAlert("Hệ thống âm thanh POS đã sẵn sàng nhận đơn.");
       }
     };
 
