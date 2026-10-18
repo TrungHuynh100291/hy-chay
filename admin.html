@@ -148,12 +148,14 @@
       <img src="Logo nho.png" alt="Hy Chay Logo" onerror="this.src='https://hychayfood.vercel.app/Logo%20nho.png'">
       <h2>TRUNG TÂM ĐIỀU HÀNH</h2>
       <p>CÔNG TY TNHH TMDV VÀ SẢN XUẤT BẢO ANH LÂM</p>
-      <form id="adminLoginForm" onsubmit="handleAdminLogin(event)">
+<form id="adminLoginForm" onsubmit="handleAdminLogin(event)">
         <input type="email" id="adminEmail" placeholder="Email quản trị viên..." required autocomplete="email">
         <input type="password" id="adminPassword" placeholder="Mật khẩu..." required autocomplete="current-password">
         <button type="submit" id="btnLoginSubmit" class="btn-login-submit">VÀO HỆ THỐNG POS</button>
+        <!-- BỔ SUNG: Dòng thông báo trạng thái chi tiết cho Giám đốc theo dõi -->
+        <div id="loginStatusText" style="margin-top: 10px; font-size: 0.85rem; font-weight: bold; color: #1e5e3a; display: none;"></div>
       </form>
-      <div id="loginErrorMsg" class="login-error">Tài khoản hoặc mật khẩu không chính xác!</div>
+      <div id="loginErrorMsg" class="login-error" style="display: none;">Tài khoản hoặc mật khẩu không chính xác!</div>
     </div>
   </div>
 
@@ -383,8 +385,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
     const storage = getStorage(app); 
     const auth = getAuth(app);
 
-    // BẮT TRẠNG THÁI ĐĂNG NHẬP
+// BẮT TRẠNG THÁI ĐĂNG NHẬP
     onAuthStateChanged(auth, (user) => {
+      console.log("Auth State Changed:", user ? "Đã đăng nhập: " + user.email : "Chưa đăng nhập");
       if (user) {
         document.getElementById('adminLoginOverlay').style.opacity = '0';
         setTimeout(() => document.getElementById('adminLoginOverlay').style.display = 'none', 500);
@@ -397,29 +400,42 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
       }
     });
 
-    // XỬ LÝ LOGIN AN TOÀN
+    // XỬ LÝ LOGIN AN TOÀN TUYỆT ĐỐI
     window.handleAdminLogin = function(e) {
       e.preventDefault();
       const email = document.getElementById('adminEmail').value.trim();
       const pass = document.getElementById('adminPassword').value;
       const btn = document.getElementById('btnLoginSubmit');
       const errBox = document.getElementById('loginErrorMsg');
+      const statusBox = document.getElementById('loginStatusText');
       
-      btn.innerText = "ĐANG XÁC THỰC..."; btn.disabled = true; errBox.style.display = 'none';
+      btn.innerText = "ĐANG XÁC THỰC..."; 
+      btn.disabled = true; 
+      errBox.style.display = 'none';
+      statusBox.style.display = 'block';
+      statusBox.style.color = '#0284c7';
+      statusBox.innerText = "Đang kết nối tới máy chủ Google...";
       
       signInWithEmailAndPassword(auth, email, pass)
-        .then(() => {
-          btn.innerText = "VÀO HỆ THỐNG POS"; btn.disabled = false;
+        .then((userCredential) => {
+          console.log("Đăng nhập thành công:", userCredential.user.email);
+          statusBox.style.color = '#10b981';
+          statusBox.innerText = "Đăng nhập thành công! Đang chuyển hướng...";
         })
         .catch((error) => {
+          console.error("Lỗi đăng nhập Firebase:", error.code, error.message);
+          btn.innerText = "VÀO HỆ THỐNG POS"; 
+          btn.disabled = false;
+          statusBox.style.display = 'none';
+          
           errBox.style.display = 'block';
-          // Bóc tách chi tiết lỗi để Giám đốc dễ nhận biết
           if(error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
               errBox.innerText = "Sai Email hoặc Mật khẩu quản trị!";
+          } else if(error.code === 'auth/invalid-email') {
+              errBox.innerText = "Định dạng Email không hợp lệ!";
           } else {
-              errBox.innerText = "Lỗi Firebase Auth: " + error.message;
+              errBox.innerText = `Lỗi [${error.code}]: ${error.message}`;
           }
-          btn.innerText = "VÀO HỆ THỐNG POS"; btn.disabled = false;
         });
     };
 
