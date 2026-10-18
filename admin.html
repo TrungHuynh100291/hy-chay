@@ -373,126 +373,69 @@
 
   <div id="printArea"></div>
 
-  <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, onValue, update, remove, set, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
     import { getStorage, ref as sRef, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = { apiKey: "AIzaSyB7CH4HUqEozclN38P_iGtSFzDB_w7sOUk", authDomain: "hy-chay.firebaseapp.com", projectId: "hy-chay", storageBucket: "hy-chay.firebasestorage.app", messagingSenderId: "215026977682", appId: "1:215026977682:web:52b136c7f09a62cc488f4b" };
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app, "https://hy-chay-default-rtdb.asia-southeast1.firebasedatabase.app");
     const storage = getStorage(app); 
-    const auth = getAuth(app);
 
-// BẮT TRẠNG THÁI ĐĂNG NHẬP
-    onAuthStateChanged(auth, (user) => {
-      console.log("Auth State Changed:", user ? "Đã đăng nhập: " + user.email : "Chưa đăng nhập");
-      if (user) {
-        document.getElementById('adminLoginOverlay').style.opacity = '0';
-        setTimeout(() => document.getElementById('adminLoginOverlay').style.display = 'none', 500);
+    // ==========================================
+    // QUẢN LÝ ĐĂNG NHẬP NỘI BỘ (AN TOÀN & KHÔNG LỖI)
+    // ==========================================
+    window.addEventListener('DOMContentLoaded', () => {
+      const activeManager = localStorage.getItem('hy_chay_active_manager');
+      if (activeManager) {
+        document.getElementById('adminLoginOverlay').style.display = 'none';
         document.getElementById('mainAppWrapper').style.display = 'block';
       } else {
         document.getElementById('mainAppWrapper').style.display = 'none';
         document.getElementById('adminLoginOverlay').style.display = 'flex';
-        document.getElementById('adminLoginOverlay').style.opacity = '1';
-        if(typeof isAudioActive !== 'undefined' && isAudioActive) window.toggleAudioEngine(); 
       }
     });
 
-    // XỬ LÝ LOGIN AN TOÀN TUYỆT ĐỐI
+    // Mật khẩu quản trị cố định của hệ thống
+    const ADMIN_SECRET_PASS = "baochay2026"; 
+
     window.handleAdminLogin = function(e) {
       e.preventDefault();
       const email = document.getElementById('adminEmail').value.trim();
       const pass = document.getElementById('adminPassword').value;
       const btn = document.getElementById('btnLoginSubmit');
       const errBox = document.getElementById('loginErrorMsg');
-      const statusBox = document.getElementById('loginStatusText');
       
-      btn.innerText = "ĐANG XÁC THỰC..."; 
-      btn.disabled = true; 
       errBox.style.display = 'none';
-      statusBox.style.display = 'block';
-      statusBox.style.color = '#0284c7';
-      statusBox.innerText = "Đang kết nối tới máy chủ Google...";
-      
-      signInWithEmailAndPassword(auth, email, pass)
-        .then((userCredential) => {
-          console.log("Đăng nhập thành công:", userCredential.user.email);
-          statusBox.style.color = '#10b981';
-          statusBox.innerText = "Đăng nhập thành công! Đang chuyển hướng...";
-        })
-        .catch((error) => {
-          console.error("Lỗi đăng nhập Firebase:", error.code, error.message);
-          btn.innerText = "VÀO HỆ THỐNG POS"; 
-          btn.disabled = false;
-          statusBox.style.display = 'none';
-          
-          errBox.style.display = 'block';
-          if(error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
-              errBox.innerText = "Sai Email hoặc Mật khẩu quản trị!";
-          } else if(error.code === 'auth/invalid-email') {
-              errBox.innerText = "Định dạng Email không hợp lệ!";
-          } else {
-              errBox.innerText = `Lỗi [${error.code}]: ${error.message}`;
-          }
-        });
-    };
 
-    const firebaseConfig = { apiKey: "AIzaSyB7CH4HUqEozclN38P_iGtSFzDB_w7sOUk", authDomain: "hy-chay.firebaseapp.com", projectId: "hy-chay", storageBucket: "hy-chay.firebasestorage.app", messagingSenderId: "215026977682", appId: "1:215026977682:web:52b136c7f09a62cc488f4b" };
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app, "https://hy-chay-default-rtdb.asia-southeast1.firebasedatabase.app");
-    const storage = getStorage(app); 
-    const auth = getAuth(app); // Khởi tạo Auth
-
-    // KHỐI LOGIC BẢO MẬT & ĐĂNG NHẬP ADMIN
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // Đã đăng nhập: Ẩn form đăng nhập, hiện app
-        document.getElementById('adminLoginOverlay').style.opacity = '0';
-        setTimeout(() => document.getElementById('adminLoginOverlay').style.display = 'none', 500);
-        document.getElementById('mainAppWrapper').style.display = 'block';
-      } else {
-        // Chưa đăng nhập: Đẩy ra màn hình đăng nhập
-        document.getElementById('mainAppWrapper').style.display = 'none';
-        document.getElementById('adminLoginOverlay').style.display = 'flex';
-        document.getElementById('adminLoginOverlay').style.opacity = '1';
+      if (email && pass === ADMIN_SECRET_PASS) {
+        btn.innerText = "ĐANG VÀO HỆ THỐNG...";
+        localStorage.setItem('hy_chay_active_manager', email);
         
-        // Tắt chuông nếu bị văng ra ngoài
-        if(isAudioActive) window.toggleAudioEngine(); 
+        setTimeout(() => {
+          document.getElementById('adminLoginOverlay').style.opacity = '0';
+          setTimeout(() => {
+            document.getElementById('adminLoginOverlay').style.display = 'none';
+            document.getElementById('mainAppWrapper').style.display = 'block';
+            btn.innerText = "VÀO HỆ THỐNG POS";
+          }, 300);
+        }, 400);
+      } else {
+        errBox.style.display = 'block';
+        errBox.innerText = "Sai Mật khẩu quản trị! (Mật khẩu mặc định: baochay2026)";
       }
-    });
-
-    window.handleAdminLogin = function(e) {
-      e.preventDefault();
-      const email = document.getElementById('adminEmail').value.trim();
-      const pass = document.getElementById('adminPassword').value;
-      const btn = document.getElementById('btnLoginSubmit');
-      const errBox = document.getElementById('loginErrorMsg');
-      
-      btn.innerText = "ĐANG XÁC THỰC..."; btn.disabled = true; errBox.style.display = 'none';
-      
-      signInWithEmailAndPassword(auth, email, pass)
-        .then((userCredential) => {
-          btn.innerText = "VÀO HỆ THỐNG POS"; btn.disabled = false;
-        })
-        .catch((error) => {
-          errBox.style.display = 'block';
-          if(error.code === 'auth/invalid-credential') errBox.innerText = "Tài khoản hoặc mật khẩu không chính xác!";
-          else errBox.innerText = "Lỗi kết nối. Vui lòng thử lại!";
-          btn.innerText = "VÀO HỆ THỐNG POS"; btn.disabled = false;
-        });
     };
 
     window.logoutAdmin = function() {
-      if(confirm("Bạn có chắc chắn muốn thoát khỏi phiên làm việc?")) {
-        signOut(auth).then(() => { /* onAuthStateChanged sẽ tự chuyển màn hình */ });
+      if(confirm("Bạn có chắc chắn muốn kết thúc ca trực và thoát khỏi hệ thống?")) {
+        localStorage.removeItem('hy_chay_active_manager');
+        location.reload();
       }
     };
 
     let ordersCache = {}; let menuCustomCache = {}; let isAudioActive = false; let targetCancelOrderId = null; let selectedTable = "Bàn 1"; let posCart = {};
-    let aiVoiceInterval = null; 
-    let lastSpokenCallId = null;
+    let aiVoiceInterval = null; let lastSpokenCallId = null;
 
     const tDay = new Date(); document.getElementById('filterDayInput').value = tDay.toISOString().split('T')[0]; document.getElementById('filterMonthInput').value = tDay.toISOString().slice(0, 7);
     setInterval(() => { document.getElementById('liveClock').innerText = new Date().toLocaleTimeString('vi-VN'); }, 1000);
@@ -504,8 +447,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
         if (!isAudioActive || !('speechSynthesis' in window)) return;
         window.speechSynthesis.cancel(); 
         const msg = new SpeechSynthesisUtterance(text);
-        msg.lang = 'vi-VN'; 
-        msg.rate = 1.0;     
+        msg.lang = 'vi-VN'; msg.rate = 1.0;     
         window.speechSynthesis.speak(msg);
     }
 
@@ -524,66 +466,37 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
       }
     };
 
-window.switchMainTab = function(tabName, ev) {
+    window.switchMainTab = function(tabName, ev) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); ev.currentTarget.classList.add('active');
       ['viewOrders','viewPosOrder','viewMenuStock','viewBankConfig','viewShiftReport'].forEach(id => document.getElementById(id).style.display = 'none');
       document.getElementById('view' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).style.display = 'block';
-      
-      // FIX: Cập nhật gọi hàm có chứa window.
       if (tabName === 'posOrder') window.renderPosDishGrid();
       else if (tabName === 'menuStock') window.renderMenuStockTable();
       else if (tabName === 'shiftReport') window.renderShiftReport();
     };
 
-    onValue(ref(db, 'menu_customizations'), (snap) => { 
-      menuCustomCache = snap.val() || {}; 
-      // FIX: Thêm window.
-      window.renderMenuStockTable(); 
-      window.renderPosDishGrid(); 
-    });
-
-    onValue(ref(db, 'orders'), (snapshot) => { 
-      ordersCache = snapshot.val() || {}; 
-      renderOrders(); 
-      window.renderShiftReport(); // FIX: Thêm window.
-    });
-
-    window.submitDineInOrder = function() {
-      // ... (logic giữ nguyên)
-      push(ref(db, 'orders'), orderData).then((res) => { 
-        window.printKitchenTicket(res.key, orderData); // FIX: Thêm window.
-        alert(`Đã gửi đơn ${selectedTable} xuống bếp thành công!`); 
-        posCart = {}; document.getElementById('posOrderNote').value = ''; 
-        renderPosCartUI(); document.querySelectorAll('.tab-btn')[0].click(); 
+    onValue(ref(db, 'service_calls'), (snap) => {
+      const calls = snap.val() || {}; const container = document.getElementById('serviceAlerts'); container.innerHTML = ''; let playSound = false;
+      const callIds = Object.keys(calls);
+      callIds.forEach(id => {
+        const c = calls[id];
+        if ((new Date() - new Date(c.timestamp)) / 60000 < 10) {
+          playSound = true; const isBill = c.type === 'bill';
+          container.innerHTML += `<div class="service-alert ${isBill ? 'bill' : ''}"><div><b style="font-size:1.1rem; color:${isBill?'#0284c7':'#b91c1c'};">${c.table}</b><br><span style="font-size:0.85rem;">${isBill ? '💳 Tính Tiền' : '🔔 Phục Vụ'}</span></div><button onclick="clearServiceCall('${id}')" style="background:#f1f5f9; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;">Xong</button></div>`;
+        }
       });
-    };
-
-    window.endShiftAndClearScreen = function() {
-      if (!confirm("🛑 BẠN ĐÃ CHẮC CHẮN KẾT CA CHƯA?\n\nHệ thống sẽ in phiếu tổng kết và ẩn các đơn đã hoàn tất / đã hủy khỏi màn hình chính.")) return;
-      for (let id in ordersCache) {
-        let o = ordersCache[id];
-        if ((o.status === 'Đã hoàn tất' || o.status === 'Đã hủy') && !o.archived) update(ref(db, 'orders/' + id), { archived: true });
+      if (playSound && isAudioActive && !aiVoiceInterval && callIds.length > 0) {
+          const latestId = callIds.pop();
+          if (latestId !== lastSpokenCallId) {
+              const latestCall = calls[latestId];
+              const actionText = latestCall.type === 'bill' ? 'yêu cầu tính tiền' : 'gọi phục vụ';
+              speakAlert(`Hy Chay! ${latestCall.table} ${actionText}`);
+              lastSpokenCallId = latestId; 
+          }
+      } else if (!playSound && document.getElementById('kpiPending').innerText === '0') {
+          window.speechSynthesis.cancel();
       }
-      alert("✅ Đã kết ca và dọn dẹp màn hình thành công!");
-      document.getElementById('filterMode').value = 'day'; document.getElementById('filterDayInput').value = new Date().toISOString().split('T')[0];
-      
-      window.onFilterModeChange(); // FIX: Thêm window.
-      setTimeout(() => { window.printShiftReport(); }, 500); // FIX: Thêm window.
-    };
-
-    window.onFilterModeChange = function() {
-      // ... (logic giữ nguyên)
-      window.renderShiftReport(); // FIX: Thêm window.
-    };
-
-    window.confirmCancelOrderWithReason = function() {
-      // ... (logic giữ nguyên)
-      update(ref(db, 'orders/' + targetCancelOrderId), { status: 'Đã hủy', cancelReason: reason, cancelSuggestion: suggestion || "Quán rất mong được phục vụ quý khách lần sau!", canceledAt: new Date().toISOString() }).then(() => { 
-        alert("✅ Đã hủy đơn và gửi lời nhắn tới khách hàng!"); 
-        window.closeCancelModal(); // FIX: Thêm window.
-      });
-    };
-    
+    });
     window.clearServiceCall = (id) => remove(ref(db, 'service_calls/' + id));
 
     const ALL_MENU_DATA = [
@@ -673,7 +586,7 @@ window.switchMainTab = function(tabName, ev) {
       set(ref(db, 'restaurant_config/bank'), { bankId, accountNo, accountName, updatedAt: new Date().toISOString() }).then(() => alert("✅ Lưu cấu hình VietQR thành công!"));
     };
 
-    onValue(ref(db, 'menu_customizations'), (snap) => { menuCustomCache = snap.val() || {}; renderMenuStockTable(); renderPosDishGrid(); });
+    onValue(ref(db, 'menu_customizations'), (snap) => { menuCustomCache = snap.val() || {}; window.renderMenuStockTable(); window.renderPosDishGrid(); });
 
     function getDishData(dish) {
       const c = menuCustomCache[dish.id] || {};
@@ -753,10 +666,10 @@ window.switchMainTab = function(tabName, ev) {
       if (Object.keys(posCart).length === 0) return alert("Vui lòng chọn ít nhất 1 món!");
       let sub = 0; for (let k in posCart) sub += posCart[k].price * posCart[k].qty;
       const orderData = { orderType: 'dine_in', table: selectedTable, customerName: selectedTable, phone: 'Tại quán', address: '280 Trần Hưng Đạo', note: document.getElementById('posOrderNote').value, items: posCart, subtotal: sub, shippingFee: 0, grandTotal: sub, status: 'Đang chế biến', createdAt: new Date().toISOString(), archived: false };
-      push(ref(db, 'orders'), orderData).then((res) => { printKitchenTicket(res.key, orderData); alert(`Đã gửi đơn ${selectedTable} xuống bếp thành công!`); posCart = {}; document.getElementById('posOrderNote').value = ''; renderPosCartUI(); document.querySelectorAll('.tab-btn')[0].click(); });
+      push(ref(db, 'orders'), orderData).then((res) => { window.printKitchenTicket(res.key, orderData); alert(`Đã gửi đơn ${selectedTable} xuống bếp thành công!`); posCart = {}; document.getElementById('posOrderNote').value = ''; renderPosCartUI(); document.querySelectorAll('.tab-btn')[0].click(); });
     };
 
-    onValue(ref(db, 'orders'), (snapshot) => { ordersCache = snapshot.val() || {}; renderOrders(); renderShiftReport(); });
+    onValue(ref(db, 'orders'), (snapshot) => { ordersCache = snapshot.val() || {}; renderOrders(); window.renderShiftReport(); });
 
     function renderOrders() {
       const container = document.getElementById('ordersContainer'); let countPending = 0, countCooking = 0, taxableRevToday = 0, shipRevToday = 0, cardsHtml = '';
@@ -795,8 +708,8 @@ window.switchMainTab = function(tabName, ev) {
             </div>
             <div class="card-footer">
               ${isPending ? `<button class="btn-act btn-accept" onclick="updateOrderStatus('${id}', 'Đang chế biến')">⚡ TIẾP NHẬN ĐƠN</button>` : ''}
-              <button class="btn-act btn-print-kitchen" onclick="printKitchenTicket('${id}')">🍳 In Bếp</button>
-              <button class="btn-act btn-print-bill" onclick="printCustomerBill('${id}')">🧾 In Hóa Đơn</button>
+              <button class="btn-act btn-print-kitchen" onclick="window.printKitchenTicket('${id}')">🍳 In Bếp</button>
+              <button class="btn-act btn-print-bill" onclick="window.printCustomerBill('${id}')">🧾 In Hóa Đơn</button>
               ${isCooking ? `<button class="btn-act btn-complete" style="grid-column: span 2;" onclick="updateOrderStatus('${id}', 'Đã hoàn tất')">🚀 HOÀN TẤT & THU TIỀN</button>` : ''}
               ${!isDone && !isCanceled ? `<button class="btn-act btn-cancel" style="grid-column: span 2;" onclick="openCancelModal('${id}')">🗑️ Hủy Đơn & Nhắn Khách</button>` : ''}
             </div>
@@ -839,7 +752,7 @@ window.switchMainTab = function(tabName, ev) {
       }
       alert("✅ Đã kết ca và dọn dẹp màn hình thành công!");
       document.getElementById('filterMode').value = 'day'; document.getElementById('filterDayInput').value = new Date().toISOString().split('T')[0];
-      onFilterModeChange(); setTimeout(() => { printShiftReport(); }, 500);
+      window.onFilterModeChange(); setTimeout(() => { window.printShiftReport(); }, 500);
     };
 
     window.openCancelModal = function(id) { targetCancelOrderId = id; document.getElementById('cancelOrderIdText').innerText = `#HC-${id.substring(id.length - 5).toUpperCase()}`; document.getElementById('cancelModal').classList.add('active'); };
@@ -848,7 +761,7 @@ window.switchMainTab = function(tabName, ev) {
     window.confirmCancelOrderWithReason = function() {
       if (!targetCancelOrderId) return;
       const reason = document.getElementById('cancelReasonSelect').value; const suggestion = document.getElementById('cancelSuggestionText').value.trim();
-      update(ref(db, 'orders/' + targetCancelOrderId), { status: 'Đã hủy', cancelReason: reason, cancelSuggestion: suggestion || "Quán rất mong được phục vụ quý khách lần sau!", canceledAt: new Date().toISOString() }).then(() => { alert("✅ Đã hủy đơn và gửi lời nhắn tới khách hàng!"); closeCancelModal(); });
+      update(ref(db, 'orders/' + targetCancelOrderId), { status: 'Đã hủy', cancelReason: reason, cancelSuggestion: suggestion || "Quán rất mong được phục vụ quý khách lần sau!", canceledAt: new Date().toISOString() }).then(() => { alert("✅ Đã hủy đơn và gửi lời nhắn tới khách hàng!"); window.closeCancelModal(); });
     };
 
     window.onFilterModeChange = function() {
@@ -856,7 +769,7 @@ window.switchMainTab = function(tabName, ev) {
       document.getElementById('filterQuarterBox').style.display = m === 'quarter' ? 'inline-block' : 'none';
       document.getElementById('filterMonthBox').style.display = m === 'month' ? 'inline-block' : 'none';
       document.getElementById('filterDayBox').style.display = m === 'day' ? 'inline-block' : 'none';
-      renderShiftReport();
+      window.renderShiftReport();
     };
 
     function getTaxReportData() {
