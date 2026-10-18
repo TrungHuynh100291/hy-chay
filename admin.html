@@ -6,7 +6,7 @@
   <title>Hy Chay POS - Trung Tâm Điều Hành</title>
   
   <link rel="icon" type="image/png" href="https://hychayfood.vercel.app/Logo%20nho.png">
-  <meta name="theme-color" content="#1e5e3a">
+  <meta name="theme-color" content="#ffd800">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,6 +16,19 @@
     :root { --primary: #1e5e3a; --accent: #ffd800; --danger: #ef4444; --success: #10b981; --bg: #f8fafc; --card-bg: #ffffff; --text-main: #0f172a; --text-muted: #64748b; --border: #e2e8f0; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text-main); line-height: 1.5; }
+
+    /* MÀN HÌNH ĐĂNG NHẬP ADMIN (NỀN VÀNG) */
+    .admin-login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #ffd800, #ffb700); z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; transition: opacity 0.5s ease; }
+    .admin-login-box { background: #ffffff; padding: 40px 30px; border-radius: 20px; box-shadow: 0 25px 50px rgba(0,0,0,0.15); width: 100%; max-width: 420px; text-align: center; }
+    .admin-login-box img { width: 110px; margin-bottom: 20px; border-radius: 16px; box-shadow: 0 4px 15px rgba(30, 94, 58, 0.2); }
+    .admin-login-box h2 { color: var(--primary); font-family: 'Montserrat', sans-serif; font-size: 1.4rem; font-weight: 800; margin-bottom: 5px; }
+    .admin-login-box p { color: #64748b; font-size: 0.9rem; margin-bottom: 25px; }
+    .admin-login-box input { width: 100%; padding: 14px 16px; margin-bottom: 16px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 0.95rem; font-family: inherit; transition: border-color 0.3s; }
+    .admin-login-box input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30, 94, 58, 0.1); }
+    .btn-login-submit { width: 100%; background: var(--primary); color: #fff; border: none; padding: 15px; border-radius: 10px; font-weight: 800; font-size: 1.05rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+    .btn-login-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(30, 94, 58, 0.2); }
+    .btn-login-submit:disabled { background: #94a3b8; cursor: not-allowed; transform: none; box-shadow: none; }
+    .login-error { color: #ef4444; font-size: 0.85rem; font-weight: 600; margin-top: 15px; display: none; background: #fef2f2; padding: 8px; border-radius: 8px; border: 1px solid #fecaca; }
 
     /* TOPBAR & ALERTS */
     .topbar { background: #ffffff; border-bottom: 1px solid var(--border); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; gap:10px; }
@@ -27,6 +40,7 @@
     .btn-install-shortcut { background: #0284c7; color: #fff; border: none; padding: 7px 14px; border-radius: 20px; font-weight: 700; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; gap: 6px; }
     .btn-sound { background: var(--accent); color: #1a3826; border: none; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; gap: 6px; }
     .btn-sound.active { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+    .btn-logout { background: #ef4444; color: #fff; border: none; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.82rem; cursor: pointer; }
 
     /* CHUÔNG GỌI PHỤC VỤ (DINE-IN) */
     .service-alert-container { position: fixed; top: 70px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; }
@@ -74,7 +88,7 @@
     .card-footer { padding: 10px 14px; background: #fafafa; border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
     .btn-act { border: none; padding: 8px; border-radius: 8px; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
 
-    /* VIEW 2: POS TẠI BÀN */
+    /* CÁC VIEW KHÁC GIỮ NGUYÊN */
     .pos-layout { display: grid; grid-template-columns: 1.8fr 1.2fr; gap: 16px; }
     .pos-menu-panel, .pos-cart-panel { background: #fff; border-radius: 14px; border: 1px solid var(--border); padding: 16px; }
     .table-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
@@ -87,7 +101,6 @@
     .pos-cart-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px dashed var(--border); font-size: 0.86rem; }
     .pos-submit-btn { background: #16a34a; color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: 800; cursor: pointer; width: 100%; font-size: 0.95rem; }
 
-    /* VIEW 3: QUẢN LÝ MÓN ĂN & UPLOAD ẢNH */
     .menu-ctrl-header { background: #fff; border-radius: 14px; border: 1px solid var(--border); padding: 14px; margin-bottom: 14px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
     .search-input, .cat-select { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; }
     .menu-mgmt-table { width: 100%; background: #fff; border-radius: 14px; border-collapse: collapse; border: 1px solid var(--border); }
@@ -105,13 +118,11 @@
     input:checked + .slider { background-color: #16a34a; }
     input:checked + .slider:before { transform: translateX(22px); }
 
-    /* VIEW 4: CẤU HÌNH VIETQR */
     .config-card { background: #fff; border-radius: 14px; border: 1px solid var(--border); padding: 20px; max-width: 650px; margin: 0 auto 20px; }
     .form-group-cfg { margin-bottom: 14px; }
     .form-group-cfg label { display: block; font-weight: 700; font-size: 0.88rem; margin-bottom: 5px; }
     .form-group-cfg input, .form-group-cfg select { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.92rem; }
 
-    /* VIEW 5: BÁO CÁO THUẾ & KẾT CA */
     .report-card { background: #fff; border-radius: 14px; border: 1px solid var(--border); padding: 20px; }
     .report-filter-bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; background: #f8fafc; border: 1px solid var(--border); padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; }
     .rep-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 14px; text-align: center; }
@@ -119,13 +130,9 @@
     .report-table th { background: #f1f5f9; padding: 10px 14px; text-align: left; font-size: 0.82rem; border-bottom: 2px solid var(--border); }
     .report-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
 
-    /* MODAL HỦY ĐƠN VĂN MINH & INSTALL GUIDE */
-    .cancel-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000; display: none; justify-content: center; align-items: center; padding: 16px; }
-    .cancel-modal-overlay.active { display: flex; }
+    .cancel-modal-overlay, .install-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000; display: none; justify-content: center; align-items: center; padding: 16px; }
+    .cancel-modal-overlay.active, .install-modal-overlay.active { display: flex; }
     .cancel-modal-box { background: #fff; border-radius: 16px; max-width: 500px; width: 100%; padding: 22px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
-    
-    .install-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000; display: none; justify-content: center; align-items: center; padding: 16px; }
-    .install-modal-overlay.active { display: flex; }
     .install-modal-box { background: #ffffff; border-radius: 18px; max-width: 460px; width: 100%; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); position: relative; }
     .install-step-card { background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; font-size: 0.88rem; }
 
@@ -135,186 +142,205 @@
 </head>
 <body>
 
-  <!-- KHUNG HIỆN THÔNG BÁO DỊCH VỤ DINE-IN -->
-  <div id="serviceAlerts" class="service-alert-container no-print"></div>
-
-  <!-- MODAL HƯỚNG DẪN CÀI ICON APP -->
-  <div id="installGuideModal" class="install-modal-overlay">
-    <div class="install-modal-box">
-      <span style="position:absolute; top:14px; right:16px; font-size:1.4rem; cursor:pointer;" onclick="closeInstallGuideModal()">&times;</span>
-      <h3 style="color:var(--primary); font-size:1.25rem; margin-bottom:12px;">📲 Cài Đặt Hy Chay POS Ra Màn Hình</h3>
-      <p style="font-size:0.88rem; color:#64748b; margin-bottom:14px;">Giúp mở phần mềm độc lập 1-chạm, toàn màn hình:</p>
-      <div class="install-step-card">
-        <b style="color:var(--primary);">🍎 Dành cho iPhone / iPad (Safari):</b>
-        <p>1. Bấm vào biểu tượng <b>Chia sẻ (⎋ ô vuông mũi tên)</b> ở mép dưới.</p>
-        <p>2. Cuộn xuống chọn dòng <b>"Thêm vào MH chính" (➕)</b>.</p>
-      </div>
-      <div class="install-step-card">
-        <b style="color:var(--primary);">🤖 Dành cho Android (Chrome):</b>
-        <p>1. Bấm vào biểu tượng <b>3 dấu chấm (⋮)</b> ở góc trên bên phải.</p>
-        <p>2. Chọn <b>"Thêm vào màn hình chính"</b> rồi xác nhận.</p>
-      </div>
-      <button onclick="closeInstallGuideModal()" style="width:100%; padding:10px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-weight:700; cursor:pointer;">Đã Hiểu</button>
+  <!-- MÀN HÌNH ĐĂNG NHẬP BẢO MẬT ADMIN (NỀN VÀNG THEO LOGO) -->
+  <div id="adminLoginOverlay" class="admin-login-overlay">
+    <div class="admin-login-box">
+      <img src="Logo nho.png" alt="Hy Chay Logo" onerror="this.src='https://hychayfood.vercel.app/Logo%20nho.png'">
+      <h2>TRUNG TÂM ĐIỀU HÀNH</h2>
+      <p>CÔNG TY TNHH TMDV VÀ SẢN XUẤT BẢO ANH LÂM</p>
+      <form id="adminLoginForm" onsubmit="handleAdminLogin(event)">
+        <input type="email" id="adminEmail" placeholder="Email quản trị viên..." required autocomplete="email">
+        <input type="password" id="adminPassword" placeholder="Mật khẩu..." required autocomplete="current-password">
+        <button type="submit" id="btnLoginSubmit" class="btn-login-submit">VÀO HỆ THỐNG POS</button>
+      </form>
+      <div id="loginErrorMsg" class="login-error">Tài khoản hoặc mật khẩu không chính xác!</div>
     </div>
   </div>
 
-  <header class="topbar no-print">
-    <div class="brand-group">
-      <img src="Logo nho.png" class="brand-logo">
-      <div class="brand-title"><h1>HY CHAY POS PRO</h1><p>280 Trần Hưng Đạo, P. Phan Thiết</p></div>
-    </div>
-    <div class="top-actions">
-      <button class="btn-install-shortcut" onclick="openInstallGuideModal()">📲 Cài Icon Về Màn Hình</button>
-      <div id="liveClock" class="live-clock">--:--:--</div>
-      <button id="btnSoundTrigger" class="btn-sound" onclick="toggleAudioEngine()"><span>🔔</span><span id="soundText">Bật Chuông Báo</span></button>
-    </div>
-  </header>
+  <!-- TOÀN BỘ APP ADMIN SẼ BỊ ẨN ĐI CHO ĐẾN KHI ĐĂNG NHẬP THÀNH CÔNG -->
+  <div id="mainAppWrapper" style="display: none;">
+    <!-- KHUNG HIỆN THÔNG BÁO DỊCH VỤ DINE-IN -->
+    <div id="serviceAlerts" class="service-alert-container no-print"></div>
 
-  <main class="dashboard-container no-print">
-    <section class="stats-grid">
-      <div class="stat-card"><div class="stat-info"><span>Chờ Tiếp Nhận</span><h2 id="kpiPending" style="color: #ef4444;">0</h2></div></div>
-      <div class="stat-card"><div class="stat-info"><span>Bếp Đang Làm</span><h2 id="kpiCooking" style="color: #d97706;">0</h2></div></div>
-      <div class="stat-card"><div class="stat-info"><span>Doanh Thu Món (Hôm Nay)</span><h2 id="kpiTaxableRev" style="color: #1e5e3a;">0đ</h2></div></div>
-      <div class="stat-card"><div class="stat-info"><span>Tiền Ship Thu Hộ (Hôm Nay)</span><h2 id="kpiShippingRev" style="color: #2563eb;">0đ</h2></div></div>
-    </section>
-
-    <div class="tabs-bar">
-      <button class="tab-btn active" onclick="switchMainTab('orders', event)">📦 Màn Hình Đơn Hàng <span class="tab-badge badge-danger" id="badgePending">0</span></button>
-      <button class="tab-btn" onclick="switchMainTab('posOrder', event)">➕ Order Tại Bàn</button>
-      <button class="tab-btn" onclick="switchMainTab('menuStock', event)">🍽️ Quản Lý Món Ăn (Giá/Ảnh)</button>
-      <button class="tab-btn" onclick="switchMainTab('bankConfig', event)">⚙️ Cấu Hình VietQR</button>
-      <button class="tab-btn" onclick="switchMainTab('shiftReport', event)">📊 Báo Cáo Kế Toán</button>
-      <button class="btn-end-shift" onclick="endShiftAndClearScreen()">🛑 KẾT CA & XÓA MÀN HÌNH</button>
-    </div>
-
-    <!-- VIEW 1: ĐƠN HÀNG -->
-    <div id="viewOrders"><div id="ordersContainer" class="orders-grid"></div></div>
-
-    <!-- VIEW 2: POS TẠI BÀN -->
-    <div id="viewPosOrder" style="display: none;">
-      <div class="pos-layout">
-        <div class="pos-menu-panel">
-          <label style="font-weight:700; font-size:0.85rem; color:#64748b; display:block; margin-bottom:6px;">VỊ TRÍ BÀN ĂN:</label>
-          <div class="table-pills">
-            <button class="btn-table-pill active" onclick="selectTable('Bàn 1', this)">Bàn 1</button>
-            <button class="btn-table-pill" onclick="selectTable('Bàn 2', this)">Bàn 2</button>
-            <button class="btn-table-pill" onclick="selectTable('Bàn 3', this)">Bàn 3</button>
-            <button class="btn-table-pill" onclick="selectTable('Bàn 4', this)">Bàn 4</button>
-            <button class="btn-table-pill" onclick="selectTable('Bàn 5', this)">Bàn 5</button>
-            <button class="btn-table-pill" onclick="selectTable('Bàn 6', this)">Bàn 6</button>
-            <button class="btn-table-pill" onclick="selectTable('Bàn 7', this)">Bàn 7</button>
-            <button class="btn-table-pill" onclick="selectTable('Bàn 8', this)">Bàn 8</button>
-            <button class="btn-table-pill" onclick="selectTable('Mang Về', this)">Mang Về</button>
-          </div>
-          <label style="font-weight:700; font-size:0.85rem; color:#64748b; display:block; margin-bottom:8px;">CHỌN MÓN VÀO ORDER:</label>
-          <div class="pos-dish-grid" id="posDishGrid"></div>
+    <!-- MODAL HƯỚNG DẪN CÀI ICON APP -->
+    <div id="installGuideModal" class="install-modal-overlay">
+      <div class="install-modal-box">
+        <span style="position:absolute; top:14px; right:16px; font-size:1.4rem; cursor:pointer;" onclick="closeInstallGuideModal()">&times;</span>
+        <h3 style="color:var(--primary); font-size:1.25rem; margin-bottom:12px;">📲 Cài Đặt Hy Chay POS Ra Màn Hình</h3>
+        <p style="font-size:0.88rem; color:#64748b; margin-bottom:14px;">Giúp mở phần mềm độc lập 1-chạm, toàn màn hình:</p>
+        <div class="install-step-card">
+          <b style="color:var(--primary);">🍎 Dành cho iPhone / iPad (Safari):</b>
+          <p>1. Bấm vào biểu tượng <b>Chia sẻ (⎋ ô vuông mũi tên)</b> ở mép dưới.</p>
+          <p>2. Cuộn xuống chọn dòng <b>"Thêm vào MH chính" (➕)</b>.</p>
         </div>
-
-        <div class="pos-cart-panel">
-          <h3 style="margin-bottom:10px;">Order: <span id="currentSelectedTable" style="color:#d97706;">Bàn 1</span></h3>
-          <div class="pos-cart-items" id="posCartItemsList"><p style="color:#94a3b8; text-align:center; padding:40px 0;">Chưa có món nào.</p></div>
-          <input type="text" id="posOrderNote" placeholder="Ghi chú cho bếp..." style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:10px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-weight:700;">
-            <span>Tổng tiền:</span><span id="posCartTotal" style="font-size:1.3rem; color:#dc2626;">0đ</span>
-          </div>
-          <button class="pos-submit-btn" onclick="submitDineInOrder()">⚡ GỬI BẾP & IN BÁO BẾP</button>
+        <div class="install-step-card">
+          <b style="color:var(--primary);">🤖 Dành cho Android (Chrome):</b>
+          <p>1. Bấm vào biểu tượng <b>3 dấu chấm (⋮)</b> ở góc trên bên phải.</p>
+          <p>2. Chọn <b>"Thêm vào màn hình chính"</b> rồi xác nhận.</p>
         </div>
+        <button onclick="closeInstallGuideModal()" style="width:100%; padding:10px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-weight:700; cursor:pointer;">Đã Hiểu</button>
       </div>
     </div>
 
-    <!-- VIEW 3: QUẢN LÝ MÓN ĂN & UPLOAD ẢNH NATIVE -->
-    <div id="viewMenuStock" style="display: none;">
-      <div class="menu-ctrl-header">
-        <input type="text" id="menuSearchInput" class="search-input" placeholder="🔍 Tìm tên món ăn..." oninput="renderMenuStockTable()">
-        <select id="menuCatFilter" class="cat-select" onchange="renderMenuStockTable()">
-          <option value="all">Tất cả nhóm món</option>
-          <option value="bun">Món Bún</option>
-          <option value="mi_pho">Mì, Phở & Hủ Tiếu</option>
-          <option value="com_kho">Cơm & Món Khô</option>
-          <option value="chien_dacbiet">Chiên & Đặc Biệt</option>
-          <option value="lau">Lẩu Chay</option>
-          <option value="soche">Sơ Chế & Đóng Gói</option>
-          <option value="douong">Đồ Uống BAL'S HOUSE</option>
-        </select>
-        <span style="font-size:0.8rem; color:#64748b; margin-left:auto;">💡 Ảnh và giá cập nhật tại đây đồng bộ tức thì sang khách hàng!</span>
+    <header class="topbar no-print">
+      <div class="brand-group">
+        <img src="Logo nho.png" class="brand-logo" onerror="this.src='https://hychayfood.vercel.app/Logo%20nho.png'">
+        <div class="brand-title"><h1>HY CHAY POS PRO</h1><p>280 Trần Hưng Đạo, P. Phan Thiết</p></div>
       </div>
-      <table class="menu-mgmt-table">
-        <thead>
-          <tr>
-            <th style="width: 80px;">Hình Ảnh</th>
-            <th>Tên Món Ăn</th>
-            <th>Nhóm</th>
-            <th style="width: 170px;">Giá Bán</th>
-            <th style="width: 100px;">Trạng Thái</th>
-            <th style="width: 70px; text-align: center;">Tắt/Bật</th>
-          </tr>
-        </thead>
-        <tbody id="menuStockBody"></tbody>
-      </table>
-    </div>
+      <div class="top-actions">
+        <button class="btn-install-shortcut" onclick="openInstallGuideModal()">📲 Cài Icon Về Màn Hình</button>
+        <div id="liveClock" class="live-clock">--:--:--</div>
+        <button id="btnSoundTrigger" class="btn-sound" onclick="toggleAudioEngine()"><span>🔔</span><span id="soundText">Bật Chuông Báo</span></button>
+        <button class="btn-logout" onclick="logoutAdmin()">🚪 Đăng Xuất</button>
+      </div>
+    </header>
 
-    <!-- VIEW 4: CẤU HÌNH VIETQR -->
-    <div id="viewBankConfig" style="display: none;">
-      <div class="config-card">
-        <h2 style="color:var(--primary); font-size:1.25rem; margin-bottom:14px;">Cấu Hình Tài Khoản VietQR</h2>
-        <div class="form-group-cfg">
-          <label>Ngân Hàng Thụ Hưởng:</label>
-          <select id="cfgBankSelect">
-            <option value="MB">MBBank</option><option value="VCB">Vietcombank</option><option value="TCB">Techcombank</option>
-            <option value="ACB">ACB</option><option value="ICB">VietinBank</option><option value="BIDV">BIDV</option>
+    <main class="dashboard-container no-print">
+      <section class="stats-grid">
+        <div class="stat-card"><div class="stat-info"><span>Chờ Tiếp Nhận</span><h2 id="kpiPending" style="color: #ef4444;">0</h2></div></div>
+        <div class="stat-card"><div class="stat-info"><span>Bếp Đang Làm</span><h2 id="kpiCooking" style="color: #d97706;">0</h2></div></div>
+        <div class="stat-card"><div class="stat-info"><span>Doanh Thu Món (Hôm Nay)</span><h2 id="kpiTaxableRev" style="color: #1e5e3a;">0đ</h2></div></div>
+        <div class="stat-card"><div class="stat-info"><span>Tiền Ship Thu Hộ (Hôm Nay)</span><h2 id="kpiShippingRev" style="color: #2563eb;">0đ</h2></div></div>
+      </section>
+
+      <div class="tabs-bar">
+        <button class="tab-btn active" onclick="switchMainTab('orders', event)">📦 Màn Hình Đơn Hàng <span class="tab-badge badge-danger" id="badgePending">0</span></button>
+        <button class="tab-btn" onclick="switchMainTab('posOrder', event)">➕ Order Tại Bàn</button>
+        <button class="tab-btn" onclick="switchMainTab('menuStock', event)">🍽️ Quản Lý Món Ăn (Giá/Ảnh)</button>
+        <button class="tab-btn" onclick="switchMainTab('bankConfig', event)">⚙️ Cấu Hình VietQR</button>
+        <button class="tab-btn" onclick="switchMainTab('shiftReport', event)">📊 Báo Cáo Kế Toán</button>
+        <button class="btn-end-shift" onclick="endShiftAndClearScreen()">🛑 KẾT CA & XÓA MÀN HÌNH</button>
+      </div>
+
+      <!-- VIEW 1: ĐƠN HÀNG -->
+      <div id="viewOrders"><div id="ordersContainer" class="orders-grid"></div></div>
+
+      <!-- VIEW 2: POS TẠI BÀN -->
+      <div id="viewPosOrder" style="display: none;">
+        <div class="pos-layout">
+          <div class="pos-menu-panel">
+            <label style="font-weight:700; font-size:0.85rem; color:#64748b; display:block; margin-bottom:6px;">VỊ TRÍ BÀN ĂN:</label>
+            <div class="table-pills">
+              <button class="btn-table-pill active" onclick="selectTable('Bàn 1', this)">Bàn 1</button>
+              <button class="btn-table-pill" onclick="selectTable('Bàn 2', this)">Bàn 2</button>
+              <button class="btn-table-pill" onclick="selectTable('Bàn 3', this)">Bàn 3</button>
+              <button class="btn-table-pill" onclick="selectTable('Bàn 4', this)">Bàn 4</button>
+              <button class="btn-table-pill" onclick="selectTable('Bàn 5', this)">Bàn 5</button>
+              <button class="btn-table-pill" onclick="selectTable('Bàn 6', this)">Bàn 6</button>
+              <button class="btn-table-pill" onclick="selectTable('Bàn 7', this)">Bàn 7</button>
+              <button class="btn-table-pill" onclick="selectTable('Bàn 8', this)">Bàn 8</button>
+              <button class="btn-table-pill" onclick="selectTable('Mang Về', this)">Mang Về</button>
+            </div>
+            <label style="font-weight:700; font-size:0.85rem; color:#64748b; display:block; margin-bottom:8px;">CHỌN MÓN VÀO ORDER:</label>
+            <div class="pos-dish-grid" id="posDishGrid"></div>
+          </div>
+
+          <div class="pos-cart-panel">
+            <h3 style="margin-bottom:10px;">Order: <span id="currentSelectedTable" style="color:#d97706;">Bàn 1</span></h3>
+            <div class="pos-cart-items" id="posCartItemsList"><p style="color:#94a3b8; text-align:center; padding:40px 0;">Chưa có món nào.</p></div>
+            <input type="text" id="posOrderNote" placeholder="Ghi chú cho bếp..." style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-weight:700;">
+              <span>Tổng tiền:</span><span id="posCartTotal" style="font-size:1.3rem; color:#dc2626;">0đ</span>
+            </div>
+            <button class="pos-submit-btn" onclick="submitDineInOrder()">⚡ GỬI BẾP & IN BÁO BẾP</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 3: QUẢN LÝ MÓN ĂN & UPLOAD ẢNH NATIVE -->
+      <div id="viewMenuStock" style="display: none;">
+        <div class="menu-ctrl-header">
+          <input type="text" id="menuSearchInput" class="search-input" placeholder="🔍 Tìm tên món ăn..." oninput="renderMenuStockTable()">
+          <select id="menuCatFilter" class="cat-select" onchange="renderMenuStockTable()">
+            <option value="all">Tất cả nhóm món</option>
+            <option value="bun">Món Bún</option>
+            <option value="mi_pho">Mì, Phở & Hủ Tiếu</option>
+            <option value="com_kho">Cơm & Món Khô</option>
+            <option value="chien_dacbiet">Chiên & Đặc Biệt</option>
+            <option value="lau">Lẩu Chay</option>
+            <option value="soche">Sơ Chế & Đóng Gói</option>
+            <option value="douong">Đồ Uống BAL'S HOUSE</option>
           </select>
+          <span style="font-size:0.8rem; color:#64748b; margin-left:auto;">💡 Ảnh và giá cập nhật tại đây đồng bộ tức thì sang khách hàng!</span>
         </div>
-        <div class="form-group-cfg"><label>Số Tài Khoản:</label><input type="text" id="cfgAccountNo" placeholder="Nhập số tài khoản..."></div>
-        <div class="form-group-cfg"><label>Tên Chủ Tài Khoản (In hoa không dấu):</label><input type="text" id="cfgAccountName" placeholder="VD: HOANG HUYNH HUY BAO"></div>
-        <button onclick="saveBankConfig()" style="width:100%; padding:12px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-weight:700; cursor:pointer;">💾 LƯU CẤU HÌNH VIETQR NGAY</button>
-      </div>
-    </div>
-
-    <!-- VIEW 5: BÁO CÁO THUẾ & KẾT CA -->
-    <div id="viewShiftReport" style="display: none;">
-      <div class="report-card">
-        <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px; margin-bottom:16px;">
-          <h3 style="color:var(--primary); font-size:1.05rem;">CÔNG TY TNHH TMDV VÀ SẢN XUẤT BẢO ANH LÂM</h3>
-          <p style="font-size:0.85rem; color:#166534;">MST: <b>3401289271</b> | Đ/c: 280 Trần Hưng Đạo, P. Phan Thiết<br><i>Bóc tách rõ Doanh thu theo mã ngành (5610, 5630) và Khoản thu hộ cước ship (Không chịu thuế).</i></p>
-        </div>
-
-        <div class="report-filter-bar">
-          <select id="filterMode" onchange="onFilterModeChange()" style="padding:8px; border-radius:6px; border:1px solid #cbd5e1;">
-            <option value="quarter">Theo Quý (Báo Cáo Thuế)</option><option value="month">Theo Tháng</option><option value="day" selected>Theo Ngày (Kết Ca)</option>
-          </select>
-          <div id="filterQuarterBox" style="display:none;">
-            <select id="filterQuarter" style="padding:8px; border-radius:6px;"><option value="1">Quý 1</option><option value="2">Quý 2</option><option value="3">Quý 3</option><option value="4" selected>Quý 4</option></select>
-            <select id="filterQuarterYear" style="padding:8px; border-radius:6px;"><option value="2026" selected>2026</option><option value="2025">2025</option></select>
-          </div>
-          <div id="filterMonthBox" style="display:none;"><input type="month" id="filterMonthInput" style="padding:7px; border-radius:6px;"></div>
-          <div id="filterDayBox"><input type="date" id="filterDayInput" style="padding:7px; border-radius:6px;"></div>
-          
-          <button onclick="renderShiftReport()" style="background:var(--primary); color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:700;">🔍 Tra Cứu</button>
-          <button onclick="printShiftReport()" style="background:#0284c7; color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:700; margin-left:auto;">🖨️ In Phiếu Tổng Kết (80mm)</button>
-          <button onclick="exportTaxReportCSV()" style="background:#059669; color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:700;">📥 Xuất Bảng Kê Excel</button>
-        </div>
-
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-bottom:16px;">
-          <div class="rep-box"><span>DOANH THU 5610 (HY CHAY)</span><h3 id="repTaxable5610" style="color:var(--primary);">0đ</h3></div>
-          <div class="rep-box"><span>DOANH THU 5630 (BAL'S HOUSE)</span><h3 id="repTaxable5630" style="color:#d97706;">0đ</h3></div>
-          <div class="rep-box"><span>TIỀN SHIP THU HỘ</span><h3 id="repDeliveryRev" style="color:#2563eb;">0đ</h3></div>
-          <div class="rep-box"><span>TỔNG ĐƠN ĐÃ XONG</span><h3 id="repDoneCount" style="color:#16a34a;">0 đơn</h3></div>
-        </div>
-
-        <h3 style="font-size:1.05rem; color:var(--primary); margin-bottom:8px;">1. BẢNG DOANH THU THEO TỪNG NGÀY TRONG KỲ</h3>
-        <table class="report-table">
-          <thead><tr style="background:#f1f5f9; text-align:left;"><th>Ngày Thực Hiện</th><th style="text-align:center;">Số Đơn</th><th style="text-align:right; color:#1e5e3a;">Doanh Thu 5610 (Chay)</th><th style="text-align:right; color:#d97706;">Doanh Thu 5630 (Đồ Uống)</th><th style="text-align:right; color:#2563eb;">Tiền Ship Hộ</th><th style="text-align:right;">Tổng Thu Thực Tế</th></tr></thead>
-          <tbody id="repDailyBreakdownBody"></tbody>
-        </table>
-
-        <h3 style="font-size:1.05rem; color:var(--primary); margin-top:20px; margin-bottom:8px;">2. KIỂM KÊ SỐ LƯỢNG MÓN BÁN RA</h3>
-        <table class="report-table">
-          <thead><tr style="background:#f1f5f9; text-align:left;"><th>Tên Món Ăn</th><th style="text-align:center;">Số Lượng Đã Bán</th><th style="text-align:right;">Thành Tiền (VNĐ)</th></tr></thead>
-          <tbody id="repDishTableBody"></tbody>
+        <table class="menu-mgmt-table">
+          <thead>
+            <tr>
+              <th style="width: 80px;">Hình Ảnh</th>
+              <th>Tên Món Ăn</th>
+              <th>Nhóm</th>
+              <th style="width: 170px;">Giá Bán</th>
+              <th style="width: 100px;">Trạng Thái</th>
+              <th style="width: 70px; text-align: center;">Tắt/Bật</th>
+            </tr>
+          </thead>
+          <tbody id="menuStockBody"></tbody>
         </table>
       </div>
-    </div>
-  </main>
+
+      <!-- VIEW 4: CẤU HÌNH VIETQR -->
+      <div id="viewBankConfig" style="display: none;">
+        <div class="config-card">
+          <h2 style="color:var(--primary); font-size:1.25rem; margin-bottom:14px;">Cấu Hình Tài Khoản VietQR</h2>
+          <div class="form-group-cfg">
+            <label>Ngân Hàng Thụ Hưởng:</label>
+            <select id="cfgBankSelect">
+              <option value="MB">MBBank</option><option value="VCB">Vietcombank</option><option value="TCB">Techcombank</option>
+              <option value="ACB">ACB</option><option value="ICB">VietinBank</option><option value="BIDV">BIDV</option>
+            </select>
+          </div>
+          <div class="form-group-cfg"><label>Số Tài Khoản:</label><input type="text" id="cfgAccountNo" placeholder="Nhập số tài khoản..."></div>
+          <div class="form-group-cfg"><label>Tên Chủ Tài Khoản (In hoa không dấu):</label><input type="text" id="cfgAccountName" placeholder="VD: HOANG HUYNH HUY BAO"></div>
+          <button onclick="saveBankConfig()" style="width:100%; padding:12px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-weight:700; cursor:pointer;">💾 LƯU CẤU HÌNH VIETQR NGAY</button>
+        </div>
+      </div>
+
+      <!-- VIEW 5: BÁO CÁO THUẾ & KẾT CA -->
+      <div id="viewShiftReport" style="display: none;">
+        <div class="report-card">
+          <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px; margin-bottom:16px;">
+            <h3 style="color:var(--primary); font-size:1.05rem;">CÔNG TY TNHH TMDV VÀ SẢN XUẤT BẢO ANH LÂM</h3>
+            <p style="font-size:0.85rem; color:#166534;">MST: <b>3401289271</b> | Đ/c: 280 Trần Hưng Đạo, P. Phan Thiết<br><i>Bóc tách rõ Doanh thu theo mã ngành (5610, 5630) và Khoản thu hộ cước ship (Không chịu thuế).</i></p>
+          </div>
+
+          <div class="report-filter-bar">
+            <select id="filterMode" onchange="onFilterModeChange()" style="padding:8px; border-radius:6px; border:1px solid #cbd5e1;">
+              <option value="quarter">Theo Quý (Báo Cáo Thuế)</option><option value="month">Theo Tháng</option><option value="day" selected>Theo Ngày (Kết Ca)</option>
+            </select>
+            <div id="filterQuarterBox" style="display:none;">
+              <select id="filterQuarter" style="padding:8px; border-radius:6px;"><option value="1">Quý 1</option><option value="2">Quý 2</option><option value="3">Quý 3</option><option value="4" selected>Quý 4</option></select>
+              <select id="filterQuarterYear" style="padding:8px; border-radius:6px;"><option value="2026" selected>2026</option><option value="2025">2025</option></select>
+            </div>
+            <div id="filterMonthBox" style="display:none;"><input type="month" id="filterMonthInput" style="padding:7px; border-radius:6px;"></div>
+            <div id="filterDayBox"><input type="date" id="filterDayInput" style="padding:7px; border-radius:6px;"></div>
+            
+            <button onclick="renderShiftReport()" style="background:var(--primary); color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:700;">🔍 Tra Cứu</button>
+            <button onclick="printShiftReport()" style="background:#0284c7; color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:700; margin-left:auto;">🖨️ In Phiếu Tổng Kết (80mm)</button>
+            <button onclick="exportTaxReportCSV()" style="background:#059669; color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:700;">📥 Xuất Bảng Kê Excel</button>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-bottom:16px;">
+            <div class="rep-box"><span>DOANH THU 5610 (HY CHAY)</span><h3 id="repTaxable5610" style="color:var(--primary);">0đ</h3></div>
+            <div class="rep-box"><span>DOANH THU 5630 (BAL'S HOUSE)</span><h3 id="repTaxable5630" style="color:#d97706;">0đ</h3></div>
+            <div class="rep-box"><span>TIỀN SHIP THU HỘ</span><h3 id="repDeliveryRev" style="color:#2563eb;">0đ</h3></div>
+            <div class="rep-box"><span>TỔNG ĐƠN ĐÃ XONG</span><h3 id="repDoneCount" style="color:#16a34a;">0 đơn</h3></div>
+          </div>
+
+          <h3 style="font-size:1.05rem; color:var(--primary); margin-bottom:8px;">1. BẢNG DOANH THU THEO TỪNG NGÀY TRONG KỲ</h3>
+          <table class="report-table">
+            <thead><tr style="background:#f1f5f9; text-align:left;"><th>Ngày Thực Hiện</th><th style="text-align:center;">Số Đơn</th><th style="text-align:right; color:#1e5e3a;">Doanh Thu 5610 (Chay)</th><th style="text-align:right; color:#d97706;">Doanh Thu 5630 (Đồ Uống)</th><th style="text-align:right; color:#2563eb;">Tiền Ship Hộ</th><th style="text-align:right;">Tổng Thu Thực Tế</th></tr></thead>
+            <tbody id="repDailyBreakdownBody"></tbody>
+          </table>
+
+          <h3 style="font-size:1.05rem; color:var(--primary); margin-top:20px; margin-bottom:8px;">2. KIỂM KÊ SỐ LƯỢNG MÓN BÁN RA</h3>
+          <table class="report-table">
+            <thead><tr style="background:#f1f5f9; text-align:left;"><th>Tên Món Ăn</th><th style="text-align:center;">Số Lượng Đã Bán</th><th style="text-align:right;">Thành Tiền (VNĐ)</th></tr></thead>
+            <tbody id="repDishTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div> <!-- HẾT mainAppWrapper -->
 
   <!-- MODAL HỦY ĐƠN VĂN MINH -->
   <div id="cancelModal" class="cancel-modal-overlay">
@@ -349,18 +375,65 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, onValue, update, remove, set, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
     import { getStorage, ref as sRef, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+    // NÂNG CẤP: Import thư viện Authentication của Firebase
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = { apiKey: "AIzaSyB7CH4HUqEozclN38P_iGtSFzDB_w7sOUk", authDomain: "hy-chay.firebaseapp.com", projectId: "hy-chay", storageBucket: "hy-chay.firebasestorage.app", messagingSenderId: "215026977682", appId: "1:215026977682:web:52b136c7f09a62cc488f4b" };
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app, "https://hy-chay-default-rtdb.asia-southeast1.firebasedatabase.app");
     const storage = getStorage(app); 
+    const auth = getAuth(app); // Khởi tạo Auth
+
+    // KHỐI LOGIC BẢO MẬT & ĐĂNG NHẬP ADMIN
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // Đã đăng nhập: Ẩn form đăng nhập, hiện app
+        document.getElementById('adminLoginOverlay').style.opacity = '0';
+        setTimeout(() => document.getElementById('adminLoginOverlay').style.display = 'none', 500);
+        document.getElementById('mainAppWrapper').style.display = 'block';
+      } else {
+        // Chưa đăng nhập: Đẩy ra màn hình đăng nhập
+        document.getElementById('mainAppWrapper').style.display = 'none';
+        document.getElementById('adminLoginOverlay').style.display = 'flex';
+        document.getElementById('adminLoginOverlay').style.opacity = '1';
+        
+        // Tắt chuông nếu bị văng ra ngoài
+        if(isAudioActive) window.toggleAudioEngine(); 
+      }
+    });
+
+    window.handleAdminLogin = function(e) {
+      e.preventDefault();
+      const email = document.getElementById('adminEmail').value.trim();
+      const pass = document.getElementById('adminPassword').value;
+      const btn = document.getElementById('btnLoginSubmit');
+      const errBox = document.getElementById('loginErrorMsg');
+      
+      btn.innerText = "ĐANG XÁC THỰC..."; btn.disabled = true; errBox.style.display = 'none';
+      
+      signInWithEmailAndPassword(auth, email, pass)
+        .then((userCredential) => {
+          btn.innerText = "VÀO HỆ THỐNG POS"; btn.disabled = false;
+        })
+        .catch((error) => {
+          errBox.style.display = 'block';
+          if(error.code === 'auth/invalid-credential') errBox.innerText = "Tài khoản hoặc mật khẩu không chính xác!";
+          else errBox.innerText = "Lỗi kết nối. Vui lòng thử lại!";
+          btn.innerText = "VÀO HỆ THỐNG POS"; btn.disabled = false;
+        });
+    };
+
+    window.logoutAdmin = function() {
+      if(confirm("Bạn có chắc chắn muốn thoát khỏi phiên làm việc?")) {
+        signOut(auth).then(() => { /* onAuthStateChanged sẽ tự chuyển màn hình */ });
+      }
+    };
 
     let ordersCache = {}; let menuCustomCache = {}; let isAudioActive = false; let targetCancelOrderId = null; let selectedTable = "Bàn 1"; let posCart = {};
     let aiVoiceInterval = null; 
-    let lastSpokenCallId = null; // NÂNG CẤP: Chốt chặn bộ nhớ AI để không đọc nhại lại
+    let lastSpokenCallId = null;
 
     const tDay = new Date(); document.getElementById('filterDayInput').value = tDay.toISOString().split('T')[0]; document.getElementById('filterMonthInput').value = tDay.toISOString().slice(0, 7);
-
     setInterval(() => { document.getElementById('liveClock').innerText = new Date().toLocaleTimeString('vi-VN'); }, 1000);
 
     window.openInstallGuideModal = () => document.getElementById('installGuideModal').classList.add('active');
@@ -411,14 +484,13 @@
         }
       });
       
-      // NÂNG CẤP: Chặn lỗi nhại giọng - Kiểm tra ID cuộc gọi cuối cùng
       if (playSound && isAudioActive && !aiVoiceInterval && callIds.length > 0) {
           const latestId = callIds.pop();
           if (latestId !== lastSpokenCallId) {
               const latestCall = calls[latestId];
               const actionText = latestCall.type === 'bill' ? 'yêu cầu tính tiền' : 'gọi phục vụ';
               speakAlert(`Hy Chay! ${latestCall.table} ${actionText}`);
-              lastSpokenCallId = latestId; // Đánh dấu đã đọc
+              lastSpokenCallId = latestId; 
           }
       } else if (!playSound && document.getElementById('kpiPending').innerText === '0') {
           window.speechSynthesis.cancel();
