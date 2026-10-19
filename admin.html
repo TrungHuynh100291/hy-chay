@@ -5,18 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Hy Chay POS - Trung Tâm Điều Hành</title>
   
-<link rel="icon" type="image/png" href="https://hychayfood.vercel.app/Logo%20nho.png">
-  <meta name="theme-color" content="#ffd800">
-<meta name="mobile-web-app-capable" content="yes">
+  <link id="adminFavicon" rel="icon" type="image/png" href="https://hychayfood.vercel.app/Logo%20nho.png">
+  <link id="adminTouchIcon" rel="apple-touch-icon" href="https://hychayfood.vercel.app/Logo%20nho.png">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  
-  <!-- BỔ SUNG: Ép tên Icon độc lập cho iOS -->
-  <meta name="apple-mobile-web-app-title" content="POS Admin">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="POS Hy Chay">
   <meta name="theme-color" content="#ffd800">
-  
-<!-- NÂNG CẤP: Manifest được mã hóa Base64 tuyệt đối an toàn -->
-  <link rel="manifest" href="data:application/manifest+json;base64,eyJpZCI6Ii9oeWNoYXktYWRtaW4iLCJuYW1lIjoiSHkgQ2hheSBQT1MgQWRtaW4iLCJzaG9ydF9uYW1lIjoiUE9TIEFkbWluIiwic3RhcnRfdXJsIjoiL2FkbWluLmh0bWwiLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3ciOiIjZmZkODAwIiwidGhlbWVfY29sb3IiOiIjZmZkODAwIiwiaWNvbnMiOlt7InNyYyI6Imh0dHBzOi8vaHljaGF5Zm9vZC52ZXJjZWwuYXBwL0xvZ28lMjBuaG8ucG5nIiwic2l6ZXMiOiIxOTJ4MTkyIiwidHlwZSI6ImltYWdlL3BuZyJ9XX0=">
+  <link id="adminManifestLink" rel="manifest" href='data:application/manifest+json,{"id":"/hychay-pos-admin-v2","name":"Hy Chay POS Admin","short_name":"POS Hy Chay","start_url":"/admin.html","scope":"/admin.html","display":"standalone","background_color":"#ffd800","theme_color":"#ffd800"}'>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -73,30 +69,58 @@
     .tab-btn.active .tab-badge { background: var(--primary); color: #fff; }
     .btn-end-shift { background: #ea580c; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer; margin-left: auto; }
 
-    /* VIEW 1: ĐƠN HÀNG */
-    .orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
-    .order-card { background: var(--card-bg); border-radius: 14px; border: 1px solid var(--border); box-shadow: 0 3px 12px rgba(0,0,0,0.04); display: flex; flex-direction: column; overflow: hidden; }
-    .order-card.pending { border: 2px solid #ef4444; animation: alert-card 1.2s infinite alternate; }
-    @keyframes alert-card { from { box-shadow: 0 0 6px rgba(239, 68, 68, 0.2); } to { box-shadow: 0 0 18px rgba(239, 68, 68, 0.5); } }
-    .card-top { padding: 10px 14px; background: #f8fafc; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-    .order-id { font-weight: 800; font-size: 0.95rem; color: var(--primary); }
-    .order-type-badge { font-size: 0.72rem; font-weight: 700; padding: 3px 7px; border-radius: 10px; text-transform: uppercase; }
+/* VIEW 1: ĐƠN HÀNG & BÁO BẾP THU GỌN (COMPACT KDS) */
+    .kds-filter-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; background: #ffffff; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 14px; }
+    .kds-filter-btn { border: 1px solid #cbd5e1; background: #f8fafc; color: #334155; padding: 6px 12px; border-radius: 20px; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+    .kds-filter-btn.active { background: var(--primary); color: #ffffff; border-color: var(--primary); }
+    .kds-sort-select { margin-left: auto; padding: 6px 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.82rem; font-weight: 700; color: var(--primary); background: #f8fafc; cursor: pointer; }
+
+    .orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 12px; align-items: start; }
+    .order-card { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; flex-direction: column; overflow: hidden; transition: transform 0.15s; }
+    .order-card.pending { border: 2px solid #ef4444; animation: alert-card 1s infinite alternate; }
+    .order-card.cooking { border: 2px solid #f59e0b; background: #fffdf9; }
+    @keyframes alert-card { from { box-shadow: 0 0 4px rgba(239, 68, 68, 0.2); } to { box-shadow: 0 0 16px rgba(239, 68, 68, 0.6); } }
+    
+    .card-top { padding: 8px 10px; background: #f8fafc; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; gap: 4px; flex-wrap: wrap; }
+    .order-id { font-weight: 800; font-size: 0.88rem; color: var(--primary); }
+    .order-time-badge { font-size: 0.72rem; font-weight: 700; color: #334155; background: #e2e8f0; padding: 2px 6px; border-radius: 6px; }
+    .wait-timer { font-size: 0.7rem; font-weight: 800; padding: 2px 6px; border-radius: 6px; }
+    .wait-normal { background: #dcfce7; color: #166534; }
+    .wait-warn { background: #fef3c7; color: #b45309; }
+    .wait-danger { background: #fee2e2; color: #b91c1c; animation: alert-card 0.8s infinite alternate; }
+
+    .order-type-badge { font-size: 0.68rem; font-weight: 800; padding: 2px 6px; border-radius: 6px; text-transform: uppercase; }
     .type-dinein { background: #fef3c7; color: #b45309; }
     .type-delivery { background: #e0f2fe; color: #0369a1; }
-    .state-badge { padding: 3px 7px; border-radius: 10px; font-size: 0.7rem; font-weight: 700; }
+    .state-badge { padding: 2px 6px; border-radius: 6px; font-size: 0.68rem; font-weight: 800; }
     .state-new { background: #fee2e2; color: #b91c1c; }
     .state-process { background: #fef3c7; color: #92400e; }
     .state-complete { background: #dcfce7; color: #15803d; }
     .state-canceled { background: #f1f5f9; color: #64748b; }
     
-    .card-body { padding: 14px; flex-grow: 1; }
-    .items-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 0.88rem; }
-    .items-table tr { border-bottom: 1px dashed var(--border); }
-    .items-table td { padding: 5px 0; }
-    .financial-split-box { background: #fafafa; border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; margin-top: 6px; font-size: 0.82rem; }
-    .fin-row { display: flex; justify-content: space-between; margin-bottom: 3px; }
-    .card-footer { padding: 10px 14px; background: #fafafa; border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-    .btn-act { border: none; padding: 8px; border-radius: 8px; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+    .card-body { padding: 10px; flex-grow: 1; font-size: 0.82rem; }
+    .customer-box { background: #f8fafc; padding: 6px 8px; border-radius: 6px; margin-bottom: 8px; border-left: 3px solid var(--primary); font-size: 0.78rem; line-height: 1.35; }
+    .pay-status-box { padding: 6px 8px; border-radius: 6px; margin-bottom: 8px; font-size: 0.76rem; font-weight: 700; display: flex; flex-direction: column; gap: 4px; }
+    .pay-cod { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
+    .pay-qr-wait { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+    .pay-qr-done { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+
+    .items-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 0.83rem; }
+    .items-table tr { border-bottom: 1px dashed var(--border); cursor: pointer; transition: background 0.15s; }
+    .items-table tr:hover { background: #f1f5f9; }
+    .items-table tr.dish-done td { text-decoration: line-through; color: #16a34a; opacity: 0.75; }
+    .items-table td { padding: 4px 2px; }
+    
+    .financial-split-box { background: #fafafa; border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; font-size: 0.76rem; }
+    .fin-row { display: flex; justify-content: space-between; margin-bottom: 2px; }
+    .fin-total { border-top: 1px dashed #cbd5e1; padding-top: 4px; margin-top: 3px; font-weight: 800; font-size: 0.85rem; color: #dc2626; }
+    .card-footer { padding: 8px 10px; background: #fafafa; border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+    .btn-act { border: none; padding: 7px 6px; border-radius: 6px; font-weight: 700; font-size: 0.76rem; cursor: pointer; }
+    .btn-accept { background: #ef4444; color: #fff; grid-column: span 2; font-size: 0.84rem; padding: 9px; }
+    .btn-complete { background: #16a34a; color: #fff; }
+    .btn-print-kitchen { background: #e2e8f0; color: #0f172a; }
+    .btn-print-bill { background: #e0f2fe; color: #0369a1; }
+    .btn-cancel { background: #fee2e2; color: #b91c1c; }
 
     /* CÁC VIEW KHÁC GIỮ NGUYÊN */
     .pos-layout { display: grid; grid-template-columns: 1.8fr 1.2fr; gap: 16px; }
@@ -226,8 +250,22 @@
         <button class="btn-end-shift" onclick="endShiftAndClearScreen()">🛑 KẾT CA & XÓA MÀN HÌNH</button>
       </div>
 
-      <!-- VIEW 1: ĐƠN HÀNG -->
-      <div id="viewOrders"><div id="ordersContainer" class="orders-grid"></div></div>
+<!-- VIEW 1: ĐƠN HÀNG & BÁO BẾP THU GỌN -->
+      <div id="viewOrders">
+        <div class="kds-filter-bar">
+          <button class="kds-filter-btn active" onclick="setOrderStatusFilter('active_only', this)">🔥 Cần Xử Lý (<span id="cntActiveOnly">0</span>)</button>
+          <button class="kds-filter-btn" onclick="setOrderStatusFilter('Chờ xác nhận', this)">🔴 Chờ Nhận (<span id="cntFilterPending">0</span>)</button>
+          <button class="kds-filter-btn" onclick="setOrderStatusFilter('Đang chế biến', this)">🟠 Bếp Đang Làm (<span id="cntFilterCooking">0</span>)</button>
+          <button class="kds-filter-btn" onclick="setOrderStatusFilter('done_cancel', this)">✅ Đã Xong / Hủy (<span id="cntFilterDone">0</span>)</button>
+          <button class="kds-filter-btn" onclick="setOrderStatusFilter('all', this)">📋 Tất Cả</button>
+          
+          <select id="orderSortSelect" class="kds-sort-select" onchange="renderOrders()">
+            <option value="fifo">⏳ Xếp theo thứ tự: Đơn Đặt Trước Làm Trước (FIFO)</option>
+            <option value="newest">🆕 Xếp theo thứ tự: Đơn Mới Nhất Lên Đầu</option>
+          </select>
+        </div>
+        <div id="ordersContainer" class="orders-grid"></div>
+      </div>
 
       <!-- VIEW 2: POS TẠI BÀN -->
       <div id="viewPosOrder" style="display: none;">
@@ -292,29 +330,36 @@
         </table>
       </div>
 
-      <!-- VIEW 4: CẤU HÌNH VIETQR -->
+<!-- VIEW 4: CẤU HÌNH VIETQR (ƯU TIÊN 4 NGÂN HÀNG CHỦ LỰC & BỘ NHỚ ĐA NGÂN HÀNG) -->
       <div id="viewBankConfig" style="display: none;">
         <div class="config-card">
-          <h2 style="color:var(--primary); font-size:1.25rem; margin-bottom:14px;">Cấu Hình Tài Khoản VietQR</h2>
+          <h2 style="color:var(--primary); font-size:1.25rem; margin-bottom:6px;">Cấu Hình Tài Khoản VietQR</h2>
+          <p style="font-size:0.84rem; color:#64748b; margin-bottom:14px;">Hệ thống tự động ghi nhớ Số tài khoản riêng cho từng ngân hàng. Chọn ngân hàng nào và bấm Lưu thì mã QR của khách sẽ chuyển sang ngân hàng đó.</p>
           <div class="form-group-cfg">
-            <label>Ngân Hàng Thụ Hưởng:</label>
-            <select id="cfgBankSelect">
-              <option value="MB">MBBank</option><option value="VCB">Vietcombank</option><option value="TCB">Techcombank</option>
-              <option value="ACB">ACB</option><option value="ICB">VietinBank</option><option value="BIDV">BIDV</option>
+            <label>Ngân Hàng Thụ Hưởng (Ưu tiên hệ thống Bảo Anh Lâm):</label>
+            <select id="cfgBankSelect" onchange="onBankSelectChange(this.value)">
+              <option value="MB">⭐ MBBank - Ngân hàng Quân Đội</option>
+              <option value="ABB">⭐ ABBank - Ngân hàng An Bình</option>
+              <option value="NAB">⭐ Nam A Bank - Ngân hàng Nam Á</option>
+              <option value="ACB">⭐ ACB - Ngân hàng Á Châu</option>
+              <option value="VCB">Vietcombank - Ngoại Thương</option>
+              <option value="TCB">Techcombank - Kỹ Thương</option>
+              <option value="ICB">VietinBank - Công Thương</option>
+              <option value="BIDV">BIDV - Đầu Tư & Phát Triển</option>
             </select>
           </div>
-          <div class="form-group-cfg"><label>Số Tài Khoản:</label><input type="text" id="cfgAccountNo" placeholder="Nhập số tài khoản..."></div>
+          <div class="form-group-cfg"><label>Số Tài Khoản Nhận Tiền:</label><input type="text" id="cfgAccountNo" placeholder="Nhập số tài khoản của ngân hàng đang chọn..."></div>
           <div class="form-group-cfg"><label>Tên Chủ Tài Khoản (In hoa không dấu):</label><input type="text" id="cfgAccountName" placeholder="VD: HOANG HUYNH HUY BAO"></div>
-          <button onclick="saveBankConfig()" style="width:100%; padding:12px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-weight:700; cursor:pointer;">💾 LƯU CẤU HÌNH VIETQR NGAY</button>
+          <button onclick="saveBankConfig()" style="width:100%; padding:12px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-weight:700; cursor:pointer;">💾 LƯU & KÍCH HOẠT NGÂN HÀNG NÀY CHO VIETQR</button>
         </div>
       </div>
 
-      <!-- VIEW 5: BÁO CÁO THUẾ & KẾT CA -->
+      <!-- VIEW 5: BÁO CÁO THUẾ & KẾT CA (TÁCH BIỆT TUYỆT ĐỐI DOANH THU QUÁN & TIỀN SHIP SHIPPER) -->
       <div id="viewShiftReport" style="display: none;">
         <div class="report-card">
           <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px; margin-bottom:16px;">
             <h3 style="color:var(--primary); font-size:1.05rem;">CÔNG TY TNHH TMDV VÀ SẢN XUẤT BẢO ANH LÂM</h3>
-            <p style="font-size:0.85rem; color:#166534;">MST: <b>3401289271</b> | Đ/c: 280 Trần Hưng Đạo, P. Phan Thiết<br><i>Bóc tách rõ Doanh thu theo mã ngành (5610, 5630) và Khoản thu hộ cước ship (Không chịu thuế).</i></p>
+            <p style="font-size:0.85rem; color:#166534;">MST: <b>3401289271</b> | Đ/c: 280 Trần Hưng Đạo, P. Phan Thiết, T. Lâm Đồng<br><i>Báo cáo kế toán tách biệt 100% Doanh thu bán hàng chịu thuế (Mã ngành 5610, 5630) và Sổ thu hộ phí vận chuyển trả cho Shipper (Không tính vào doanh thu chịu thuế của công ty).</i></p>
           </div>
 
           <div class="report-filter-bar">
@@ -334,23 +379,45 @@
           </div>
 
           <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-bottom:16px;">
-            <div class="rep-box"><span>DOANH THU 5610 (HY CHAY)</span><h3 id="repTaxable5610" style="color:var(--primary);">0đ</h3></div>
-            <div class="rep-box"><span>DOANH THU 5630 (BAL'S HOUSE)</span><h3 id="repTaxable5630" style="color:#d97706;">0đ</h3></div>
-            <div class="rep-box"><span>TIỀN SHIP THU HỘ</span><h3 id="repDeliveryRev" style="color:#2563eb;">0đ</h3></div>
-            <div class="rep-box"><span>TỔNG ĐƠN ĐÃ XONG</span><h3 id="repDoneCount" style="color:#16a34a;">0 đơn</h3></div>
+            <div class="rep-box"><span>DT 5610 (HY CHAY)</span><h3 id="repTaxable5610" style="color:var(--primary);">0đ</h3></div>
+            <div class="rep-box"><span>DT 5630 (BAL'S HOUSE)</span><h3 id="repTaxable5630" style="color:#d97706;">0đ</h3></div>
+            <div class="rep-box" style="background:#ecfdf5; border-color:#86efac;"><span>TỔNG DT CHỊU THUẾ (QUÁN)</span><h3 id="repTotalTaxable" style="color:#15803d;">0đ</h3></div>
+            <div class="rep-box" style="background:#eff6ff; border-color:#bfdbfe;"><span>SỔ SHIP THU HỘ (TRẢ TÀI XẾ)</span><h3 id="repDeliveryRev" style="color:#2563eb;">0đ</h3></div>
+            <div class="rep-box"><span>TỔNG ĐƠN HOÀN TẤT</span><h3 id="repDoneCount" style="color:#16a34a;">0 đơn</h3></div>
           </div>
 
-          <h3 style="font-size:1.05rem; color:var(--primary); margin-bottom:8px;">1. BẢNG DOANH THU THEO TỪNG NGÀY TRONG KỲ</h3>
+          <h3 style="font-size:1.05rem; color:var(--primary); margin-bottom:8px;">1. BẢNG KÊ DOANH THU CHỊU THUẾ THEO NGÀY (KHÔNG CỘNG TIỀN SHIP VÀO DOANH THU QUÁN)</h3>
           <table class="report-table">
-            <thead><tr style="background:#f1f5f9; text-align:left;"><th>Ngày Thực Hiện</th><th style="text-align:center;">Số Đơn</th><th style="text-align:right; color:#1e5e3a;">Doanh Thu 5610 (Chay)</th><th style="text-align:right; color:#d97706;">Doanh Thu 5630 (Đồ Uống)</th><th style="text-align:right; color:#2563eb;">Tiền Ship Hộ</th><th style="text-align:right;">Tổng Thu Thực Tế</th></tr></thead>
+            <thead>
+              <tr style="background:#f1f5f9; text-align:left;">
+                <th>Ngày Thực Hiện</th>
+                <th style="text-align:center;">Số Đơn</th>
+                <th style="text-align:right; color:#1e5e3a;">DT 5610 (Đồ Chay)</th>
+                <th style="text-align:right; color:#d97706;">DT 5630 (Đồ Uống)</th>
+                <th style="text-align:right; color:#15803d; background:#dcfce7;">TỔNG DT CHỊU THUẾ (5610+5630)</th>
+                <th style="text-align:right; color:#2563eb; background:#eff6ff;">Tiền Ship Thu Hộ (Trả Shipper)</th>
+              </tr>
+            </thead>
             <tbody id="repDailyBreakdownBody"></tbody>
           </table>
 
-          <h3 style="font-size:1.05rem; color:var(--primary); margin-top:20px; margin-bottom:8px;">2. KIỂM KÊ SỐ LƯỢNG MÓN BÁN RA</h3>
+          <h3 style="font-size:1.05rem; color:var(--primary); margin-top:20px; margin-bottom:8px;">2. KIỂM KÊ SỐ LƯỢNG MÓN BÁN RA (DOANH THU MÓN)</h3>
           <table class="report-table">
-            <thead><tr style="background:#f1f5f9; text-align:left;"><th>Tên Món Ăn</th><th style="text-align:center;">Số Lượng Đã Bán</th><th style="text-align:right;">Thành Tiền (VNĐ)</th></tr></thead>
+            <thead><tr style="background:#f1f5f9; text-align:left;"><th>Tên Món Ăn / Đồ Uống</th><th style="text-align:center;">Số Lượng Đã Bán</th><th style="text-align:right;">Doanh Thu Món (VNĐ)</th></tr></thead>
             <tbody id="repDishTableBody"></tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- MODAL XEM ẢNH CHỤP MÀN HÌNH CHUYỂN KHOẢN CỦA KHÁCH -->
+      <div id="proofModal" class="cancel-modal-overlay">
+        <div class="cancel-modal-box" style="max-width:420px; text-align:center;">
+          <h3 style="color:var(--primary); margin-bottom:8px;">🖼️ Ảnh Biên Lai Chuyển Khoản</h3>
+          <p id="proofModalTitle" style="font-size:0.85rem; color:#64748b; margin-bottom:12px;"></p>
+          <div style="background:#f8fafc; padding:10px; border-radius:10px; border:1px solid #cbd5e1; margin-bottom:14px;">
+            <img id="proofModalImg" src="" alt="Ảnh chuyển khoản" style="max-width:100%; max-height:60vh; margin:0 auto; border-radius:8px;">
+          </div>
+          <button onclick="closeProofModal()" style="width:100%; padding:10px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-weight:700; cursor:pointer;">Đóng Cửa Sổ</button>
         </div>
       </div>
       
@@ -562,13 +629,75 @@ window.addEventListener('DOMContentLoaded', () => {
         if (tbody) tbody.innerHTML = html || '<tr><td colspan="4" style="text-align:center;">Chưa có tài khoản phụ nào.</td></tr>';
     });
 
-    // Cập nhật hàm switchMainTab để thêm viewUsers
+// ==========================================
+    // 3. TỰ ĐỘNG TẠO ICON "POS ADMIN" NỀN VÀNG ĐỘC LẬP 100% VỚI APP KHÁCH
+    // ==========================================
+    function setupDistinctAdminAppIdentity() {
+      const cv = document.createElement('canvas');
+      cv.width = 192; cv.height = 192;
+      const ctx = cv.getContext('2d');
+
+      // Vẽ nền Vàng Hoàng Kim đặc trưng của Admin
+      ctx.fillStyle = '#ffd800';
+      ctx.fillRect(0, 0, 192, 192);
+
+      // Vẽ khung viền xanh đậm Hy Chay
+      ctx.strokeStyle = '#1e5e3a';
+      ctx.lineWidth = 12;
+      ctx.strokeRect(6, 6, 180, 180);
+
+      // Vẽ dải băng Đỏ "POS ADMIN" nổi bật
+      ctx.fillStyle = '#dc2626';
+      ctx.fillRect(16, 22, 160, 56);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 38px Montserrat, Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('POS', 96, 52);
+
+      // Vẽ chữ HY CHAY ADMIN ở nửa dưới
+      ctx.fillStyle = '#1e5e3a';
+      ctx.font = '900 28px Montserrat, Arial, sans-serif';
+      ctx.fillText('HY CHAY', 96, 118);
+      ctx.font = '800 20px Inter, Arial, sans-serif';
+      ctx.fillStyle = '#0f172a';
+      ctx.fillText('QUẢN TRỊ', 96, 152);
+
+      const iconDataUrl = cv.toDataURL('image/png');
+      const fav = document.getElementById('adminFavicon');
+      const touch = document.getElementById('adminTouchIcon');
+      if (fav) fav.href = iconDataUrl;
+      if (touch) touch.href = iconDataUrl;
+
+      const dynamicManifest = {
+        id: "/hychay-pos-admin-standalone",
+        name: "Hy Chay POS - Trung Tâm Điều Hành",
+        short_name: "POS Hy Chay",
+        start_url: window.location.pathname || "/admin.html",
+        scope: window.location.pathname || "/admin.html",
+        display: "standalone",
+        background_color: "#ffd800",
+        theme_color: "#ffd800",
+        icons: [{ src: iconDataUrl, sizes: "192x192", type: "image/png", purpose: "any maskable" }]
+      };
+      const manifestBlob = new Blob([JSON.stringify(dynamicManifest)], { type: 'application/json' });
+      const manifestLink = document.getElementById('adminManifestLink');
+      if (manifestLink) manifestLink.href = URL.createObjectURL(manifestBlob);
+    }
+    setupDistinctAdminAppIdentity();
+
+    // ==========================================
+    // 4. ĐIỀU HƯỚNG TAB CHÍNH (ĐÃ XÓA BẢN TRÙNG LẶP GÂY MẤT TAB PHÂN QUYỀN)
+    // ==========================================
     window.switchMainTab = function(tabName, ev) {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); ev.currentTarget.classList.add('active');
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      if (ev && ev.currentTarget) ev.currentTarget.classList.add('active');
       ['viewOrders','viewPosOrder','viewMenuStock','viewBankConfig','viewShiftReport','viewUsers'].forEach(id => {
-          if(document.getElementById(id)) document.getElementById(id).style.display = 'none';
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
       });
-      document.getElementById('view' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).style.display = 'block';
+      const target = document.getElementById('view' + tabName.charAt(0).toUpperCase() + tabName.slice(1));
+      if (target) target.style.display = 'block';
       
       if (tabName === 'posOrder') window.renderPosDishGrid();
       else if (tabName === 'menuStock') window.renderMenuStockTable();
@@ -577,28 +706,55 @@ window.addEventListener('DOMContentLoaded', () => {
 
     let ordersCache = {}; let menuCustomCache = {}; let isAudioActive = false; let targetCancelOrderId = null; let selectedTable = "Bàn 1"; let posCart = {};
     let aiVoiceInterval = null; let lastSpokenCallId = null;
+    let currentOrderStatusFilter = 'active_only';
+    let banksMapCache = {};
 
-    const tDay = new Date(); document.getElementById('filterDayInput').value = tDay.toISOString().split('T')[0]; document.getElementById('filterMonthInput').value = tDay.toISOString().slice(0, 7);
+    const BANK_NAMES_MAP = {
+      "MB": "MBBank",
+      "ABB": "ABBank (An Bình)",
+      "NAB": "Nam A Bank",
+      "ACB": "ACB",
+      "VCB": "Vietcombank",
+      "TCB": "Techcombank",
+      "ICB": "VietinBank",
+      "BIDV": "BIDV"
+    };
+
+    const tDay = new Date();
+    document.getElementById('filterDayInput').value = tDay.toISOString().split('T')[0];
+    document.getElementById('filterMonthInput').value = tDay.toISOString().slice(0, 7);
     setInterval(() => { document.getElementById('liveClock').innerText = new Date().toLocaleTimeString('vi-VN'); }, 1000);
+    // Cập nhật đồng hồ đếm phút chờ trên thẻ đơn mỗi 30 giây
+    setInterval(() => { if (Object.keys(ordersCache).length > 0) renderOrders(); }, 30000);
 
     window.openInstallGuideModal = () => document.getElementById('installGuideModal').classList.add('active');
     window.closeInstallGuideModal = () => document.getElementById('installGuideModal').classList.remove('active');
-  
-function speakAlert(text) {
-      if (!isAudioActive) return;
-      playHardwareBeep();
-      if (!('speechSynthesis' in window)) return;
-      window.speechSynthesis.cancel(); 
-      const msg = new SpeechSynthesisUtterance(text);
-      msg.lang = 'vi-VN'; 
-      msg.rate = 1.0;     
-      window.speechSynthesis.speak(msg);
+
+    // ==========================================
+    // 5. HỆ THỐNG ÂM THANH KDS CỰC ĐẠI (100% VOLUME) & KHÓA GIỌNG ĐỌC TIẾNG VIỆT
+    // ==========================================
+    let wakeLock = null;
+    let audioContext = null;
+    let cachedVietnameseVoice = null;
+    let fallbackAudioPlayer = new Audio();
+
+    function findVietnameseVoice() {
+      if (!('speechSynthesis' in window)) return null;
+      const voices = window.speechSynthesis.getVoices() || [];
+      // Ưu tiên 1: Giọng có mã ngôn ngữ vi-VN hoặc vi_VN
+      let vn = voices.find(v => v.lang && (v.lang.toLowerCase() === 'vi-vn' || v.lang.toLowerCase() === 'vi_vn' || v.lang.toLowerCase().startsWith('vi')));
+      // Ưu tiên 2: Giọng có tên chứa chữ Vietnamese hoặc Tiếng Việt
+      if (!vn) vn = voices.find(v => v.name && (v.name.toLowerCase().includes('viet') || v.name.toLowerCase().includes('tiếng việt')));
+      cachedVietnameseVoice = vn || null;
+      return cachedVietnameseVoice;
     }
 
-let wakeLock = null;
-    let audioContext = null;
+    if ('speechSynthesis' in window) {
+      findVietnameseVoice();
+      window.speechSynthesis.onvoiceschanged = () => { findVietnameseVoice(); };
+    }
 
-    // Phát âm bip tần số cao chuẩn POS để đánh thức kênh âm thanh phần cứng
+    // Phát chuỗi 3 hồi chuông KDS tần số cao ở mức âm lượng tối đa (100% Gain)
     function playHardwareBeep() {
       try {
         if (!audioContext) {
@@ -607,19 +763,66 @@ let wakeLock = null;
         if (audioContext.state === 'suspended') {
           audioContext.resume();
         }
-        const osc = audioContext.createOscillator();
-        const gain = audioContext.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(880, audioContext.currentTime); // Nốt La (A5)
-        gain.gain.setValueAtTime(0.3, audioContext.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.35);
-        osc.connect(gain);
-        gain.connect(audioContext.destination);
-        osc.start();
-        osc.stop(audioContext.currentTime + 0.35);
+        const now = audioContext.currentTime;
+        // Tạo 3 hồi chuông kép "TING-TONG! TING-TONG! TING-TONG!" vang lớn
+        const notes = [
+          { freq: 987.77, start: 0.0, dur: 0.16 },
+          { freq: 783.99, start: 0.17, dur: 0.20 },
+          { freq: 987.77, start: 0.42, dur: 0.16 },
+          { freq: 783.99, start: 0.59, dur: 0.20 },
+          { freq: 1046.50, start: 0.84, dur: 0.30 }
+        ];
+        notes.forEach(n => {
+          const osc = audioContext.createOscillator();
+          const gain = audioContext.createGain();
+          osc.type = 'triangle'; // Sóng âm triangle kết hợp hài âm rõ và vang xa hơn sine
+          osc.frequency.setValueAtTime(n.freq, now + n.start);
+          gain.gain.setValueAtTime(1.0, now + n.start); // Cực đại 100% công suất
+          gain.gain.exponentialRampToValueAtTime(0.02, now + n.start + n.dur);
+          osc.connect(gain);
+          gain.connect(audioContext.destination);
+          osc.start(now + n.start);
+          osc.stop(now + n.start + n.dur);
+        });
       } catch (e) {
         console.warn('Lỗi AudioContext:', e);
       }
+    }
+
+    function speakAlert(text) {
+      if (!isAudioActive) return;
+      playHardwareBeep();
+
+      // Đợi 1.1 giây cho 3 hồi chuông KDS dứt rồi mới đọc to rõ
+      setTimeout(() => {
+        if (!isAudioActive) return;
+        const vnVoice = cachedVietnameseVoice || findVietnameseVoice();
+
+        if (vnVoice && 'speechSynthesis' in window) {
+          // Máy có sẵn giọng Tiếng Việt -> Ép dùng đúng giọng Tiếng Việt với âm lượng 100%
+          window.speechSynthesis.cancel();
+          const msg = new SpeechSynthesisUtterance(text);
+          msg.voice = vnVoice;
+          msg.lang = 'vi-VN';
+          msg.volume = 1.0;
+          msg.rate = 0.95;
+          msg.pitch = 1.05;
+          window.speechSynthesis.speak(msg);
+        } else {
+          // Máy phụ KHÔNG có giọng Tiếng Việt -> Dùng luồng Google TTS Tiếng Việt để không bị phát âm tiếng Anh
+          try {
+            const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=${encodeURIComponent(text)}`;
+            fallbackAudioPlayer.src = ttsUrl;
+            fallbackAudioPlayer.volume = 1.0;
+            fallbackAudioPlayer.play().catch(() => {
+              // Nếu mạng chặn stream ngoài thì đánh thêm 1 nhịp chuông báo động kép
+              playHardwareBeep();
+            });
+          } catch (_) {
+            playHardwareBeep();
+          }
+        }
+      }, 1100);
     }
 
     window.toggleAudioEngine = async function() {
@@ -628,44 +831,31 @@ let wakeLock = null;
         clearInterval(aiVoiceInterval);
         aiVoiceInterval = null;
         if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-        
-        // Nhả khóa giữ sáng màn hình
         if (wakeLock !== null) {
           try { await wakeLock.release(); wakeLock = null; } catch (_) {}
         }
-
         document.getElementById('btnSoundTrigger').classList.remove('active');
         document.getElementById('soundText').innerText = 'Bật Chuông Báo';
       } else {
-        // 1. Kích hoạt quyền Audio phần cứng bằng tương tác click trực tiếp
         playHardwareBeep();
-
-        // 2. Yêu cầu quyền giữ sáng màn hình (Screen Wake Lock API) để máy không sleep mất đơn
         if ('wakeLock' in navigator) {
           try {
             wakeLock = await navigator.wakeLock.request('screen');
             wakeLock.addEventListener('release', () => { wakeLock = null; });
           } catch (err) {
-            console.log('Thiết bị không hỗ trợ hoặc từ chối WakeLock:', err);
+            console.log('WakeLock info:', err);
           }
         }
-
         isAudioActive = true;
         document.getElementById('btnSoundTrigger').classList.add('active');
-        document.getElementById('soundText').innerText = 'Chuông Đang Bật (Chạy Ngầm)';
-        speakAlert("Hệ thống âm thanh POS đã sẵn sàng nhận đơn.");
+        document.getElementById('soundText').innerText = '🔊 Chuông Cực Đại (Đang Bật)';
+        speakAlert("Hệ thống âm thanh Hy Chay đã bật mức tối đa.");
       }
     };
 
-    window.switchMainTab = function(tabName, ev) {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); ev.currentTarget.classList.add('active');
-      ['viewOrders','viewPosOrder','viewMenuStock','viewBankConfig','viewShiftReport'].forEach(id => document.getElementById(id).style.display = 'none');
-      document.getElementById('view' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).style.display = 'block';
-      if (tabName === 'posOrder') window.renderPosDishGrid();
-      else if (tabName === 'menuStock') window.renderMenuStockTable();
-      else if (tabName === 'shiftReport') window.renderShiftReport();
-    };
-
+    // ==========================================
+    // 6. CHUÔNG GỌI PHỤC VỤ TẠI BÀN
+    // ==========================================
     onValue(ref(db, 'service_calls'), (snap) => {
       const calls = snap.val() || {}; const container = document.getElementById('serviceAlerts'); container.innerHTML = ''; let playSound = false;
       const callIds = Object.keys(calls);
@@ -673,23 +863,25 @@ let wakeLock = null;
         const c = calls[id];
         if ((new Date() - new Date(c.timestamp)) / 60000 < 10) {
           playSound = true; const isBill = c.type === 'bill';
-          container.innerHTML += `<div class="service-alert ${isBill ? 'bill' : ''}"><div><b style="font-size:1.1rem; color:${isBill?'#0284c7':'#b91c1c'};">${c.table}</b><br><span style="font-size:0.85rem;">${isBill ? '💳 Tính Tiền' : '🔔 Phục Vụ'}</span></div><button onclick="clearServiceCall('${id}')" style="background:#f1f5f9; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;">Xong</button></div>`;
+          const callTime = new Date(c.timestamp).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+          container.innerHTML += `<div class="service-alert ${isBill ? 'bill' : ''}"><div><b style="font-size:1.05rem; color:${isBill?'#0284c7':'#b91c1c'};">${c.table} (${callTime})</b><br><span style="font-size:0.84rem;">${isBill ? '💳 Yêu cầu Tính Tiền' : '🔔 Gọi Phục Vụ'}</span></div><button onclick="clearServiceCall('${id}')" style="background:#f1f5f9; border:1px solid #cbd5e1; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;">Đã Xử Lý</button></div>`;
         }
       });
       if (playSound && isAudioActive && !aiVoiceInterval && callIds.length > 0) {
-          const latestId = callIds.pop();
-          if (latestId !== lastSpokenCallId) {
-              const latestCall = calls[latestId];
-              const actionText = latestCall.type === 'bill' ? 'yêu cầu tính tiền' : 'gọi phục vụ';
-              speakAlert(`Hy Chay! ${latestCall.table} ${actionText}`);
-              lastSpokenCallId = latestId; 
-          }
-      } else if (!playSound && document.getElementById('kpiPending').innerText === '0') {
-          window.speechSynthesis.cancel();
+        const latestId = callIds[callIds.length - 1];
+        if (latestId !== lastSpokenCallId) {
+          const latestCall = calls[latestId];
+          const actionText = latestCall.type === 'bill' ? 'yêu cầu tính tiền' : 'gọi phục vụ';
+          speakAlert(`Chú ý! ${latestCall.table} đang ${actionText}`);
+          lastSpokenCallId = latestId; 
+        }
       }
     });
     window.clearServiceCall = (id) => remove(ref(db, 'service_calls/' + id));
 
+    // ==========================================
+    // 7. DỮ LIỆU 70 MÓN ĂN & ĐỒ UỐNG
+    // ==========================================
     const ALL_MENU_DATA = [
       { id: "bunmoc", name: "Bún Mọc Chay", defaultPrice: 30000, cat: "bun", catName: "Món Bún" },
       { id: "bunthai", name: "Bún Thái Chay", defaultPrice: 35000, cat: "bun", catName: "Món Bún" },
@@ -764,6 +956,13 @@ let wakeLock = null;
       { id: "nuocngot", name: "Nước Ngọt Các Loại", defaultPrice: 15000, cat: "douong", catName: "Đồ Uống" }
     ];
 
+    // ==========================================
+    // 8. CẤU HÌNH VIETQR ĐA NGÂN HÀNG (MB, ABBANK, NAM Á BANK, ACB)
+    // ==========================================
+    onValue(ref(db, 'restaurant_config/banks_map'), (snap) => {
+      banksMapCache = snap.val() || {};
+    });
+
     onValue(ref(db, 'restaurant_config/bank'), (snap) => {
       const cfg = snap.val() || {};
       if (cfg.bankId) document.getElementById('cfgBankSelect').value = cfg.bankId;
@@ -771,12 +970,32 @@ let wakeLock = null;
       if (cfg.accountName) document.getElementById('cfgAccountName').value = cfg.accountName;
     });
 
-    window.saveBankConfig = function() {
-      const bankId = document.getElementById('cfgBankSelect').value, accountNo = document.getElementById('cfgAccountNo').value.trim(), accountName = document.getElementById('cfgAccountName').value.trim().toUpperCase();
-      if (!accountNo || !accountName) return alert("Nhập đủ Số tài khoản và Tên chủ thẻ!");
-      set(ref(db, 'restaurant_config/bank'), { bankId, accountNo, accountName, updatedAt: new Date().toISOString() }).then(() => alert("✅ Lưu cấu hình VietQR thành công!"));
+    window.onBankSelectChange = function(bankId) {
+      const saved = banksMapCache[bankId];
+      if (saved) {
+        document.getElementById('cfgAccountNo').value = saved.accountNo || '';
+        document.getElementById('cfgAccountName').value = saved.accountName || 'HOANG HUYNH HUY BAO';
+      } else {
+        document.getElementById('cfgAccountNo').value = '';
+        if (!document.getElementById('cfgAccountName').value) {
+          document.getElementById('cfgAccountName').value = 'HOANG HUYNH HUY BAO';
+        }
+      }
     };
 
+    window.saveBankConfig = function() {
+      const bankId = document.getElementById('cfgBankSelect').value;
+      const accountNo = document.getElementById('cfgAccountNo').value.trim();
+      const accountName = document.getElementById('cfgAccountName').value.trim().toUpperCase();
+      if (!accountNo || !accountName) return alert("Vui lòng nhập đủ Số tài khoản và Tên chủ tài khoản!");
+      const payload = { bankId, accountNo, accountName, updatedAt: new Date().toISOString() };
+      update(ref(db, `restaurant_config/banks_map/${bankId}`), payload);
+      set(ref(db, 'restaurant_config/bank'), payload).then(() => alert(`✅ Đã lưu và kích hoạt VietQR ngân hàng ${BANK_NAMES_MAP[bankId] || bankId}!`));
+    };
+
+    // ==========================================
+    // 9. QUẢN LÝ MÓN ĂN & POS TẠI BÀN
+    // ==========================================
     onValue(ref(db, 'menu_customizations'), (snap) => { menuCustomCache = snap.val() || {}; window.renderMenuStockTable(); window.renderPosDishGrid(); });
 
     function getDishData(dish) {
@@ -804,36 +1023,26 @@ let wakeLock = null;
       tbody.innerHTML = html;
     };
 
-window.uploadDishImageDirect = function(input, dishId) {
-  const file = input.files[0]; 
-  if (!file) return; 
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const img = new Image();
-    img.onload = () => {
-      const cv = document.createElement('canvas'); 
-      let w = img.width, h = img.height; 
-      if (w > 380) { 
-        h = Math.round(h * 380 / w); 
-        w = 380; 
-      }
-      cv.width = w; 
-      cv.height = h; 
-      cv.getContext('2d').drawImage(img, 0, 0, w, h);
-      const base64Data = cv.toDataURL('image/jpeg', 0.82);
-
-      // Lưu trực tiếp chuỗi ảnh nén vào Realtime Database (không cần dịch vụ Storage)
-      update(ref(db, `menu_customizations/${dishId}`), { 
-        image: base64Data, 
-        updatedAt: new Date().toISOString() 
-      })
-      .then(() => alert("✅ Đã cập nhật ảnh món thành công!"))
-      .catch((err) => alert("❌ Lỗi lưu ảnh: " + err.message));
+    window.uploadDishImageDirect = function(input, dishId) {
+      const file = input.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const cv = document.createElement('canvas');
+          let w = img.width, h = img.height;
+          if (w > 380) { h = Math.round(h * 380 / w); w = 380; }
+          cv.width = w; cv.height = h;
+          cv.getContext('2d').drawImage(img, 0, 0, w, h);
+          const base64Data = cv.toDataURL('image/jpeg', 0.82);
+          update(ref(db, `menu_customizations/${dishId}`), { image: base64Data, updatedAt: new Date().toISOString() })
+            .then(() => alert("✅ Đã cập nhật ảnh món thành công!"))
+            .catch((err) => alert("❌ Lỗi lưu ảnh: " + err.message));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
     };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
-};
 
     window.saveDishPrice = (id) => { const p = parseInt(document.getElementById(`p_in_${id}`).value); if (!isNaN(p)) update(ref(db, `menu_customizations/${id}`), { price: p, updatedAt: new Date().toISOString() }).then(() => alert("✅ Đã lưu giá mới!")); };
     window.toggleDishStock = (id, active) => update(ref(db, `menu_customizations/${id}`), { soldOut: !active, updatedAt: new Date().toISOString() });
@@ -865,53 +1074,190 @@ window.uploadDishImageDirect = function(input, dishId) {
     window.submitDineInOrder = function() {
       if (Object.keys(posCart).length === 0) return alert("Vui lòng chọn ít nhất 1 món!");
       let sub = 0; for (let k in posCart) sub += posCart[k].price * posCart[k].qty;
-      const orderData = { orderType: 'dine_in', table: selectedTable, customerName: selectedTable, phone: 'Tại quán', address: '280 Trần Hưng Đạo', note: document.getElementById('posOrderNote').value, items: posCart, subtotal: sub, shippingFee: 0, grandTotal: sub, status: 'Đang chế biến', createdAt: new Date().toISOString(), archived: false };
+      const orderData = { orderType: 'dine_in', table: selectedTable, customerName: selectedTable, phone: 'Tại quán', address: '280 Trần Hưng Đạo', note: document.getElementById('posOrderNote').value, items: posCart, subtotal: sub, shippingFee: 0, grandTotal: sub, paymentMethod: 'COD', paymentStatus: 'Thu tại bàn', status: 'Đang chế biến', createdAt: new Date().toISOString(), archived: false };
       push(ref(db, 'orders'), orderData).then((res) => { window.printKitchenTicket(res.key, orderData); alert(`Đã gửi đơn ${selectedTable} xuống bếp thành công!`); posCart = {}; document.getElementById('posOrderNote').value = ''; renderPosCartUI(); document.querySelectorAll('.tab-btn')[0].click(); });
     };
+
+    // ==========================================
+    // 10. MÀN HÌNH ĐƠN HÀNG KDS THU GỌN, THỜI GIAN ĐẶT, ĐỐI SOÁT VIETQR & TICK MÓN
+    // ==========================================
+    window.setOrderStatusFilter = function(filterVal, btn) {
+      currentOrderStatusFilter = filterVal;
+      document.querySelectorAll('.kds-filter-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderOrders();
+    };
+
+    window.toggleDishCooked = function(orderId, itemKey, currentState) {
+      update(ref(db, `orders/${orderId}/checkedItems`), { [itemKey]: !currentState });
+    };
+
+    window.verifyQrPayment = function(orderId) {
+      update(ref(db, `orders/${orderId}`), {
+        paymentVerified: true,
+        paymentStatus: 'Đã nhận CK',
+        paymentVerifiedAt: new Date().toISOString()
+      });
+    };
+
+    window.openProofModal = function(orderId) {
+      const o = ordersCache[orderId];
+      if (!o || !o.paymentProof) return alert("Đơn này khách không đính kèm ảnh chụp biên lai.");
+      document.getElementById('proofModalTitle').innerText = `Đơn #HC-${orderId.substring(orderId.length - 5).toUpperCase()} | Mã CK: ${o.paymentCode || 'QR'} | Tổng: ${(o.grandTotal || 0).toLocaleString()}đ`;
+      document.getElementById('proofModalImg').src = o.paymentProof;
+      document.getElementById('proofModal').classList.add('active');
+    };
+    window.closeProofModal = () => document.getElementById('proofModal').classList.remove('active');
 
     onValue(ref(db, 'orders'), (snapshot) => { ordersCache = snapshot.val() || {}; renderOrders(); window.renderShiftReport(); });
 
     function renderOrders() {
-      const container = document.getElementById('ordersContainer'); let countPending = 0, countCooking = 0, taxableRevToday = 0, shipRevToday = 0, cardsHtml = '';
-      const keys = Object.keys(ordersCache).reverse(); const todayStr = new Date().toISOString().split('T')[0];
+      const container = document.getElementById('ordersContainer');
+      let countPending = 0, countCooking = 0, countDoneCancel = 0, taxableRevToday = 0, shipRevToday = 0, cardsHtml = '';
+      const todayStr = new Date().toISOString().split('T')[0];
 
-      keys.forEach(id => {
+      const allKeys = Object.keys(ordersCache);
+      allKeys.forEach(id => {
+        const o = ordersCache[id];
+        if (!o || !o.createdAt) return;
+        if (new Date(o.createdAt).toISOString().split('T')[0] === todayStr && o.status === 'Đã hoàn tất') {
+          taxableRevToday += (o.subtotal || 0);
+          shipRevToday += (o.shippingFee || 0);
+        }
+        if (o.archived) return;
+        if (o.status === 'Chờ xác nhận') countPending++;
+        else if (o.status === 'Đang chế biến') countCooking++;
+        else if (o.status === 'Đã hoàn tất' || o.status === 'Đã hủy') countDoneCancel++;
+      });
+
+      const sortMode = document.getElementById('orderSortSelect') ? document.getElementById('orderSortSelect').value : 'fifo';
+      const sortedKeys = allKeys.filter(id => ordersCache[id] && !ordersCache[id].archived).sort((a, b) => {
+        const oA = ordersCache[a], oB = ordersCache[b];
+        // Luôn ưu tiên đưa đơn "Chờ xác nhận" lên trước nhất để không sót đơn mới
+        const rank = (st) => st === 'Chờ xác nhận' ? 1 : (st === 'Đang chế biến' ? 2 : 3);
+        if (rank(oA.status) !== rank(oB.status)) return rank(oA.status) - rank(oB.status);
+        const tA = new Date(oA.createdAt).getTime(), tB = new Date(oB.createdAt).getTime();
+        return sortMode === 'fifo' ? (tA - tB) : (tB - tA);
+      });
+
+      sortedKeys.forEach(id => {
         const order = ordersCache[id];
-        if (new Date(order.createdAt).toISOString().split('T')[0] === todayStr && order.status === 'Đã hoàn tất') { taxableRevToday += (order.subtotal || 0); shipRevToday += (order.shippingFee || 0); }
-        if (order.archived) return;
+        const isPending = order.status === 'Chờ xác nhận';
+        const isCooking = order.status === 'Đang chế biến';
+        const isDone = order.status === 'Đã hoàn tất';
+        const isCanceled = order.status === 'Đã hủy';
 
-        const isDineIn = order.orderType === 'dine_in'; let subtotal = order.subtotal || 0; let shipFee = order.shippingFee || 0; let grandTotal = order.grandTotal || (subtotal + shipFee);
-        let itemsRows = ''; for (let k in order.items) itemsRows += `<tr><td>${order.items[k].qty}x ${order.items[k].name}</td><td style="text-align:right;">${(order.items[k].price * order.items[k].qty).toLocaleString()}đ</td></tr>`;
+        // Lọc theo Sub-tab để màn hình luôn gọn gàng
+        if (currentOrderStatusFilter === 'active_only' && !isPending && !isCooking) return;
+        if (currentOrderStatusFilter === 'Chờ xác nhận' && !isPending) return;
+        if (currentOrderStatusFilter === 'Đang chế biến' && !isCooking) return;
+        if (currentOrderStatusFilter === 'done_cancel' && !isDone && !isCanceled) return;
 
-        if (order.status === 'Chờ xác nhận') countPending++; else if (order.status === 'Đang chế biến') countCooking++;
-        const isPending = order.status === 'Chờ xác nhận', isCooking = order.status === 'Đang chế biến', isDone = order.status === 'Đã hoàn tất', isCanceled = order.status === 'Đã hủy';
+        const isDineIn = order.orderType === 'dine_in';
+        const subtotal = order.subtotal || 0;
+        const shipFee = order.shippingFee || 0;
+        const grandTotal = order.grandTotal || (subtotal + shipFee);
+
+        // Tính giờ đặt và số phút chờ thực tế
+        const createdDate = new Date(order.createdAt);
+        const timeStr = createdDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        const waitMins = Math.max(0, Math.floor((Date.now() - createdDate.getTime()) / 60000));
+        let waitBadgeHtml = '';
+        if (isPending || isCooking) {
+          const wClass = waitMins >= 15 ? 'wait-danger' : (waitMins >= 10 ? 'wait-warn' : 'wait-normal');
+          waitBadgeHtml = `<span class="wait-timer ${wClass}">⏳ ${waitMins}p</span>`;
+        }
+
+        // Hiển thị danh sách món kèm ô Tick đã nấu
+        const checkedMap = order.checkedItems || {};
+        let totalDishesCount = 0, cookedDishesCount = 0;
+        let itemsRows = '';
+        for (let k in order.items) {
+          totalDishesCount++;
+          const isChecked = !!checkedMap[k];
+          if (isChecked) cookedDishesCount++;
+          const safeKey = k.replace(/'/g, "\\'");
+          const checkIcon = (isPending || isCooking) ? (isChecked ? '☑️ ' : '⬜ ') : '• ';
+          itemsRows += `
+            <tr class="${isChecked ? 'dish-done' : ''}" onclick="toggleDishCooked('${id}', '${safeKey}', ${isChecked})" title="Chạm để đánh dấu đã làm xong món này">
+              <td><b>${checkIcon}${order.items[k].qty}x ${order.items[k].name}</b></td>
+              <td style="text-align:right; white-space:nowrap;">${(order.items[k].price * order.items[k].qty).toLocaleString()}đ</td>
+            </tr>`;
+        }
+
+        // Khung kiểm soát phương thức thanh toán (COD vs VIETQR)
+        const isQR = order.paymentMethod === 'VIETQR';
+        const qrCodeLabel = order.paymentCode || ('HC' + id.substring(id.length - 4).toUpperCase());
+        const bankLabel = BANK_NAMES_MAP[order.paymentBank] || order.paymentBank || 'Ngân hàng';
+        let paymentBoxHtml = '';
+        if (isQR) {
+          if (order.paymentVerified) {
+            paymentBoxHtml = `
+              <div class="pay-status-box pay-qr-done">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span>🟢 ĐÃ NHẬN CK (${bankLabel})</span>
+                  <span>Mã: <b>${qrCodeLabel}</b></span>
+                </div>
+                ${order.paymentProof ? `<button class="btn-act" style="background:#fff; color:#166534; border:1px solid #86efac; padding:3px 6px;" onclick="openProofModal('${id}')">🖼️ Xem Ảnh Bill Khách Gửi</button>` : ''}
+              </div>`;
+          } else {
+            paymentBoxHtml = `
+              <div class="pay-status-box pay-qr-wait">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span>💳 CK VIETQR (${bankLabel})</span>
+                  <span style="background:#fef08a; color:#991b1b; padding:1px 5px; border-radius:4px;">Mã: ${qrCodeLabel}</span>
+                </div>
+                <div style="font-size:0.72rem; color:#b91c1c;">⏳ Chưa xác nhận tiền vào TK (${grandTotal.toLocaleString()}đ)</div>
+                <div style="display:flex; gap:4px; margin-top:2px;">
+                  <button class="btn-act" style="flex:1; background:#16a34a; color:#fff; padding:4px;" onclick="verifyQrPayment('${id}')">✔️ Đã Nhận Tiền</button>
+                  ${order.paymentProof ? `<button class="btn-act" style="background:#0284c7; color:#fff; padding:4px 8px;" onclick="openProofModal('${id}')">🖼️ Xem Bill</button>` : ''}
+                </div>
+              </div>`;
+          }
+        } else {
+          paymentBoxHtml = `
+            <div class="pay-status-box pay-cod">
+              <div style="display:flex; justify-content:space-between;">
+                <span>${isDineIn ? '🍽️ THANH TOÁN TẠI BÀN' : '💵 THU TIỀN MẶT (COD)'}</span>
+                <b>${grandTotal.toLocaleString()}đ</b>
+              </div>
+            </div>`;
+        }
 
         cardsHtml += `
-          <div class="order-card ${isPending ? 'pending' : ''}">
+          <div class="order-card ${isPending ? 'pending' : (isCooking ? 'cooking' : '')}">
             <div class="card-top">
               <span class="order-id">#HC-${id.substring(id.length - 5).toUpperCase()}</span>
-              <span class="order-type-badge ${isDineIn ? 'type-dinein' : 'type-delivery'}">${isDineIn ? (order.table || 'Tại Bàn') : 'Giao Ship'}</span>
+              <span class="order-time-badge">🕒 ${timeStr}</span>
+              ${waitBadgeHtml}
+              <span class="order-type-badge ${isDineIn ? 'type-dinein' : 'type-delivery'}">${isDineIn ? (order.table || 'Tại Bàn') : 'Ship'}</span>
               <span class="state-badge ${isPending ? 'state-new' : isCooking ? 'state-process' : isDone ? 'state-complete' : 'state-canceled'}">${order.status}</span>
             </div>
             <div class="card-body">
               <div class="customer-box">
-                <p>👤 <b>${order.customerName}</b> - ${order.phone}</p><p>📍 ${order.address}</p>
-                ${order.note ? `<p style="color:#e11d48; margin-top:3px;"><b>Ghi chú:</b> ${order.note}</p>` : ''}
-                ${isCanceled ? `<p style="color:#b91c1c; margin-top:4px; font-weight:bold;">❌ Đã hủy: ${order.cancelReason || 'Theo yêu cầu'}</p>` : ''}
+                <p>👤 <b>${order.customerName}</b> (${order.phone})</p>
+                ${!isDineIn ? `<p>📍 ${order.address}</p>` : ''}
+                ${order.note ? `<p style="color:#e11d48; margin-top:2px;"><b>📝 Bếp chú ý:</b> ${order.note}</p>` : ''}
+                ${isCanceled ? `<p style="color:#b91c1c; margin-top:2px; font-weight:bold;">❌ Đã hủy: ${order.cancelReason || 'Theo yêu cầu'}</p>` : ''}
+              </div>
+              ${paymentBoxHtml}
+              <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:#64748b; margin-bottom:2px;">
+                <span>Chạm vào món để gạch món đã làm:</span>
+                <b>Đã làm: ${cookedDishesCount}/${totalDishesCount}</b>
               </div>
               <table class="items-table">${itemsRows}</table>
               <div class="financial-split-box">
-                <div class="fin-row"><span>Tiền món (Chịu thuế):</span><b>${subtotal.toLocaleString()}đ</b></div>
-                <div class="fin-row" style="color:#2563eb;"><span>Tiền ship thu hộ:</span><b>${shipFee.toLocaleString()}đ</b></div>
-                <div class="fin-row fin-total"><span>TỔNG THU:</span><span>${grandTotal.toLocaleString()}đ</span></div>
+                <div class="fin-row"><span>Doanh thu món (Quán):</span><b style="color:#1e5e3a;">${subtotal.toLocaleString()}đ</b></div>
+                <div class="fin-row" style="color:#2563eb;"><span>Ship thu hộ (Trả tài xế):</span><b>${shipFee.toLocaleString()}đ</b></div>
+                <div class="fin-row fin-total"><span>TỔNG THU KHÁCH:</span><span>${grandTotal.toLocaleString()}đ</span></div>
               </div>
             </div>
             <div class="card-footer">
-              ${isPending ? `<button class="btn-act btn-accept" onclick="updateOrderStatus('${id}', 'Đang chế biến')">⚡ TIẾP NHẬN ĐƠN</button>` : ''}
+              ${isPending ? `<button class="btn-act btn-accept" onclick="updateOrderStatus('${id}', 'Đang chế biến')">⚡ TIẾP NHẬN & CHUYỂN BẾP</button>` : ''}
               <button class="btn-act btn-print-kitchen" onclick="window.printKitchenTicket('${id}')">🍳 In Bếp</button>
-              <button class="btn-act btn-print-bill" onclick="window.printCustomerBill('${id}')">🧾 In Hóa Đơn</button>
-              ${isCooking ? `<button class="btn-act btn-complete" style="grid-column: span 2;" onclick="updateOrderStatus('${id}', 'Đã hoàn tất')">🚀 HOÀN TẤT & THU TIỀN</button>` : ''}
-              ${!isDone && !isCanceled ? `<button class="btn-act btn-cancel" style="grid-column: span 2;" onclick="openCancelModal('${id}')">🗑️ Hủy Đơn & Nhắn Khách</button>` : ''}
+              <button class="btn-act btn-print-bill" onclick="window.printCustomerBill('${id}')">🧾 In Bill</button>
+              ${isCooking ? `<button class="btn-act btn-complete" style="grid-column: span 2;" onclick="completeOrderSafely('${id}')">🚀 HOÀN TẤT ĐƠN</button>` : ''}
+              ${!isDone && !isCanceled ? `<button class="btn-act btn-cancel" style="grid-column: span 2;" onclick="openCancelModal('${id}')">🗑️ Hủy Đơn & Báo Khách</button>` : ''}
             </div>
           </div>
         `;
@@ -923,26 +1269,43 @@ window.uploadDishImageDirect = function(input, dishId) {
       document.getElementById('kpiShippingRev').innerText = shipRevToday.toLocaleString() + 'đ';
       document.getElementById('badgePending').innerText = countPending;
 
+      if (document.getElementById('cntActiveOnly')) document.getElementById('cntActiveOnly').innerText = countPending + countCooking;
+      if (document.getElementById('cntFilterPending')) document.getElementById('cntFilterPending').innerText = countPending;
+      if (document.getElementById('cntFilterCooking')) document.getElementById('cntFilterCooking').innerText = countCooking;
+      if (document.getElementById('cntFilterDone')) document.getElementById('cntFilterDone').innerText = countDoneCancel;
+
       if (countPending > 0 && isAudioActive && document.getElementById('serviceAlerts').innerHTML === '') {
-          if (!aiVoiceInterval) {
-              speakAlert(`Hy Chay! Bạn có ${countPending} đơn hàng mới từ Hy Chay Food.`);
-              aiVoiceInterval = setInterval(() => {
-                  if (document.getElementById('kpiPending').innerText !== '0') {
-                      speakAlert("Hy Chay! Chú ý, có đơn hàng mới chưa xác nhận.");
-                  } else {
-                      clearInterval(aiVoiceInterval); aiVoiceInterval = null;
-                  }
-              }, 12000); 
-          }
+        if (!aiVoiceInterval) {
+          speakAlert(`Hy Chay chú ý! Có ${countPending} đơn hàng mới đang chờ tiếp nhận.`);
+          aiVoiceInterval = setInterval(() => {
+            if (document.getElementById('kpiPending').innerText !== '0') {
+              speakAlert(`Hy Chay chú ý! Còn ${document.getElementById('kpiPending').innerText} đơn hàng mới chưa bấm tiếp nhận.`);
+            } else {
+              clearInterval(aiVoiceInterval); aiVoiceInterval = null;
+            }
+          }, 10000);
+        }
       } else if (countPending === 0) {
-          clearInterval(aiVoiceInterval); aiVoiceInterval = null; 
-          if (document.getElementById('serviceAlerts').innerHTML === '') window.speechSynthesis.cancel();
+        clearInterval(aiVoiceInterval); aiVoiceInterval = null;
+        if (document.getElementById('serviceAlerts').innerHTML === '' && 'speechSynthesis' in window) window.speechSynthesis.cancel();
       }
 
-      container.innerHTML = cardsHtml || '<p style="text-align:center; padding:40px; grid-column:1/-1; color:#64748b;">Màn hình đã được làm sạch. Đang chờ đơn hàng mới...</p>';
+      container.innerHTML = cardsHtml || '<p style="text-align:center; padding:35px; grid-column:1/-1; color:#64748b; background:#fff; border-radius:12px; border:1px dashed #cbd5e1;">Hiện không có đơn hàng nào trong mục này.</p>';
     }
 
     window.updateOrderStatus = (id, s) => update(ref(db, 'orders/' + id), { status: s });
+
+    window.completeOrderSafely = function(id) {
+      const o = ordersCache[id];
+      if (!o) return;
+      if (o.paymentMethod === 'VIETQR' && !o.paymentVerified) {
+        const ok = confirm(`⚠️ CẢNH BÁO ĐỐI SOÁT CHUYỂN KHOẢN:\n\nĐơn này chọn Chuyển khoản QR (Mã: ${o.paymentCode || 'QR'} - Số tiền: ${(o.grandTotal || 0).toLocaleString()}đ) nhưng chưa được bấm "Đã Nhận Tiền".\n\nGiám đốc / Thu ngân đã kiểm tra thấy tiền vào tài khoản ngân hàng chưa?`);
+        if (!ok) return;
+        update(ref(db, 'orders/' + id), { status: 'Đã hoàn tất', paymentVerified: true, paymentStatus: 'Đã nhận CK', completedAt: new Date().toISOString() });
+      } else {
+        update(ref(db, 'orders/' + id), { status: 'Đã hoàn tất', completedAt: new Date().toISOString() });
+      }
+    };
 
     window.endShiftAndClearScreen = function() {
       if (!confirm("🛑 BẠN ĐÃ CHẮC CHẮN KẾT CA CHƯA?\n\nHệ thống sẽ in phiếu tổng kết và ẩn các đơn đã hoàn tất / đã hủy khỏi màn hình chính.")) return;
@@ -964,6 +1327,9 @@ window.uploadDishImageDirect = function(input, dishId) {
       update(ref(db, 'orders/' + targetCancelOrderId), { status: 'Đã hủy', cancelReason: reason, cancelSuggestion: suggestion || "Quán rất mong được phục vụ quý khách lần sau!", canceledAt: new Date().toISOString() }).then(() => { alert("✅ Đã hủy đơn và gửi lời nhắn tới khách hàng!"); window.closeCancelModal(); });
     };
 
+    // ==========================================
+    // 11. BÁO CÁO THUẾ BẢO ANH LÂM (BÓC TÁCH TUYỆT ĐỐI TIỀN SHIP THU HỘ SHIPPER)
+    // ==========================================
     window.onFilterModeChange = function() {
       const m = document.getElementById('filterMode').value;
       document.getElementById('filterQuarterBox').style.display = m === 'quarter' ? 'inline-block' : 'none';
@@ -977,7 +1343,7 @@ window.uploadDishImageDirect = function(input, dishId) {
       let total5610 = 0, total5630 = 0, totalShip = 0, count = 0, daily = {}, dishStats = {}, rawList = [];
       
       for (let id in ordersCache) {
-        const o = ordersCache[id]; if (o.status !== 'Đã hoàn tất') continue;
+        const o = ordersCache[id]; if (!o || o.status !== 'Đã hoàn tất') continue;
         const dObj = new Date(o.createdAt), y = dObj.getFullYear(), m = dObj.getMonth() + 1, dStr = dObj.toISOString().split('T')[0];
         let match = false;
         if (mode === 'quarter') { const q = parseInt(document.getElementById('filterQuarter').value), qY = parseInt(document.getElementById('filterQuarterYear').value); labelPeriod = `Quý ${q} Năm ${qY}`; if (y === qY && m >= (q-1)*3+1 && m <= q*3) match = true; }
@@ -997,38 +1363,49 @@ window.uploadDishImageDirect = function(input, dishId) {
             const dishBase = ALL_MENU_DATA.find(d => d.name === it.name);
             
             if (dishBase && dishBase.cat === 'douong') {
-                orderTotal5630 += lineTotal;
-                total5630 += lineTotal;
-                daily[dStr].tax5630 += lineTotal;
+              orderTotal5630 += lineTotal;
+              total5630 += lineTotal;
+              daily[dStr].tax5630 += lineTotal;
             } else {
-                orderTotal5610 += lineTotal;
-                total5610 += lineTotal;
-                daily[dStr].tax5610 += lineTotal;
+              orderTotal5610 += lineTotal;
+              total5610 += lineTotal;
+              daily[dStr].tax5610 += lineTotal;
             }
             
             if (!dishStats[it.name]) dishStats[it.name] = { qty: 0, total: 0 };
             dishStats[it.name].qty += it.qty; dishStats[it.name].total += lineTotal;
           }
+          o.id = id;
           o.calc5610 = orderTotal5610; o.calc5630 = orderTotal5630;
           rawList.push(o);
         }
       }
-      return { labelPeriod, total5610, total5630, totalShip, count, daily, dishStats, rawList };
+      return { labelPeriod, total5610, total5630, totalTaxable: total5610 + total5630, totalShip, count, daily, dishStats, rawList };
     }
 
     window.renderShiftReport = function() {
       const data = getTaxReportData();
       document.getElementById('repTaxable5610').innerText = data.total5610.toLocaleString() + 'đ';
       document.getElementById('repTaxable5630').innerText = data.total5630.toLocaleString() + 'đ';
+      if (document.getElementById('repTotalTaxable')) document.getElementById('repTotalTaxable').innerText = data.totalTaxable.toLocaleString() + 'đ';
       document.getElementById('repDeliveryRev').innerText = data.totalShip.toLocaleString() + 'đ';
       document.getElementById('repDoneCount').innerText = data.count + ' đơn';
 
       let dailyHtml = '';
       Object.keys(data.daily).sort().forEach(day => {
         const r = data.daily[day];
-        dailyHtml += `<tr><td style="padding:10px;"><b>${day}</b></td><td style="text-align:center;">${r.count}</td><td style="text-align:right; font-weight:bold; color:#1e5e3a;">${r.tax5610.toLocaleString()}đ</td><td style="text-align:right; font-weight:bold; color:#d97706;">${r.tax5630.toLocaleString()}đ</td><td style="text-align:right; color:#2563eb;">${r.ship.toLocaleString()}đ</td><td style="text-align:right; font-weight:bold;">${(r.tax5610 + r.tax5630 + r.ship).toLocaleString()}đ</td></tr>`;
+        const taxableDay = r.tax5610 + r.tax5630;
+        dailyHtml += `
+          <tr>
+            <td style="padding:10px;"><b>${day}</b></td>
+            <td style="text-align:center;">${r.count}</td>
+            <td style="text-align:right; font-weight:bold; color:#1e5e3a;">${r.tax5610.toLocaleString()}đ</td>
+            <td style="text-align:right; font-weight:bold; color:#d97706;">${r.tax5630.toLocaleString()}đ</td>
+            <td style="text-align:right; font-weight:800; color:#15803d; background:#f0fdf4;">${taxableDay.toLocaleString()}đ</td>
+            <td style="text-align:right; font-weight:bold; color:#2563eb; background:#f8fafc;">${r.ship.toLocaleString()}đ</td>
+          </tr>`;
       });
-      document.getElementById('repDailyBreakdownBody').innerHTML = dailyHtml || '<tr><td colspan="6" style="text-align:center; padding:20px;">Không có dữ liệu.</td></tr>';
+      document.getElementById('repDailyBreakdownBody').innerHTML = dailyHtml || '<tr><td colspan="6" style="text-align:center; padding:20px;">Không có dữ liệu trong kỳ này.</td></tr>';
 
       let dishHtml = '';
       Object.keys(data.dishStats).forEach(name => {
@@ -1040,29 +1417,37 @@ window.uploadDishImageDirect = function(input, dishId) {
 
     window.exportTaxReportCSV = function() {
       const data = getTaxReportData();
-      let csv = "\uFEFFCÔNG TY TNHH TMDV VÀ SẢN XUẤT BẢO ANH LÂM\nMST: 3401289271 - 280 Trần Hưng Đạo, P. Phan Thiết\nBẢNG KÊ DOANH THU THUẾ BÁN LẺ (BÓC TÁCH MÃ NGÀNH & TIỀN SHIP)\n\nSTT,Mã Đơn,Thời Gian,Loại Hình,Khách Hàng,Doanh Thu 5610 (Hy Chay),Doanh Thu 5630 (BAL'S HOUSE),Tiền Ship (Ko Tính Thuế),Tổng Thu Thực Tế\n";
-      data.rawList.forEach((o, i) => { csv += `${i+1},#HC-${o.id.substring(o.id.length-5).toUpperCase()},"${new Date(o.createdAt).toLocaleString('vi-VN')}","${o.orderType}","${o.customerName}",${o.calc5610 || 0},${o.calc5630 || 0},${o.shippingFee || 0},${(o.calc5610||0) + (o.calc5630||0) + (o.shippingFee||0)}\n`; });
-      const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" })); a.download = `Bang_Ke_Thue_BaoAnhLam.csv`; a.click();
+      let csv = "\uFEFFCÔNG TY TNHH TMDV VÀ SẢN XUẤT BẢO ANH LÂM\nMST: 3401289271 - 280 Trần Hưng Đạo, P. Phan Thiết, Tỉnh Lâm Đồng\nBẢNG KÊ DOANH THU CHỊU THUẾ (5610, 5630) & SỔ ĐỐI SOÁT TIỀN SHIP THU HỘ TRẢ SHIPPER\n\nSTT,Mã Đơn,Ngày Giờ Đặt,Hình Thức TT,Khách Hàng,Doanh Thu 5610 (Hy Chay),Doanh Thu 5630 (BAL'S HOUSE),TỔNG DOANH THU CHỊU THUẾ (QUÁN),Tiền Ship Thu Hộ (Trả Shipper - Không Tính Thuế)\n";
+      data.rawList.forEach((o, i) => {
+        const taxableOrder = (o.calc5610 || 0) + (o.calc5630 || 0);
+        const payLabel = o.paymentMethod === 'VIETQR' ? `CK QR (${o.paymentCode || ''})` : 'Tiền mặt';
+        csv += `${i+1},#HC-${o.id.substring(o.id.length-5).toUpperCase()},"${new Date(o.createdAt).toLocaleString('vi-VN')}","${payLabel}","${o.customerName}",${o.calc5610 || 0},${o.calc5630 || 0},${taxableOrder},${o.shippingFee || 0}\n`;
+      });
+      csv += `\n,TỔNG CỘNG KỲ (${data.labelPeriod}),,,,${data.total5610},${data.total5630},${data.totalTaxable},${data.totalShip}\n`;
+      const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" })); a.download = `Bang_Ke_Thue_BaoAnhLam_${data.labelPeriod.replace(/\s+/g, '_')}.csv`; a.click();
     };
 
     window.printKitchenTicket = (id, dData = null) => {
       const o = dData || ordersCache[id]; if (!o) return; let rows = '';
-      for (let k in o.items) rows += `<tr><td style="font-size:18px; font-weight:bold;">${o.items[k].qty}x</td><td style="font-size:16px; font-weight:bold;">${o.items[k].name}</td></tr>`;
-      document.getElementById('printArea').innerHTML = `<div style="text-align:center; border-bottom:2px solid #000; padding-bottom:4px;"><h2 style="margin:0;">PHIẾU BÁO BẾP</h2><p style="font-size:16px; font-weight:bold; margin:4px 0; background:#000; color:#fff;">${o.orderType === 'dine_in' ? o.table : 'GIAO TẬN NƠI'}</p></div>${o.note ? `<p style="margin:6px 0; border:1px solid #000; padding:4px;"><b>LƯU Ý:</b> ${o.note}</p>` : ''}<table style="width:100%; margin-top:8px;">${rows}</table>`;
+      const timeStr = new Date(o.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+      for (let k in o.items) rows += `<tr><td style="font-size:18px; font-weight:bold; padding:3px 0;">${o.items[k].qty}x</td><td style="font-size:16px; font-weight:bold; padding:3px 0;">${o.items[k].name}</td></tr>`;
+      document.getElementById('printArea').innerHTML = `<div style="text-align:center; border-bottom:2px solid #000; padding-bottom:4px;"><h2 style="margin:0;">PHIẾU BÁO BẾP</h2><p style="margin:2px 0; font-size:12px;">Mã: <b>#HC-${id.substring(id.length - 5).toUpperCase()}</b> | Giờ nhận: <b>${timeStr}</b></p><p style="font-size:16px; font-weight:bold; margin:4px 0; background:#000; color:#fff;">${o.orderType === 'dine_in' ? o.table : 'ĐƠN GIAO SHIP'}</p></div>${o.note ? `<p style="margin:6px 0; border:1px solid #000; padding:4px;"><b>LƯU Ý BẾP:</b> ${o.note}</p>` : ''}<table style="width:100%; margin-top:8px;">${rows}</table>`;
       window.print();
     };
 
     window.printCustomerBill = (id) => {
       const o = ordersCache[id]; if (!o) return; let sub = o.subtotal || 0, ship = o.shippingFee || 0, total = sub + ship, rows = '';
+      const timeStr = new Date(o.createdAt).toLocaleString('vi-VN');
+      const payText = o.paymentMethod === 'VIETQR' ? `Chuyển khoản QR (${o.paymentCode || ''})` : 'Tiền mặt (COD)';
       for (let k in o.items) rows += `<tr><td>${o.items[k].qty}x ${o.items[k].name}</td><td style="text-align:right;">${(o.items[k].price * o.items[k].qty).toLocaleString()}</td></tr>`;
-      document.getElementById('printArea').innerHTML = `<div style="text-align:center; margin-bottom:6px;"><h3 style="margin:0;">HY CHAY - BẢO ANH LÂM</h3><p style="margin:2px 0; font-size:11px;">MST: 3401289271 - 280 Trần Hưng Đạo</p><p style="margin:4px 0; border-top:1px dashed #000; border-bottom:1px dashed #000; padding:3px 0; font-weight:bold;">HÓA ĐƠN THANH TOÁN</p></div><p style="margin:2px 0;">Khách: ${o.customerName}</p><table style="width:100%; border-collapse:collapse; margin-top:4px;">${rows}</table><div style="border-top:1px dashed #000; margin-top:6px; padding-top:4px; font-size:12px;"><div style="display:flex; justify-content:space-between;"><span>Tiền món:</span><span>${sub.toLocaleString()}đ</span></div><div style="display:flex; justify-content:space-between;"><span>Cước giao hàng:</span><span>${ship.toLocaleString()}đ</span></div><div style="display:flex; justify-content:space-between; font-weight:bold; font-size:14px; margin-top:4px;"><span>TỔNG THANH TOÁN:</span><span>${total.toLocaleString()}đ</span></div></div>`;
+      document.getElementById('printArea').innerHTML = `<div style="text-align:center; margin-bottom:6px;"><h3 style="margin:0;">HY CHAY - BẢO ANH LÂM</h3><p style="margin:2px 0; font-size:11px;">MST: 3401289271 - 280 Trần Hưng Đạo</p><p style="margin:4px 0; border-top:1px dashed #000; border-bottom:1px dashed #000; padding:3px 0; font-weight:bold;">PHIẾU THANH TOÁN (#HC-${id.substring(id.length - 5).toUpperCase()})</p></div><p style="margin:2px 0; font-size:11px;">Giờ đặt: ${timeStr}</p><p style="margin:2px 0; font-size:11px;">Khách: <b>${o.customerName}</b> (${o.phone})</p><p style="margin:2px 0; font-size:11px;">HTTT: <b>${payText}</b></p><table style="width:100%; border-collapse:collapse; margin-top:4px;">${rows}</table><div style="border-top:1px dashed #000; margin-top:6px; padding-top:4px; font-size:12px;"><div style="display:flex; justify-content:space-between;"><span>1. Tiền món (Tại quán):</span><b>${sub.toLocaleString()}đ</b></div><div style="display:flex; justify-content:space-between;"><span>2. Ship thu hộ tài xế:</span><span>${ship.toLocaleString()}đ</span></div><div style="display:flex; justify-content:space-between; font-weight:bold; font-size:14px; margin-top:4px; border-top:1px dashed #000; padding-top:4px;"><span>TỔNG THANH TOÁN:</span><span>${total.toLocaleString()}đ</span></div></div>`;
       window.print();
     };
 
     window.printShiftReport = function() {
       const data = getTaxReportData(); let dailyRows = '';
       for (let d in data.daily) { const r = data.daily[d]; dailyRows += `<tr><td style="padding:4px 0;">${d}</td><td style="text-align:center;">${r.count}</td><td style="text-align:right;">${r.tax5610.toLocaleString()}</td><td style="text-align:right;">${r.tax5630.toLocaleString()}</td></tr>`; }
-      document.getElementById('printArea').innerHTML = `<div style="text-align:center; margin-bottom:8px;"><h2 style="margin:0; font-size:16px;">CTY BẢO ANH LÂM</h2><p style="margin:6px 0; border-top:1px dashed #000; border-bottom:1px dashed #000; padding:4px 0; font-weight:bold; font-size:13px;">BẢNG KẾT CA<br>(${data.labelPeriod})</p></div><p style="margin:2px 0; font-size:11px;"><b>Số đơn:</b> ${data.count} | <b>In lúc:</b> ${new Date().toLocaleTimeString('vi-VN')}</p><div style="border-top:1px dashed #000; border-bottom:1px dashed #000; margin:6px 0; padding:4px 0; font-size:12px;"><div style="display:flex; justify-content:space-between;"><span>DT 5610 (Chay):</span><b>${data.total5610.toLocaleString()}đ</b></div><div style="display:flex; justify-content:space-between;"><span>DT 5630 (Đồ Uống):</span><b>${data.total5630.toLocaleString()}đ</b></div><div style="display:flex; justify-content:space-between; margin-top:4px; padding-top:4px; border-top:1px dashed #ccc;"><span>Ship thu hộ (Ko thuế):</span><b>${data.totalShip.toLocaleString()}đ</b></div></div><p style="font-weight:bold; margin-top:8px; font-size:12px;">CHI TIẾT TỪNG NGÀY:</p><table style="width:100%; border-collapse:collapse; font-size:11px; margin-top:4px;"><tr style="border-bottom:1px dashed #000;"><th style="text-align:left;">Ngày</th><th>Đơn</th><th style="text-align:right;">5610</th><th style="text-align:right;">5630</th></tr>${dailyRows || '<tr><td colspan="4" style="text-align:center;">Không có dữ liệu</td></tr>'}</table><div style="margin-top:20px; display:flex; justify-content:space-between; text-align:center; font-size:10px;"><div><b>Kế Toán / Thu Ngân</b><br><br><br>(Ký tên)</div><div><b>Đại Diện Quản Lý</b><br><br><br><b>Hoàng Huỳnh Huy Bảo</b></div></div>`;
+      document.getElementById('printArea').innerHTML = `<div style="text-align:center; margin-bottom:8px;"><h2 style="margin:0; font-size:16px;">CTY BẢO ANH LÂM</h2><p style="margin:6px 0; border-top:1px dashed #000; border-bottom:1px dashed #000; padding:4px 0; font-weight:bold; font-size:13px;">BẢNG KẾT CA<br>(${data.labelPeriod})</p></div><p style="margin:2px 0; font-size:11px;"><b>Số đơn:</b> ${data.count} | <b>In lúc:</b> ${new Date().toLocaleTimeString('vi-VN')}</p><div style="border-top:1px dashed #000; border-bottom:1px dashed #000; margin:6px 0; padding:4px 0; font-size:12px;"><div style="display:flex; justify-content:space-between;"><span>DT 5610 (Chay):</span><b>${data.total5610.toLocaleString()}đ</b></div><div style="display:flex; justify-content:space-between;"><span>DT 5630 (Đồ Uống):</span><b>${data.total5630.toLocaleString()}đ</b></div><div style="display:flex; justify-content:space-between; font-weight:bold; margin-top:3px;"><span>TỔNG DT CHỊU THUẾ:</span><b>${data.totalTaxable.toLocaleString()}đ</b></div><div style="display:flex; justify-content:space-between; margin-top:4px; padding-top:4px; border-top:1px dashed #ccc;"><span>Sổ Ship thu hộ (Trả tài xế):</span><b>${data.totalShip.toLocaleString()}đ</b></div></div><p style="font-weight:bold; margin-top:8px; font-size:12px;">CHI TIẾT DOANH THU QUÁN:</p><table style="width:100%; border-collapse:collapse; font-size:11px; margin-top:4px;"><tr style="border-bottom:1px dashed #000;"><th style="text-align:left;">Ngày</th><th>Đơn</th><th style="text-align:right;">5610</th><th style="text-align:right;">5630</th></tr>${dailyRows || '<tr><td colspan="4" style="text-align:center;">Không có dữ liệu</td></tr>'}</table><div style="margin-top:20px; display:flex; justify-content:space-between; text-align:center; font-size:10px;"><div><b>Kế Toán / Thu Ngân</b><br><br><br>(Ký tên)</div><div><b>Đại Diện Quản Lý</b><br><br><br><b>Hoàng Huỳnh Huy Bảo</b></div></div>`;
       window.print();
     };
   </script>
