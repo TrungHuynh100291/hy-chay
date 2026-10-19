@@ -1452,11 +1452,22 @@ window.addEventListener('DOMContentLoaded', () => {
     };
   </script>
 
-  <script>
-    // Khởi chạy Service Worker để mở khóa tính năng cài đặt App PWA
+<script>
+    // Gỡ bỏ các Service Worker gốc (scope "/") đang chiếm quyền và khóa riêng scope "/admin.html"
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW Lỗi:', err));
+      window.addEventListener('load', async () => {
+        try {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          for (let r of regs) {
+            // Nếu có Service Worker nào đang chiếm toàn bộ tên miền gốc "/" thì gỡ ra để không gộp chung 2 App
+            if (r.scope === window.location.origin + '/') {
+              await r.unregister();
+            }
+          }
+          await navigator.serviceWorker.register('/sw.js', { scope: '/admin.html' });
+        } catch (err) {
+          console.log('SW Admin Scope:', err);
+        }
       });
     }
   </script>
