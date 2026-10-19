@@ -432,23 +432,17 @@
             Nội dung CK (Tự động): <b id="qrContentText" style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:4px; font-size:0.95rem;">--</b>
           </div>
           
-          <div style="text-align:left; background:#ffffff; border:1px solid #cbd5e1; border-radius:8px; padding:10px; margin-bottom:8px;">
-            <label style="font-size:0.82rem; font-weight:700; color:#0369a1; display:block; margin-bottom:6px;">📷 Đính kèm ảnh chụp màn hình giao dịch (Giúp quán duyệt đơn ngay):</label>
-            <input type="file" id="qrProofInput" accept="image/*" onchange="handleProofUpload(this)" style="font-size:0.8rem; width:100%; padding:4px;">
-            <div id="qrProofPreviewBox" style="display:none; margin-top:8px; text-align:center;">
-              <img id="qrProofPreviewImg" src="" style="max-height:110px; margin:0 auto; border-radius:6px; border:1px solid #16a34a;">
-              <span style="font-size:0.78rem; color:#16a34a; font-weight:700; display:block; margin-top:4px;">✅ Đã đính kèm ảnh biên lai</span>
-            </div>
+<button type="button" onclick="openBankingApp()" style="width:100%; padding:14px; background:#0284c7; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:1.05rem; cursor:pointer; margin-bottom:12px; box-shadow:0 4px 15px rgba(2,132,199,0.3);">🚀 BẤM VÀO ĐÂY ĐỂ CHUYỂN KHOẢN</button>
+          
+          <div id="paymentStatusBanner" style="background:#fffbeb; border:2px solid #fde68a; border-radius:8px; padding:12px; text-align:center; font-weight:700; color:#b45309;">
+            <div style="font-size:1.2rem; margin-bottom:4px;">⏳</div>
+            HỆ THỐNG ĐANG LẮNG NGHE NGÂN HÀNG...<br>
+            <span style="font-size:0.8rem; color:#64748b; font-weight:normal;">(Nút Gửi Đơn sẽ tự động mở khóa ngay khi tiền vào tài khoản)</span>
           </div>
-
-          <label style="display:flex; align-items:center; gap:8px; text-align:left; font-size:0.85rem; font-weight:700; color:#b91c1c; background:#fef2f2; padding:8px 10px; border-radius:8px; border:1px solid #fecaca; cursor:pointer;">
-            <input type="checkbox" id="qrConfirmCheck" style="width:18px; height:18px; accent-color:#16a34a;">
-            <span>Tôi xác nhận đã chuyển khoản thành công theo mã QR trên.</span>
-          </label>
         </div>
 
         <div class="form-group"><label>Ghi chú cho bếp (Chay kiêng ngũ vị tân...):</label><input type="text" id="cusNote" placeholder="Ví dụ: Không hành tỏi, ít cay..."></div>
-        <button type="submit" id="btnSubmitOrder" class="btn-primary" style="padding: 15px; font-size:1.05rem;">XÁC NHẬN GỬI ĐƠN</button>
+        <button type="submit" id="btnSubmitOrder" class="btn-primary" style="padding: 15px; font-size:1.05rem; transition: 0.3s;">XÁC NHẬN GỬI ĐƠN</button>
       </form>
     </div>
   </div>
@@ -1216,31 +1210,54 @@
     const cusPhoneInput = document.getElementById('cusPhone');
     if (cusPhoneInput) cusPhoneInput.addEventListener('input', updateCalc);
 
+let checkPaymentInterval = null;
+    let isPaymentReceived = false;
+
     window.togglePaymentMethod = (v) => {
       document.getElementById('vietqrBox').style.display = v === 'VIETQR' ? 'block' : 'none';
+      const btnSubmit = document.getElementById('btnSubmitOrder');
+      
+      if (v === 'VIETQR') {
+        isPaymentReceived = false;
+        btnSubmit.disabled = true;
+        btnSubmit.style.background = "#9ca3af";
+        btnSubmit.innerText = "CHƯA NHẬN ĐƯỢC TIỀN - KHÔNG THỂ GỬI ĐƠN";
+        
+        // Bắt đầu lắng nghe tín hiệu từ Webhook ghi vào nhánh /auto_payments/{mã_giao_dịch}
+        const paymentRef = ref(db, `auto_payments/${currentPaymentCode}`);
+        onValue(paymentRef, (snap) => {
+          if (snap.exists() && snap.val().status === 'success') {
+            isPaymentReceived = true;
+            document.getElementById('paymentStatusBanner').innerHTML = '<div style="font-size:1.5rem; margin-bottom:4px;">✅</div>ĐÃ NHẬN TIỀN THÀNH CÔNG!<br><span style="font-size:0.85rem; color:#166534;">(Hệ thống đã tự động xác thực)</span>';
+            document.getElementById('paymentStatusBanner').style.background = '#dcfce7';
+            document.getElementById('paymentStatusBanner').style.borderColor = '#86efac';
+            document.getElementById('paymentStatusBanner').style.color = '#166534';
+            
+            btnSubmit.disabled = false;
+            btnSubmit.style.background = "var(--primary)";
+            btnSubmit.innerText = "XÁC NHẬN GỬI ĐƠN NGAY";
+          }
+        });
+      } else {
+        // Trả lại trạng thái bình thường nếu chọn Tiền mặt
+        isPaymentReceived = true;
+        btnSubmit.disabled = false;
+        btnSubmit.style.background = "var(--accent)";
+        btnSubmit.innerText = "XÁC NHẬN GỬI ĐƠN";
+      }
       updateCalc();
     };
 
-    window.handleProofUpload = function(input) {
-      const file = input.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          const cv = document.createElement('canvas');
-          let w = img.width, h = img.height;
-          if (w > 480) { h = Math.round(h * 480 / w); w = 480; }
-          cv.width = w; cv.height = h;
-          cv.getContext('2d').drawImage(img, 0, 0, w, h);
-          currentPaymentProofBase64 = cv.toDataURL('image/jpeg', 0.75);
-          document.getElementById('qrProofPreviewImg').src = currentPaymentProofBase64;
-          document.getElementById('qrProofPreviewBox').style.display = 'block';
-          document.getElementById('qrConfirmCheck').checked = true;
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
+    // Hàm gọi Deep Link để tự động mở App ngân hàng trên điện thoại khách
+    window.openBankingApp = function() {
+      let sub = 0; for (let k in cart) sub += cart[k].price * cart[k].qty;
+      const finalTotal = sub - birthdayDiscountAmt + shippingFee;
+      const p = (document.getElementById('cusPhone').value || '').replace(/\s+/g, '');
+      const transferContent = p ? `${currentPaymentCode} ${p}` : `${currentPaymentCode}`;
+      
+      // Tạo link chuẩn Napas để kích hoạt Deep Link
+      const rawUrl = `https://dl.vietqr.io/pay?app=${bankConfig.bankId.toLowerCase()}&ba=${bankConfig.accountNo}&am=${finalTotal}&tn=${encodeURIComponent(transferContent)}`;
+      window.open(rawUrl, '_blank');
     };
 
     window.calcDistance = function(addr, optLat, optLng) {
@@ -1272,11 +1289,10 @@
       let sub = 0; for (let k in cart) sub += cart[k].price * cart[k].qty; if (sub === 0) return;
 
       const payMethod = document.getElementById('paymentMethodSelect') ? document.getElementById('paymentMethodSelect').value : 'COD';
-      if (payMethod === 'VIETQR') {
-        const isConfirmed = document.getElementById('qrConfirmCheck') && document.getElementById('qrConfirmCheck').checked;
-        if (!isConfirmed && !currentPaymentProofBase64) {
-          return alert("⚠️ Vui lòng tích vào ô 'Tôi xác nhận đã chuyển khoản thành công' hoặc đính kèm ảnh biên lai sau khi quét mã QR!");
-        }
+      
+      // Lớp bảo vệ cuối cùng trước khi submit
+      if (payMethod === 'VIETQR' && !isPaymentReceived) {
+        return alert("⚠️ Hệ thống chưa nhận được khoản thanh toán từ Ngân hàng. Vui lòng hoàn tất chuyển khoản trước khi gửi đơn!");
       }
 
       const name = document.getElementById('cusName').value;
