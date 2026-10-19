@@ -491,16 +491,13 @@
 <!-- =============================== -->
   <!-- PHẦN 3: JAVASCRIPT - XỬ LÝ LOGIC  -->
   <!-- =============================== -->
-  <script type="module">
+<script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, push, onValue, get, query, orderByChild, equalTo, update, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-    // ĐÃ SỬA CHUẨN XÁC API KEY (iGtSFzDB) ĐỂ ĐĂNG NHẬP / ĐĂNG KÝ HOẠT ĐỘNG 100%
     const firebaseConfig = { apiKey: "AIzaSyB7CH4HUqEozclN38P_iGtSFzDB_w7sOUk", authDomain: "hy-chay.firebaseapp.com", projectId: "hy-chay", storageBucket: "hy-chay.firebasestorage.app", messagingSenderId: "215026977682", appId: "1:215026977682:web:52b136c7f09a62cc488f4b" };
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app, "https://hy-chay-default-rtdb.asia-southeast1.firebasedatabase.app");
-    const auth = getAuth(app);
 
     // KHÓA SCOPE MANIFEST CỦA KHÁCH HÀNG CHỈ TRONG /index.html ĐỂ KHÔNG ĐÁ APP ADMIN RA
     (function lockCustomerManifestScope() {
@@ -732,11 +729,63 @@
       }
     });
 
+// ==========================================
+    // 4. HỆ THỐNG ĐĂNG NHẬP / ĐĂNG KÝ TRỰC TIẾP QUA REALTIME DB (KHÔNG LỖI API KEY)
     // ==========================================
-    // 4. HỆ THỐNG ĐĂNG NHẬP / ĐĂNG KÝ / HỒ SƠ KHÁCH HÀNG
-    // ==========================================
-    const getFakeEmail = (phone) => `${phone}@hychay.com`;
-    let isRegistering = false;
+    let historyUnsubscribe = null;
+
+    function normalizePhone(rawPhone) {
+      return (rawPhone || '').trim().replace(/\s+/g, '').replace(/^\+84/, '0').replace(/[^0-9]/g, '');
+    }
+
+    function applyCustomerAuthSession(phoneKey) {
+      if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+        const btnInst = document.getElementById('btnInstallApp');
+        if (btnInst) btnInst.style.display = 'none';
+      }
+
+      if (phoneKey) {
+        currentUserId = phoneKey;
+        currentUserPhone = phoneKey;
+        localStorage.setItem('hyChayActiveCustomerPhone', phoneKey);
+
+        if (document.getElementById('authView')) document.getElementById('authView').style.display = 'none';
+        if (document.getElementById('profileView')) document.getElementById('profileView').style.display = 'block';
+        if (document.getElementById('updPhone')) document.getElementById('updPhone').value = phoneKey;
+
+        get(ref(db, `users/${phoneKey}`)).then(snap => {
+          if (snap.exists()) {
+            const u = snap.val();
+            document.getElementById('updName').value = u.name || '';
+            document.getElementById('updEmail').value = u.email || '';
+            document.getElementById('updBirthday').value = u.birthday || '';
+            document.getElementById('updHouse').value = u.house || '';
+            document.getElementById('updWard').value = u.ward || '';
+            document.getElementById('updProvince').value = u.province || 'Lâm Đồng';
+            const displayName = u.name ? u.name : phoneKey;
+            document.getElementById('btnHeaderAccount').innerText = `👤 ${displayName}`;
+            localStorage.setItem('hyChayUserProfile', JSON.stringify({
+              name: u.name || '',
+              phone: phoneKey,
+              address: u.fullAddress || '',
+              birthday: u.birthday || ''
+            }));
+          } else {
+            document.getElementById('btnHeaderAccount').innerText = `👤 ${phoneKey}`;
+          }
+        });
+
+        loadOrderHistoryTracker(phoneKey);
+      } else {
+        currentUserId = null;
+        currentUserPhone = null;
+        localStorage.removeItem('hyChayActiveCustomerPhone');
+        if (historyUnsubscribe) { historyUnsubscribe(); historyUnsubscribe = null; }
+        if (document.getElementById('authView')) document.getElementById('authView').style.display = 'block';
+        if (document.getElementById('profileView')) document.getElementById('profileView').style.display = 'none';
+        document.getElementById('btnHeaderAccount').innerText = `👤 Đăng nhập`;
+      }
+    }
 
     window.openAccountModal = function() {
       const modal = document.getElementById('accountModal');
@@ -767,6 +816,9 @@
 
     window.switchAuthTab = function(tab) {
       document.querySelectorAll('.auth-tab').forEach(el => el.classList.remove('active'));
+      document.getElementById('lError').style.display = 'none';
+      document.getElementById('rError').style.display = 'none';
+      document.getElementById('rSuccess').style.display = 'none';
       if (tab === 'login') {
         document.getElementById('tabLoginBtn').classList.add('active');
         document.getElementById('formLogin').style.display = 'block';
@@ -778,62 +830,21 @@
       }
     };
 
-    onAuthStateChanged(auth, (user) => {
-      if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
-        const btnInst = document.getElementById('btnInstallApp');
-        if (btnInst) btnInst.style.display = 'none';
-      }
-
-      if (user) {
-        currentUserId = user.uid;
-        currentUserPhone = user.email.replace('@hychay.com', '');
-        if (document.getElementById('authView')) document.getElementById('authView').style.display = 'none';
-        if (document.getElementById('profileView')) document.getElementById('profileView').style.display = 'block';
-        if (document.getElementById('updPhone')) document.getElementById('updPhone').value = currentUserPhone;
-
-        get(ref(db, `users/${currentUserId}`)).then(snap => {
-          if (snap.exists()) {
-            const u = snap.val();
-            document.getElementById('updName').value = u.name || '';
-            document.getElementById('updEmail').value = u.email || '';
-            document.getElementById('updBirthday').value = u.birthday || '';
-            document.getElementById('updHouse').value = u.house || '';
-            document.getElementById('updWard').value = u.ward || '';
-            document.getElementById('updProvince').value = u.province || 'Lâm Đồng';
-            const displayName = u.name ? u.name : currentUserPhone;
-            document.getElementById('btnHeaderAccount').innerText = `👤 ${displayName}`;
-            localStorage.setItem('hyChayUserProfile', JSON.stringify({
-              name: u.name || '',
-              phone: currentUserPhone,
-              address: u.fullAddress || '',
-              birthday: u.birthday || ''
-            }));
-          } else {
-            document.getElementById('btnHeaderAccount').innerText = `👤 ${currentUserPhone}`;
-          }
-        });
-
-        if (!isRegistering) {
-          loadOrderHistoryTracker(currentUserPhone);
-        }
-      } else {
-        currentUserId = null; currentUserPhone = null;
-        if (document.getElementById('authView')) document.getElementById('authView').style.display = 'block';
-        if (document.getElementById('profileView')) document.getElementById('profileView').style.display = 'none';
-        document.getElementById('btnHeaderAccount').innerText = `👤 Đăng nhập`;
-      }
-    });
-
     window.handleRegister = function() {
-      const phone = document.getElementById('rPhone').value.trim();
+      const cleanPhone = normalizePhone(document.getElementById('rPhone').value);
       const pass = document.getElementById('rPass').value;
       const passConfirm = document.getElementById('rPassConfirm').value;
       const errBox = document.getElementById('rError');
       const succBox = document.getElementById('rSuccess');
 
       errBox.style.display = 'none'; succBox.style.display = 'none';
-      if (!phone || pass.length < 6) {
-        errBox.innerText = "SĐT và Mật khẩu (tối thiểu 6 ký tự) là bắt buộc!";
+      if (!cleanPhone || cleanPhone.length < 9) {
+        errBox.innerText = "Vui lòng nhập Số điện thoại hợp lệ (10 số)!";
+        errBox.style.display = 'block';
+        return;
+      }
+      if (!pass || pass.length < 6) {
+        errBox.innerText = "Mật khẩu phải có ít nhất 6 ký tự!";
         errBox.style.display = 'block';
         return;
       }
@@ -843,59 +854,74 @@
         return;
       }
 
-      isRegistering = true;
-      createUserWithEmailAndPassword(auth, getFakeEmail(phone), pass)
-        .then((userCred) => {
+      get(ref(db, `users/${cleanPhone}`)).then((snap) => {
+        if (snap.exists() && snap.val().password) {
+          errBox.innerText = "Số điện thoại này đã được đăng ký! Vui lòng bấm qua tab Đăng Nhập.";
+          errBox.style.display = 'block';
+          return;
+        }
+        update(ref(db, `users/${cleanPhone}`), {
+          phone: cleanPhone,
+          password: pass,
+          createdAt: new Date().toISOString()
+        }).then(() => {
           succBox.style.display = 'block';
-          set(ref(db, `users/${userCred.user.uid}`), { phone: phone, createdAt: new Date().toISOString() });
-          signOut(auth).then(() => {
-            isRegistering = false;
-            setTimeout(() => {
-              document.getElementById('lPhone').value = phone;
-              window.switchAuthTab('login');
-              succBox.style.display = 'none';
-              document.getElementById('rPhone').value = '';
-              document.getElementById('rPass').value = '';
-              document.getElementById('rPassConfirm').value = '';
-            }, 1200);
-          });
-        })
-        .catch(err => {
-          isRegistering = false;
-          errBox.innerText = (err.code === 'auth/email-already-in-use') ? "Số điện thoại này đã được đăng ký!" : ("Lỗi đăng ký: " + err.message);
+          setTimeout(() => {
+            document.getElementById('lPhone').value = cleanPhone;
+            document.getElementById('lPass').value = pass;
+            window.switchAuthTab('login');
+            succBox.style.display = 'none';
+            document.getElementById('rPhone').value = '';
+            document.getElementById('rPass').value = '';
+            document.getElementById('rPassConfirm').value = '';
+          }, 1000);
+        }).catch(err => {
+          errBox.innerText = "Lỗi kết nối máy chủ: " + err.message;
           errBox.style.display = 'block';
         });
+      }).catch(err => {
+        errBox.innerText = "Lỗi kiểm tra tài khoản: " + err.message;
+        errBox.style.display = 'block';
+      });
     };
 
     window.handleLogin = function() {
-      const phone = document.getElementById('lPhone').value.trim();
+      const cleanPhone = normalizePhone(document.getElementById('lPhone').value);
       const pass = document.getElementById('lPass').value;
       const errBox = document.getElementById('lError');
       errBox.style.display = 'none';
-      if (!phone || !pass) {
+
+      if (!cleanPhone || !pass) {
         errBox.innerText = "Vui lòng nhập đầy đủ Số điện thoại và Mật khẩu!";
         errBox.style.display = 'block';
         return;
       }
 
-      signInWithEmailAndPassword(auth, getFakeEmail(phone), pass)
-        .then(() => {
+      get(ref(db, `users/${cleanPhone}`)).then((snap) => {
+        if (snap.exists() && String(snap.val().password) === String(pass)) {
           document.getElementById('lPass').value = '';
-        })
-        .catch(() => {
-          errBox.innerText = "Sai số điện thoại hoặc mật khẩu!";
+          applyCustomerAuthSession(cleanPhone);
+        } else if (!snap.exists() || !snap.val().password) {
+          errBox.innerText = "Số điện thoại này chưa đăng ký tài khoản! Vui lòng bấm qua tab Đăng Ký.";
           errBox.style.display = 'block';
-        });
-    };
-
-    window.logoutUser = function() {
-      signOut(auth).then(() => {
-        localStorage.removeItem('hyChayUserProfile');
-        window.closeAccountModal();
+        } else {
+          errBox.innerText = "Mật khẩu không chính xác!";
+          errBox.style.display = 'block';
+        }
+      }).catch(err => {
+        errBox.innerText = "Lỗi kết nối máy chủ: " + err.message;
+        errBox.style.display = 'block';
       });
     };
 
+    window.logoutUser = function() {
+      localStorage.removeItem('hyChayUserProfile');
+      applyCustomerAuthSession(null);
+      window.closeAccountModal();
+    };
+
     window.saveUserProfile = function() {
+      if (!currentUserId) return alert("Vui lòng đăng nhập lại!");
       const name = document.getElementById('updName').value.trim();
       const email = document.getElementById('updEmail').value.trim();
       const birthday = document.getElementById('updBirthday').value;
@@ -906,14 +932,15 @@
 
       if (!name) return alert("Vui lòng nhập Họ và Tên!");
 
-      update(ref(db, `users/${currentUserId}`), { name, email, birthday, house, ward, province, fullAddress, updatedAt: new Date().toISOString() })
-        .then(() => {
-          localStorage.setItem('hyChayUserProfile', JSON.stringify({ name, phone: currentUserPhone, address: fullAddress, birthday }));
-          alert("✅ Cập nhật thông tin giao hàng thành công!");
-          window.closeAccountModal();
-          document.getElementById('btnHeaderAccount').innerText = `👤 ${name}`;
-        })
-        .catch(err => alert("❌ Lỗi lưu thông tin: " + err.message));
+      update(ref(db, `users/${currentUserId}`), {
+        name, email, birthday, house, ward, province, fullAddress,
+        updatedAt: new Date().toISOString()
+      }).then(() => {
+        localStorage.setItem('hyChayUserProfile', JSON.stringify({ name, phone: currentUserPhone, address: fullAddress, birthday }));
+        alert("✅ Cập nhật thông tin giao hàng thành công!");
+        window.closeAccountModal();
+        document.getElementById('btnHeaderAccount').innerText = `👤 ${name}`;
+      }).catch(err => alert("❌ Lỗi lưu thông tin: " + err.message));
     };
 
     function loadOrderHistoryTracker(phone) {
@@ -921,10 +948,11 @@
       if (!listEl) return;
       listEl.innerHTML = '<p style="text-align:center; color:#94a3b8;">Đang tải dữ liệu...</p>';
 
-      onValue(ref(db, 'orders'), (snapshot) => {
+      if (historyUnsubscribe) { historyUnsubscribe(); historyUnsubscribe = null; }
+      historyUnsubscribe = onValue(ref(db, 'orders'), (snapshot) => {
         const orders = snapshot.val() || {};
         let totalSpent = 0, html = '';
-        const matchingIds = Object.keys(orders).filter(id => orders[id] && orders[id].phone === phone);
+        const matchingIds = Object.keys(orders).filter(id => orders[id] && normalizePhone(orders[id].phone) === normalizePhone(phone));
         matchingIds.sort((a, b) => new Date(orders[b].createdAt) - new Date(orders[a].createdAt));
 
         matchingIds.forEach(id => {
@@ -975,6 +1003,12 @@
       }
       updateCartUI(); saveCartLocal(); window.closeAccountModal(); window.openCheckoutModal();
     };
+
+    // Tự động khôi phục phiên đăng nhập khách hàng khi mở lại App
+    const savedCustomerPhone = localStorage.getItem('hyChayActiveCustomerPhone');
+    if (savedCustomerPhone) {
+      applyCustomerAuthSession(savedCustomerPhone);
+    }
 
     // ==========================================
     // 5. BẢN ĐỒ LEAFLET GPS & TÍNH PHÍ SHIP KÉP 20% - 30%
