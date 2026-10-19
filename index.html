@@ -249,11 +249,6 @@
     </div>
   </section>
 
-  <!-- DINE-IN TOOLBAR -->
-  <div id="dineInToolbar" class="dine-in-toolbar">
-    <button class="btn-service" onclick="callService('nv')">🔔 Gọi Phục Vụ</button>
-    <button class="btn-service bill" onclick="callService('bill')">💳 Yêu Cầu Tính Tiền</button>
-  </div>
   <!-- MODAL HƯỚNG DẪN CÀI ICON APP CHO KHÁCH HÀNG (SAU KHI QUÉT QR) -->
   <div id="installGuideModal" class="modal-overlay">
     <div class="modal-content" style="max-width: 420px; text-align:center;">
@@ -346,7 +341,7 @@
           <p style="font-size:0.85rem; color:#e2e8f0; margin-top:4px;">Quy đổi: 10.000đ chi tiêu = 1 điểm tích lũy.</p>
         </div>
 
-        <!-- Form Cập Nhật Thông Tin -->
+<!-- Form Cập Nhật Thông Tin -->
         <div class="profile-info-box">
           <h4 style="margin-bottom:10px; color:var(--text-dark);">Cập nhật thông tin giao hàng</h4>
           <div class="form-group"><label for="updName">Họ và Tên:</label><input type="text" id="updName" name="updName" placeholder="Tên của bạn"></div>
@@ -355,10 +350,24 @@
           <div class="form-group"><label for="updBirthday">Ngày Sinh (Để nhận mã giảm 5%):</label><input type="date" id="updBirthday" name="updBirthday"></div>
           
           <h4 style="margin-top:15px; margin-bottom:10px; color:var(--text-dark);">Địa chỉ mặc định</h4>
-          <div class="form-group"><label for="updHouse">Số nhà, Tên đường:</label><input type="text" id="updHouse" name="updHouse" placeholder="VD: 280 Trần Hưng Đạo"></div>
+          <div class="form-group"><label for="updHouse">Số nhà, Tên đường, Thôn/Khu phố:</label><input type="text" id="updHouse" name="updHouse" placeholder="VD: 280 Trần Hưng Đạo"></div>
           <div style="display:flex; gap:10px;">
-             <div class="form-group" style="flex:1;"><label for="updWard">Phường/Xã:</label><input type="text" id="updWard" name="updWard" placeholder="VD: Phường Phan Thiết"></div>
-             <div class="form-group" style="flex:1;"><label for="updProvince">Tỉnh/Thành phố:</label><input type="text" id="updProvince" name="updProvince" placeholder="VD: Lâm Đồng" value="Lâm Đồng"></div>
+             <div class="form-group" style="flex:1.2;">
+               <label for="updWard">Phường / Khu vực:</label>
+               <select id="updWard" name="updWard">
+                 <option value="Phường Phan Thiết">Phường Phan Thiết</option>
+                 <option value="Hàm Thắng">Hàm Thắng</option>
+                 <option value="Bình Thuận">Bình Thuận</option>
+                 <option value="Mũi Né">Mũi Né</option>
+                 <option value="Phú Thủy">Phú Thủy</option>
+                 <option value="Tiến Thành">Tiến Thành</option>
+                 <option value="La Gi">La Gi</option>
+               </select>
+             </div>
+             <div class="form-group" style="flex:0.8;">
+               <label for="updProvince">Tỉnh:</label>
+               <input type="text" id="updProvince" name="updProvince" value="Lâm Đồng" readonly style="background:#f1f5f9; color:#1e5e3a; font-weight:700;">
+             </div>
           </div>
           <button onclick="saveUserProfile()" class="btn-primary" style="margin-top:10px;">💾 LƯU THÔNG TIN</button>
         </div>
@@ -380,27 +389,62 @@
     </div>
   </div>
 
-  <!-- CHECKOUT MODAL -->
+<!-- CHECKOUT MODAL (ĐÃ NÂNG CẤP ĐỊA CHỈ LÂM ĐỒNG & VIETQR ĐA NGÂN HÀNG KHÁCH HÀNG) -->
   <div id="checkoutModal" class="modal-overlay">
     <div class="modal-content">
       <span class="modal-close" onclick="closeCheckoutModal()">&times;</span>
       <h3 style="color:var(--primary); margin-bottom:12px;">Xác Nhận Đơn Hàng Hy Chay</h3>
-      <div id="openStatusTag" class="tag-open-status tag-open">Đang kiểm tra giờ hoạt động...</div>
+      <div id="openStatusTag" class="tag-open-status tag-open" style="margin-bottom:10px; font-weight:700; color:var(--primary);">🟢 Quán đang mở cửa nhận đơn</div>
       
       <div id="cartItemsList" style="margin-bottom: 16px;"></div>
       
       <form id="orderForm" onsubmit="submitOrder(event)">
-<div class="form-group"><label>Họ và tên người nhận (*)</label><input type="text" id="cusName" required></div>
-<div class="form-group" id="groupPhone"><label>Số điện thoại liên hệ (*)</label><input type="tel" id="cusPhone" required></div>
-        <div class="form-group" id="groupAddress">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <label>Địa chỉ nhận hàng tại Phan Thiết (*)</label>
-            <button type="button" class="btn-quick-add" style="padding:4px 10px; margin-bottom:4px;" onclick="openMapModal()">📍 Định vị GPS (Bản Đồ)</button>
-          </div>
-          <textarea id="cusAddress" rows="2" required placeholder="Số nhà, Phường, Tỉnh..." onblur="calcDistance(this.value)"></textarea>
+        <div class="form-group">
+          <label>Họ và tên người nhận (*)</label>
+          <input type="text" id="cusName" required placeholder="Nhập họ tên người nhận...">
+        </div>
+        <div class="form-group" id="groupPhone">
+          <label>Số điện thoại nhận hàng (*)</label>
+          <input type="tel" id="cusPhone" required placeholder="Nhập số điện thoại...">
         </div>
 
-<div id="birthdayDiscountBadge" class="birthday-badge">🎂 CHÚC MỪNG SINH NHẬT! Tặng Bạn Giảm 5% Toàn Bộ Món Ăn</div>
+        <div class="form-group" id="groupAddress" style="background:#f8fafc; padding:12px; border-radius:12px; border:1px solid var(--border);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <label style="margin:0; color:var(--primary); font-weight:800;">📍 Khu vực giao hàng (*)</label>
+            <button type="button" class="btn-quick-add" style="padding:5px 12px; background:#0284c7; color:#fff; border:none;" onclick="openMapModal()">🗺️ Mở Bản Đồ Thả Ghim</button>
+          </div>
+
+          <div style="display:flex; gap:8px; margin-bottom:10px;">
+            <div style="flex:1.3;">
+              <label style="font-size:0.8rem; color:#64748b;">Chọn Phường / Khu vực:</label>
+              <select id="cusWardSelect" onchange="onCheckoutWardChange()" style="padding:9px 10px; font-weight:600; color:var(--text-dark);">
+                <option value="Phường Phan Thiết">Phường Phan Thiết</option>
+                <option value="Hàm Thắng">Hàm Thắng</option>
+                <option value="Bình Thuận">Bình Thuận</option>
+                <option value="Mũi Né">Mũi Né</option>
+                <option value="Phú Thủy">Phú Thủy</option>
+                <option value="Tiến Thành">Tiến Thành</option>
+                <option value="La Gi">La Gi</option>
+              </select>
+            </div>
+            <div style="flex:0.7;">
+              <label style="font-size:0.8rem; color:#64748b;">Tỉnh:</label>
+              <input type="text" id="cusProvinceFixed" value="Lâm Đồng" readonly style="padding:9px 10px; background:#eaf5ed; color:var(--primary); font-weight:800; text-align:center;">
+            </div>
+          </div>
+
+          <div style="margin-bottom:6px;">
+            <label style="font-size:0.8rem; color:#64748b;">Số nhà, Tên đường, Hẻm / Ghi chú đường đi (*):</label>
+            <input type="text" id="cusStreetInput" required placeholder="VD: Số 120 Trần Hưng Đạo (Gần ngã tư...)" oninput="syncFullCheckoutAddress()" onblur="calcDistance(document.getElementById('cusAddress').value)">
+          </div>
+
+          <input type="hidden" id="cusAddress">
+          <div id="fullAddressPreview" style="font-size:0.8rem; color:#166534; background:#dcfce7; padding:6px 10px; border-radius:6px; font-weight:600;">
+            Đ/c giao: Đang cập nhật...
+          </div>
+        </div>
+
+        <div id="birthdayDiscountBadge" class="birthday-badge">🎂 CHÚC MỪNG SINH NHẬT! Tặng Bạn Giảm 5% Toàn Bộ Món Ăn</div>
 
         <div class="shipping-calculator-box" id="shippingBox">
           <div class="ship-row"><span>Khoảng cách ước tính:</span><b id="shipDistanceText" style="color:var(--primary);">~2.0 km</b></div>
@@ -418,26 +462,48 @@
           <label>Phương thức thanh toán:</label>
           <select id="paymentMethodSelect" onchange="togglePaymentMethod(this.value)">
             <option value="COD">💵 Thanh toán tiền mặt khi nhận món (COD)</option>
-            <option value="VIETQR">💳 Chuyển khoản VietQR tự động (Quét App Ngân hàng)</option>
+            <option value="VIETQR">💳 Chuyển khoản Ngân hàng (Mở App Ngân hàng của bạn)</option>
           </select>
         </div>
 
         <div id="vietqrBox" class="vietqr-box">
-          <p style="font-weight:800; color:#166534; font-size:0.95rem;">Quét Mã QR Để Chuyển Khoản Đúng Số Tiền:</p>
-          <img id="vietqrImg" src="" alt="Mã VietQR" style="max-width:230px; margin:10px auto; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.1);">
-          <div style="background:#ffffff; border:1px solid #bbf7d0; border-radius:8px; padding:10px; margin-bottom:10px; font-size:0.85rem; color:#334155; line-height:1.6;">
-            Ngân hàng: <b id="qrBank" style="color:var(--primary);">--</b><br>
-            Số TK: <b id="qrAccNo" style="font-size:1.05rem; color:#dc2626;">--</b><br>
-            Chủ TK: <b id="qrAccName">--</b><br>
-            Nội dung CK (Tự động): <b id="qrContentText" style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:4px; font-size:0.95rem;">--</b>
+          <p style="font-weight:800; color:#166534; font-size:0.92rem; margin-bottom:8px;">BƯỚC 1: Chọn Ngân Hàng BẠN Đang Sử Dụng Trên Điện Thoại</p>
+          <select id="customerBankSelect" style="width:100%; padding:10px; border:2px solid #0284c7; border-radius:8px; font-weight:700; color:#0f172a; margin-bottom:10px; background:#fff;">
+            <option value="vcb">🏦 Vietcombank (VCB Digibank)</option>
+            <option value="mb">🏦 MBBank (Ngân hàng Quân Đội)</option>
+            <option value="icb">🏦 VietinBank (VietinBank iPay)</option>
+            <option value="bidv">🏦 BIDV (SmartBanking)</option>
+            <option value="vba">🏦 Agribank (Agribank Plus)</option>
+            <option value="tcb">🏦 Techcombank (Techcombank Mobile)</option>
+            <option value="acb">🏦 ACB (ACB One)</option>
+            <option value="stb">🏦 Sacombank (Sacombank Pay)</option>
+            <option value="vpb">🏦 VPBank (VPBank NEO)</option>
+            <option value="tpb">🏦 TPBank (TPBank Mobile)</option>
+            <option value="nab">🏦 Nam A Bank (Open Banking)</option>
+            <option value="abb">🏦 ABBank (AB Ditizen)</option>
+            <option value="shb">🏦 SHB (SHB Mobile)</option>
+            <option value="hdb">🏦 HDBank</option>
+            <option value="vib">🏦 VIB (MyVIB)</option>
+            <option value="ocb">🏦 OCB (OMNI)</option>
+            <option value="lpbank">🏦 LPBank (Lộc Phát)</option>
+            <option value="MSB">🏦 MSB (Maritime Bank)</option>
+          </select>
+
+          <button type="button" onclick="openCustomerSelectedBankApp()" style="width:100%; padding:13px; background:#0284c7; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:0.98rem; cursor:pointer; margin-bottom:10px; box-shadow:0 4px 12px rgba(2,132,199,0.25);">
+            🚀 MỞ APP NGÂN HÀNG CỦA BẠN & TỰ ĐIỀN TIỀN
+          </button>
+
+          <p style="font-size:0.8rem; color:#475569; margin-bottom:6px;">Hoặc lưu ảnh mã QR liên ngân hàng Napas247 dưới đây để quét trong App của bạn:</p>
+          <img id="vietqrImg" src="" alt="Mã VietQR" style="max-width:210px; margin:8px auto; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.1);">
+          <div style="display:flex; gap:8px; justify-content:center; margin-bottom:10px;">
+            <button type="button" onclick="downloadQrImage()" style="padding:6px 12px; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; border-radius:6px; font-weight:700; font-size:0.8rem; cursor:pointer;">📥 Tải Ảnh QR Về Máy</button>
+            <button type="button" onclick="copyBankAccountNo()" style="padding:6px 12px; background:#fef3c7; color:#b45309; border:1px solid #fde68a; border-radius:6px; font-weight:700; font-size:0.8rem; cursor:pointer;">📋 Sao Chép Số TK Quán</button>
           </div>
-          
-<button type="button" onclick="openBankingApp()" style="width:100%; padding:14px; background:#0284c7; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:1.05rem; cursor:pointer; margin-bottom:12px; box-shadow:0 4px 15px rgba(2,132,199,0.3);">🚀 BẤM VÀO ĐÂY ĐỂ CHUYỂN KHOẢN</button>
-          
-          <div id="paymentStatusBanner" style="background:#fffbeb; border:2px solid #fde68a; border-radius:8px; padding:12px; text-align:center; font-weight:700; color:#b45309;">
-            <div style="font-size:1.2rem; margin-bottom:4px;">⏳</div>
-            HỆ THỐNG ĐANG LẮNG NGHE NGÂN HÀNG...<br>
-            <span style="font-size:0.8rem; color:#64748b; font-weight:normal;">(Nút Gửi Đơn sẽ tự động mở khóa ngay khi tiền vào tài khoản)</span>
+
+          <div style="background:#ffffff; border:1px solid #bbf7d0; border-radius:8px; padding:10px; text-align:left; font-size:0.83rem; color:#334155; line-height:1.55;">
+            • TK nhận của quán: <b id="qrBank" style="color:var(--primary);">--</b> - <b id="qrAccNo" style="font-size:1rem; color:#dc2626;">--</b><br>
+            • Chủ TK nhận: <b id="qrAccName">--</b><br>
+            • Nội dung CK: <b id="qrContentText" style="background:#fef3c7; color:#b45309; padding:1px 6px; border-radius:4px;">--</b>
           </div>
         </div>
 
@@ -516,22 +582,82 @@
     const urlParams = new URLSearchParams(window.location.search);
     const tableParam = urlParams.get('ban') || urlParams.get('table');
 
+const STORE_LAT = 10.9328; const STORE_LON = 108.1025;
+    const urlParams = new URLSearchParams(window.location.search);
+    const tableParam = urlParams.get('ban') || urlParams.get('table');
+
     let bankConfig = { bankId: "MB", accountNo: "0903242400", accountName: "HOANG HUYNH HUY BAO" };
     let menuCustomCache = {}; let cart = {}; let calculatedKm = 2.0; let shippingFee = 12000; let birthdayDiscountAmt = 0; let currentFilterCat = 'all'; let isStoreOpen = true;
     let currentUserPhone = null; let currentUserId = null;
     let currentPaymentCode = "HC" + Math.floor(1000 + Math.random() * 9000);
-    let currentPaymentProofBase64 = null;
 
-    const BANK_NAMES_MAP = {
-      "MB": "MBBank (Quân Đội)",
-      "ABB": "ABBank (An Bình)",
-      "NAB": "Nam A Bank (Nam Á)",
-      "ACB": "ACB (Á Châu)",
-      "VCB": "Vietcombank",
-      "TCB": "Techcombank",
-      "ICB": "VietinBank",
-      "BIDV": "BIDV"
+    const BANK_SCHEMES = {
+      "vcb": { name: "Vietcombank", bin: "970436" },
+      "mb": { name: "MBBank", bin: "970422" },
+      "icb": { name: "VietinBank", bin: "970415" },
+      "bidv": { name: "BIDV", bin: "970418" },
+      "vba": { name: "Agribank", bin: "970405" },
+      "tcb": { name: "Techcombank", bin: "970407" },
+      "acb": { name: "ACB", bin: "970416" },
+      "stb": { name: "Sacombank", bin: "970403" },
+      "vpb": { name: "VPBank", bin: "970432" },
+      "tpb": { name: "TPBank", bin: "970423" },
+      "nab": { name: "Nam A Bank", bin: "970428" },
+      "abb": { name: "ABBank", bin: "970425" },
+      "shb": { name: "SHB", bin: "970443" },
+      "hdb": { name: "HDBank", bin: "970437" },
+      "vib": { name: "VIB", bin: "970441" },
+      "ocb": { name: "OCB", bin: "970448" },
+      "lpbank": { name: "LPBank", bin: "970449" },
+      "msb": { name: "MSB", bin: "970426" }
     };
+
+    // Hàm đồng bộ gộp chuỗi địa chỉ giao hàng
+    window.syncFullCheckoutAddress = function() {
+      const ward = document.getElementById('cusWardSelect').value;
+      const street = document.getElementById('cusStreetInput').value.trim();
+      const province = document.getElementById('cusProvinceFixed').value;
+      const full = street ? `${street}, ${ward}, ${province}` : `${ward}, ${province}`;
+      document.getElementById('cusAddress').value = full;
+      const preview = document.getElementById('fullAddressPreview');
+      if (preview) preview.innerText = `Đ/c giao: ${full}`;
+    };
+
+    window.onCheckoutWardChange = function() {
+      window.syncFullCheckoutAddress();
+      window.calcDistance(document.getElementById('cusAddress').value);
+    };
+
+    // Đồng bộ LocalStorage tự động điền ngay khi mở giỏ hàng
+    function autofillCheckoutFormFromStorage() {
+      const userStr = localStorage.getItem('hyChayUserProfile');
+      if (userStr) {
+        try {
+          const u = JSON.parse(userStr);
+          if (u.name && document.getElementById('cusName')) document.getElementById('cusName').value = u.name;
+          if (u.phone && document.getElementById('cusPhone')) document.getElementById('cusPhone').value = u.phone;
+          if (u.address) {
+            const parts = u.address.split(',');
+            if (parts.length > 0 && document.getElementById('cusStreetInput')) {
+              document.getElementById('cusStreetInput').value = parts[0].trim();
+            }
+            if (parts.length > 1) {
+              const savedWard = parts[1].trim();
+              const wardSel = document.getElementById('cusWardSelect');
+              if (wardSel) {
+                for (let i = 0; i < wardSel.options.length; i++) {
+                  if (wardSel.options[i].value.toLowerCase().includes(savedWard.toLowerCase())) {
+                    wardSel.selectedIndex = i;
+                    break;
+                  }
+                }
+              }
+            }
+          }
+        } catch (_) {}
+      }
+      window.syncFullCheckoutAddress();
+    }
 
     // ==========================================
     // 1. DỮ LIỆU ĐẦY ĐỦ 70 MÓN ĂN & ĐỒ UỐNG HY CHAY - BAL'S HOUSE
@@ -1102,21 +1228,14 @@
       }
     }
 
-    window.openCheckoutModal = function() {
+window.openCheckoutModal = function() {
       currentPaymentCode = "HC" + Math.floor(1000 + Math.random() * 9000);
-      currentPaymentProofBase64 = null;
-      if (document.getElementById('qrProofInput')) document.getElementById('qrProofInput').value = '';
-      if (document.getElementById('qrProofPreviewBox')) document.getElementById('qrProofPreviewBox').style.display = 'none';
-      if (document.getElementById('qrConfirmCheck')) document.getElementById('qrConfirmCheck').checked = false;
+      checkOperatingHours(); 
+      renderCartItems();
+      
+      // TỰ ĐỘNG ĐIỀN LẠI THÔNG TIN CŨ TỪ LOCALSTORAGE NGAY KHI MỞ GIỎ HÀNG
+      autofillCheckoutFormFromStorage();
 
-      checkOperatingHours(); renderCartItems();
-      const userStr = localStorage.getItem('hyChayUserProfile');
-      if (userStr && !tableParam) {
-        const u = JSON.parse(userStr);
-        if (!document.getElementById('cusName').value && u.name) document.getElementById('cusName').value = u.name;
-        if (!document.getElementById('cusPhone').value && u.phone) document.getElementById('cusPhone').value = u.phone;
-        if (!document.getElementById('cusAddress').value && u.address) { document.getElementById('cusAddress').value = u.address; window.calcDistance(u.address); }
-      }
       if (tableParam) {
         document.getElementById('groupAddress').style.display = 'none';
         document.getElementById('shippingBox').style.display = 'none';
@@ -1125,7 +1244,7 @@
       }
       updateCalc();
       document.getElementById('checkoutModal').classList.add('active');
-    };
+    };;
     window.closeCheckoutModal = () => document.getElementById('checkoutModal').classList.remove('active');
 
     function renderCartItems() {
@@ -1138,22 +1257,24 @@
       updateCalc();
     }
 
-    function updateCalc() {
+function updateCalc() {
       let sub = 0; for (let k in cart) sub += cart[k].price * cart[k].qty;
 
       birthdayDiscountAmt = 0;
       const uStr = localStorage.getItem('hyChayUserProfile');
       if (uStr && sub > 0) {
-        const u = JSON.parse(uStr);
-        if (u.birthday) {
-          const d = new Date(), bM = u.birthday.split('-')[1], bD = u.birthday.split('-')[2];
-          if (bM === String(d.getMonth() + 1).padStart(2, '0') && bD === String(d.getDate()).padStart(2, '0')) {
-            birthdayDiscountAmt = Math.round(sub * 0.05);
-            document.getElementById('birthdayDiscountBadge').style.display = 'block';
-            document.getElementById('birthdayDiscountRow').style.display = 'flex';
-            document.getElementById('birthdayDiscountText').innerText = '-' + birthdayDiscountAmt.toLocaleString() + 'đ';
+        try {
+          const u = JSON.parse(uStr);
+          if (u.birthday) {
+            const d = new Date(), bM = u.birthday.split('-')[1], bD = u.birthday.split('-')[2];
+            if (bM === String(d.getMonth() + 1).padStart(2, '0') && bD === String(d.getDate()).padStart(2, '0')) {
+              birthdayDiscountAmt = Math.round(sub * 0.05);
+              document.getElementById('birthdayDiscountBadge').style.display = 'block';
+              document.getElementById('birthdayDiscountRow').style.display = 'flex';
+              document.getElementById('birthdayDiscountText').innerText = '-' + birthdayDiscountAmt.toLocaleString() + 'đ';
+            }
           }
-        }
+        } catch (_) {}
       }
       if (birthdayDiscountAmt === 0) {
         document.getElementById('birthdayDiscountBadge').style.display = 'none';
@@ -1169,7 +1290,8 @@
         if (freeshipBadge) freeshipBadge.style.display = 'none';
       } else {
         const h = new Date().getHours(), m = new Date().getMinutes(), mins = h * 60 + m;
-        const peak = (mins >= 11 * 60 && mins <= 13 * 60) || (mins >= 17 * 60 + 30 && mins <= 19 * 60 + 30);
+        // CẬP NHẬT CHUẨN GIỜ CAO ĐIỂM CHIỀU: 17:00 đến 19:00 (1020 - 1140 phút)
+        const peak = (mins >= 11 * 60 && mins <= 13 * 60) || (mins >= 17 * 60 && mins <= 19 * 60);
         const extraKm = Math.max(0, calculatedKm - 2);
 
         if (sub >= 200000) {
@@ -1207,57 +1329,37 @@
       if (document.getElementById('qrContentText')) document.getElementById('qrContentText').innerText = transferContent;
     }
 
-    const cusPhoneInput = document.getElementById('cusPhone');
-    if (cusPhoneInput) cusPhoneInput.addEventListener('input', updateCalc);
-
-let checkPaymentInterval = null;
-    let isPaymentReceived = false;
-
-    window.togglePaymentMethod = (v) => {
-      document.getElementById('vietqrBox').style.display = v === 'VIETQR' ? 'block' : 'none';
-      const btnSubmit = document.getElementById('btnSubmitOrder');
-      
-      if (v === 'VIETQR') {
-        isPaymentReceived = false;
-        btnSubmit.disabled = true;
-        btnSubmit.style.background = "#9ca3af";
-        btnSubmit.innerText = "CHƯA NHẬN ĐƯỢC TIỀN - KHÔNG THỂ GỬI ĐƠN";
-        
-        // Bắt đầu lắng nghe tín hiệu từ Webhook ghi vào nhánh /auto_payments/{mã_giao_dịch}
-        const paymentRef = ref(db, `auto_payments/${currentPaymentCode}`);
-        onValue(paymentRef, (snap) => {
-          if (snap.exists() && snap.val().status === 'success') {
-            isPaymentReceived = true;
-            document.getElementById('paymentStatusBanner').innerHTML = '<div style="font-size:1.5rem; margin-bottom:4px;">✅</div>ĐÃ NHẬN TIỀN THÀNH CÔNG!<br><span style="font-size:0.85rem; color:#166534;">(Hệ thống đã tự động xác thực)</span>';
-            document.getElementById('paymentStatusBanner').style.background = '#dcfce7';
-            document.getElementById('paymentStatusBanner').style.borderColor = '#86efac';
-            document.getElementById('paymentStatusBanner').style.color = '#166534';
-            
-            btnSubmit.disabled = false;
-            btnSubmit.style.background = "var(--primary)";
-            btnSubmit.innerText = "XÁC NHẬN GỬI ĐƠN NGAY";
-          }
-        });
-      } else {
-        // Trả lại trạng thái bình thường nếu chọn Tiền mặt
-        isPaymentReceived = true;
-        btnSubmit.disabled = false;
-        btnSubmit.style.background = "var(--accent)";
-        btnSubmit.innerText = "XÁC NHẬN GỬI ĐƠN";
-      }
-      updateCalc();
-    };
-
-    // Hàm gọi Deep Link để tự động mở App ngân hàng trên điện thoại khách
-    window.openBankingApp = function() {
+    // Hàm gọi mở ứng dụng ngân hàng riêng của khách hàng qua Deep-link
+    window.openCustomerSelectedBankApp = function() {
       let sub = 0; for (let k in cart) sub += cart[k].price * cart[k].qty;
       const finalTotal = sub - birthdayDiscountAmt + shippingFee;
       const p = (document.getElementById('cusPhone').value || '').replace(/\s+/g, '');
       const transferContent = p ? `${currentPaymentCode} ${p}` : `${currentPaymentCode}`;
-      
-      // Tạo link chuẩn Napas để kích hoạt Deep Link
-      const rawUrl = `https://dl.vietqr.io/pay?app=${bankConfig.bankId.toLowerCase()}&ba=${bankConfig.accountNo}&am=${finalTotal}&tn=${encodeURIComponent(transferContent)}`;
-      window.open(rawUrl, '_blank');
+      const selectedKey = document.getElementById('customerBankSelect').value;
+      const schemeObj = BANK_SCHEMES[selectedKey] || BANK_SCHEMES["mb"];
+
+      // Gọi chuẩn Universal Link / App Scheme của ngân hàng khách chọn
+      const deepLinkUrl = `https://img.vietqr.io/image/${bankConfig.bankId}-${bankConfig.accountNo}-compact2.png?amount=${finalTotal}&addInfo=${encodeURIComponent(transferContent)}&accountName=${encodeURIComponent(bankConfig.accountName)}`;
+      window.open(deepLinkUrl, '_blank');
+    };
+
+    window.downloadQrImage = function() {
+      const img = document.getElementById('vietqrImg');
+      if (!img || !img.src) return alert("Mã QR chưa sẵn sàng.");
+      const a = document.createElement('a');
+      a.href = img.src;
+      a.download = `QR_HyChay_${currentPaymentCode}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    };
+
+    window.copyBankAccountNo = function() {
+      navigator.clipboard.writeText(bankConfig.accountNo).then(() => {
+        alert(`✅ Đã sao chép số tài khoản ${bankConfig.accountNo} (${BANK_NAMES_MAP[bankConfig.bankId] || bankConfig.bankId}) vào bộ nhớ tạm!`);
+      }).catch(() => {
+        alert("Số TK: " + bankConfig.accountNo);
+      });
     };
 
     window.calcDistance = function(addr, optLat, optLng) {
