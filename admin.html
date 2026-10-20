@@ -1007,24 +1007,32 @@ function updatePiPCanvas() {
       const W = pipCanvasEl.width;
       const H = pipCanvasEl.height;
       const pendingCnt = parseInt(document.getElementById('kpiPending')?.innerText || '0');
+      const cookingCnt = parseInt(document.getElementById('kpiCooking')?.innerText || '0');
       pipBlinkState = !pipBlinkState;
 
-      // Xóa nền đen
+      // Xóa nền tối tiệp màu viền hệ thống (Giúp giả lập độ trong suốt trên PiP Web)
       ctx.clearRect(0, 0, W, H);
-      ctx.fillStyle = '#0f172a';
+      ctx.fillStyle = '#111827';
       ctx.fillRect(0, 0, W, H);
 
+      // Vẽ chấm tròn chính giữa y hệt tỷ lệ Grab
       const centerX = W / 2;
       const centerY = H / 2;
-      const radius = (W / 2) - 2;
+      const radius = (W / 2) - 4;
 
-      // Vẽ chấm tròn phong cách Grab Merchant
       ctx.beginPath();
       ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-      ctx.fillStyle = pendingCnt > 0 ? (pipBlinkState ? '#dc2626' : '#ea580c') : '#00b14f';
+      if (pendingCnt > 0) {
+        // Có đơn: Nhấp nháy Đỏ cảnh báo
+        ctx.fillStyle = pipBlinkState ? '#dc2626' : '#ea580c';
+      } else {
+        // Đang chờ: Xanh lá Grab
+        ctx.fillStyle = '#00b14f';
+      }
       ctx.fill();
 
-      ctx.lineWidth = 2;
+      // Viền trắng bảo vệ quanh chấm
+      ctx.lineWidth = 3;
       ctx.strokeStyle = '#ffffff';
       ctx.stroke();
 
@@ -1032,45 +1040,23 @@ function updatePiPCanvas() {
       ctx.textBaseline = 'middle';
 
       if (pendingCnt > 0) {
+        ctx.fillStyle = '#ffd800';
+        ctx.font = '800 15px Montserrat, Arial, sans-serif';
+        ctx.fillText('ĐƠN MỚI', centerX, centerY - 22);
+
         ctx.fillStyle = '#ffffff';
-        ctx.font = '900 22px Inter, sans-serif';
-        ctx.fillText(String(pendingCnt), centerX, centerY);
+        ctx.font = '900 40px Inter, Arial, sans-serif';
+        ctx.fillText(String(pendingCnt), centerX, centerY + 8);
       } else {
         ctx.fillStyle = '#ffffff';
-        ctx.font = '900 11px Montserrat, sans-serif';
-        ctx.fillText('Hy Chay', centerX, centerY - 5);
-        ctx.font = '700 8px Inter, sans-serif';
+        ctx.font = '900 22px Montserrat, Arial, sans-serif';
+        ctx.fillText('Hy Chay', centerX, centerY - 10);
+
         ctx.fillStyle = '#fef08a';
-        ctx.fillText('POS', centerX, centerY + 7);
+        ctx.font = '700 13px Inter, Arial, sans-serif';
+        ctx.fillText(cookingCnt > 0 ? `Bếp: ${cookingCnt} đơn` : 'Merchant', centerX, centerY + 16);
       }
     }
-
-    window.initAutoPiP = function() {
-      if (!pipCanvasEl) {
-        pipCanvasEl = document.createElement('canvas');
-        pipCanvasEl.width = 48;
-        pipCanvasEl.height = 48;
-        updatePiPCanvas();
-      }
-      if (!pipVideoEl) {
-        pipVideoEl = document.createElement('video');
-        pipVideoEl.muted = true;
-        pipVideoEl.playsInline = true;
-        pipVideoEl.autoPictureInPicture = true;
-        pipVideoEl.width = 48;
-        pipVideoEl.height = 48;
-        pipVideoEl.style.position = 'fixed';
-        pipVideoEl.style.bottom = '0';
-        pipVideoEl.style.right = '0';
-        pipVideoEl.style.width = '1px';
-        pipVideoEl.style.height = '1px';
-        pipVideoEl.style.opacity = '0.01';
-        pipVideoEl.style.pointerEvents = 'none';
-        document.body.appendChild(pipVideoEl);
-        pipVideoEl.srcObject = pipCanvasEl.captureStream(2);
-      }
-      pipVideoEl.play().catch(() => {});
-    };
 
     // Hàm mồi để Android Chrome tự động bật Pop-up khi lùi ra Home
     window.initAutoPiP = function() {
