@@ -1546,7 +1546,7 @@ function updatePiPCanvas() {
 function renderOrders() {
       const container = document.getElementById('ordersContainer');
       if (!container) return;
-      let countPending = 0, countCooking = 0, countDoneCancel = 0, taxableRevToday = 0, shipRevToday = 0, cardsHtml = '';
+      let countPending = 0, countCooking = 0, countDoneCancel = 0, countIssue = 0, taxableRevToday = 0, shipRevToday = 0, cardsHtml = '';
       const todayStr = new Date().toISOString().split('T')[0];
 
       const allKeys = Object.keys(ordersCache);
@@ -1558,21 +1558,24 @@ function renderOrders() {
           shipRevToday += (o.shippingFee || 0);
         }
         if (o.archived) return;
-        if (o.status === 'Chờ xác nhận' || o.status === 'Sự cố Shipper') countPending++;
-        else if (o.status === 'Đang chế biến' || o.status === 'Tài xế đang đến quán' || o.status === 'Đang giao hàng') countCooking++;
-        else if (o.status === 'Đã hoàn tất' || o.status === 'Đã hủy') countDoneCancel++;
+        if (o.status === 'Chờ xác nhận' || o.status === 'Sự cố Shipper') {
+          countPending++;
+          if (o.status === 'Sự cố Shipper') countIssue++;
+        } else if (o.status === 'Đang chế biến' || o.status === 'Tài xế đang đến quán' || o.status === 'Đang giao hàng') {
+          countCooking++;
+        } else if (o.status === 'Đã hoàn tất' || o.status === 'Đã hủy') {
+          countDoneCancel++;
+        }
       });
 
       const sortMode = document.getElementById('orderSortSelect') ? document.getElementById('orderSortSelect').value : 'fifo';
       const sortedKeys = allKeys.filter(id => ordersCache[id] && !ordersCache[id].archived).sort((a, b) => {
         const oA = ordersCache[a], oB = ordersCache[b];
-        const rank = (st) => (st === 'Chờ xác nhận' || st === 'Sự cố Shipper') ? 1 : (st === 'Đã hoàn tất' || st === 'Đã hủy' ? 3 : 2);
+        const rank = (st) => st === 'Sự cố Shipper' ? 0 : (st === 'Chờ xác nhận' ? 1 : (st === 'Đã hoàn tất' || st === 'Đã hủy' ? 3 : 2));
         if (rank(oA.status) !== rank(oB.status)) return rank(oA.status) - rank(oB.status);
         const tA = new Date(oA.createdAt).getTime(), tB = new Date(oB.createdAt).getTime();
         return sortMode === 'fifo' ? (tA - tB) : (tB - tA);
       });
-
-      let alertIssueSound = false; // Cờ báo hiệu có sự cố Shipper
 
       sortedKeys.forEach(id => {
         const order = ordersCache[id];
@@ -1584,9 +1587,7 @@ function renderOrders() {
         const isDone = order.status === 'Đã hoàn tất';
         const isCanceled = order.status === 'Đã hủy';
 
-        if (isShipperIssue) alertIssueSound = true;
-
-        // BẢN VÁ: Cho phép tab "Cần xử lý" hiện cả đơn Đang giao để Quản lý theo dõi
+        // Giữ đơn hàng luôn hiển thị trên màn hình Cần Xử Lý & Bếp Đang Làm khi Shipper nhận hoặc đang giao
         if (currentOrderStatusFilter === 'active_only' && !isPending && !isShipperIssue && !isCooking && !isDriverToStore && !isDelivering) return;
         if (currentOrderStatusFilter === 'Chờ xác nhận' && !isPending && !isShipperIssue) return;
         if (currentOrderStatusFilter === 'Đang chế biến' && !isCooking && !isDriverToStore && !isDelivering) return;
@@ -1599,8 +1600,14 @@ function renderOrders() {
 
         const createdDate = new Date(order.createdAt);
         const timeStr = createdDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-        
-        let checkedMap = order.checkedItems || {};
+        const waitMins = Math.max(0, Math.floor((Date.now() - createdDate.getTime()) / 60000));
+        let waitBadgeHtml = '';
+        if (!isDone && !isCanceled) {
+          const wClass = waitMins >= 15 ? 'wait-danger' : (waitMins >= 10 ? 'wait-warn' : 'wait-normal');
+          waitBadgeHtml = `<span class="wait-timer ${wClass}">⏳ ${waitMins}p</span>`;
+        }
+
+        const checkedMap = order.checkedItems || {};
         let totalDishesCount = 0, cookedDishesCount = 0, itemsRows = '';
         for (let k in order.items) {
           totalDishesCount++;
@@ -1614,48 +1621,130 @@ function renderOrders() {
             </tr>`;
         }
 
-        // BẢN VÁ: Hiển thị rõ Tên và SĐT của Shipper trên thẻ đơn hàng
+        // Hiển thị Tên, SĐT Shipper, Trạng thái di chuyển & Thời gian dự kiến (ETA)
         let shipperInfoHtml = '';
         if (order.shipperPhone) {
-          shipperInfoHtml = `<div style="background:#e0f2fe; color:#0369a1; padding:6px; border-radius:6px; margin-bottom:8px; font-size:0.75rem; font-weight:700; border:1px solid #bae6fd;">🛵 Tài xế: ${order.shipperName || ''} (${order.shipperPhone})</div>`;
+          const etaBadge = isDriverToStore
+            ? `<br><span style="color:#b45309;">⏳ Đang tới quán (~${order.etaToStoreMins || 5} phút - cách ${order.shipperDistToStoreKm || 1.5}km)</span>`
+            : (isDelivering ? `<br><span style="color:#15803d;">🚀 Đã lấy món & đang giao khách (~${order.etaToCustomerMins || 10} phút)</span>` : '');
+          shipperInfoHtml = `
+            <div style="background:#e0f2fe; color:#0369a1; padding:8px; border-radius:6px; margin-bottom:8px; font-size:0.78rem; font-weight:700; border:1px solid #bae6fd; line-height:1.4;">
+              🛵 Tài xế: <b>${order.shipperName || 'Shipper'}</b> (<a href="tel:${order.shipperPhone}" style="text-decoration:underline; color:#0369a1;">📞 ${order.shipperPhone}</a>)
+              ${etaBadge}
+            </div>`;
         }
         if (isShipperIssue) {
-          shipperInfoHtml = `<div style="background:#fee2e2; color:#b91c1c; padding:6px; border-radius:6px; margin-bottom:8px; font-size:0.75rem; font-weight:700; border:1px solid #fecaca; animation: alert-card 1s infinite alternate;">⚠️ TÀI XẾ TRẢ ĐƠN / SỰ CỐ XE HƯ! Bắn lại Link Shipper ngay!</div>`;
+          shipperInfoHtml = `
+            <div style="background:#fee2e2; color:#b91c1c; padding:8px; border-radius:6px; margin-bottom:8px; font-size:0.8rem; font-weight:800; border:2px solid #ef4444; animation: alert-card 0.8s infinite alternate;">
+              ⚠️ SỰ CỐ SHIPPER HỦY NHẬN: ${order.shipperIssueNote || 'Xe hư không qua được'}!<br>
+              👉 Bấm "GỌI SHIPPER (ZALO)" bên dưới để gửi lại Link cho tài xế khác!
+            </div>`;
         }
 
+        const isQR = order.paymentMethod === 'VIETQR';
+        const qrCodeLabel = order.paymentCode || ('HC' + id.substring(id.length - 4).toUpperCase());
+        const bankLabel = BANK_NAMES_MAP[order.paymentBank] || order.paymentBank || 'Ngân hàng';
+        const customerBankNote = order.customerSelectedBank ? ` (Khách dùng: ${order.customerSelectedBank})` : '';
+        let paymentBoxHtml = '';
+        if (isQR) {
+          if (order.paymentVerified) {
+            paymentBoxHtml = `<div class="pay-status-box pay-qr-done"><div style="display:flex; justify-content:space-between;"><span>🟢 ĐÃ NHẬN CK${customerBankNote}</span><span>Mã: <b>${qrCodeLabel}</b></span></div></div>`;
+          } else {
+            paymentBoxHtml = `
+              <div class="pay-status-box pay-qr-wait">
+                <div style="display:flex; justify-content:space-between;"><span>💳 CK VIETQR (${bankLabel})</span><span>Mã: <b>${qrCodeLabel}</b></span></div>
+                <div style="display:flex; gap:4px; margin-top:2px;">
+                  <button class="btn-act" style="flex:1; background:#16a34a; color:#fff; padding:4px;" onclick="verifyQrPayment('${id}')">✔️ Xác Nhận Đã Nhận Tiền</button>
+                </div>
+              </div>`;
+          }
+        } else {
+          paymentBoxHtml = `<div class="pay-status-box pay-cod"><div style="display:flex; justify-content:space-between;"><span>${isDineIn ? '🍽️ THU TẠI BÀN' : '💵 THU TIỀN MẶT (COD)'}</span><b>${grandTotal.toLocaleString()}đ</b></div></div>`;
+        }
+
+        const cleanPhoneCall = (order.phone || '').replace(/[^0-9+]/g, '');
+
         cardsHtml += `
-          <div class="order-card ${(isPending || isShipperIssue) ? 'pending' : (isCooking ? 'cooking' : '')}">
+          <div class="order-card ${(isPending || isShipperIssue) ? 'pending' : ((isCooking || isDriverToStore || isDelivering) ? 'cooking' : '')}">
             <div class="card-top">
               <span class="order-id">#HC-${id.substring(id.length - 5).toUpperCase()}</span>
               <span class="order-time-badge">🕒 ${timeStr}</span>
-              <span class="state-badge ${(isPending||isShipperIssue) ? 'state-new' : (isDone ? 'state-complete' : (isCanceled ? 'state-canceled' : 'state-process'))}">${order.status.toUpperCase()}</span>
+              ${waitBadgeHtml}
+              <span class="state-badge ${(isPending || isShipperIssue) ? 'state-new' : (isDone ? 'state-complete' : (isCanceled ? 'state-canceled' : 'state-process'))}">${order.status}</span>
             </div>
             <div class="card-body">
               <div class="customer-box">
                 <p>👤 <b>${order.customerName}</b> (${order.phone})</p>
                 ${!isDineIn ? `<p>📍 ${order.address}</p>` : ''}
+                ${order.note ? `<p style="color:#e11d48; margin-top:2px;"><b>📝 Ghi chú:</b> ${order.note}</p>` : ''}
+                ${!isDone && !isCanceled ? `
+                  <div class="customer-action-row">
+                    ${cleanPhoneCall ? `<a href="tel:${cleanPhoneCall}" class="btn-call-customer">📞 Gọi Khách Đổi Món</a>` : ''}
+                    <button type="button" class="btn-edit-order" onclick="openEditOrderModal('${id}')">✏️ Sửa Món (Thêm/Bỏ)</button>
+                  </div>
+                ` : ''}
               </div>
               ${shipperInfoHtml}
+              ${paymentBoxHtml}
+              <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:#64748b; margin-bottom:2px;">
+                <span>Chạm vào món để gạch món đã làm:</span>
+                <b>Đã làm: ${cookedDishesCount}/${totalDishesCount}</b>
+              </div>
               <table class="items-table">${itemsRows}</table>
               <div class="financial-split-box">
+                <div class="fin-row"><span>Doanh thu món (Quán):</span><b style="color:#1e5e3a;">${subtotal.toLocaleString()}đ</b></div>
+                <div class="fin-row" style="color:#2563eb;"><span>Ship thu hộ (Trả tài xế):</span><b>${shipFee.toLocaleString()}đ</b></div>
                 <div class="fin-row fin-total"><span>TỔNG THU KHÁCH:</span><span>${grandTotal.toLocaleString()}đ</span></div>
               </div>
             </div>
             <div class="card-footer">
-              ${(isPending || isShipperIssue) ? `<button class="btn-act btn-accept" onclick="updateOrderStatus('${id}', 'Đang chế biến')">⚡ TIẾP NHẬN BẾP</button>` : ''}
-              ${(!isDineIn && !isDelivering && !isDone && !isCanceled) ? `<button class="btn-act" style="grid-column: span 2; background:#0284c7; color:#fff;" onclick="openDispatchModal('${id}')">🛵 GỌI SHIPPER (ZALO)</button>` : ''}
+              ${isPending ? `<button class="btn-act btn-accept" onclick="updateOrderStatus('${id}', 'Đang chế biến')">⚡ TIẾP NHẬN & CHUYỂN BẾP</button>` : ''}
+              <button class="btn-act btn-print-kitchen" onclick="window.printKitchenTicket('${id}')">🍳 In Bếp</button>
+              <button class="btn-act btn-print-bill" onclick="window.printCustomerBill('${id}')">🧾 In Bill</button>
+              ${(!isDineIn && !isDone && !isCanceled) ? `<button class="btn-act" style="grid-column: span 2; background:${isShipperIssue ? '#dc2626' : '#0284c7'}; color:#fff; padding:8px;" onclick="openDispatchModal('${id}')">🛵 ${order.shipperPhone ? 'ĐỔI / BẮN LẠI LINK SHIPPER' : 'GỌI SHIPPER (ZALO / GRAB)'}</button>` : ''}
               ${(isCooking || isDriverToStore || isDelivering) ? `<button class="btn-act btn-complete" style="grid-column: span 2;" onclick="completeOrderSafely('${id}')">🚀 HOÀN TẤT ĐƠN</button>` : ''}
+              ${(!isDone && !isCanceled) ? `<button class="btn-act btn-cancel" style="grid-column: span 2;" onclick="openCancelModal('${id}')">🗑️ Hủy Đơn & Báo Khách</button>` : ''}
             </div>
           </div>
         `;
       });
 
-      container.innerHTML = cardsHtml || '<p style="text-align:center; padding:35px; color:#64748b;">Hiện không có đơn hàng nào.</p>';
-      
-      // Báo động giọng nói nếu có sự cố
-      if (alertIssueSound && isAudioActive && !aiVoiceInterval) {
-        speakAlert("Báo động! Có tài xế vừa hủy chuyến, vui lòng điều phối lại đơn hàng ngay lập tức!", true);
+      document.getElementById('kpiPending').innerText = countPending;
+      document.getElementById('kpiCooking').innerText = countCooking;
+      document.getElementById('kpiTaxableRev').innerText = taxableRevToday.toLocaleString() + 'đ';
+      document.getElementById('kpiShippingRev').innerText = shipRevToday.toLocaleString() + 'đ';
+      document.getElementById('badgePending').innerText = countPending;
+
+      if (document.getElementById('cntActiveOnly')) document.getElementById('cntActiveOnly').innerText = countPending + countCooking;
+      if (document.getElementById('cntFilterPending')) document.getElementById('cntFilterPending').innerText = countPending;
+      if (document.getElementById('cntFilterCooking')) document.getElementById('cntFilterCooking').innerText = countCooking;
+      if (document.getElementById('cntFilterDone')) document.getElementById('cntFilterDone').innerText = countDoneCancel;
+
+      if (countPending > previousPendingCount && isAudioActive) {
+        if (countIssue > 0) {
+          speakAlert(`Cảnh báo khẩn cấp! Có đơn hàng bị sự cố tài xế hủy chuyến, vui lòng bắn lại link cho tài xế khác!`, true);
+        } else {
+          speakAlert(`Hy Chay chú ý! Có ${countPending} đơn hàng mới đang chờ xử lý.`, true);
+        }
       }
+      previousPendingCount = countPending;
+
+      if (countPending > 0 && isAudioActive) {
+        if (!aiVoiceInterval) {
+          aiVoiceInterval = setInterval(() => {
+            const currentWait = parseInt(document.getElementById('kpiPending')?.innerText || '0');
+            if (currentWait > 0 && isAudioActive) {
+              speakAlert(countIssue > 0 ? `Chú ý! Có đơn hàng gặp sự cố tài xế chưa được điều phối lại.` : `Hy Chay chú ý! Còn ${currentWait} đơn hàng mới chưa bấm tiếp nhận.`, false);
+            } else {
+              clearInterval(aiVoiceInterval); aiVoiceInterval = null;
+            }
+          }, 9000);
+        }
+      } else if (countPending === 0) {
+        clearInterval(aiVoiceInterval); aiVoiceInterval = null;
+      }
+
+      container.innerHTML = cardsHtml || '<p style="text-align:center; padding:35px; grid-column:1/-1; color:#64748b; background:#fff; border-radius:12px; border:1px dashed #cbd5e1;">Hiện không có đơn hàng nào trong mục này.</p>';
     }
 
     window.updateOrderStatus = (id, s) => update(ref(db, 'orders/' + id), { status: s });
