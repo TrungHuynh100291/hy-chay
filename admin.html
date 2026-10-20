@@ -271,6 +271,8 @@
         <button class="tab-btn" onclick="switchMainTab('menuStock', event)">🍽️ Quản Lý Món Ăn</button>
         <button class="tab-btn" onclick="switchMainTab('bankConfig', event)">⚙️ Cấu Hình VietQR</button>
         <button class="tab-btn" id="tabShiftReport" onclick="switchMainTab('shiftReport', event)">📊 Báo Cáo Kế Toán</button>
+        <button class="tab-btn" onclick="switchMainTab('printerConfig', event)">🖨️ Máy In</button>
+        <button class="tab-btn" onclick="switchMainTab('shippers', event)">🛵 Đội Tài Xế</button>
         <button class="tab-btn" id="tabUsers" onclick="switchMainTab('users', event)" style="color:#2563eb;">👥 Phân Quyền</button>
         <button class="btn-end-shift" onclick="endShiftAndClearScreen()">🛑 KẾT CA & XÓA MÀN HÌNH</button>
       </div>
@@ -477,6 +479,42 @@
               <button onclick="saveEditedOrderChanges()" style="padding:8px 18px; background:var(--primary); color:#fff; border:none; border-radius:6px; font-weight:800; cursor:pointer;">💾 Lưu Thay Đổi & Gửi Bếp</button>
             </div>
           </div>
+        </div>
+      </div>
+      
+<!-- VIEW MÁY IN: CẤU HÌNH IN BILL & BÁO BẾP -->
+      <div id="viewPrinterConfig" style="display: none;">
+        <div class="config-card">
+          <h2 style="color:var(--primary); font-size:1.25rem; margin-bottom:6px;">Cấu Hình Máy In Bill & Báo Bếp</h2>
+          <p style="font-size:0.84rem; color:#64748b; margin-bottom:14px;">Tùy chỉnh nội dung hóa đơn để phù hợp với máy in nhiệt qua cổng USB/LAN hoặc Bluetooth.</p>
+          
+          <div class="form-group-cfg">
+            <label>Khổ Giấy Máy In:</label>
+            <select id="cfgPaperSize">
+              <option value="80mm">Máy in lớn (Khổ 80mm / K80)</option>
+              <option value="58mm">Máy in nhỏ (Khổ 58mm / K58)</option>
+            </select>
+          </div>
+          <div class="form-group-cfg"><label>Tiêu Đề Dòng 1 (Tên Quán / Logo):</label><input type="text" id="cfgPrintHeader1" placeholder="VD: HY CHAY - BẢO ANH LÂM"></div>
+          <div class="form-group-cfg"><label>Tiêu Đề Dòng 2 (Địa chỉ / MST):</label><input type="text" id="cfgPrintHeader2" placeholder="VD: MST: 3401289271 - 280 Trần Hưng Đạo, P. Phan Thiết"></div>
+          <div class="form-group-cfg"><label>Lời Cảm Ơn Cuối Bill:</label><input type="text" id="cfgPrintFooter" placeholder="VD: Cảm ơn quý khách và hẹn gặp lại!"></div>
+          <button onclick="savePrinterConfig()" style="width:100%; padding:12px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-weight:700; cursor:pointer;">💾 LƯU CẤU HÌNH MÁY IN</button>
+        </div>
+      </div>
+
+      <!-- VIEW ĐỘI TÀI XẾ: QUẢN LÝ SHIPPER & TRẠNG THÁI ONLINE -->
+      <div id="viewShippers" style="display: none;">
+        <div class="report-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <h3 style="color:var(--primary);">Quản Lý Đội Ngũ Giao Hàng (Shipper Ruột)</h3>
+            <span style="background:#dcfce7; color:#166534; padding:4px 10px; border-radius:12px; font-weight:700; font-size:0.8rem;" id="onlineShipperCount">Đang hoạt động: 0</span>
+          </div>
+          <p style="font-size:0.85rem; color:#64748b; margin-bottom:15px;">Hệ thống sẽ chỉ ưu tiên chia đơn (báo giờ đếm ngược 20s) cho những tài xế đang bật trạng thái "Sẵn Sàng (Online)".</p>
+          
+          <table class="report-table">
+            <thead><tr style="background:#f1f5f9; text-align:left;"><th>Tên Tài Xế</th><th>Số Điện Thoại</th><th>Tình Trạng (Online/Offline)</th><th>Trạng Thái Nick</th><th>Hành Động</th></tr></thead>
+            <tbody id="shippersTableBody"></tbody>
+          </table>
         </div>
       </div>
       
