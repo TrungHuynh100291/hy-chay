@@ -184,6 +184,14 @@
 
     <div class="shipper-card" id="shipperOrderBox" style="display:none;">
       <h2>📦 CHI TIẾT ĐƠN HÀNG</h2>
+      <!-- CÔNG TẮC TRẠNG THÁI TÀI XẾ -->
+      <div style="background:#1e293b; border:2px solid #475569; padding:10px; border-radius:10px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:0.9rem; font-weight:700; color:#fff;" id="shipperStatusText">Trạng thái: Đang nghỉ</span>
+        <label class="switch">
+          <input type="checkbox" id="shipperOnlineToggle" onchange="toggleShipperOnline(this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
       <div style="background:#0f172a; border-radius:12px; padding:15px; margin-bottom:20px; text-align:left; border:1px dashed #475569;">
         <p style="color:#94a3b8; margin-bottom:5px; font-size:0.9rem;">Mã đơn: <b id="shpOrderId" style="color:#fff;">--</b></p>
         <p style="color:#94a3b8; margin-bottom:5px; font-size:0.9rem;">👤 Khách: <b id="shpCustomerInfo" style="color:#fff;">--</b></p>
@@ -741,10 +749,22 @@
         actionBox.style.display = "none";
 
         const baseTimestamp = order.dispatchResetAt ? new Date(order.dispatchResetAt).getTime() : new Date(order.createdAt).getTime();
-        const shipperSlot = (parseInt(phone.slice(-4)) || 0) % 5;
-        const slotStart = shipperSlot * 20000;
-        const slotEnd = slotStart + 20000;
-        const freeForAllTime = 100000;
+        // THUẬT TOÁN THÁC NƯỚC ĐỘNG (DYNAMIC WATERFALL V9)
+        const queue = order.dispatchQueue || [];
+        const myIndex = queue.indexOf(phone);
+        
+        let slotStart = 0, slotEnd = 0, freeForAllTime = 0;
+
+        if (myIndex !== -1) {
+          // Tài xế có mặt trong danh sách ưu tiên do Admin bốc thăm
+          slotStart = myIndex * 20000;
+          slotEnd = slotStart + 20000;
+          freeForAllTime = queue.length * 20000;
+        } else {
+          // Tài xế quên bật Online, phải chờ tất cả người Online từ chối thì mới được giành đơn
+          slotStart = 9999999; 
+          freeForAllTime = (queue.length > 0 ? queue.length : 1) * 20000;
+        }
 
         if (shipperInterval) clearInterval(shipperInterval);
         shipperInterval = setInterval(() => {
@@ -1843,6 +1863,42 @@
       autoFillCheckoutNow();
       checkOperatingHours();
       setInterval(checkOperatingHours, 60000);
+    }
+
+    // Đồng bộ trạng thái Online/Offline của Shipper
+    window.toggleShipperOnline = function(isOnline) {
+      const phone = localStorage.getItem('hyChayShipperPhone');
+      const name = localStorage.getItem('hyChayShipperName');
+      if (!phone) return alert("Vui lòng đăng nhập trước!");
+      
+      update(ref(db, `shippers/${phone}`), { 
+        name: name,
+        isOnline: isOnline,
+        lastSeen: new Date().toISOString()
+      }).then(() => {
+        const txt = document.getElementById('shipperStatusText');
+        if (isOnline) {
+          txt.innerText = "Trạng thái: SẴN SÀNG NHẬN ĐƠN";
+          txt.style.color = "#22c55e";
+        } else {
+          txt.innerText = "Trạng thái: Đang nghỉ";
+          txt.style.color = "#fff";
+        }
+      });
+    };
+
+    // Khôi phục trạng thái nút bật tắt khi reload trang Shipper
+    if (shipperOrderIdParam) {
+      const phone = localStorage.getItem('hyChayShipperPhone');
+      if (phone) {
+        get(ref(db, `shippers/${phone}`)).then((snap) => {
+          if (snap.exists() && snap.val().isOnline) {
+            document.getElementById('shipperOnlineToggle').checked = true;
+            document.getElementById('shipperStatusText').innerText = "Trạng thái: SẴN SÀNG NHẬN ĐƠN";
+            document.getElementById('shipperStatusText').style.color = "#22c55e";
+          }
+        });
+      }
     }
   </script>
 </body>
