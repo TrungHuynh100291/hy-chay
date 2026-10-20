@@ -524,74 +524,365 @@
     </footer>
   </div> <!-- Hết customerAppWrapper -->
 <!-- =============================== -->
-  <!-- PHẦN 3: JAVASCRIPT - XỬ LÝ LOGIC LÕI  -->
+<!-- =============================== -->
+  <!-- PHẦN 3: JAVASCRIPT - XỬ LÝ LOGIC LÕI (CHUẨN HÓA ĐỒNG BỘ V8) -->
   <!-- =============================== -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, get, query, orderByChild, equalTo, update, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getDatabase, ref, push, onValue, get, update, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    const firebaseConfig = { apiKey: "AIzaSyB7CH4HUqEozclN38P_iGtSFzDB_w7sOUk", authDomain: "hy-chay.firebaseapp.com", projectId: "hy-chay", storageBucket: "hy-chay.firebasestorage.app", messagingSenderId: "215026977682", appId: "1:215026977682:web:52b136c7f09a62cc488f4b" };
+    const firebaseConfig = {
+      apiKey: "AIzaSyB7CH4HUqEozclN38P_iGtSFzDB_w7sOUk",
+      authDomain: "hy-chay.firebaseapp.com",
+      projectId: "hy-chay",
+      storageBucket: "hy-chay.firebasestorage.app",
+      messagingSenderId: "215026977682",
+      appId: "1:215026977682:web:52b136c7f09a62cc488f4b"
+    };
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app, "https://hy-chay-default-rtdb.asia-southeast1.firebasedatabase.app");
-    const auth = getAuth(app);
 
-    const STORE_LAT = 10.9328; const STORE_LON = 108.1025;
+    const STORE_LAT = 10.9328;
+    const STORE_LON = 108.1025;
+    const STORE_ADDRESS_TEXT = "280 Trần Hưng Đạo, Phường Phan Thiết, Lâm Đồng";
     const urlParams = new URLSearchParams(window.location.search);
-    
-    // KIỂM TRA CHẾ ĐỘ SHIPPER (ĐƯỜNG LINK MA THUẬT)
     const shipperOrderIdParam = urlParams.get('shipper');
 
+    const WARD_GEO_CONFIG = {
+      "Phường Phan Thiết": { lat: 10.9285, lon: 108.0985, defaultKm: 1.8 },
+      "Phú Thủy": { lat: 10.9395, lon: 108.1180, defaultKm: 2.5 },
+      "Hàm Thắng": { lat: 10.9580, lon: 108.1150, defaultKm: 4.2 },
+      "Bình Thuận": { lat: 10.9450, lon: 108.0820, defaultKm: 3.5 },
+      "Tiến Thành": { lat: 10.8650, lon: 108.0350, defaultKm: 9.5 },
+      "Tiến Thánh": { lat: 10.8650, lon: 108.0350, defaultKm: 9.5 },
+      "Mũi Né": { lat: 10.9330, lon: 108.2870, defaultKm: 18.0 },
+      "La Gi": { lat: 10.6650, lon: 107.7720, defaultKm: 45.0 }
+    };
+
     let bankConfig = { bankId: "MB", accountNo: "0903242400", accountName: "HOANG HUYNH HUY BAO" };
-    let menuCustomCache = {}; let cart = {}; let calculatedKm = 2.0; let shippingFee = 12000; let birthdayDiscountAmt = 0; let currentFilterCat = 'all'; let isStoreOpen = true;
-    let currentUserPhone = null; let currentUserId = null;
+    let menuCustomCache = {};
+    let cart = {};
+    let calculatedKm = 2.0;
+    let shippingFee = 12000;
+    let birthdayDiscountAmt = 0;
+    let currentFilterCat = 'all';
+    let isStoreOpen = true;
+    let currentUserPhone = null;
+    let currentUserId = null;
     let currentPaymentCode = "HC" + Math.floor(1000 + Math.random() * 9000);
 
     const BANK_NAMES_MAP = {
+      "MB": "MBBank", "ABB": "ABBank", "NAB": "Nam A Bank", "ACB": "ACB",
+      "VCB": "Vietcombank", "TCB": "Techcombank", "ICB": "VietinBank", "BIDV": "BIDV",
       "vcb": "Vietcombank", "bidv": "BIDV", "tcb": "Techcombank", "icb": "VietinBank",
       "mbbank": "MBBank", "acb": "ACB", "sacombank": "Sacombank", "agribank": "Agribank",
       "vpbank": "VPBank", "tpbank": "TPBank", "vib": "VIB", "hdbank": "HDBank"
     };
 
-<!-- =============================== -->
-  <!-- MÀN HÌNH NHẬN ĐƠN DÀNH RIÊNG CHO SHIPPER (V7 - NÂNG CẤP) -->
-  <!-- =============================== -->
-  <div id="shipperModeOverlay" class="shipper-mode-overlay">
-    <div class="shipper-card" id="shipperLoginBox">
-      <h2>🛵 ĐỘI SHIP HY CHAY</h2>
-      <p>Nhập thông tin để quán và khách hàng dễ liên hệ.</p>
-      <input type="text" id="shipperNameInput" class="shipper-input" placeholder="Tên của bạn (VD: Chú Tư)..." style="margin-bottom:10px;">
-      <input type="tel" id="shipperPhoneInput" class="shipper-input" placeholder="Số điện thoại của bạn...">
-      <button class="shipper-btn" onclick="shipperLogin()">TIẾP TỤC</button>
-    </div>
+    function safeItemKey(keyName) {
+      return (keyName || '').replace(/[.#$\[\]\/]/g, '_');
+    }
 
-    <div class="shipper-card" id="shipperOrderBox" style="display:none;">
-      <h2>📦 CHI TIẾT ĐƠN HÀNG</h2>
-      <div style="background:#0f172a; border-radius:12px; padding:15px; margin-bottom:20px; text-align:left; border:1px dashed #475569;">
-        <p style="color:#94a3b8; margin-bottom:5px; font-size:0.9rem;">Mã đơn: <b id="shpOrderId" style="color:#fff;">--</b></p>
-        <p style="color:#94a3b8; margin-bottom:5px; font-size:0.9rem;">📍 Khách: <b id="shpCustomerInfo" style="color:#fff;">--</b></p>
-        <p style="color:#94a3b8; margin-bottom:5px; font-size:0.9rem;">📍 Địa chỉ: <b id="shpAddress" style="color:#38bdf8;">--</b></p>
-        <p style="color:#94a3b8; font-size:0.9rem;">💰 Phí Ship bạn nhận: <b id="shpFee" style="color:#22c55e; font-size:1.1rem;">--</b></p>
-      </div>
-      
-      <div id="shpStatusMsg" style="color:#fde047; font-weight:bold; margin-bottom:10px; min-height:24px;">Đang kiểm tra lượt...</div>
-      <div class="shipper-countdown" id="shpCountdown">00</div>
-      
-      <!-- Nút thao tác trước khi nhận -->
-      <button id="btnAcceptOrder" class="shipper-btn" onclick="acceptOrderByShipper()" disabled>ĐANG XỬ LÝ LƯỢT...</button>
+    function normalizePhone(rawPhone) {
+      return (rawPhone || '').trim().replace(/\s+/g, '').replace(/^\+84/, '0').replace(/[^0-9]/g, '');
+    }
 
-      <!-- Các nút thao tác SAU KHI nhận (Ẩn mặc định) -->
-      <div id="shipperActionButtons" style="display:none; flex-direction:column; gap:10px; margin-top:15px;">
-        <button onclick="shipperActionPickedUp()" style="background:#22c55e; color:#fff; border:none; padding:14px; border-radius:10px; font-weight:800; font-size:1rem; cursor:pointer;">✅ ĐÃ LẤY MÓN - BẮT ĐẦU GIAO</button>
-        <button onclick="shipperActionNavigate()" style="background:#3b82f6; color:#fff; border:none; padding:14px; border-radius:10px; font-weight:800; font-size:1rem; cursor:pointer;">🗺️ DẪN ĐƯỜNG BẰNG GOOGLE MAPS</button>
-        <button onclick="shipperActionIssue()" style="background:#ef4444; color:#fff; border:none; padding:12px; border-radius:10px; font-weight:800; font-size:0.9rem; cursor:pointer;">⚠️ BÁO SỰ CỐ / HƯ XE (TRẢ ĐƠN)</button>
-      </div>
-    </div>
-  </div>
+    // Hàm tính khoảng cách đường bộ (km) và thời gian di chuyển (phút) giữa 2 tọa độ GPS
+    function calcRoadDistanceKm(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+      const straightKm = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return Math.max(0.5, Math.round(straightKm * 1.25 * 10) / 10);
+    }
 
     // ==========================================
-    // 2. DỮ LIỆU MENU & AUTO-FILL THÔNG TIN KHÁCH HÀNG
+    // 1. CHẾ ĐỘ SHIPPER V8 (THÁC NƯỚC 20S + TÍNH ETA TỚI QUÁN & TỚI KHÁCH + DẪN ĐƯỜNG + BÁO SỰ CỐ)
     // ==========================================
+    let shipperInterval = null;
+    let currentOrderAddress = "";
+    let currentOrderCached = null;
+
+    if (shipperOrderIdParam) {
+      document.getElementById('customerAppWrapper').style.display = 'none';
+      document.getElementById('shipperModeOverlay').style.display = 'flex';
+
+      const savedShipperPhone = localStorage.getItem('hyChayShipperPhone');
+      const savedShipperName = localStorage.getItem('hyChayShipperName');
+      if (savedShipperPhone && savedShipperName) {
+        document.getElementById('shipperPhoneInput').value = savedShipperPhone;
+        document.getElementById('shipperNameInput').value = savedShipperName;
+        setTimeout(() => window.shipperLogin(), 300);
+      }
+    }
+
+    window.shipperLogin = function() {
+      const name = (document.getElementById('shipperNameInput').value || '').trim();
+      const phone = normalizePhone(document.getElementById('shipperPhoneInput').value);
+      if (!name || !phone || phone.length < 9) {
+        return alert("Vui lòng nhập đầy đủ Tên và Số điện thoại của bạn (lần đầu tiên) để quán và khách hàng dễ liên hệ!");
+      }
+      localStorage.setItem('hyChayShipperName', name);
+      localStorage.setItem('hyChayShipperPhone', phone);
+
+      document.getElementById('shipperLoginBox').style.display = 'none';
+      document.getElementById('shipperOrderBox').style.display = 'block';
+
+      onValue(ref(db, `orders/${shipperOrderIdParam}`), (snap) => {
+        const order = snap.val();
+        if (!order) {
+          document.getElementById('shpStatusMsg').innerHTML = "<span style='color:#ef4444;'>❌ Đơn hàng không tồn tại hoặc đã bị xóa.</span>";
+          document.getElementById('shpCountdown').style.display = "none";
+          document.getElementById('btnAcceptOrder').style.display = "none";
+          return;
+        }
+
+        currentOrderCached = order;
+        currentOrderAddress = order.address || "Phan Thiết, Lâm Đồng";
+        document.getElementById('shpOrderId').innerText = `#HC-${shipperOrderIdParam.substring(shipperOrderIdParam.length - 5).toUpperCase()}`;
+        document.getElementById('shpCustomerInfo').innerText = `${order.customerName} (${order.phone})`;
+        document.getElementById('shpAddress').innerText = order.address || '--';
+        document.getElementById('shpFee').innerText = (order.shippingFee || 0).toLocaleString() + 'đ';
+
+        const isMyOrder = (normalizePhone(order.shipperPhone) === phone);
+        const actionBox = document.getElementById('shipperActionButtons');
+        const btnPickedUp = actionBox ? actionBox.children[0] : null;
+
+        if (order.status === 'Tài xế đang đến quán' || order.status === 'Đang giao hàng') {
+          if (shipperInterval) clearInterval(shipperInterval);
+          document.getElementById('shpCountdown').style.display = "none";
+
+          if (isMyOrder) {
+            document.getElementById('btnAcceptOrder').style.display = "none";
+            actionBox.style.display = "flex";
+
+            if (order.status === 'Tài xế đang đến quán') {
+              if (btnPickedUp) {
+                btnPickedUp.style.display = 'block';
+                btnPickedUp.innerText = "✅ ĐÃ TỚI QUÁN & NHẬN ĐƠN THÀNH CÔNG";
+              }
+              const etaStore = order.etaToStoreMins || 5;
+              const distStore = order.shipperDistToStoreKm || 1.5;
+              document.getElementById('shpStatusMsg').innerHTML = `
+                <div style="background:#1e3a8a; border:1px solid #3b82f6; padding:10px; border-radius:10px; color:#fff; line-height:1.5;">
+                  🛵 <b>BẠN ĐANG TRÊN ĐƯỜNG TỚI QUÁN</b><br>
+                  📍 Cách quán khoảng <b>${distStore} km</b> (Dự kiến <b>~${etaStore} phút</b> tới quán)<br>
+                  <small style="color:#fde047;">👉 Khi tới quán lấy đồ xong, hãy bấm nút màu Xanh lá bên dưới!</small>
+                </div>`;
+            } else {
+              if (btnPickedUp) btnPickedUp.style.display = 'none';
+              const etaCus = order.etaToCustomerMins || 10;
+              const distCus = order.shipperDistToCusKm || 2.0;
+              document.getElementById('shpStatusMsg').innerHTML = `
+                <div style="background:#14532d; border:1px solid #22c55e; padding:10px; border-radius:10px; color:#fff; line-height:1.5;">
+                  🚀 <b>ĐÃ NHẬN MÓN - ĐANG GIAO CHO KHÁCH</b><br>
+                  📍 Quãng đường từ quán tới khách: <b>~${distCus} km</b><br>
+                  ⏳ Thời gian dự kiến tới khách: <b>~${etaCus} phút</b>
+                </div>`;
+            }
+          } else {
+            actionBox.style.display = "none";
+            document.getElementById('btnAcceptOrder').style.display = "block";
+            document.getElementById('btnAcceptOrder').disabled = true;
+            document.getElementById('btnAcceptOrder').innerText = "ĐÃ CÓ TÀI XẾ KHÁC NHẬN";
+            document.getElementById('shpStatusMsg').innerHTML = `<span style='color:#ef4444;'>⚠️ Tài xế <b>${order.shipperName || ''} (${order.shipperPhone || ''})</b> đã nhận đơn này!</span>`;
+          }
+          return;
+        }
+
+        if (order.status === 'Đã hoàn tất' || order.status === 'Đã hủy') {
+          if (shipperInterval) clearInterval(shipperInterval);
+          document.getElementById('shpCountdown').style.display = "none";
+          document.getElementById('shpStatusMsg').innerHTML = `<span style='color:#ef4444;'>Đơn hàng đã kết thúc (${order.status}).</span>`;
+          document.getElementById('btnAcceptOrder').style.display = "block";
+          document.getElementById('btnAcceptOrder').disabled = true;
+          actionBox.style.display = "none";
+          return;
+        }
+
+        // Trạng thái đơn đang chờ Shipper nhận (hoặc vừa có Shipper báo sự cố trả đơn)
+        document.getElementById('shpCountdown').style.display = "block";
+        document.getElementById('btnAcceptOrder').style.display = "block";
+        actionBox.style.display = "none";
+
+        const baseTimestamp = order.dispatchResetAt ? new Date(order.dispatchResetAt).getTime() : new Date(order.createdAt).getTime();
+        const shipperSlot = (parseInt(phone.slice(-4)) || 0) % 5;
+        const slotStart = shipperSlot * 20000;
+        const slotEnd = slotStart + 20000;
+        const freeForAllTime = 100000;
+
+        if (shipperInterval) clearInterval(shipperInterval);
+        shipperInterval = setInterval(() => {
+          const elapsed = Math.max(0, Date.now() - baseTimestamp);
+          const btn = document.getElementById('btnAcceptOrder');
+          const msg = document.getElementById('shpStatusMsg');
+          const cd = document.getElementById('shpCountdown');
+
+          if (order.status === 'Sự cố Shipper' || elapsed >= freeForAllTime) {
+            msg.innerHTML = `<span style='color:#22c55e;'>🔥 ĐƠN ƯU TIÊN NHẬN NGAY (${name} - ${phone})!</span>`;
+            cd.innerText = "NHẬN!";
+            cd.style.color = "#22c55e";
+            btn.disabled = false;
+            btn.innerText = "✅ BẤM NHẬN ĐƠN NGAY";
+            btn.style.background = "#22c55e";
+          } else if (elapsed >= slotStart && elapsed < slotEnd) {
+            const timeLeft = Math.ceil((slotEnd - elapsed) / 1000);
+            msg.innerHTML = `<span style='color:#ffd800;'>🟢 ĐẾN LƯỢT CỦA BẠN (${name})! Xác nhận trong 20s!</span>`;
+            cd.innerText = timeLeft.toString().padStart(2, '0') + "s";
+            cd.style.color = "#22c55e";
+            btn.disabled = false;
+            btn.innerText = "✅ BẤM NHẬN ĐƠN NGAY";
+            btn.style.background = "#ffd800";
+          } else if (elapsed < slotStart) {
+            const waitTime = Math.ceil((slotStart - elapsed) / 1000);
+            msg.innerHTML = "<span style='color:#94a3b8;'>⏳ Đang ưu tiên tài xế trước (20s/người)... Chờ đến lượt bạn:</span>";
+            cd.innerText = waitTime.toString().padStart(2, '0') + "s";
+            cd.style.color = "#ef4444";
+            btn.disabled = true;
+            btn.innerText = "ĐANG ĐỢI ĐẾN LƯỢT BẠN...";
+            btn.style.background = "#475569";
+          } else {
+            const waitFree = Math.ceil((freeForAllTime - elapsed) / 1000);
+            msg.innerHTML = "<span style='color:#94a3b8;'>⏳ Đã qua 20s của bạn. Chuyển cho người kế tiếp...</span>";
+            cd.innerText = waitFree.toString().padStart(2, '0') + "s";
+            cd.style.color = "#ef4444";
+            btn.disabled = true;
+            btn.innerText = "ĐÃ QUA LƯỢT - CHỜ MỞ TỰ DO";
+            btn.style.background = "#475569";
+          }
+        }, 500);
+      });
+    };
+
+    // BƯỚC 1 CỦA SHIPPER: BẤM NHẬN ĐƠN -> TÍNH THỜI GIAN TỚI QUÁN DỰA TRÊN ĐỊNH VỊ MAP & BÁO KHÁCH
+    window.acceptOrderByShipper = function() {
+      const phone = localStorage.getItem('hyChayShipperPhone');
+      const name = localStorage.getItem('hyChayShipperName');
+      const btn = document.getElementById('btnAcceptOrder');
+      btn.disabled = true;
+      btn.innerText = "📍 ĐANG ĐỊNH VỊ KHOẢNG CÁCH TỚI QUÁN...";
+
+      const finalizeAccept = (distToStoreKm) => {
+        const etaToStoreMins = Math.max(2, Math.round(distToStoreKm * 2.5 + 1));
+        get(ref(db, `orders/${shipperOrderIdParam}`)).then((snap) => {
+          const order = snap.val();
+          if (order && !order.shipperPhone) {
+            update(ref(db, `orders/${shipperOrderIdParam}`), {
+              status: 'Tài xế đang đến quán',
+              shipperPhone: phone,
+              shipperName: name,
+              shipperDistToStoreKm: distToStoreKm,
+              etaToStoreMins: etaToStoreMins,
+              acceptedAt: new Date().toISOString()
+            }).then(() => {
+              set(ref(db, 'voice_sync/latest'), {
+                text: `Tài xế ${name} đã nhận đơn hàng, dự kiến ${etaToStoreMins} phút sẽ tới quán.`,
+                timestamp: Date.now(),
+                sender: 'shipper'
+              }).catch(() => {});
+              alert(`🎉 Nhận đơn thành công!\n📍 Khoảng cách tới quán: ~${distToStoreKm} km\n⏳ Dự kiến: ~${etaToStoreMins} phút tới quán Hy Chay.`);
+            });
+          } else {
+            alert("⚠️ Rất tiếc, đơn hàng này vừa được tài xế khác nhận!");
+          }
+        });
+      };
+
+      if (navigator.geolocation) {
+        let gpsResolved = false;
+        const gpsTimer = setTimeout(() => {
+          if (!gpsResolved) { gpsResolved = true; finalizeAccept(1.5); }
+        }, 3500);
+
+        navigator.geolocation.getCurrentPosition((pos) => {
+          if (!gpsResolved) {
+            gpsResolved = true;
+            clearTimeout(gpsTimer);
+            const distKm = calcRoadDistanceKm(pos.coords.latitude, pos.coords.longitude, STORE_LAT, STORE_LON);
+            finalizeAccept(distKm);
+          }
+        }, () => {
+          if (!gpsResolved) { gpsResolved = true; clearTimeout(gpsTimer); finalizeAccept(1.5); }
+        }, { timeout: 3200 });
+      } else {
+        finalizeAccept(1.5);
+      }
+    };
+
+    // BƯỚC 2 CỦA SHIPPER: TỚI QUÁN BẤM NHẬN ĐƠN THÀNH CÔNG -> TÍNH THỜI GIAN TỪ QUÁN TỚI KHÁCH & BÁO KHÁCH
+    window.shipperActionPickedUp = function() {
+      const name = localStorage.getItem('hyChayShipperName') || 'Tài xế';
+      const commitPickup = (distToCusKm) => {
+        const etaToCustomerMins = Math.max(3, Math.round(distToCusKm * 2.5 + 2));
+        update(ref(db, `orders/${shipperOrderIdParam}`), {
+          status: 'Đang giao hàng',
+          shipperDistToCusKm: distToCusKm,
+          etaToCustomerMins: etaToCustomerMins,
+          pickedUpAt: new Date().toISOString()
+        }).then(() => {
+          set(ref(db, 'voice_sync/latest'), {
+            text: `Tài xế ${name} đã nhận món tại quán và bắt đầu đi giao cho khách.`,
+            timestamp: Date.now(),
+            sender: 'shipper'
+          }).catch(() => {});
+          alert(`🚀 Đã xác nhận lấy món tại quán!\n📍 Quãng đường giao tới khách: ~${distToCusKm} km\n⏳ Dự kiến: ~${etaToCustomerMins} phút tới nơi.\nBấm nút "Dẫn Đường Bằng Google Maps" để xem lộ trình!`);
+        });
+      };
+
+      if (currentOrderCached && currentOrderCached.deliveryKm) {
+        commitPickup(currentOrderCached.deliveryKm);
+      } else if (currentOrderAddress) {
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(currentOrderAddress)}`)
+          .then(r => r.json())
+          .then(d => {
+            if (d && d[0]) {
+              const km = calcRoadDistanceKm(STORE_LAT, STORE_LON, parseFloat(d[0].lat), parseFloat(d[0].lon));
+              commitPickup(km);
+            } else {
+              commitPickup(2.2);
+            }
+          }).catch(() => commitPickup(2.2));
+      } else {
+        commitPickup(2.2);
+      }
+    };
+
+    // BƯỚC 3 CỦA SHIPPER: DẪN ĐƯỜNG MẶC ĐỊNH TỪ QUÁN (280 TRẦN HƯNG ĐẠO) ĐẾN KHÁCH HÀNG TRÊN GOOGLE MAPS
+    window.shipperActionNavigate = function() {
+      const mapUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(STORE_ADDRESS_TEXT)}&destination=${encodeURIComponent(currentOrderAddress)}&travelmode=driving`;
+      window.open(mapUrl, '_blank');
+    };
+
+    // BƯỚC 4 CỦA SHIPPER: NÚT HỦY ĐƠN KHI GẶP SỰ CỐ (XE HƯ...) -> PHÁT VOICE BÁO ĐỘNG LẠI CHO QUÁN
+    window.shipperActionIssue = function() {
+      const name = localStorage.getItem('hyChayShipperName') || 'Tài xế';
+      const phone = localStorage.getItem('hyChayShipperPhone') || '';
+      const reason = prompt("⚠️ Nhập lý do sự cố (VD: Xe hư, bể bánh, kẹt việc đột xuất...) để báo về quán:", "Xe hư dọc đường");
+      if (reason === null) return;
+
+      update(ref(db, `orders/${shipperOrderIdParam}`), {
+        status: 'Sự cố Shipper',
+        shipperIssueNote: `Tài xế ${name} (${phone}) báo sự cố: ${reason || 'Xe hư'}`,
+        shipperPhone: null,
+        shipperName: null,
+        etaToStoreMins: null,
+        etaToCustomerMins: null,
+        dispatchResetAt: new Date().toISOString()
+      }).then(() => {
+        set(ref(db, 'voice_sync/latest'), {
+          text: `Cảnh báo khẩn cấp! Tài xế ${name} vừa báo sự cố ${reason || 'xe hư'} không thể giao đơn hàng. Quán vui lòng gửi lại đường link cho tài xế khác!`,
+          timestamp: Date.now(),
+          sender: 'shipper_issue'
+        }).catch(() => {});
+        alert("⚠️ Đã gửi thông báo sự cố bằng giọng nói về quán Hy Chay để quán điều phối Shipper khác!");
+      });
+    };
+
+    // ==========================================
+    // 2. DỮ LIỆU 70 MÓN ĂN & HIỂN THỊ MENU TỨC THÌ (ĐÃ KHÔI PHỤC 100%)
+    // ==========================================
+    const FEATURED_IDS = ["bunchagio", "banhcanh", "hoanhthanhmi", "miquang", "comga", "xoi", "nomhoachuoi", "mispaghetti"];
     const ALL_MENU_DATA = [
       { id: "bunmoc", name: "Bún Mọc Chay", defaultPrice: 30000, cat: "bun", catName: "Món Bún", defaultImg: "menu 1.jpg" },
       { id: "bunthai", name: "Bún Thái Chay", defaultPrice: 35000, cat: "bun", catName: "Món Bún", defaultImg: "menu 1.jpg" },
@@ -666,174 +957,395 @@
       { id: "nuocngot", name: "Nước Ngọt Các Loại", defaultPrice: 15000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" }
     ];
 
-    function getFakeEmail(phone) { return `${phone}@hychay.com`; }
-    function safeItemKey(keyName) { return (keyName || '').replace(/[.#$\[\]\/]/g, '_'); }
+    function getDishData(dish) {
+      const c = menuCustomCache[dish.id] || {};
+      return {
+        id: dish.id,
+        name: dish.name,
+        cat: dish.cat,
+        catName: dish.catName,
+        price: c.price !== undefined ? c.price : dish.defaultPrice,
+        image: c.image || dish.defaultImg || 'Logo nho.png',
+        isSoldOut: !!c.soldOut,
+        isHot: dish.isHot
+      };
+    }
 
-    // ==========================================
-    // 3. XỬ LÝ AUTHENTICATION VÀ LỊCH SỬ ĐƠN
-    // ==========================================
-    let isRegistering = false;
-    let historyUnsubscribe = null;
+    function renderFeaturedDishes() {
+      const el = document.getElementById('featuredDishGrid');
+      if (!el) return;
+      let html = '';
+      FEATURED_IDS.forEach(id => {
+        const base = ALL_MENU_DATA.find(d => d.id === id);
+        if (!base) return;
+        const it = getDishData(base);
+        const safeName = it.name.replace(/'/g, "\\'");
+        html += `
+          <div class="dish-card ${it.isSoldOut ? 'is-sold-out' : ''} ${it.isHot ? 'is-hot' : ''}" data-dish-id="${it.id}">
+            <div class="dish-img-wrap"><span class="hot-badge">🔥 Bán chạy</span><img src="${it.image}" onerror="this.src='Logo nho.png'"><span class="sold-out-badge">Tạm Hết</span></div>
+            <div class="dish-body">
+              <h3>${it.name}</h3>
+              <div class="dish-footer" style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+                <span class="dish-price">${it.price.toLocaleString()}đ</span>
+                <button class="btn-add-cart" ${it.isSoldOut ? 'disabled' : ''} onclick="addToCart('${it.id}', '${safeName}', ${it.price})">${it.isSoldOut ? 'Tạm Hết' : '+ Chọn Món'}</button>
+              </div>
+            </div>
+          </div>`;
+      });
+      el.innerHTML = html;
+    }
 
-    onAuthStateChanged(auth, (user) => {
-      if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
-          const btnInst = document.getElementById('btnInstallApp');
-          if (btnInst) btnInst.style.display = 'none';
-      }
+    function renderFullMenu() {
+      const el = document.getElementById('fullMenuContainer');
+      if (!el) return;
+      let html = '';
+      ALL_MENU_DATA.forEach(dish => {
+        if (currentFilterCat !== 'all' && dish.cat !== currentFilterCat) return;
+        const it = getDishData(dish);
+        const safeName = it.name.replace(/'/g, "\\'");
+        html += `
+          <div class="menu-item-row ${it.isSoldOut ? 'is-sold-out' : ''}">
+            <div class="item-thumb"><img src="${it.image}" onerror="this.src='Logo nho.png'"></div>
+            <div class="item-meta"><span class="item-cat-label">${it.catName}</span><h4>${it.name} ${it.isHot ? '<span class="hot-label-small">🔥</span>' : ''}</h4><span class="item-price-tag">${it.price.toLocaleString()}đ</span></div>
+            <button class="btn-quick-add" ${it.isSoldOut ? 'disabled' : ''} onclick="addToCart('${it.id}', '${safeName}', ${it.price})">${it.isSoldOut ? 'Tạm Hết' : '+ Chọn Món'}</button>
+          </div>`;
+      });
+      el.innerHTML = html;
+    }
 
-      if (user) {
-        currentUserId = user.uid;
-        currentUserPhone = user.email.replace('@hychay.com', '');
-        
-        if(document.getElementById('authView')) document.getElementById('authView').style.display = 'none';
-        if(document.getElementById('profileView')) document.getElementById('profileView').style.display = 'block';
-        if(document.getElementById('updPhone')) document.getElementById('updPhone').value = currentUserPhone;
-        
-        get(ref(db, `users/${currentUserId}`)).then(snap => {
-            if(snap.exists()) {
-                const u = snap.val();
-                document.getElementById('updName').value = u.name || '';
-                document.getElementById('updEmail').value = u.email || '';
-                document.getElementById('updBirthday').value = u.birthday || '';
-                document.getElementById('updHouse').value = u.house || '';
-                
-                if (u.ward) document.getElementById('updWard').value = u.ward;
-                
-                const displayName = u.name ? u.name : currentUserPhone;
-                document.getElementById('btnHeaderAccount').innerText = `👤 ${displayName}`;
+    window.filterCat = function(c, btn) {
+      currentFilterCat = c;
+      document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderFullMenu();
+    };
 
-                // Tự động lưu thẳng vào LocalStorage để lát giỏ hàng tự động hút qua
-                localStorage.setItem('hyChayUserProfile', JSON.stringify({
-                  name: u.name || '',
-                  phone: currentUserPhone,
-                  address: u.fullAddress || '',
-                  birthday: u.birthday || ''
-                }));
-            } else {
-                document.getElementById('btnHeaderAccount').innerText = `👤 ${currentUserPhone}`;
-            }
-        });
-        
-        if (!isRegistering) loadOrderHistoryTracker(currentUserPhone);
-      } else {
-        currentUserId = null; currentUserPhone = null;
-        if(document.getElementById('authView')) document.getElementById('authView').style.display = 'block';
-        if(document.getElementById('profileView')) document.getElementById('profileView').style.display = 'none';
-        document.getElementById('btnHeaderAccount').innerText = `👤 Đăng nhập`;
+    if (!shipperOrderIdParam) {
+      renderFeaturedDishes();
+      renderFullMenu();
+    }
+
+    onValue(ref(db, 'restaurant_config/bank'), (s) => { if (s.val()) { bankConfig = s.val(); window.updateCalc(); } });
+    onValue(ref(db, 'menu_customizations'), (snap) => {
+      menuCustomCache = snap.val() || {};
+      if (!shipperOrderIdParam) {
+        renderFeaturedDishes();
+        renderFullMenu();
       }
     });
 
+    // ==========================================
+    // 3. TỰ ĐỘNG BƠM MENU 7 PHƯỜNG LÂM ĐỒNG & THANH TRẠNG THÁI ĐƠN TRỰC TIẾP CHO KHÁCH
+    // ==========================================
+    function upgradeCustomerCheckoutAndLiveBannerUI() {
+      if (shipperOrderIdParam) return;
+
+      // Tạo thanh Live Order Tracker ngay dưới Header để khách nhìn thấy Shipper & ETA tức thì
+      const headerEl = document.querySelector('header');
+      if (headerEl && !document.getElementById('liveCustomerOrderBanner')) {
+        const banner = document.createElement('div');
+        banner.id = 'liveCustomerOrderBanner';
+        banner.style.cssText = 'display:none; max-width:1200px; margin:12px auto 0; padding:12px 18px; border-radius:14px; background:#f0fdf4; border:2px solid #16a34a; color:#166534; font-size:0.92rem; box-shadow:0 4px 15px rgba(0,0,0,0.06);';
+        headerEl.insertAdjacentElement('afterend', banner);
+      }
+
+      // Nâng cấp khu vực Địa chỉ trong Checkout Modal để có sẵn Sổ xuống 7 Phường + Tỉnh Lâm Đồng
+      const addrTextarea = document.getElementById('cusAddress');
+      if (addrTextarea && !document.getElementById('cusWard')) {
+        const selectorWrap = document.createElement('div');
+        selectorWrap.style.cssText = 'display:grid; grid-template-columns:1.2fr 1fr 0.8fr; gap:8px; margin-bottom:8px;';
+        selectorWrap.innerHTML = `
+          <div>
+            <label style="font-size:0.78rem; color:#475569;">Số nhà, Tên đường (*)</label>
+            <input type="text" id="cusHouse" placeholder="VD: 125 Nguyễn Hội" oninput="window.syncCheckoutAddress()">
+          </div>
+          <div>
+            <label style="font-size:0.78rem; color:#475569;">Phường / Khu vực (*)</label>
+            <select id="cusWard" onchange="window.onCheckoutWardChange()">
+              <option value="Phường Phan Thiết" selected>Phường Phan Thiết</option>
+              <option value="Hàm Thắng">Hàm Thắng</option>
+              <option value="Bình Thuận">Bình Thuận</option>
+              <option value="Mũi Né">Mũi Né</option>
+              <option value="Phú Thủy">Phú Thủy</option>
+              <option value="Tiến Thành">Tiến Thành</option>
+              <option value="La Gi">La Gi</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:0.78rem; color:#475569;">Tỉnh</label>
+            <input type="text" id="cusProvince" value="Lâm Đồng" readonly style="background:#f1f5f9; font-weight:bold; color:#1e5e3a;">
+          </div>
+        `;
+        addrTextarea.parentNode.insertBefore(selectorWrap, addrTextarea);
+      }
+    }
+    upgradeCustomerCheckoutAndLiveBannerUI();
+
+    window.syncCheckoutAddress = function() {
+      const house = (document.getElementById('cusHouse')?.value || '').trim();
+      const ward = document.getElementById('cusWard')?.value || 'Phường Phan Thiết';
+      const addrEl = document.getElementById('cusAddress');
+      if (addrEl) {
+        addrEl.value = house ? `${house}, ${ward}, Tỉnh Lâm Đồng` : `${ward}, Tỉnh Lâm Đồng`;
+      }
+      window.saveCheckoutDraft();
+    };
+
+    window.onCheckoutWardChange = function() {
+      const ward = document.getElementById('cusWard')?.value || 'Phường Phan Thiết';
+      window.syncCheckoutAddress();
+      if (WARD_GEO_CONFIG[ward]) {
+        calculatedKm = WARD_GEO_CONFIG[ward].defaultKm;
+        document.getElementById('shipDistanceText').innerText = `~${calculatedKm} km`;
+        window.updateCalc();
+      }
+    };
+
+    window.saveCheckoutDraft = function() {
+      const draft = {
+        name: (document.getElementById('cusName')?.value || '').trim(),
+        phone: (document.getElementById('cusPhone')?.value || '').trim(),
+        house: (document.getElementById('cusHouse')?.value || '').trim(),
+        ward: document.getElementById('cusWard')?.value || 'Phường Phan Thiết',
+        address: (document.getElementById('cusAddress')?.value || '').trim()
+      };
+      localStorage.setItem('hyChaySavedCheckoutInfo', JSON.stringify(draft));
+    };
+
+    function autoFillCheckoutNow() {
+      let saved = null;
+      try { saved = JSON.parse(localStorage.getItem('hyChaySavedCheckoutInfo') || 'null'); } catch (_) {}
+      let prof = null;
+      try { prof = JSON.parse(localStorage.getItem('hyChayUserProfile') || 'null'); } catch (_) {}
+
+      const nameVal = (saved && saved.name) || (prof && prof.name) || '';
+      const phoneVal = (saved && saved.phone) || (prof && prof.phone) || '';
+      const wardVal = (saved && saved.ward) || (prof && prof.ward) || 'Phường Phan Thiết';
+      const houseVal = (saved && saved.house) || (prof && prof.house) || '';
+      const addrVal = (saved && saved.address) || (prof && prof.address) || (houseVal ? `${houseVal}, ${wardVal}, Tỉnh Lâm Đồng` : '');
+
+      if (document.getElementById('cusName') && nameVal) document.getElementById('cusName').value = nameVal;
+      if (document.getElementById('cusPhone') && phoneVal) document.getElementById('cusPhone').value = phoneVal;
+      if (document.getElementById('cusWard') && wardVal) document.getElementById('cusWard').value = wardVal;
+      if (document.getElementById('cusHouse') && houseVal) document.getElementById('cusHouse').value = houseVal;
+      if (document.getElementById('cusAddress') && addrVal) document.getElementById('cusAddress').value = addrVal;
+
+      if (WARD_GEO_CONFIG[wardVal]) {
+        calculatedKm = WARD_GEO_CONFIG[wardVal].defaultKm;
+        if (document.getElementById('shipDistanceText')) document.getElementById('shipDistanceText').innerText = `~${calculatedKm} km`;
+      }
+    }
+
+    // ==========================================
+    // 4. ĐĂNG NHẬP / ĐĂNG KÝ KHÁCH HÀNG & THEO DÕI ĐƠN HÀNG (CÓ TÊN, SĐT SHIPPER & ETA)
+    // ==========================================
+    let historyUnsubscribe = null;
+
+    function formatOrderStatusForCustomer(order) {
+      const st = order.status;
+      const shpName = order.shipperName || 'Tài xế Hy Chay';
+      const shpPhone = order.shipperPhone || '';
+      const phoneHtml = shpPhone ? ` - 📞 <a href="tel:${shpPhone}" style="text-decoration:underline; font-weight:800;">${shpPhone}</a>` : '';
+
+      if (st === 'Chờ xác nhận') {
+        return { cls: '', text: '⏳ Quán đang xác nhận đơn hàng của bạn...' };
+      } else if (st === 'Đang chế biến') {
+        return { cls: 'delivering', text: '🍳 Bếp đang chế biến món ăn & chuẩn bị gọi Shipper...' };
+      } else if (st === 'Tài xế đang đến quán') {
+        const etaStore = order.etaToStoreMins ? ` (Dự kiến ~${order.etaToStoreMins} phút tới quán)` : '';
+        return { cls: 'delivering', text: `🛵 Shipper <b>${shpName}</b>${phoneHtml} đang trên đường tới quán lấy món${etaStore}!` };
+      } else if (st === 'Đang giao hàng') {
+        const etaCus = order.etaToCustomerMins ? ` (Dự kiến ~${order.etaToCustomerMins} phút tới chỗ bạn)` : '';
+        return { cls: 'delivering', text: `🚀 Shipper <b>${shpName}</b>${phoneHtml} đã nhận đơn tại quán và đang trên đường giao tới bạn${etaCus}!` };
+      } else if (st === 'Sự cố Shipper') {
+        return { cls: 'delivering', text: '🔄 Tài xế cũ gặp sự cố xe, quán đang điều phối ngay Shipper mới cho bạn!' };
+      } else if (st === 'Đã hoàn tất') {
+        return { cls: '', text: '✅ Đơn hàng đã giao thành công. Chúc bạn ngon miệng!' };
+      } else if (st === 'Đã hủy') {
+        return { cls: 'canceled', text: `❌ Đã hủy: ${order.cancelReason || 'Theo yêu cầu'}` };
+      }
+      return { cls: '', text: st || 'Đang xử lý' };
+    }
+
+    function applyCustomerAuthSession(phoneKey) {
+      if (phoneKey) {
+        currentUserId = phoneKey;
+        currentUserPhone = phoneKey;
+        localStorage.setItem('hyChayActiveCustomerPhone', phoneKey);
+
+        if (document.getElementById('authView')) document.getElementById('authView').style.display = 'none';
+        if (document.getElementById('profileView')) document.getElementById('profileView').style.display = 'block';
+        if (document.getElementById('updPhone')) document.getElementById('updPhone').value = phoneKey;
+
+        get(ref(db, `users/${phoneKey}`)).then(snap => {
+          if (snap.exists()) {
+            const u = snap.val();
+            document.getElementById('updName').value = u.name || '';
+            if (document.getElementById('updBirthday')) document.getElementById('updBirthday').value = u.birthday || '';
+            if (document.getElementById('updHouse')) document.getElementById('updHouse').value = u.house || '';
+            if (u.ward && document.getElementById('updWard')) document.getElementById('updWard').value = u.ward;
+
+            const displayName = u.name ? u.name : phoneKey;
+            document.getElementById('btnHeaderAccount').innerText = `👤 ${displayName}`;
+            const profObj = {
+              name: u.name || '', phone: phoneKey, house: u.house || '',
+              ward: u.ward || 'Phường Phan Thiết', province: 'Lâm Đồng',
+              address: u.fullAddress || '', birthday: u.birthday || ''
+            };
+            localStorage.setItem('hyChayUserProfile', JSON.stringify(profObj));
+            localStorage.setItem('hyChaySavedCheckoutInfo', JSON.stringify(profObj));
+            autoFillCheckoutNow();
+          } else {
+            document.getElementById('btnHeaderAccount').innerText = `👤 ${phoneKey}`;
+          }
+        });
+        loadOrderHistoryTracker(phoneKey);
+      } else {
+        currentUserId = null; currentUserPhone = null;
+        localStorage.removeItem('hyChayActiveCustomerPhone');
+        if (historyUnsubscribe) { historyUnsubscribe(); historyUnsubscribe = null; }
+        if (document.getElementById('authView')) document.getElementById('authView').style.display = 'block';
+        if (document.getElementById('profileView')) document.getElementById('profileView').style.display = 'none';
+        document.getElementById('btnHeaderAccount').innerText = `👤 Đăng nhập`;
+      }
+    }
+
+    window.openAccountModal = function() {
+      const modal = document.getElementById('accountModal');
+      if (!modal) return;
+      if (currentUserId) {
+        document.getElementById('authView').style.display = 'none';
+        document.getElementById('profileView').style.display = 'block';
+        loadOrderHistoryTracker(currentUserPhone);
+      } else {
+        document.getElementById('authView').style.display = 'block';
+        document.getElementById('profileView').style.display = 'none';
+        window.switchAuthTab('login');
+      }
+      modal.classList.add('active');
+      modal.style.display = 'flex';
+    };
+
+    window.closeAccountModal = function() {
+      const modal = document.getElementById('accountModal');
+      if (modal) { modal.classList.remove('active'); modal.style.display = 'none'; }
+    };
+
     window.switchAuthTab = function(tab) {
-        document.querySelectorAll('.auth-tab').forEach(el => el.classList.remove('active'));
-        if(tab === 'login') {
-            document.getElementById('tabLoginBtn').classList.add('active');
-            document.getElementById('formLogin').style.display = 'block';
-            document.getElementById('formRegister').style.display = 'none';
-        } else {
-            document.getElementById('tabRegisterBtn').classList.add('active');
-            document.getElementById('formLogin').style.display = 'none';
-            document.getElementById('formRegister').style.display = 'block';
-        }
+      document.querySelectorAll('.auth-tab').forEach(el => el.classList.remove('active'));
+      document.getElementById('lError').style.display = 'none';
+      document.getElementById('rError').style.display = 'none';
+      document.getElementById('rSuccess').style.display = 'none';
+      if (tab === 'login') {
+        document.getElementById('tabLoginBtn').classList.add('active');
+        document.getElementById('formLogin').style.display = 'block';
+        document.getElementById('formRegister').style.display = 'none';
+      } else {
+        document.getElementById('tabRegisterBtn').classList.add('active');
+        document.getElementById('formLogin').style.display = 'none';
+        document.getElementById('formRegister').style.display = 'block';
+      }
     };
 
     window.handleRegister = function() {
-        const phone = document.getElementById('rPhone').value.trim().replace(/\s+/g, '');
-        const pass = document.getElementById('rPass').value;
-        const passConfirm = document.getElementById('rPassConfirm').value;
-        const errBox = document.getElementById('rError');
-        const succBox = document.getElementById('rSuccess');
-        
-        errBox.style.display = 'none'; succBox.style.display = 'none';
-        if(!phone || phone.length < 9) return errBox.innerText = "Vui lòng nhập SĐT hợp lệ!", errBox.style.display = 'block';
-        if(pass !== passConfirm) return errBox.innerText = "Mật khẩu không khớp!", errBox.style.display = 'block';
+      const cleanPhone = normalizePhone(document.getElementById('rPhone').value);
+      const pass = document.getElementById('rPass').value;
+      const passConfirm = document.getElementById('rPassConfirm').value;
+      const errBox = document.getElementById('rError');
+      const succBox = document.getElementById('rSuccess');
 
-        isRegistering = true;
-        createUserWithEmailAndPassword(auth, getFakeEmail(phone), pass)
-        .then((userCred) => {
-            succBox.style.display = 'block';
-            set(ref(db, `users/${userCred.user.uid}`), { phone: phone, createdAt: new Date().toISOString() });
-            signOut(auth).then(() => {
-                isRegistering = false;
-                setTimeout(() => {
-                    document.getElementById('lPhone').value = phone;
-                    switchAuthTab('login');
-                    succBox.style.display = 'none';
-                    document.getElementById('rPhone').value = ''; document.getElementById('rPass').value = ''; document.getElementById('rPassConfirm').value = '';
-                }, 1500);
-            });
-        }).catch(err => {
-            isRegistering = false; 
-            errBox.innerText = (err.code === 'auth/email-already-in-use') ? "Số điện thoại này đã được đăng ký!" : "Lỗi đăng ký!";
-            errBox.style.display = 'block';
+      errBox.style.display = 'none'; succBox.style.display = 'none';
+      if (!cleanPhone || cleanPhone.length < 9) { errBox.innerText = "Vui lòng nhập SĐT hợp lệ!"; errBox.style.display = 'block'; return; }
+      if (!pass || pass.length < 6) { errBox.innerText = "Mật khẩu ít nhất 6 ký tự!"; errBox.style.display = 'block'; return; }
+      if (pass !== passConfirm) { errBox.innerText = "Mật khẩu xác nhận không khớp!"; errBox.style.display = 'block'; return; }
+
+      get(ref(db, `users/${cleanPhone}`)).then((snap) => {
+        if (snap.exists() && snap.val().password) {
+          errBox.innerText = "Số điện thoại này đã được đăng ký! Hãy qua tab Đăng Nhập.";
+          errBox.style.display = 'block';
+          return;
+        }
+        update(ref(db, `users/${cleanPhone}`), { phone: cleanPhone, password: pass, createdAt: new Date().toISOString() }).then(() => {
+          succBox.style.display = 'block';
+          setTimeout(() => {
+            document.getElementById('lPhone').value = cleanPhone;
+            document.getElementById('lPass').value = pass;
+            window.switchAuthTab('login');
+            succBox.style.display = 'none';
+          }, 1000);
         });
+      });
     };
 
     window.handleLogin = function() {
-        const phone = document.getElementById('lPhone').value.trim().replace(/\s+/g, '');
-        const pass = document.getElementById('lPass').value;
-        const errBox = document.getElementById('lError');
-        errBox.style.display = 'none';
-        if(!phone || !pass) return;
+      const cleanPhone = normalizePhone(document.getElementById('lPhone').value);
+      const pass = document.getElementById('lPass').value;
+      const errBox = document.getElementById('lError');
+      errBox.style.display = 'none';
+      if (!cleanPhone || !pass) return;
 
-        signInWithEmailAndPassword(auth, getFakeEmail(phone), pass)
-        .catch(err => { 
-          errBox.innerText = "Sai SĐT hoặc mật khẩu!";
-          errBox.style.display = 'block'; 
-        });
+      get(ref(db, `users/${cleanPhone}`)).then((snap) => {
+        if (snap.exists() && String(snap.val().password) === String(pass)) {
+          applyCustomerAuthSession(cleanPhone);
+        } else {
+          errBox.innerText = "Sai số điện thoại hoặc mật khẩu!";
+          errBox.style.display = 'block';
+        }
+      });
     };
 
     window.saveUserProfile = function() {
-        if (!currentUserId) return alert("Vui lòng đăng nhập lại!");
-        const name = document.getElementById('updName').value.trim();
-        const email = document.getElementById('updEmail').value.trim();
-        const birthday = document.getElementById('updBirthday').value;
-        const house = document.getElementById('updHouse').value.trim();
-        const ward = document.getElementById('updWard').value.trim();
-        const province = document.getElementById('updProvince').value.trim();
-        
-        const fullAddress = house ? `${house}, ${ward}, ${province}`.replace(/^, | ,/g, '').trim() : `${ward}, ${province}`;
+      if (!currentUserId) return alert("Vui lòng đăng nhập lại!");
+      const name = document.getElementById('updName').value.trim();
+      const birthday = document.getElementById('updBirthday')?.value || '';
+      const house = document.getElementById('updHouse')?.value.trim() || '';
+      const ward = document.getElementById('updWard')?.value || 'Phường Phan Thiết';
+      const province = "Lâm Đồng";
+      const fullAddress = house ? `${house}, ${ward}, Tỉnh ${province}` : `${ward}, Tỉnh ${province}`;
 
-        if (!name) return alert("Vui lòng nhập Họ Tên!");
+      if (!name) return alert("Vui lòng nhập Họ Tên!");
 
-        update(ref(db, `users/${currentUserId}`), { name, email, birthday, house, ward, province, fullAddress, updatedAt: new Date().toISOString() })
+      update(ref(db, `users/${currentUserId}`), { name, birthday, house, ward, province, fullAddress, updatedAt: new Date().toISOString() })
         .then(() => {
-            localStorage.setItem('hyChayUserProfile', JSON.stringify({ name, phone: currentUserPhone, address: fullAddress, birthday }));
-            alert("✅ Cập nhật thông tin thành công!");
-            window.closeAccountModal(); 
-            document.getElementById('btnHeaderAccount').innerText = `👤 ${name}`;
-        }).catch(err => alert("❌ Lỗi hệ thống: " + err.message));
+          const profObj = { name, phone: currentUserPhone, house, ward, province, address: fullAddress, birthday };
+          localStorage.setItem('hyChayUserProfile', JSON.stringify(profObj));
+          localStorage.setItem('hyChaySavedCheckoutInfo', JSON.stringify(profObj));
+          autoFillCheckoutNow();
+          alert("✅ Cập nhật thông tin giao hàng thành công!");
+          window.closeAccountModal();
+          document.getElementById('btnHeaderAccount').innerText = `👤 ${name}`;
+        });
     };
 
-    window.logoutUser = function() { 
-        signOut(auth).then(() => { window.closeAccountModal(); localStorage.removeItem('hyChayUserProfile'); }); 
+    window.logoutUser = function() {
+      localStorage.removeItem('hyChayUserProfile');
+      applyCustomerAuthSession(null);
+      window.closeAccountModal();
     };
 
     function loadOrderHistoryTracker(phone) {
-      if (historyUnsubscribe) historyUnsubscribe();
-      
-      const ordersQuery = query(ref(db, 'orders'), orderByChild('phone'), equalTo(phone));
-      historyUnsubscribe = onValue(ordersQuery, (snapshot) => {
-        const orders = snapshot.val() || {}; let totalSpent = 0, html = '';
-        const sortedIds = Object.keys(orders).sort((a, b) => new Date(orders[b].createdAt) - new Date(orders[a].createdAt));
-        
-        sortedIds.forEach(id => {
+      const listEl = document.getElementById('orderHistoryList');
+      if (!listEl) return;
+      if (historyUnsubscribe) { historyUnsubscribe(); historyUnsubscribe = null; }
+
+      historyUnsubscribe = onValue(ref(db, 'orders'), (snapshot) => {
+        const orders = snapshot.val() || {};
+        let totalSpent = 0, html = '';
+        const matchingIds = Object.keys(orders).filter(id => orders[id] && normalizePhone(orders[id].phone) === normalizePhone(phone));
+        matchingIds.sort((a, b) => new Date(orders[b].createdAt) - new Date(orders[a].createdAt));
+
+        matchingIds.forEach(id => {
           const order = orders[id];
           if (order.status === 'Đã hoàn tất') totalSpent += (order.subtotal || 0);
-          let itemsStr = []; for (let k in order.items) itemsStr.push(`${order.items[k].qty}x ${order.items[k].name}`);
-          
-const st = order.status; let trackerClass = '', trackerText = '';
-          if (st === 'Chờ xác nhận') { trackerClass = ''; trackerText = '⏳ Quán đang xác nhận đơn'; }
-          else if (st === 'Đang chế biến') { trackerClass = 'delivering'; trackerText = '🍳 Bếp đang nấu món cho bạn'; }
-          else if (st === 'Tài xế đang đến quán') { trackerClass = 'delivering'; trackerText = `🛵 Tài xế ${order.shipperName || ''} đang đến quán lấy món!`; }
-          else if (st === 'Đang giao hàng') { trackerClass = 'delivering'; trackerText = `🚀 Tài xế ${order.shipperName || ''} đang trên đường giao đến bạn!`; }
-          else if (st === 'Sự cố Shipper') { trackerClass = ''; trackerText = '⚠️ Quán đang điều phối lại Shipper khác'; }
-          else if (st === 'Đã hoàn tất') { trackerClass = ''; trackerText = '✅ Đã giao thành công'; }
-          else if (st === 'Đã hủy') { trackerClass = 'canceled'; trackerText = `❌ Đã hủy: ${order.cancelReason || 'Lý do khác'}`; }
+          let itemsStr = [];
+          for (let k in order.items) itemsStr.push(`${order.items[k].qty}x ${order.items[k].name}`);
+
+          const statusInfo = formatOrderStatusForCustomer(order);
 
           html += `
             <div class="history-card">
-              <div class="history-header"><span>${new Date(order.createdAt).toLocaleDateString('vi-VN')}</span><span style="color:#2b7a4d;">#HC-${id.substring(id.length-5).toUpperCase()}</span></div>
-              <div class="status-tracker ${trackerClass}">${trackerText}</div>
+              <div class="history-header"><span>${new Date(order.createdAt).toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'})} - ${new Date(order.createdAt).toLocaleDateString('vi-VN')}</span><span style="color:#2b7a4d;">#HC-${id.substring(id.length - 5).toUpperCase()}</span></div>
+              <div class="status-tracker ${statusInfo.cls}"><span>${statusInfo.text}</span></div>
               <p style="color:#334155; margin-top:8px; margin-bottom:6px;"><b>Món:</b> ${itemsStr.join(', ')}</p>
               <div style="display:flex; justify-content:space-between; align-items:center;">
                 <b style="color:#dc2626; font-size:1.05rem;">${(order.grandTotal || 0).toLocaleString()}đ</b>
@@ -841,114 +1353,133 @@ const st = order.status; let trackerClass = '', trackerText = '';
               </div>
             </div>`;
         });
-        
+
         const points = Math.floor(totalSpent / 10000);
-        document.getElementById('profPoints').innerText = points.toLocaleString();
-        document.getElementById('profRank').innerText = points >= 200 ? "Hạng Vàng ⭐" : (points >= 50 ? "Hạng Bạc 🥈" : "Thành Viên Mới");
-        document.getElementById('orderHistoryList').innerHTML = html || '<p style="text-align:center;">Bạn chưa có đơn hàng nào.</p>';
+        if (document.getElementById('profPoints')) document.getElementById('profPoints').innerText = points.toLocaleString();
+        if (document.getElementById('profRank')) document.getElementById('profRank').innerText = points >= 200 ? "Hạng Vàng ⭐" : (points >= 50 ? "Hạng Bạc 🥈" : "Thành Viên Mới");
+        listEl.innerHTML = html || '<p style="text-align:center;">Bạn chưa có đơn hàng nào.</p>';
       });
     }
 
+    window.reorderPastOrder = function(itemsObj) {
+      cart = {};
+      for (let k in itemsObj) {
+        const cleanK = safeItemKey(itemsObj[k].name || k);
+        cart[cleanK] = { name: itemsObj[k].name, price: itemsObj[k].price, qty: itemsObj[k].qty };
+      }
+      updateCartUI(); saveCartLocal(); window.closeAccountModal(); window.openCheckoutModal();
+    };
+
     // ==========================================
-    // 4. BẢN ĐỒ LEAFLET GPS (FIX LỖI XÁM MÀN HÌNH BẰNG invalidateSize)
+    // 5. BẢN ĐỒ LEAFLET GPS
     // ==========================================
     let map = null; let marker = null; let mapSelectedLat = STORE_LAT; let mapSelectedLng = STORE_LON;
 
     window.openMapModal = function() {
-        document.getElementById('mapModal').classList.add('active');
-        if(!map) {
-            map = L.map('leafletMap').setView([STORE_LAT, STORE_LON], 15);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap Hy Chay'
-            }).addTo(map);
-
-            marker = L.marker([STORE_LAT, STORE_LON], {draggable: true}).addTo(map);
-            
-            marker.on('dragend', function(e) {
-                const pos = marker.getLatLng();
-                mapSelectedLat = pos.lat; mapSelectedLng = pos.lng;
-                map.panTo(new L.LatLng(pos.lat, pos.lng));
+      const modal = document.getElementById('mapModal');
+      modal.classList.add('active');
+      modal.style.display = 'flex';
+      setTimeout(() => {
+        if (!map) {
+          map = L.map('leafletMap').setView([STORE_LAT, STORE_LON], 15);
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap Hy Chay' }).addTo(map);
+          marker = L.marker([STORE_LAT, STORE_LON], { draggable: true }).addTo(map);
+          marker.on('dragend', function() {
+            const pos = marker.getLatLng();
+            mapSelectedLat = pos.lat; mapSelectedLng = pos.lng;
+            map.panTo(new L.LatLng(pos.lat, pos.lng));
+          });
+          map.on('click', function(e) {
+            mapSelectedLat = e.latlng.lat; mapSelectedLng = e.latlng.lng;
+            marker.setLatLng(e.latlng);
+            map.panTo(new L.LatLng(e.latlng.lat, e.latlng.lng));
+          });
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(p => {
+              mapSelectedLat = p.coords.latitude; mapSelectedLng = p.coords.longitude;
+              map.setView([mapSelectedLat, mapSelectedLng], 16);
+              marker.setLatLng([mapSelectedLat, mapSelectedLng]);
             });
-
-            map.on('click', function(e) {
-                mapSelectedLat = e.latlng.lat; mapSelectedLng = e.latlng.lng;
-                marker.setLatLng(e.latlng);
-                map.panTo(new L.LatLng(e.latlng.lat, e.latlng.lng));
-            });
-
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(p => {
-                    mapSelectedLat = p.coords.latitude; mapSelectedLng = p.coords.longitude;
-                    map.setView([mapSelectedLat, mapSelectedLng], 16);
-                    marker.setLatLng([mapSelectedLat, mapSelectedLng]);
-                });
-            }
+          }
         }
-        
-        // Sửa triệt để lỗi thẻ div bị ẩn làm bản đồ không load gạch ngói
-        setTimeout(() => { map.invalidateSize(); }, 300);
+        map.invalidateSize();
+        setTimeout(() => { if (map) map.invalidateSize(); }, 300);
+      }, 150);
     };
 
-    window.closeMapModal = () => document.getElementById('mapModal').classList.remove('active');
+    window.closeMapModal = () => {
+      const modal = document.getElementById('mapModal');
+      modal.classList.remove('active');
+      modal.style.display = 'none';
+    };
 
     window.saveGPSLocation = function() {
-        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${mapSelectedLat}&lon=${mapSelectedLng}&zoom=18&addressdetails=1`)
+      const ward = document.getElementById('cusWard')?.value || 'Phường Phan Thiết';
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${mapSelectedLat}&lon=${mapSelectedLng}&zoom=18&addressdetails=1`)
         .then(res => res.json())
         .then(data => {
-            const addr = data.display_name;
-            document.getElementById('cusAddress').value = addr;
-            window.closeMapModal();
-            window.calcDistance(addr, mapSelectedLat, mapSelectedLng);
-        }).catch(() => {
-            document.getElementById('cusAddress').value = `${mapSelectedLat.toFixed(5)}, ${mapSelectedLng.toFixed(5)}`;
-            window.closeMapModal();
-            window.calcDistance("", mapSelectedLat, mapSelectedLng);
+          const road = data.address?.road || data.display_name?.split(',')[0] || `${mapSelectedLat.toFixed(4)}, ${mapSelectedLng.toFixed(4)}`;
+          if (document.getElementById('cusHouse')) document.getElementById('cusHouse').value = road;
+          document.getElementById('cusAddress').value = `${road}, ${ward}, Tỉnh Lâm Đồng`;
+          window.saveCheckoutDraft();
+          window.closeMapModal();
+          window.calcDistance(document.getElementById('cusAddress').value, mapSelectedLat, mapSelectedLng);
+        })
+        .catch(() => {
+          const coordStr = `Tọa độ (${mapSelectedLat.toFixed(4)}, ${mapSelectedLng.toFixed(4)})`;
+          if (document.getElementById('cusHouse')) document.getElementById('cusHouse').value = coordStr;
+          document.getElementById('cusAddress').value = `${coordStr}, ${ward}, Tỉnh Lâm Đồng`;
+          window.saveCheckoutDraft();
+          window.closeMapModal();
+          window.calcDistance("", mapSelectedLat, mapSelectedLng);
         });
     };
 
     // ==========================================
-    // 5. GIỎ HÀNG, AUTO-FILL & TÍNH PHÍ SHIP (GIỜ CAO ĐIỂM)
+    // 6. GIỎ HÀNG, GIỜ CAO ĐIỂM (17H-19H) & CHỌN NGÂN HÀNG CỦA KHÁCH
     // ==========================================
     function saveCartLocal() { localStorage.setItem('hyChayCart', JSON.stringify(cart)); }
-    function loadCartLocal() { const c = localStorage.getItem('hyChayCart'); if(c) { cart = JSON.parse(c); updateCartUI(); } }
+    function loadCartLocal() { const c = localStorage.getItem('hyChayCart'); if (c) { cart = JSON.parse(c); updateCartUI(); } }
 
     window.addToCart = function(id, name, p) {
       const safeKey = safeItemKey(name);
       const c = menuCustomCache[id] || {};
       const currentPrice = c.price !== undefined ? c.price : p;
       if (c.soldOut) return alert("Món này đang tạm hết nguyên liệu!");
-      
-      if (cart[safeKey]) {
-        cart[safeKey].qty++;
-      } else {
-        cart[safeKey] = { name, price: currentPrice, qty: 1 };
-      }
+
+      if (cart[safeKey]) cart[safeKey].qty++;
+      else cart[safeKey] = { name, price: currentPrice, qty: 1 };
       updateCartUI(); saveCartLocal();
     };
 
     window.updateCartQty = function(safeKey, d) {
-      if (cart[safeKey]) { 
-        cart[safeKey].qty += d; 
-        if (cart[safeKey].qty <= 0) delete cart[safeKey]; 
+      if (cart[safeKey]) {
+        cart[safeKey].qty += d;
+        if (cart[safeKey].qty <= 0) delete cart[safeKey];
       }
       updateCartUI(); window.renderCartItems(); saveCartLocal();
     };
 
     function updateCartUI() {
-      let c = 0, t = 0; for (let k in cart) { c += cart[k].qty; t += cart[k].price * cart[k].qty; }
-      document.getElementById('cartCount').innerText = c; document.getElementById('cartTotal').innerText = t.toLocaleString() + 'đ';
+      let c = 0, t = 0;
+      for (let k in cart) { c += cart[k].qty; t += cart[k].price * cart[k].qty; }
+      document.getElementById('cartCount').innerText = c;
+      document.getElementById('cartTotal').innerText = t.toLocaleString() + 'đ';
       const b = document.getElementById('cartBar');
       if (c > 0) b.classList.add('active'); else { b.classList.remove('active'); window.closeCheckoutModal(); }
     }
 
     function checkOperatingHours() {
-      const now = new Date(); const mins = now.getHours() * 60 + now.getMinutes(); 
-      const openTime = 6 * 60 + 30; const closeTime = 20 * 60 + 15;
-      const st = document.getElementById('openStatusTag'), btn = document.getElementById('btnSubmitOrder');
+      const now = new Date();
+      const mins = now.getHours() * 60 + now.getMinutes();
+      const openTime = 6 * 60 + 30;
+      const closeTime = 20 * 60 + 15;
+      const st = document.getElementById('openStatusTag');
+      const btn = document.getElementById('btnSubmitOrder');
       if (mins < openTime || mins > closeTime) {
         isStoreOpen = false;
         if (st) { st.style.background = "#fee2e2"; st.style.color = "#b91c1c"; st.innerText = "⛔ Quán đóng cửa (Mở: 06:30 - 20:15)"; }
-        if (btn) { btn.disabled = true; btn.innerText = "QUÁN ĐÃ ĐÓNG CỬA"; btn.style.background = "#9ca3af"; }
+        if (btn) { btn.disabled = true; btn.innerText = "QUÁN ĐÃ ĐÓNG CỬA"; }
       } else {
         isStoreOpen = true;
         if (st) { st.style.background = "#dcfce7"; st.style.color = "#166534"; st.innerText = "🟢 Quán đang mở cửa nhận đơn"; }
@@ -957,84 +1488,79 @@ const st = order.status; let trackerClass = '', trackerText = '';
     }
 
     window.openCheckoutModal = function() {
-      // Đặt lại mã QR mới
       currentPaymentCode = "HC" + Math.floor(1000 + Math.random() * 9000);
-      
-      checkOperatingHours(); 
-      window.renderCartItems(); 
+      autoFillCheckoutNow();
+      checkOperatingHours();
+      window.renderCartItems();
       window.updateCalc();
-      
-      // AUTO-FILL: Tự động BƠM THÔNG TIN VÀO FORM ngay lúc mở
-      const userStr = localStorage.getItem('hyChayUserProfile');
-      if (userStr) {
-        const u = JSON.parse(userStr);
-        if(!document.getElementById('cusName').value && u.name) document.getElementById('cusName').value = u.name;
-        if(!document.getElementById('cusPhone').value && u.phone) document.getElementById('cusPhone').value = u.phone;
-        if(!document.getElementById('cusAddress').value && u.address) { 
-            document.getElementById('cusAddress').value = u.address; 
-            window.calcDistance(u.address); 
-        }
-      }
-      
       document.getElementById('checkoutModal').classList.add('active');
     };
-    
+
     window.closeCheckoutModal = () => document.getElementById('checkoutModal').classList.remove('active');
 
     window.renderCartItems = function() {
       let h = '';
       for (let k in cart) {
         const it = cart[k]; const sub = it.price * it.qty;
-        h += `<div class="cart-item-row"><span><b style="color:var(--primary);">${it.name}</b></span><div style="display:flex; align-items:center;"><button type="button" onclick="updateCartQty('${k}', -1)">-</button><span style="margin:0 10px; font-weight:bold;">${it.qty}</span><button type="button" onclick="updateCartQty('${k}', 1)">+</button><b style="margin-left:14px; width:70px; text-align:right;">${sub.toLocaleString()}đ</b></div></div>`;
+        const safeK = k.replace(/'/g, "\\'");
+        h += `<div class="cart-item-row"><span><b style="color:var(--primary);">${it.name}</b></span><div style="display:flex; align-items:center;"><button type="button" onclick="updateCartQty('${safeK}', -1)">-</button><span style="margin:0 10px; font-weight:bold;">${it.qty}</span><button type="button" onclick="updateCartQty('${safeK}', 1)">+</button><b style="margin-left:14px; width:70px; text-align:right;">${sub.toLocaleString()}đ</b></div></div>`;
       }
-      document.getElementById('cartItemsList').innerHTML = h; window.updateCalc();
+      document.getElementById('cartItemsList').innerHTML = h;
+      window.updateCalc();
     };
 
     window.calcDistance = function(addr, optLat, optLng) {
-      if (!addr && (!optLat || !optLng)) return;
-      
-      if(optLat && optLng) {
-          const R = 6371, dLat = (optLat-STORE_LAT)*Math.PI/180, dLon = (optLng-STORE_LON)*Math.PI/180;
-          const a = Math.sin(dLat/2)**2 + Math.cos(STORE_LAT*Math.PI/180)*Math.cos(optLat*Math.PI/180)*Math.sin(dLon/2)**2;
-          calculatedKm = Math.max(1.0, Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)) * 1.25 * 10) / 10);
-          document.getElementById('shipDistanceText').innerText = `Khoảng ${calculatedKm} km`; window.updateCalc();
-          return;
+      if (optLat && optLng) {
+        calculatedKm = calcRoadDistanceKm(STORE_LAT, STORE_LON, optLat, optLng);
+        document.getElementById('shipDistanceText').innerText = `~${calculatedKm} km`;
+        window.updateCalc();
+        return;
       }
-
-      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addr + ", Phan Thiết")}`)
-      .then(r => r.json()).then(d => {
-        if (d && d[0]) {
-          const lat = parseFloat(d[0].lat), lon = parseFloat(d[0].lon);
-          const R = 6371, dLat = (lat-STORE_LAT)*Math.PI/180, dLon = (lon-STORE_LON)*Math.PI/180;
-          const a = Math.sin(dLat/2)**2 + Math.cos(STORE_LAT*Math.PI/180)*Math.cos(lat*Math.PI/180)*Math.sin(dLon/2)**2;
-          calculatedKm = Math.max(1.0, Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)) * 1.25 * 10) / 10);
-        } else calculatedKm = 2.0;
-        document.getElementById('shipDistanceText').innerText = `Khoảng ${calculatedKm} km`; window.updateCalc();
-      }).catch(() => { calculatedKm = 2.0; window.updateCalc(); });
+      if (!addr || addr.length < 4) return;
+      const ward = document.getElementById('cusWard')?.value || 'Phường Phan Thiết';
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addr)}`)
+        .then(r => r.json()).then(d => {
+          if (d && d[0]) {
+            calculatedKm = calcRoadDistanceKm(STORE_LAT, STORE_LON, parseFloat(d[0].lat), parseFloat(d[0].lon));
+          } else if (WARD_GEO_CONFIG[ward]) {
+            calculatedKm = WARD_GEO_CONFIG[ward].defaultKm;
+          } else {
+            calculatedKm = 2.0;
+          }
+          document.getElementById('shipDistanceText').innerText = `~${calculatedKm} km`;
+          window.updateCalc();
+        }).catch(() => {
+          calculatedKm = WARD_GEO_CONFIG[ward] ? WARD_GEO_CONFIG[ward].defaultKm : 2.0;
+          document.getElementById('shipDistanceText').innerText = `~${calculatedKm} km`;
+          window.updateCalc();
+        });
     };
 
     window.updateCalc = function() {
       let sub = 0; for (let k in cart) sub += cart[k].price * cart[k].qty;
-      
+
       birthdayDiscountAmt = 0;
       const uStr = localStorage.getItem('hyChayUserProfile');
       if (uStr && sub > 0) {
         const u = JSON.parse(uStr);
         if (u.birthday) {
           const d = new Date(), bM = u.birthday.split('-')[1], bD = u.birthday.split('-')[2];
-          if (bM === String(d.getMonth()+1).padStart(2,'0') && bD === String(d.getDate()).padStart(2,'0')) {
+          if (bM === String(d.getMonth() + 1).padStart(2, '0') && bD === String(d.getDate()).padStart(2, '0')) {
             birthdayDiscountAmt = Math.round(sub * 0.05);
-            document.getElementById('birthdayDiscountBadge').style.display = 'block'; document.getElementById('birthdayDiscountRow').style.display = 'flex';
+            document.getElementById('birthdayDiscountBadge').style.display = 'block';
+            document.getElementById('birthdayDiscountRow').style.display = 'flex';
             document.getElementById('birthdayDiscountText').innerText = '-' + birthdayDiscountAmt.toLocaleString() + 'đ';
           }
         }
       }
-      if (birthdayDiscountAmt === 0) { document.getElementById('birthdayDiscountBadge').style.display = 'none'; document.getElementById('birthdayDiscountRow').style.display = 'none'; }
+      if (birthdayDiscountAmt === 0) {
+        document.getElementById('birthdayDiscountBadge').style.display = 'none';
+        document.getElementById('birthdayDiscountRow').style.display = 'none';
+      }
 
-      // LOGIC TÍNH PHÍ SHIP (Giờ cao điểm 17h-19h)
-      const h = new Date().getHours(), m = new Date().getMinutes(), mins = h*60+m;
-      // Khung giờ trưa: 11h00 - 13h00 || Khung giờ tối: 17h00 - 19h30
-      const peak = (mins >= 11*60 && mins <= 13*60) || (mins >= 17*60 && mins <= 19*60+30);
+      // GIỜ CAO ĐIỂM BUỔI TRƯA (11:00 - 13:00) VÀ BUỔI CHIỀU (17:00 - 19:00)
+      const h = new Date().getHours(), m = new Date().getMinutes(), mins = h * 60 + m;
+      const peak = (mins >= 11 * 60 && mins <= 13 * 60) || (mins >= 17 * 60 && mins <= 19 * 60);
       const extraKm = Math.max(0, calculatedKm - 2);
 
       const subsidyBadge = document.getElementById('shipSubsidyBadge');
@@ -1049,67 +1575,44 @@ const st = order.status; let trackerClass = '', trackerText = '';
       } else if (sub >= 100000) {
         const rawFee30 = peak ? (13000 + extraKm * 3500) : (10000 + extraKm * 3500);
         shippingFee = Math.round(rawFee30 / 1000) * 1000;
-        document.getElementById('shipTimeSlotText').innerHTML = peak ? '<span style="color:#ea580c; font-weight:bold;">⚡ Cao điểm - Trợ giá 30%</span>' : '<span style="color:#0284c7; font-weight:bold;">Trợ giá 30%</span>';
+        document.getElementById('shipTimeSlotText').innerHTML = peak ? '<span style="color:#ea580c; font-weight:bold;">⚡ Cao điểm (17h-19h) - Trợ giá 30%</span>' : '<span style="color:#0284c7; font-weight:bold;">Trợ giá 30%</span>';
         if (subsidyBadge) subsidyBadge.style.display = 'block';
         if (freeshipBadge) freeshipBadge.style.display = 'none';
       } else {
         const rawFee20 = peak ? (15000 + extraKm * 4000) : (12000 + extraKm * 4000);
         shippingFee = Math.round(rawFee20 / 1000) * 1000;
-        document.getElementById('shipTimeSlotText').innerHTML = peak ? '<span style="color:#ea580c; font-weight:bold;">⚡ Cao điểm - Giảm 20%</span>' : 'Tiêu chuẩn (Giảm 20% sàn)';
+        document.getElementById('shipTimeSlotText').innerHTML = peak ? '<span style="color:#ea580c; font-weight:bold;">⚡ Cao điểm (17h-19h) - Giảm 20%</span>' : 'Tiêu chuẩn (Giảm 20% sàn)';
         if (subsidyBadge) subsidyBadge.style.display = 'none';
         if (freeshipBadge) freeshipBadge.style.display = 'none';
       }
-      
+
       const finalTotal = sub - birthdayDiscountAmt + shippingFee;
       document.getElementById('subtotalText').innerText = sub.toLocaleString() + 'đ';
       document.getElementById('shipFeeText').innerText = shippingFee === 0 ? "0đ (Miễn phí)" : shippingFee.toLocaleString() + 'đ';
       document.getElementById('grandTotalText').innerText = finalTotal.toLocaleString() + 'đ';
-      
-      // Update thông tin mã QR
-      const p = (document.getElementById('cusPhone').value || '').replace(/\s+/g, '');
+
+      const p = (document.getElementById('cusPhone')?.value || '').replace(/\s+/g, '');
       const transferContent = p ? `${currentPaymentCode} ${p}` : `${currentPaymentCode}`;
-      document.getElementById('vietqrImg').src = `https://img.vietqr.io/image/${bankConfig.bankId}-${bankConfig.accountNo}-compact2.png?amount=${finalTotal}&addInfo=${encodeURIComponent(transferContent)}&accountName=${encodeURIComponent(bankConfig.accountName)}`;
-      document.getElementById('qrAccNo').innerText = bankConfig.accountNo; 
-      document.getElementById('qrBank').innerText = BANK_NAMES_MAP[bankConfig.bankId] || bankConfig.bankId; 
-      document.getElementById('qrAccName').innerText = bankConfig.accountName;
+      const qrImg = document.getElementById('vietqrImg');
+      if (qrImg) {
+        qrImg.src = `https://img.vietqr.io/image/${bankConfig.bankId}-${bankConfig.accountNo}-compact2.png?amount=${finalTotal}&addInfo=${encodeURIComponent(transferContent)}&accountName=${encodeURIComponent(bankConfig.accountName)}`;
+      }
+      if (document.getElementById('qrAccNo')) document.getElementById('qrAccNo').innerText = bankConfig.accountNo;
+      if (document.getElementById('qrBank')) document.getElementById('qrBank').innerText = BANK_NAMES_MAP[bankConfig.bankId] || bankConfig.bankId;
+      if (document.getElementById('qrAccName')) document.getElementById('qrAccName').innerText = bankConfig.accountName;
       if (document.getElementById('qrContentText')) document.getElementById('qrContentText').innerText = transferContent;
     };
 
     const cusPhoneInput = document.getElementById('cusPhone');
-    if (cusPhoneInput) cusPhoneInput.addEventListener('input', window.updateCalc);
-
-    // ==========================================
-    // 6. XỬ LÝ VIETQR DEEP-LINK APP NGÂN HÀNG CỦA KHÁCH
-    // ==========================================
-    let isPaymentReceived = false;
+    if (cusPhoneInput) cusPhoneInput.addEventListener('input', () => { window.saveCheckoutDraft(); window.updateCalc(); });
 
     window.togglePaymentMethod = (v) => {
       document.getElementById('vietqrBox').style.display = v === 'VIETQR' ? 'block' : 'none';
       const btnSubmit = document.getElementById('btnSubmitOrder');
-      
       if (v === 'VIETQR') {
-        isPaymentReceived = false;
-        btnSubmit.disabled = true;
-        btnSubmit.style.background = "#9ca3af";
-        btnSubmit.innerText = "CHƯA NHẬN ĐƯỢC TIỀN - KHÔNG THỂ GỬI ĐƠN";
-        
-        // Mô phỏng Webhook ngân hàng đổ về (Bảo Anh Lâm sẽ đấu nối API thật vào nhánh này)
-        const paymentRef = ref(db, `auto_payments/${currentPaymentCode}`);
-        onValue(paymentRef, (snap) => {
-          if (snap.exists() && snap.val().status === 'success') {
-            isPaymentReceived = true;
-            document.getElementById('paymentStatusBanner').innerHTML = '<div style="font-size:1.5rem; margin-bottom:4px;">✅</div>ĐÃ NHẬN TIỀN THÀNH CÔNG!<br><span style="font-size:0.85rem; color:#166534;">(Hệ thống đã tự động xác thực)</span>';
-            document.getElementById('paymentStatusBanner').style.background = '#dcfce7';
-            document.getElementById('paymentStatusBanner').style.borderColor = '#86efac';
-            document.getElementById('paymentStatusBanner').style.color = '#166534';
-            
-            btnSubmit.disabled = false;
-            btnSubmit.style.background = "var(--primary)";
-            btnSubmit.innerText = "XÁC NHẬN GỬI ĐƠN HÀNG";
-          }
-        });
-      } else {
-        isPaymentReceived = true;
+        document.getElementById('paymentStatusBanner').innerHTML = '💡 Sau khi mở App Ngân hàng chuyển khoản xong, bạn hãy bấm <b>XÁC NHẬN GỬI ĐƠN HÀNG</b> bên dưới!';
+      }
+      if (btnSubmit && isStoreOpen) {
         btnSubmit.disabled = false;
         btnSubmit.style.background = "var(--accent)";
         btnSubmit.innerText = "XÁC NHẬN GỬI ĐƠN HÀNG";
@@ -1117,87 +1620,111 @@ const st = order.status; let trackerClass = '', trackerText = '';
       window.updateCalc();
     };
 
-    // Deep-Link mở thẳng App Ngân Hàng khách đang dùng
     window.openBankingApp = function() {
       let sub = 0; for (let k in cart) sub += cart[k].price * cart[k].qty;
       const finalTotal = sub - birthdayDiscountAmt + shippingFee;
-      const p = (document.getElementById('cusPhone').value || '').replace(/\s+/g, '');
+      const p = (document.getElementById('cusPhone')?.value || '').replace(/\s+/g, '');
       const transferContent = p ? `${currentPaymentCode} ${p}` : `${currentPaymentCode}`;
-      
-      const customerAppCode = document.getElementById('customerBankSelect').value;
-      
-      // Link DL.VIETQR tự động kích hoạt app trên máy khách và nhảy thẳng vào màn hình Chuyển Khoản
-      const rawUrl = `https://dl.vietqr.io/pay?app=${customerAppCode}&ba=${bankConfig.accountNo}&am=${finalTotal}&tn=${encodeURIComponent(transferContent)}`;
+      const customerAppCode = document.getElementById('customerBankSelect')?.value || 'vcb';
+      const receivingBankCode = (bankConfig.bankId || 'MB').toUpperCase();
+
+      const rawUrl = `https://dl.vietqr.io/pay?app=${customerAppCode}&ba=${bankConfig.accountNo}@${receivingBankCode}&am=${finalTotal}&tn=${encodeURIComponent(transferContent)}&bn=${encodeURIComponent(bankConfig.accountName)}`;
       window.open(rawUrl, '_blank');
     };
 
     window.downloadQrImage = function() {
-        const imgSrc = document.getElementById('vietqrImg').src;
-        if(!imgSrc) return;
-        fetch(imgSrc).then(res => res.blob()).then(blob => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none'; a.href = url;
-            a.download = `HyChay_ThanhToan_${currentPaymentCode}.png`;
-            document.body.appendChild(a); a.click();
-            window.URL.revokeObjectURL(url);
-        }).catch(() => alert('Không thể tải ảnh, vui lòng chụp màn hình!'));
+      const imgSrc = document.getElementById('vietqrImg')?.src;
+      if (imgSrc) window.open(imgSrc, '_blank');
     };
 
     // ==========================================
-    // 7. GỬI ĐƠN HÀNG CHÍNH THỨC
+    // 7. GỬI ĐƠN HÀNG & LẮNG NGHE TRẠNG THÁI TRỰC TIẾP TRÊN MÀN HÌNH KHÁCH
     // ==========================================
     window.submitOrder = function(e) {
-      e.preventDefault(); checkOperatingHours(); if (!isStoreOpen) return alert("Quán đã đóng cửa!");
-      let sub = 0; for (let k in cart) sub += cart[k].price * cart[k].qty; if (sub === 0) return;
+      e.preventDefault();
+      checkOperatingHours();
+      if (!isStoreOpen) return alert("Quán hiện đang đóng cửa!");
+      let sub = 0; for (let k in cart) sub += cart[k].price * cart[k].qty;
+      if (sub === 0) return;
 
       const payMethod = document.getElementById('paymentMethodSelect').value;
-      if (payMethod === 'VIETQR' && !isPaymentReceived) {
-        return alert("⚠️ Hệ thống chưa nhận được tiền. Vui lòng chuyển khoản trước khi bấm Gửi đơn!");
+      const name = document.getElementById('cusName').value.trim();
+      const phone = document.getElementById('cusPhone').value.trim();
+      const addr = document.getElementById('cusAddress').value.trim();
+      const ward = document.getElementById('cusWard')?.value || 'Phường Phan Thiết';
+      const house = document.getElementById('cusHouse')?.value || '';
+
+      window.saveCheckoutDraft();
+      if (!localStorage.getItem('hyChayUserProfile')) {
+        localStorage.setItem('hyChayUserProfile', JSON.stringify({ name, phone, house, ward, province: 'Lâm Đồng', address: addr, birthday: '' }));
       }
 
-      const name = document.getElementById('cusName').value; 
-      const phone = document.getElementById('cusPhone').value;
-      const addr = document.getElementById('cusAddress').value;
-
       const orderData = {
-        orderType: 'delivery', 
+        orderType: 'delivery',
         table: null,
-        customerName: name, 
-        phone: phone, 
-        address: addr, 
-        note: document.getElementById('cusNote').value, 
+        customerName: name,
+        phone: phone,
+        ward: ward,
+        province: 'Lâm Đồng',
+        address: addr,
+        deliveryKm: calculatedKm,
+        note: document.getElementById('cusNote').value.trim(),
         items: cart,
         rawSubtotal: sub,
-        subtotal: sub - birthdayDiscountAmt, 
-        shippingFee: shippingFee, 
-        discount: birthdayDiscountAmt, 
-        grandTotal: sub - birthdayDiscountAmt + shippingFee,
+        subtotal: Math.max(0, sub - birthdayDiscountAmt),
+        shippingFee: shippingFee,
+        discount: birthdayDiscountAmt,
+        grandTotal: Math.max(0, sub - birthdayDiscountAmt) + shippingFee,
         paymentMethod: payMethod,
         paymentCode: payMethod === 'VIETQR' ? currentPaymentCode : null,
         paymentBank: payMethod === 'VIETQR' ? (bankConfig.bankId || 'MB') : null,
         customerSelectedBank: payMethod === 'VIETQR' ? BANK_NAMES_MAP[document.getElementById('customerBankSelect').value] : null,
-        paymentStatus: payMethod === 'VIETQR' ? 'Đã nhận CK' : 'Thu tiền mặt (COD)',
-        paymentVerified: payMethod === 'VIETQR' ? true : false,
-        status: 'Chờ xác nhận', 
-        createdAt: new Date().toISOString(), 
+        paymentStatus: payMethod === 'VIETQR' ? 'Chờ kiểm tra CK' : 'Thu tiền mặt (COD)',
+        paymentVerified: false,
+        status: 'Chờ xác nhận',
+        createdAt: new Date().toISOString(),
         archived: false
       };
 
       push(ref(db, 'orders'), orderData).then((nRef) => {
-        localStorage.setItem('last_hy_chay_order_id', nRef.key); 
-        listenCanceledAlert(nRef.key);
-        alert(`🎉 Gửi đơn thành công! Khách vui lòng vào mục "Tài Khoản" để theo dõi tài xế.`);
-        cart = {}; saveCartLocal(); updateCartUI(); window.closeCheckoutModal(); document.getElementById('orderForm').reset();
+        localStorage.setItem('last_hy_chay_order_id', nRef.key);
+        listenActiveOrderForCustomer(nRef.key);
+        alert(`🎉 Gửi đơn thành công! Trạng thái tài xế và thời gian giao sẽ hiển thị trực tiếp ngay trên màn hình của bạn.`);
+        cart = {}; saveCartLocal(); updateCartUI(); window.closeCheckoutModal();
+        document.getElementById('cusNote').value = '';
       });
     };
 
     let cancelUnsubscribe = null;
-    function listenCanceledAlert(id) {
+    function listenActiveOrderForCustomer(id) {
       if (cancelUnsubscribe) cancelUnsubscribe();
       cancelUnsubscribe = onValue(ref(db, 'orders/' + id), (snap) => {
         const o = snap.val();
-        if (o && o.status === 'Đã hủy') {
+        const liveBanner = document.getElementById('liveCustomerOrderBanner');
+        if (!o) {
+          if (liveBanner) liveBanner.style.display = 'none';
+          return;
+        }
+
+        // Hiển thị thanh theo dõi trực tiếp ngoài trang chủ cho khách
+        if (liveBanner) {
+          if (o.status === 'Đã hoàn tất' || o.status === 'Đã hủy') {
+            liveBanner.style.display = 'none';
+          } else {
+            const stInfo = formatOrderStatusForCustomer(o);
+            liveBanner.style.display = 'block';
+            liveBanner.innerHTML = `
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                <div>
+                  <span style="background:#1e5e3a; color:#fff; padding:2px 8px; border-radius:6px; font-weight:800; font-size:0.8rem;">ĐƠN #HC-${id.substring(id.length - 5).toUpperCase()}</span>
+                  <span style="margin-left:8px; font-weight:700;">${stInfo.text}</span>
+                </div>
+                <b style="color:#dc2626;">Tổng: ${(o.grandTotal || 0).toLocaleString()}đ</b>
+              </div>`;
+          }
+        }
+
+        if (o.status === 'Đã hủy') {
           document.getElementById('alertCancelReason').innerText = "Lý do: " + (o.cancelReason || "Quán đang bận.");
           document.getElementById('alertCancelSuggestion').innerText = "Lời nhắn: " + (o.cancelSuggestion || "Hy Chay mong bạn đổi món khác nhé!");
           document.getElementById('canceledAlertModal').classList.add('active');
@@ -1209,17 +1736,26 @@ const st = order.status; let trackerClass = '', trackerText = '';
     window.closeCanceledAlert = () => {
       document.getElementById('canceledAlertModal').classList.remove('active');
       localStorage.removeItem('last_hy_chay_order_id');
-      if (cancelUnsubscribe) { cancelUnsubscribe(); cancelUnsubscribe = null; }
     };
 
-    window.reOrderSuggestedDish = () => { 
-      window.closeCanceledAlert(); 
-      window.scrollTo({ top: document.getElementById('toan-bo-menu').offsetTop - 60, behavior: 'smooth' }); 
+    window.reOrderSuggestedDish = () => {
+      window.closeCanceledAlert();
+      window.scrollTo({ top: document.getElementById('toan-bo-menu').offsetTop - 60, behavior: 'smooth' });
     };
 
-    const sid = localStorage.getItem('last_hy_chay_order_id'); if (sid) listenCanceledAlert(sid);
-    loadCartLocal(); setInterval(checkOperatingHours, 60000);
+    window.openInstallGuideModal = () => document.getElementById('installGuideModal').classList.add('active');
+    window.closeInstallGuideModal = () => document.getElementById('installGuideModal').classList.remove('active');
 
+    if (!shipperOrderIdParam) {
+      const savedPhone = localStorage.getItem('hyChayActiveCustomerPhone');
+      if (savedPhone) applyCustomerAuthSession(savedPhone);
+      const sid = localStorage.getItem('last_hy_chay_order_id');
+      if (sid) listenActiveOrderForCustomer(sid);
+      loadCartLocal();
+      autoFillCheckoutNow();
+      checkOperatingHours();
+      setInterval(checkOperatingHours, 60000);
+    }
   </script>
 </body>
 </html>
