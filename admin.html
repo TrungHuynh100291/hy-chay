@@ -482,37 +482,79 @@
         </div>
       </div>
       
-<!-- VIEW MÁY IN: CẤU HÌNH IN BILL & BÁO BẾP -->
+<!-- VIEW MÁY IN: CẤU HÌNH IN BILL & BÁO BẾP CHUẨN POS -->
       <div id="viewPrinterConfig" style="display: none;">
-        <div class="config-card">
-          <h2 style="color:var(--primary); font-size:1.25rem; margin-bottom:6px;">Cấu Hình Máy In Bill & Báo Bếp</h2>
-          <p style="font-size:0.84rem; color:#64748b; margin-bottom:14px;">Tùy chỉnh nội dung hóa đơn để phù hợp với máy in nhiệt qua cổng USB/LAN hoặc Bluetooth.</p>
+        <div class="config-card" style="max-width: 750px;">
+          <h2 style="color:var(--primary); font-size:1.25rem; margin-bottom:6px;">🖨️ Cấu Hình Máy In Bill & Báo Bếp</h2>
+          <p style="font-size:0.84rem; color:#64748b; margin-bottom:14px;">Tùy chỉnh khổ giấy, Logo đầu trang, thông tin pháp nhân đầu bill và lời chúc cuối bill giống chuẩn phần mềm POS chuyên nghiệp.</p>
           
-          <div class="form-group-cfg">
-            <label>Khổ Giấy Máy In:</label>
-            <select id="cfgPaperSize">
-              <option value="80mm">Máy in lớn (Khổ 80mm / K80)</option>
-              <option value="58mm">Máy in nhỏ (Khổ 58mm / K58)</option>
-            </select>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+            <div class="form-group-cfg">
+              <label>Khổ Giấy Máy In Nhiệt:</label>
+              <select id="cfgPaperSize">
+                <option value="80mm">Khổ lớn K80 (80mm - Chuẩn thu ngân)</option>
+                <option value="58mm">Khổ nhỏ K58 (58mm - Máy in mini)</option>
+              </select>
+            </div>
+            <div class="form-group-cfg">
+              <label>Hiển Thị Logo Đầu Bill:</label>
+              <select id="cfgShowLogo">
+                <option value="yes">Có in Logo ở đầu hóa đơn</option>
+                <option value="no">Không in Logo (Chỉ in chữ)</option>
+              </select>
+            </div>
           </div>
-          <div class="form-group-cfg"><label>Tiêu Đề Dòng 1 (Tên Quán / Logo):</label><input type="text" id="cfgPrintHeader1" placeholder="VD: HY CHAY - BẢO ANH LÂM"></div>
-          <div class="form-group-cfg"><label>Tiêu Đề Dòng 2 (Địa chỉ / MST):</label><input type="text" id="cfgPrintHeader2" placeholder="VD: MST: 3401289271 - 280 Trần Hưng Đạo, P. Phan Thiết"></div>
-          <div class="form-group-cfg"><label>Lời Cảm Ơn Cuối Bill:</label><input type="text" id="cfgPrintFooter" placeholder="VD: Cảm ơn quý khách và hẹn gặp lại!"></div>
-          <button onclick="savePrinterConfig()" style="width:100%; padding:12px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-weight:700; cursor:pointer;">💾 LƯU CẤU HÌNH MÁY IN</button>
+
+          <div class="form-group-cfg">
+            <label>Link Ảnh Logo Đầu Đoạn In (Hoặc tải ảnh từ máy):</label>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <input type="text" id="cfgPrintLogoUrl" value="Logo nho.png" placeholder="Logo nho.png">
+              <label class="btn-native-upload" style="margin:0; padding:10px 12px; white-space:nowrap;">📷 Chọn Logo<input type="file" accept="image/*" onchange="uploadPrinterLogo(this)"></label>
+            </div>
+          </div>
+
+          <div class="form-group-cfg"><label>Dòng 1 - Tên Thương Hiệu (Đầu đoạn in):</label><input type="text" id="cfgPrintHeader1" value="HY CHAY - BẢO ANH LÂM"></div>
+          <div class="form-group-cfg"><label>Dòng 2 - Địa Chỉ & MST (Đầu đoạn in):</label><input type="text" id="cfgPrintHeader2" value="MST: 3401289271 | Đ/c: 280 Trần Hưng Đạo, P. Phan Thiết"></div>
+          <div class="form-group-cfg"><label>Dòng 3 - Điện Thoại / Wifi (Đầu đoạn in):</label><input type="text" id="cfgPrintHeader3" value="Hotline: 0903.242.400"></div>
+          <div class="form-group-cfg"><label>Lời Cảm Ơn & Chào Tạm Biệt (Cuối đoạn in):</label><textarea id="cfgPrintFooter" rows="2" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-family:inherit;">Cảm ơn Quý khách đã ủng hộ Hy Chay! Chúc Quý khách thân tâm an lạc & hẹn gặp lại!</textarea></div>
+          
+          <div style="display:flex; gap:10px; margin-top:10px;">
+            <button onclick="savePrinterConfig()" style="flex:1.5; padding:12px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-weight:800; cursor:pointer;">💾 LƯU CẤU HÌNH MÁY IN</button>
+            <button onclick="testPrintSampleBill()" style="flex:1; padding:12px; background:#0284c7; color:#fff; border:none; border-radius:8px; font-weight:800; cursor:pointer;">🖨️ IN THỬ BILL MẪU</button>
+          </div>
         </div>
       </div>
 
-      <!-- VIEW ĐỘI TÀI XẾ: QUẢN LÝ SHIPPER & TRẠNG THÁI ONLINE -->
+      <!-- VIEW ĐỘI TÀI XẾ: QUẢN LÝ THÊM BỚT TÀI XẾ & TRẠNG THÁI ONLINE / OFFLINE -->
       <div id="viewShippers" style="display: none;">
         <div class="report-card">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <h3 style="color:var(--primary);">Quản Lý Đội Ngũ Giao Hàng (Shipper Ruột)</h3>
-            <span style="background:#dcfce7; color:#166534; padding:4px 10px; border-radius:12px; font-weight:700; font-size:0.8rem;" id="onlineShipperCount">Đang hoạt động: 0</span>
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
+            <div>
+              <h3 style="color:var(--primary);">🛵 Quản Lý Đội Tài Xế (Đang Chạy / Đã Nghỉ & Online / Offline)</h3>
+              <p style="font-size:0.84rem; color:#64748b;">Khi bắn đơn lên Zalo, hệ thống chỉ xếp lượt ưu tiên 20 giây cho các bác tài <b>Đang Chạy</b> và đang bật <b>🟢 ONLINE</b> (ưu tiên người đang rảnh và ít đơn hơn lên trước).</p>
+            </div>
+            <span style="background:#dcfce7; color:#166534; padding:6px 14px; border-radius:20px; font-weight:800; font-size:0.85rem; border:1px solid #86efac;" id="onlineShipperCount">🟢 Đang Online: 0 bác tài</span>
           </div>
-          <p style="font-size:0.85rem; color:#64748b; margin-bottom:15px;">Hệ thống sẽ chỉ ưu tiên chia đơn (báo giờ đếm ngược 20s) cho những tài xế đang bật trạng thái "Sẵn Sàng (Online)".</p>
-          
+
+          <div style="display:flex; gap:10px; margin-bottom: 20px; flex-wrap:wrap; background:#f8fafc; padding:12px; border-radius:10px; border:1px solid var(--border);">
+            <input type="text" id="newShipperName" placeholder="Tên tài xế (VD: Chú Tư, Anh Nam)..." style="padding:10px; border:1px solid #cbd5e1; border-radius:8px; flex:1; min-width:180px;">
+            <input type="tel" id="newShipperPhone" placeholder="Số điện thoại tài xế..." style="padding:10px; border:1px solid #cbd5e1; border-radius:8px; flex:1; min-width:180px;">
+            <input type="text" id="newShipperVehicle" placeholder="Biển số / Loại xe (Tùy chọn)..." style="padding:10px; border:1px solid #cbd5e1; border-radius:8px; flex:1; min-width:160px;">
+            <button onclick="saveOrAddShipper()" style="background:var(--primary); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-weight:800; cursor:pointer;">+ THÊM / CẬP NHẬT TÀI XẾ</button>
+          </div>
+
           <table class="report-table">
-            <thead><tr style="background:#f1f5f9; text-align:left;"><th>Tên Tài Xế</th><th>Số Điện Thoại</th><th>Tình Trạng (Online/Offline)</th><th>Trạng Thái Nick</th><th>Hành Động</th></tr></thead>
+            <thead>
+              <tr style="background:#f1f5f9; text-align:left;">
+                <th>Tên Tài Xế</th>
+                <th>Số Điện Thoại</th>
+                <th>Trạng Thái Kết Nối</th>
+                <th>Tình Trạng Giao Đơn</th>
+                <th style="text-align:center;">Đơn Hôm Nay</th>
+                <th>Trạng Thái Nhân Sự</th>
+                <th>Thao Tác Quản Lý</th>
+              </tr>
+            </thead>
             <tbody id="shippersTableBody"></tbody>
           </table>
         </div>
@@ -784,7 +826,7 @@
     window.switchMainTab = function(tabName, ev) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       if (ev && ev.currentTarget) ev.currentTarget.classList.add('active');
-      ['viewOrders','viewPosOrder','viewMenuStock','viewBankConfig','viewShiftReport','viewUsers'].forEach(id => {
+      ['viewOrders','viewPosOrder','viewMenuStock','viewBankConfig','viewPrinterConfig','viewShippers','viewShiftReport','viewUsers'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
       });
@@ -794,6 +836,7 @@
       if (tabName === 'posOrder') window.renderPosDishGrid();
       else if (tabName === 'menuStock') window.renderMenuStockTable();
       else if (tabName === 'shiftReport') window.renderShiftReport();
+      else if (tabName === 'shippers' && typeof window.renderShippersTable === 'function') window.renderShippersTable();
     };
 
     let ordersCache = {}; let menuCustomCache = {}; let isAudioActive = false; let targetCancelOrderId = null; let selectedTable = "Bàn 1"; let posCart = {};
@@ -1946,11 +1989,138 @@ window.openProofModal = function(orderId) {
       const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" })); a.download = `Bang_Ke_Thue_BaoAnhLam_${data.labelPeriod.replace(/\s+/g, '_')}.csv`; a.click();
     };
 
+// ==========================================
+    // 14. HỆ THỐNG MÁY IN POS CHUYÊN NGHIỆP (KHỔ 58MM/80MM, LOGO ĐẦU ĐOẠN & LỜI CHÚC CUỐI ĐOẠN)
+    // ==========================================
+    let printerConfig = {
+      paperSize: "80mm",
+      showLogo: "yes",
+      logoUrl: "Logo nho.png",
+      header1: "HY CHAY - BẢO ANH LÂM",
+      header2: "MST: 3401289271 | Đ/c: 280 Trần Hưng Đạo, P. Phan Thiết",
+      header3: "Hotline: 0903.242.400",
+      footer: "Cảm ơn Quý khách đã ủng hộ Hy Chay! Chúc Quý khách thân tâm an lạc & hẹn gặp lại!"
+    };
+
+    function applyDynamicPrintPageStyle(paperSize) {
+      let styleEl = document.getElementById('dynamicPrintPaperStyle');
+      if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = 'dynamicPrintPaperStyle';
+        document.head.appendChild(styleEl);
+      }
+      const w = (paperSize === '58mm') ? '56mm' : '78mm';
+      const fontSz = (paperSize === '58mm') ? '11px' : '13px';
+      styleEl.innerHTML = `@media print { #printArea { width: ${w} !important; font-size: ${fontSz} !important; } }`;
+    }
+
+    onValue(ref(db, 'restaurant_config/printer'), (snap) => {
+      if (snap.exists()) {
+        printerConfig = { ...printerConfig, ...snap.val() };
+        if (document.getElementById('cfgPaperSize')) document.getElementById('cfgPaperSize').value = printerConfig.paperSize || '80mm';
+        if (document.getElementById('cfgShowLogo')) document.getElementById('cfgShowLogo').value = printerConfig.showLogo || 'yes';
+        if (document.getElementById('cfgPrintLogoUrl')) document.getElementById('cfgPrintLogoUrl').value = printerConfig.logoUrl || 'Logo nho.png';
+        if (document.getElementById('cfgPrintHeader1')) document.getElementById('cfgPrintHeader1').value = printerConfig.header1 || '';
+        if (document.getElementById('cfgPrintHeader2')) document.getElementById('cfgPrintHeader2').value = printerConfig.header2 || '';
+        if (document.getElementById('cfgPrintHeader3')) document.getElementById('cfgPrintHeader3').value = printerConfig.header3 || '';
+        if (document.getElementById('cfgPrintFooter')) document.getElementById('cfgPrintFooter').value = printerConfig.footer || '';
+        applyDynamicPrintPageStyle(printerConfig.paperSize);
+      }
+    });
+
+    window.uploadPrinterLogo = function(input) {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const cv = document.createElement('canvas');
+          let w = img.width, h = img.height;
+          if (w > 220) { h = Math.round(h * 220 / w); w = 220; }
+          cv.width = w; cv.height = h;
+          cv.getContext('2d').drawImage(img, 0, 0, w, h);
+          document.getElementById('cfgPrintLogoUrl').value = cv.toDataURL('image/png');
+          alert("✅ Đã nạp ảnh Logo máy in! Hãy bấm 'Lưu Cấu Hình Máy In'.");
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
+
+    window.savePrinterConfig = function() {
+      const payload = {
+        paperSize: document.getElementById('cfgPaperSize').value,
+        showLogo: document.getElementById('cfgShowLogo').value,
+        logoUrl: document.getElementById('cfgPrintLogoUrl').value.trim() || 'Logo nho.png',
+        header1: document.getElementById('cfgPrintHeader1').value.trim() || 'HY CHAY - BẢO ANH LÂM',
+        header2: document.getElementById('cfgPrintHeader2').value.trim() || 'MST: 3401289271 - 280 Trần Hưng Đạo, P. Phan Thiết',
+        header3: document.getElementById('cfgPrintHeader3').value.trim() || 'Hotline: 0903.242.400',
+        footer: document.getElementById('cfgPrintFooter').value.trim() || 'Cảm ơn Quý khách!',
+        updatedAt: new Date().toISOString()
+      };
+      set(ref(db, 'restaurant_config/printer'), payload).then(() => {
+        applyDynamicPrintPageStyle(payload.paperSize);
+        alert(`✅ Đã lưu cấu hình máy in khổ ${payload.paperSize}!`);
+      });
+    };
+
+    function buildPrintHeaderHtml(billTitle) {
+      const logoHtml = (printerConfig.showLogo !== 'no' && printerConfig.logoUrl)
+        ? `<img src="${printerConfig.logoUrl}" onerror="this.style.display='none'" style="max-width:55px; max-height:55px; margin:0 auto 4px; display:block; border-radius:6px;">`
+        : '';
+      return `
+        <div style="text-align:center; margin-bottom:6px;">
+          ${logoHtml}
+          <h3 style="margin:0; font-size:15px; font-weight:800;">${printerConfig.header1 || 'HY CHAY - BẢO ANH LÂM'}</h3>
+          ${printerConfig.header2 ? `<p style="margin:2px 0; font-size:11px;">${printerConfig.header2}</p>` : ''}
+          ${printerConfig.header3 ? `<p style="margin:1px 0; font-size:11px;">${printerConfig.header3}</p>` : ''}
+          <p style="margin:5px 0; border-top:1px dashed #000; border-bottom:1px dashed #000; padding:4px 0; font-weight:bold; font-size:13px;">${billTitle}</p>
+        </div>`;
+    }
+
+    function buildPrintFooterHtml() {
+      return `
+        <div style="margin-top:10px; padding-top:6px; border-top:1px dashed #000; text-align:center; font-size:11px; font-style:italic;">
+          ${(printerConfig.footer || 'Cảm ơn Quý khách!').replace(/\n/g, '<br>')}
+        </div>`;
+    }
+
+    window.testPrintSampleBill = function() {
+      const widthCSS = printerConfig.paperSize === '58mm' ? '56mm' : '78mm';
+      applyDynamicPrintPageStyle(printerConfig.paperSize);
+      document.getElementById('printArea').innerHTML = `
+        <div style="width:${widthCSS}; margin:0 auto;">
+          ${buildPrintHeaderHtml('PHIẾU IN THỬ NGHIỆM (TEST)')}
+          <p style="margin:2px 0; font-size:11px;">Khổ giấy: <b>${printerConfig.paperSize}</b> | Giờ in: ${new Date().toLocaleTimeString('vi-VN')}</p>
+          <table style="width:100%; border-collapse:collapse; margin-top:4px; font-size:12px;">
+            <tr><td>1x Bún Thái Chay</td><td style="text-align:right;">35.000</td></tr>
+            <tr><td>1x Cà Phê Muối BAL</td><td style="text-align:right;">25.000</td></tr>
+          </table>
+          <div style="border-top:1px dashed #000; margin-top:6px; padding-top:4px; font-size:12px;">
+            <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:14px;"><span>TỔNG CỘNG:</span><span>60.000đ</span></div>
+          </div>
+          ${buildPrintFooterHtml()}
+        </div>`;
+      window.print();
+    };
+
     window.printKitchenTicket = (id, dData = null) => {
       const o = dData || ordersCache[id]; if (!o) return; let rows = '';
       const timeStr = new Date(o.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-      for (let k in o.items) rows += `<tr><td style="font-size:18px; font-weight:bold; padding:3px 0;">${o.items[k].qty}x</td><td style="font-size:16px; font-weight:bold; padding:3px 0;">${o.items[k].name}</td></tr>`;
-      document.getElementById('printArea').innerHTML = `<div style="text-align:center; border-bottom:2px solid #000; padding-bottom:4px;"><h2 style="margin:0;">PHIẾU BÁO BẾP</h2><p style="margin:2px 0; font-size:12px;">Mã: <b>#HC-${id.substring(id.length - 5).toUpperCase()}</b> | Giờ nhận: <b>${timeStr}</b></p><p style="font-size:16px; font-weight:bold; margin:4px 0; background:#000; color:#fff;">${o.orderType === 'dine_in' ? o.table : 'ĐƠN GIAO SHIP'}</p></div>${o.note ? `<p style="margin:6px 0; border:1px solid #000; padding:4px;"><b>LƯU Ý BẾP:</b> ${o.note}</p>` : ''}<table style="width:100%; margin-top:8px;">${rows}</table>`;
+      const widthCSS = printerConfig.paperSize === '58mm' ? '56mm' : '78mm';
+      applyDynamicPrintPageStyle(printerConfig.paperSize);
+      for (let k in o.items) rows += `<tr style="border-bottom:1px dashed #ccc;"><td style="font-size:18px; font-weight:bold; padding:4px 0;">${o.items[k].qty}x</td><td style="font-size:16px; font-weight:bold; padding:4px 0;">${o.items[k].name}</td></tr>`;
+      document.getElementById('printArea').innerHTML = `
+        <div style="width:${widthCSS}; margin:0 auto;">
+          <div style="text-align:center; border-bottom:2px solid #000; padding-bottom:4px;">
+            <h2 style="margin:0; font-size:17px;">PHIẾU BÁO BẾP</h2>
+            <p style="margin:2px 0; font-size:12px;">Mã: <b>#HC-${id.substring(id.length - 5).toUpperCase()}</b> | Giờ: <b>${timeStr}</b></p>
+            <p style="font-size:15px; font-weight:bold; margin:4px 0; background:#000; color:#fff; padding:2px;">${o.orderType === 'dine_in' ? o.table : 'ĐƠN GIAO SHIP'}</p>
+          </div>
+          ${o.note ? `<p style="margin:6px 0; border:1px solid #000; padding:4px;"><b>LƯU Ý BẾP:</b> ${o.note}</p>` : ''}
+          <table style="width:100%; margin-top:6px; border-collapse:collapse;">${rows}</table>
+        </div>`;
       window.print();
     };
 
@@ -1958,21 +2128,184 @@ window.openProofModal = function(orderId) {
       const o = ordersCache[id]; if (!o) return; let sub = o.subtotal || 0, ship = o.shippingFee || 0, total = sub + ship, rows = '';
       const timeStr = new Date(o.createdAt).toLocaleString('vi-VN');
       const payText = o.paymentMethod === 'VIETQR' ? `Chuyển khoản QR (${o.paymentCode || ''})` : 'Tiền mặt (COD)';
-      for (let k in o.items) rows += `<tr><td>${o.items[k].qty}x ${o.items[k].name}</td><td style="text-align:right;">${(o.items[k].price * o.items[k].qty).toLocaleString()}</td></tr>`;
-      document.getElementById('printArea').innerHTML = `<div style="text-align:center; margin-bottom:6px;"><h3 style="margin:0;">HY CHAY - BẢO ANH LÂM</h3><p style="margin:2px 0; font-size:11px;">MST: 3401289271 - 280 Trần Hưng Đạo, P. Phan Thiết</p><p style="margin:4px 0; border-top:1px dashed #000; border-bottom:1px dashed #000; padding:3px 0; font-weight:bold;">PHIẾU THANH TOÁN (#HC-${id.substring(id.length - 5).toUpperCase()})</p></div><p style="margin:2px 0; font-size:11px;">Giờ đặt: ${timeStr}</p><p style="margin:2px 0; font-size:11px;">Khách: <b>${o.customerName}</b> (${o.phone})</p><p style="margin:2px 0; font-size:11px;">HTTT: <b>${payText}</b></p><table style="width:100%; border-collapse:collapse; margin-top:4px;">${rows}</table><div style="border-top:1px dashed #000; margin-top:6px; padding-top:4px; font-size:12px;"><div style="display:flex; justify-content:space-between;"><span>1. Tiền món (Tại quán):</span><b>${sub.toLocaleString()}đ</b></div><div style="display:flex; justify-content:space-between;"><span>2. Ship thu hộ tài xế:</span><span>${ship.toLocaleString()}đ</span></div><div style="display:flex; justify-content:space-between; font-weight:bold; font-size:14px; margin-top:4px; border-top:1px dashed #000; padding-top:4px;"><span>TỔNG THANH TOÁN:</span><span>${total.toLocaleString()}đ</span></div></div>`;
+      const widthCSS = printerConfig.paperSize === '58mm' ? '56mm' : '78mm';
+      applyDynamicPrintPageStyle(printerConfig.paperSize);
+      for (let k in o.items) rows += `<tr><td style="padding:2px 0;">${o.items[k].qty}x ${o.items[k].name}</td><td style="text-align:right; padding:2px 0;">${(o.items[k].price * o.items[k].qty).toLocaleString()}</td></tr>`;
+      document.getElementById('printArea').innerHTML = `
+        <div style="width:${widthCSS}; margin:0 auto;">
+          ${buildPrintHeaderHtml(`PHIẾU THANH TOÁN (#HC-${id.substring(id.length - 5).toUpperCase()})`)}
+          <p style="margin:2px 0; font-size:11px;">Giờ đặt: ${timeStr}</p>
+          <p style="margin:2px 0; font-size:11px;">Khách: <b>${o.customerName}</b> (${o.phone})</p>
+          ${o.orderType !== 'dine_in' ? `<p style="margin:2px 0; font-size:11px;">Đ/c: ${o.address}</p>` : ''}
+          <p style="margin:2px 0; font-size:11px;">HTTT: <b>${payText}</b></p>
+          <table style="width:100%; border-collapse:collapse; margin-top:4px; font-size:12px;">${rows}</table>
+          <div style="border-top:1px dashed #000; margin-top:6px; padding-top:4px; font-size:12px;">
+            <div style="display:flex; justify-content:space-between;"><span>1. Tiền món (Tại quán):</span><b>${sub.toLocaleString()}đ</b></div>
+            <div style="display:flex; justify-content:space-between;"><span>2. Ship thu hộ tài xế:</span><span>${ship.toLocaleString()}đ</span></div>
+            <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:14px; margin-top:4px; border-top:1px dashed #000; padding-top:4px;"><span>TỔNG THANH TOÁN:</span><span>${total.toLocaleString()}đ</span></div>
+          </div>
+          ${buildPrintFooterHtml()}
+        </div>`;
       window.print();
     };
 
     window.printShiftReport = function() {
       const data = getTaxReportData(); let dailyRows = '';
+      const widthCSS = printerConfig.paperSize === '58mm' ? '56mm' : '78mm';
+      applyDynamicPrintPageStyle(printerConfig.paperSize);
       for (let d in data.daily) { const r = data.daily[d]; dailyRows += `<tr><td style="padding:4px 0;">${d}</td><td style="text-align:center;">${r.count}</td><td style="text-align:right;">${r.tax5610.toLocaleString()}</td><td style="text-align:right;">${r.tax5630.toLocaleString()}</td></tr>`; }
-      document.getElementById('printArea').innerHTML = `<div style="text-align:center; margin-bottom:8px;"><h2 style="margin:0; font-size:16px;">CTY BẢO ANH LÂM</h2><p style="margin:6px 0; border-top:1px dashed #000; border-bottom:1px dashed #000; padding:4px 0; font-weight:bold; font-size:13px;">BẢNG KẾT CA<br>(${data.labelPeriod})</p></div><p style="margin:2px 0; font-size:11px;"><b>Số đơn:</b> ${data.count} | <b>In lúc:</b> ${new Date().toLocaleTimeString('vi-VN')}</p><div style="border-top:1px dashed #000; border-bottom:1px dashed #000; margin:6px 0; padding:4px 0; font-size:12px;"><div style="display:flex; justify-content:space-between;"><span>DT 5610 (Chay):</span><b>${data.total5610.toLocaleString()}đ</b></div><div style="display:flex; justify-content:space-between;"><span>DT 5630 (Đồ Uống):</span><b>${data.total5630.toLocaleString()}đ</b></div><div style="display:flex; justify-content:space-between; font-weight:bold; margin-top:3px;"><span>TỔNG DT CHỊU THUẾ:</span><b>${data.totalTaxable.toLocaleString()}đ</b></div><div style="display:flex; justify-content:space-between; margin-top:4px; padding-top:4px; border-top:1px dashed #ccc;"><span>Sổ Ship thu hộ (Trả tài xế):</span><b>${data.totalShip.toLocaleString()}đ</b></div></div><p style="font-weight:bold; margin-top:8px; font-size:12px;">CHI TIẾT DOANH THU QUÁN:</p><table style="width:100%; border-collapse:collapse; font-size:11px; margin-top:4px;"><tr style="border-bottom:1px dashed #000;"><th style="text-align:left;">Ngày</th><th>Đơn</th><th style="text-align:right;">5610</th><th style="text-align:right;">5630</th></tr>${dailyRows || '<tr><td colspan="4" style="text-align:center;">Không có dữ liệu</td></tr>'}</table><div style="margin-top:20px; display:flex; justify-content:space-between; text-align:center; font-size:10px;"><div><b>Kế Toán / Thu Ngân</b><br><br><br>(Ký tên)</div><div><b>Đại Diện Quản Lý</b><br><br><br><b>Hoàng Huỳnh Huy Bảo</b></div></div>`;
+      document.getElementById('printArea').innerHTML = `
+        <div style="width:${widthCSS}; margin:0 auto;">
+          ${buildPrintHeaderHtml(`BẢNG KẾT CA (${data.labelPeriod})`)}
+          <p style="margin:2px 0; font-size:11px;"><b>Số đơn:</b> ${data.count} | <b>In lúc:</b> ${new Date().toLocaleTimeString('vi-VN')}</p>
+          <div style="border-top:1px dashed #000; border-bottom:1px dashed #000; margin:6px 0; padding:4px 0; font-size:12px;">
+            <div style="display:flex; justify-content:space-between;"><span>DT 5610 (Chay):</span><b>${data.total5610.toLocaleString()}đ</b></div>
+            <div style="display:flex; justify-content:space-between;"><span>DT 5630 (Đồ Uống):</span><b>${data.total5630.toLocaleString()}đ</b></div>
+            <div style="display:flex; justify-content:space-between; font-weight:bold; margin-top:3px;"><span>TỔNG DT CHỊU THUẾ:</span><b>${data.totalTaxable.toLocaleString()}đ</b></div>
+            <div style="display:flex; justify-content:space-between; margin-top:4px; padding-top:4px; border-top:1px dashed #ccc;"><span>Sổ Ship thu hộ (Trả tài xế):</span><b>${data.totalShip.toLocaleString()}đ</b></div>
+          </div>
+          <p style="font-weight:bold; margin-top:8px; font-size:12px;">CHI TIẾT DOANH THU QUÁN:</p>
+          <table style="width:100%; border-collapse:collapse; font-size:11px; margin-top:4px;"><tr style="border-bottom:1px dashed #000;"><th style="text-align:left;">Ngày</th><th>Đơn</th><th style="text-align:right;">5610</th><th style="text-align:right;">5630</th></tr>${dailyRows || '<tr><td colspan="4" style="text-align:center;">Không có dữ liệu</td></tr>'}</table>
+          <div style="margin-top:20px; display:flex; justify-content:space-between; text-align:center; font-size:10px;"><div><b>Kế Toán / Thu Ngân</b><br><br><br>(Ký tên)</div><div><b>Đại Diện Quản Lý</b><br><br><br><b>Hoàng Huỳnh Huy Bảo</b></div></div>
+        </div>`;
       window.print();
     };
+
     // ==========================================
-    // 14. HỆ THỐNG ĐIỀU PHỐI SHIPPER TỰ ĐỘNG
+    // 15. QUẢN LÝ ĐỘI TÀI XẾ (THÊM/BỚT, TRẠNG THÁI ONLINE/OFFLINE) & PHÂN BỔ ĐƠN THÁC NƯỚC ĐỘNG
     // ==========================================
+    let shippersCache = {};
     let currentDispatchOrderId = null;
+
+    function normalizeShipperPhone(raw) {
+      return (raw || '').trim().replace(/\s+/g, '').replace(/^\+84/, '0').replace(/[^0-9]/g, '');
+    }
+
+    onValue(ref(db, 'shippers'), (snap) => {
+      shippersCache = snap.val() || {};
+      window.renderShippersTable();
+    });
+
+    window.saveOrAddShipper = function() {
+      const name = (document.getElementById('newShipperName')?.value || '').trim();
+      const phone = normalizeShipperPhone(document.getElementById('newShipperPhone')?.value);
+      const vehicle = (document.getElementById('newShipperVehicle')?.value || '').trim();
+      if (!name || !phone || phone.length < 9) return alert("Vui lòng nhập đầy đủ Tên và Số điện thoại hợp lệ của tài xế!");
+
+      const existing = shippersCache[phone] || {};
+      update(ref(db, `shippers/${phone}`), {
+        name: name,
+        phone: phone,
+        vehicle: vehicle,
+        isOnline: existing.isOnline !== undefined ? existing.isOnline : true,
+        isActive: true,
+        updatedAt: new Date().toISOString()
+      }).then(() => {
+        alert(`✅ Đã lưu tài xế ${name} (${phone}) vào danh sách đội xe!`);
+        document.getElementById('newShipperName').value = '';
+        document.getElementById('newShipperPhone').value = '';
+        if (document.getElementById('newShipperVehicle')) document.getElementById('newShipperVehicle').value = '';
+      });
+    };
+
+    window.toggleShipperOnlineByAdmin = function(phone, newOnlineState) {
+      update(ref(db, `shippers/${phone}`), {
+        isOnline: newOnlineState,
+        lastSeen: new Date().toISOString()
+      });
+    };
+
+    window.toggleShipperActiveStatus = function(phone, newActiveState) {
+      update(ref(db, `shippers/${phone}`), {
+        isActive: newActiveState,
+        isOnline: newActiveState ? true : false,
+        updatedAt: new Date().toISOString()
+      });
+    };
+
+    window.deleteShipperPermanently = function(phone) {
+      if (confirm(`⚠️ Xóa vĩnh viễn tài xế (${phone}) khỏi danh sách đội xe?`)) {
+        remove(ref(db, `shippers/${phone}`));
+      }
+    };
+
+    window.renderShippersTable = function() {
+      const tbody = document.getElementById('shippersTableBody');
+      if (!tbody) return;
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      // Tính xem tài xế nào đang kẹt giao đơn khác và đếm số đơn hôm nay của từng người
+      const busyMap = {};
+      const todayCountMap = {};
+      for (let oid in ordersCache) {
+        const o = ordersCache[oid];
+        if (!o || !o.shipperPhone) continue;
+        const sp = normalizeShipperPhone(o.shipperPhone);
+        if (o.status === 'Tài xế đang đến quán' || o.status === 'Đang giao hàng') {
+          busyMap[sp] = `#HC-${oid.substring(oid.length - 5).toUpperCase()}`;
+        }
+        if (o.createdAt && new Date(o.createdAt).toISOString().split('T')[0] === todayStr && (o.status === 'Đã hoàn tất' || o.status === 'Đang giao hàng')) {
+          todayCountMap[sp] = (todayCountMap[sp] || 0) + 1;
+        }
+      }
+
+      let html = '';
+      let onlineReadyCount = 0;
+      const phones = Object.keys(shippersCache);
+
+      phones.forEach(phone => {
+        const shp = shippersCache[phone];
+        const isActive = shp.isActive !== false;
+        const isOnline = isActive && (shp.isOnline === true);
+        if (isOnline) onlineReadyCount++;
+
+        const busyOrderCode = busyMap[phone];
+        const todayOrders = todayCountMap[phone] || 0;
+        const lastSeenStr = shp.lastSeen ? new Date(shp.lastSeen).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '--:--';
+
+        const onlineBadge = isOnline
+          ? `<span style="background:#dcfce7; color:#166534; padding:3px 8px; border-radius:12px; font-weight:800; font-size:0.76rem;">🟢 ONLINE (Cập nhật: ${lastSeenStr})</span>`
+          : `<span style="background:#f1f5f9; color:#64748b; padding:3px 8px; border-radius:12px; font-weight:700; font-size:0.76rem;">🔴 OFFLINE</span>`;
+
+        const busyBadge = !isActive
+          ? `<span style="color:#94a3b8;">--</span>`
+          : (busyOrderCode
+              ? `<span style="background:#fef3c7; color:#b45309; padding:3px 8px; border-radius:8px; font-weight:800; font-size:0.76rem;">🛵 Đang giao ${busyOrderCode}</span>`
+              : (isOnline ? `<span style="color:#16a34a; font-weight:800;">⚡ Đang rảnh (Sẵn sàng)</span>` : `<span style="color:#64748b;">Đang tạm nghỉ</span>`));
+
+        const activeBadge = isActive
+          ? `<span style="color:#0284c7; font-weight:800;">Đang chạy</span>`
+          : `<span style="color:#dc2626; font-weight:800; text-decoration:line-through;">Đã nghỉ</span>`;
+
+        html += `
+          <tr style="${!isActive ? 'opacity:0.6; background:#f8fafc;' : ''}">
+            <td><b>${shp.name || 'Tài xế'}</b>${shp.vehicle ? `<br><small style="color:#64748b;">${shp.vehicle}</small>` : ''}</td>
+            <td><a href="tel:${phone}" style="color:var(--primary); font-weight:700; text-decoration:underline;">📞 ${phone}</a></td>
+            <td>${onlineBadge}</td>
+            <td>${busyBadge}</td>
+            <td style="text-align:center; font-weight:800; color:var(--primary);">${todayOrders} đơn</td>
+            <td>${activeBadge}</td>
+            <td>
+              <div style="display:flex; gap:5px; flex-wrap:wrap;">
+                ${isActive ? `
+                  <button onclick="toggleShipperOnlineByAdmin('${phone}',${!isOnline})" style="background:${isOnline ? '#fef3c7' : '#dcfce7'}; color:${isOnline ? '#b45309' : '#166534'}; border:1px solid ${isOnline ? '#fde68a' : '#86efac'}; padding:4px 8px; border-radius:6px; font-weight:700; font-size:0.75rem; cursor:pointer;">
+                    ${isOnline ? 'Chuyển Offline' : 'Bật Online'}
+                  </button>
+                ` : ''}
+                <button onclick="toggleShipperActiveStatus('${phone}', ${!isActive})" style="background:${isActive ? '#fee2e2' : '#e0f2fe'}; color:${isActive ? '#b91c1c' : '#0369a1'}; border:none; padding:4px 8px; border-radius:6px; font-weight:700; font-size:0.75rem; cursor:pointer;">
+                  ${isActive ? 'Báo Nghỉ' : 'Cho Chạy Lại'}
+                </button>
+                <button onclick="deleteShipperPermanently('${phone}')" style="background:#f1f5f9; color:#64748b; border:1px solid #cbd5e1; padding:4px 8px; border-radius:6px; font-weight:700; font-size:0.75rem; cursor:pointer;">Xóa</button>
+              </div>
+            </td>
+          </tr>`;
+      });
+
+      tbody.innerHTML = html || '<tr><td colspan="7" style="text-align:center; padding:20px; color:#64748b;">Chưa có tài xế nào trong danh sách. Hãy thêm tài xế ở khung phía trên!</td></tr>';
+      if (document.getElementById('onlineShipperCount')) {
+        document.getElementById('onlineShipperCount').innerText = `🟢 Đang Online: ${onlineReadyCount} bác tài`;
+      }
+    };
 
     window.openDispatchModal = function(id) {
       currentDispatchOrderId = id;
@@ -1989,8 +2322,48 @@ window.openProofModal = function(orderId) {
       if (!currentDispatchOrderId) return;
       const o = ordersCache[currentDispatchOrderId];
       const shortId = `HC-${currentDispatchOrderId.substring(currentDispatchOrderId.length - 5).toUpperCase()}`;
-      
-      // Xử lý chống thu nhầm tiền lần 2 nếu khách đã thanh toán VietQR
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      // 1. Kiểm tra ai đang kẹt giao đơn khác và số đơn đã chạy hôm nay để xếp hàng đợi công bằng
+      const busyMap = {};
+      const todayCountMap = {};
+      for (let oid in ordersCache) {
+        const ord = ordersCache[oid];
+        if (!ord || !ord.shipperPhone) continue;
+        const sp = normalizeShipperPhone(ord.shipperPhone);
+        if (ord.status === 'Tài xế đang đến quán' || ord.status === 'Đang giao hàng') busyMap[sp] = true;
+        if (ord.createdAt && new Date(ord.createdAt).toISOString().split('T')[0] === todayStr && (ord.status === 'Đã hoàn tất' || ord.status === 'Đang giao hàng')) {
+          todayCountMap[sp] = (todayCountMap[sp] || 0) + 1;
+        }
+      }
+
+      // 2. Chỉ lọc các bác tài Đang Chạy (isActive !== false) VÀ Đang Online (isOnline === true)
+      let candidates = Object.keys(shippersCache).filter(phone => {
+        const s = shippersCache[phone];
+        return s && s.isActive !== false && s.isOnline === true;
+      });
+
+      // Ưu tiên 1: Tài xế đang rảnh (không vướng đơn đang giao) đứng trước
+      // Ưu tiên 2: Tài xế chạy ít đơn hơn trong ngày đứng trước (chia đều thu nhập)
+      // Ưu tiên 3: Ngẫu nhiên nếu bằng nhau
+      candidates.sort((a, b) => {
+        const busyA = busyMap[a] ? 1 : 0;
+        const busyB = busyMap[b] ? 1 : 0;
+        if (busyA !== busyB) return busyA - busyB;
+        const cntA = todayCountMap[a] || 0;
+        const cntB = todayCountMap[b] || 0;
+        if (cntA !== cntB) return cntA - cntB;
+        return Math.random() - 0.5;
+      });
+
+      const queueNames = candidates.map((p, idx) => `${idx + 1}. ${shippersCache[p]?.name || p} (${idx * 20}s-${(idx + 1) * 20}s)`).join(' -> ');
+
+      // Ghi hàng đợi ưu tiên lên Firebase của đơn hàng
+      update(ref(db, `orders/${currentDispatchOrderId}`), {
+        dispatchQueue: candidates,
+        dispatchResetAt: new Date().toISOString()
+      });
+
       const isPaid = (o.paymentMethod === 'VIETQR' && o.paymentVerified) || o.paymentStatus === 'Đã nhận CK';
       const payStr = isPaid 
         ? "✅ KHÁCH ĐÃ CHUYỂN KHOẢN - CHỈ GIAO ĐỒ (KHÔNG THU TIỀN)" 
@@ -1998,12 +2371,14 @@ window.openProofModal = function(orderId) {
       
       const domain = window.location.host;
       const protocol = window.location.protocol;
+      const queueText = candidates.length > 0 ? `\n⏱️ Thứ tự ưu tiên (20s/người): ${queueNames}` : `\n⏱️ Chế độ mở tự do (Ai bấm trước nhận trước)`;
       
-      const text = `📦 ĐƠN MỚI - HY CHAY (${shortId})\n📍 Giao đến: ${o.address}\n📞 SĐT: ${o.phone}\n${payStr}\n\n👉 BẤM VÀO LINK ĐỂ NHẬN ĐƠN NÀY:\n${protocol}//${domain}/index.html?shipper=${currentDispatchOrderId}`;
+      const text = `📦 ĐƠN MỚI - HY CHAY (${shortId})\n📍 Giao đến: ${o.address}\n📞 SĐT: ${o.phone}\n${payStr}${queueText}\n\n👉 BẤM VÀO LINK ĐỂ NHẬN ĐƠN NÀY:\n${protocol}//${domain}/index.html?shipper=${currentDispatchOrderId}`;
       
       navigator.clipboard.writeText(text).then(() => {
-        alert("✅ Đã copy Mẫu Bắn Đơn Zalo!\nHãy mở Zalo và dán vào nhóm Đội Ship Hy Chay.");
-      }).catch(err => {
+        alert(`✅ Đã copy Mẫu Bắn Đơn Zalo!\nHệ thống đã xếp lượt ưu tiên 20s/người cho ${candidates.length} bác tài đang ONLINE.\nHãy mở Zalo và dán vào nhóm Đội Ship Hy Chay.`);
+        window.closeDispatchModal();
+      }).catch(() => {
         prompt("Copy đoạn tin nhắn này:", text);
       });
     };
@@ -2014,7 +2389,7 @@ window.openProofModal = function(orderId) {
       const text = `${o.address} - ${o.phone} (${o.customerName})`;
       navigator.clipboard.writeText(text).then(() => {
         alert("✅ Đã copy SĐT và Địa chỉ!\nHãy mở app Grab/Maxim để dán.");
-      }).catch(err => {
+      }).catch(() => {
         prompt("Copy SĐT và Địa chỉ:", text);
       });
     };
@@ -2023,28 +2398,13 @@ window.openProofModal = function(orderId) {
       if (!currentDispatchOrderId) return;
       update(ref(db, 'orders/' + currentDispatchOrderId), { 
         status: 'Đang giao hàng',
-        shipperPhone: 'Giao ngoài / Grab'
+        shipperPhone: 'Giao ngoài / Grab',
+        shipperName: 'Tài xế App ngoài'
       }).then(() => {
-        alert("✅ Đã đổi trạng thái khách hàng thành: ĐANG GIAO HÀNG!");
+        alert("✅ Đã đổi trạng thái đơn sang: SHIPPER ĐANG GIAO!");
         window.closeDispatchModal();
       });
     };
-  </script>
-
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', async () => {
-        try {
-          const regs = await navigator.serviceWorker.getRegistrations();
-          for (let r of regs) {
-            if (r.scope === window.location.origin + '/') {
-              await r.unregister();
-            }
-          }
-          await navigator.serviceWorker.register('/sw.js', { scope: '/admin.html' });
-        } catch (err) {}
-      });
-    }
   </script>
 </body>
 </html>
