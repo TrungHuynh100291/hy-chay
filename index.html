@@ -657,6 +657,8 @@
       }
       localStorage.setItem('hyChayShipperName', name);
       localStorage.setItem('hyChayShipperPhone', phone);
+      // Tự động đăng ký bác tài lên bảng Đội Tài Xế của Admin & báo Online
+      update(ref(db, `shippers/${phone}`), { name: name, phone: phone, isOnline: true, lastSeen: new Date().toISOString() }).catch(() => {});
 
       document.getElementById('shipperLoginBox').style.display = 'none';
       document.getElementById('shipperOrderBox').style.display = 'block';
