@@ -170,12 +170,13 @@
 <body>
 
 <!-- =============================== -->
-  <!-- MÀN HÌNH NHẬN ĐƠN DÀNH RIÊNG CHO SHIPPER (V7 - NÂNG CẤP) -->
+<!-- =============================== -->
+  <!-- MÀN HÌNH NHẬN ĐƠN DÀNH RIÊNG CHO SHIPPER (V9 - CHỤP ẢNH MỞ KHÓA HOÀN TẤT) -->
   <!-- =============================== -->
   <div id="shipperModeOverlay" class="shipper-mode-overlay">
     <div class="shipper-card" id="shipperLoginBox">
       <h2>🛵 ĐỘI SHIP HY CHAY</h2>
-      <p>Nhập thông tin để quán và khách hàng dễ liên hệ.</p>
+      <p>Nhập thông tin lần đầu để quán và khách hàng dễ liên hệ.</p>
       <input type="text" id="shipperNameInput" class="shipper-input" placeholder="Tên của bạn (VD: Chú Tư)..." style="margin-bottom:10px;">
       <input type="tel" id="shipperPhoneInput" class="shipper-input" placeholder="Số điện thoại của bạn...">
       <button class="shipper-btn" onclick="shipperLogin()">TIẾP TỤC</button>
@@ -185,7 +186,7 @@
       <h2>📦 CHI TIẾT ĐƠN HÀNG</h2>
       <div style="background:#0f172a; border-radius:12px; padding:15px; margin-bottom:20px; text-align:left; border:1px dashed #475569;">
         <p style="color:#94a3b8; margin-bottom:5px; font-size:0.9rem;">Mã đơn: <b id="shpOrderId" style="color:#fff;">--</b></p>
-        <p style="color:#94a3b8; margin-bottom:5px; font-size:0.9rem;">📍 Khách: <b id="shpCustomerInfo" style="color:#fff;">--</b></p>
+        <p style="color:#94a3b8; margin-bottom:5px; font-size:0.9rem;">👤 Khách: <b id="shpCustomerInfo" style="color:#fff;">--</b></p>
         <p style="color:#94a3b8; margin-bottom:5px; font-size:0.9rem;">📍 Địa chỉ: <b id="shpAddress" style="color:#38bdf8;">--</b></p>
         <p style="color:#94a3b8; font-size:0.9rem;">💰 Phí Ship bạn nhận: <b id="shpFee" style="color:#22c55e; font-size:1.1rem;">--</b></p>
       </div>
@@ -196,11 +197,33 @@
       <!-- Nút thao tác trước khi nhận -->
       <button id="btnAcceptOrder" class="shipper-btn" onclick="acceptOrderByShipper()" disabled>ĐANG XỬ LÝ LƯỢT...</button>
 
-      <!-- Các nút thao tác SAU KHI nhận (Ẩn mặc định) -->
+      <!-- Các nút thao tác SAU KHI nhận -->
       <div id="shipperActionButtons" style="display:none; flex-direction:column; gap:10px; margin-top:15px;">
-        <button onclick="shipperActionPickedUp()" style="background:#22c55e; color:#fff; border:none; padding:14px; border-radius:10px; font-weight:800; font-size:1rem; cursor:pointer;">✅ ĐÃ LẤY MÓN - BẮT ĐẦU GIAO</button>
-        <button onclick="shipperActionNavigate()" style="background:#3b82f6; color:#fff; border:none; padding:14px; border-radius:10px; font-weight:800; font-size:1rem; cursor:pointer;">🗺️ DẪN ĐƯỜNG BẰNG GOOGLE MAPS</button>
-        <button onclick="shipperActionIssue()" style="background:#ef4444; color:#fff; border:none; padding:12px; border-radius:10px; font-weight:800; font-size:0.9rem; cursor:pointer;">⚠️ BÁO SỰ CỐ / HƯ XE (TRẢ ĐƠN)</button>
+        <!-- Nút 1: Chỉ hiện khi đang chạy tới quán -->
+        <button id="btnShipperPickedUp" onclick="shipperActionPickedUp()" style="background:#22c55e; color:#fff; border:none; padding:14px; border-radius:10px; font-weight:800; font-size:1rem; cursor:pointer;">✅ ĐÃ TỚI QUÁN & NHẬN ĐƠN THÀNH CÔNG</button>
+        
+        <!-- Nút 2: Luôn hiện để dẫn đường -->
+        <button id="btnShipperNavigate" onclick="shipperActionNavigate()" style="background:#3b82f6; color:#fff; border:none; padding:14px; border-radius:10px; font-weight:800; font-size:1rem; cursor:pointer;">🗺️ DẪN ĐƯỜNG BẰNG GOOGLE MAPS</button>
+        
+        <!-- Nút 3: Chỉ hiện khi đang chạy tới quán; TỰ ĐỘNG ẨN khi đã nhận món đi giao -->
+        <button id="btnShipperIssue" onclick="shipperActionIssue()" style="background:#ef4444; color:#fff; border:none; padding:12px; border-radius:10px; font-weight:800; font-size:0.9rem; cursor:pointer;">⚠️ BÁO SỰ CỐ / HƯ XE (TRẢ ĐƠN)</button>
+
+        <!-- Khung 4: Chỉ hiện sau khi đã lấy món tại quán đi giao cho khách -->
+        <div id="shipperProofSection" style="display:none; background:#0f172a; border:1px solid #334155; border-radius:12px; padding:14px; margin-top:4px; text-align:center;">
+          <p style="color:#fde047; font-size:0.88rem; font-weight:700; margin-bottom:10px;">📸 Chụp hình xác nhận giao hàng cho khách:</p>
+          <label style="display:block; width:100%; background:#0284c7; color:#fff; padding:12px; border-radius:10px; font-weight:800; font-size:0.95rem; cursor:pointer; margin-bottom:10px;">
+            📷 BẤM CHỤP HÌNH XÁC NHẬN
+            <input type="file" id="shipperProofInput" accept="image/*" capture="environment" style="display:none;" onchange="handleShipperProofCapture(this)">
+          </label>
+          <div id="shipperProofPreviewBox" style="display:none; margin-bottom:12px;">
+            <img id="shipperProofPreviewImg" src="" alt="Ảnh giao hàng" style="max-height:150px; border-radius:8px; border:2px solid #22c55e; margin:0 auto;">
+            <p style="color:#22c55e; font-size:0.8rem; font-weight:700; margin-top:6px;">✅ Đã lưu hình xác nhận! Nút hoàn tất đã mở khóa.</p>
+          </div>
+          <div id="btnCompleteLockedNotice" style="background:#334155; color:#94a3b8; padding:12px; border-radius:10px; font-weight:700; font-size:0.85rem;">
+            🔒 Chưa chụp hình xác nhận (Chụp hình xong mới hiện nút Hoàn tất đơn)
+          </div>
+          <button id="btnShipperCompleteOrder" onclick="shipperActionCompleteDelivery()" style="display:none; width:100%; background:#22c55e; color:#fff; border:none; padding:15px; border-radius:10px; font-weight:900; font-size:1.05rem; cursor:pointer; box-shadow:0 4px 15px rgba(34,197,94,0.35);">🚀 XÁC NHẬN GIAO ĐƠN THÀNH CÔNG</button>
+        </div>
       </div>
     </div>
   </div>
@@ -597,12 +620,13 @@
       return Math.max(0.5, Math.round(straightKm * 1.25 * 10) / 10);
     }
 
-    // ==========================================
-    // 1. CHẾ ĐỘ SHIPPER V8 (THÁC NƯỚC 20S + TÍNH ETA TỚI QUÁN & TỚI KHÁCH + DẪN ĐƯỜNG + BÁO SỰ CỐ)
+// ==========================================
+    // 1. CHẾ ĐỘ SHIPPER V9 (ẨN BÁO SỰ CỐ KHI ĐÃ LẤY MÓN + BẮT BUỘC CHỤP ẢNH MỚI HIỆN NÚT HOÀN TẤT)
     // ==========================================
     let shipperInterval = null;
     let currentOrderAddress = "";
     let currentOrderCached = null;
+    let shipperDeliveryProofBase64 = null;
 
     if (shipperOrderIdParam) {
       document.getElementById('customerAppWrapper').style.display = 'none';
@@ -647,7 +671,10 @@
 
         const isMyOrder = (normalizePhone(order.shipperPhone) === phone);
         const actionBox = document.getElementById('shipperActionButtons');
-        const btnPickedUp = actionBox ? actionBox.children[0] : null;
+        const btnPickedUp = document.getElementById('btnShipperPickedUp');
+        const btnNavigate = document.getElementById('btnShipperNavigate');
+        const btnIssue = document.getElementById('btnShipperIssue');
+        const proofSection = document.getElementById('shipperProofSection');
 
         if (order.status === 'Tài xế đang đến quán' || order.status === 'Đang giao hàng') {
           if (shipperInterval) clearInterval(shipperInterval);
@@ -658,25 +685,33 @@
             actionBox.style.display = "flex";
 
             if (order.status === 'Tài xế đang đến quán') {
-              if (btnPickedUp) {
-                btnPickedUp.style.display = 'block';
-                btnPickedUp.innerText = "✅ ĐÃ TỚI QUÁN & NHẬN ĐƠN THÀNH CÔNG";
-              }
+              // Giai đoạn 1: Shipper đang chạy tới quán -> Hiện nút Đã tới quán + Dẫn đường + Báo sự cố; Ẩn khung chụp ảnh giao khách
+              if (btnPickedUp) btnPickedUp.style.display = 'block';
+              if (btnNavigate) btnNavigate.style.display = 'block';
+              if (btnIssue) btnIssue.style.display = 'block';
+              if (proofSection) proofSection.style.display = 'none';
+
               const etaStore = order.etaToStoreMins || 5;
               const distStore = order.shipperDistToStoreKm || 1.5;
               document.getElementById('shpStatusMsg').innerHTML = `
                 <div style="background:#1e3a8a; border:1px solid #3b82f6; padding:10px; border-radius:10px; color:#fff; line-height:1.5;">
                   🛵 <b>BẠN ĐANG TRÊN ĐƯỜNG TỚI QUÁN</b><br>
                   📍 Cách quán khoảng <b>${distStore} km</b> (Dự kiến <b>~${etaStore} phút</b> tới quán)<br>
-                  <small style="color:#fde047;">👉 Khi tới quán lấy đồ xong, hãy bấm nút màu Xanh lá bên dưới!</small>
+                  <small style="color:#fde047;">👉 Khi tới quán lấy món xong, hãy bấm nút màu Xanh lá bên dưới!</small>
                 </div>`;
             } else {
+              // Giai đoạn 2: Shipper ĐÃ NHẬN MÓN TẠI QUÁN & ĐANG GIAO KHÁCH
+              // Bỏ nút Báo sự cố & nút Đã tới quán; Chỉ hiện nút Dẫn đường + Khung chụp ảnh mở khóa nút Hoàn tất
               if (btnPickedUp) btnPickedUp.style.display = 'none';
+              if (btnIssue) btnIssue.style.display = 'none';
+              if (btnNavigate) btnNavigate.style.display = 'block';
+              if (proofSection) proofSection.style.display = 'block';
+
               const etaCus = order.etaToCustomerMins || 10;
               const distCus = order.shipperDistToCusKm || 2.0;
               document.getElementById('shpStatusMsg').innerHTML = `
                 <div style="background:#14532d; border:1px solid #22c55e; padding:10px; border-radius:10px; color:#fff; line-height:1.5;">
-                  🚀 <b>ĐÃ NHẬN MÓN - ĐANG GIAO CHO KHÁCH</b><br>
+                  🚀 <b>ĐÃ NHẬN MÓN TẠI QUÁN - ĐANG GIAO KHÁCH</b><br>
                   📍 Quãng đường từ quán tới khách: <b>~${distCus} km</b><br>
                   ⏳ Thời gian dự kiến tới khách: <b>~${etaCus} phút</b>
                 </div>`;
@@ -694,14 +729,13 @@
         if (order.status === 'Đã hoàn tất' || order.status === 'Đã hủy') {
           if (shipperInterval) clearInterval(shipperInterval);
           document.getElementById('shpCountdown').style.display = "none";
-          document.getElementById('shpStatusMsg').innerHTML = `<span style='color:#ef4444;'>Đơn hàng đã kết thúc (${order.status}).</span>`;
-          document.getElementById('btnAcceptOrder').style.display = "block";
-          document.getElementById('btnAcceptOrder').disabled = true;
+          document.getElementById('shpStatusMsg').innerHTML = `<span style='color:#22c55e; font-size:1.05rem;'>✅ ĐƠN HÀNG ĐÃ GIAO THÀNH CÔNG! Cảm ơn bác tài!</span>`;
+          document.getElementById('btnAcceptOrder').style.display = "none";
           actionBox.style.display = "none";
           return;
         }
 
-        // Trạng thái đơn đang chờ Shipper nhận (hoặc vừa có Shipper báo sự cố trả đơn)
+        // Trạng thái đơn đang chờ Shipper nhận
         document.getElementById('shpCountdown').style.display = "block";
         document.getElementById('btnAcceptOrder').style.display = "block";
         actionBox.style.display = "none";
@@ -755,7 +789,6 @@
       });
     };
 
-    // BƯỚC 1 CỦA SHIPPER: BẤM NHẬN ĐƠN -> TÍNH THỜI GIAN TỚI QUÁN DỰA TRÊN ĐỊNH VỊ MAP & BÁO KHÁCH
     window.acceptOrderByShipper = function() {
       const phone = localStorage.getItem('hyChayShipperPhone');
       const name = localStorage.getItem('hyChayShipperName');
@@ -810,7 +843,6 @@
       }
     };
 
-    // BƯỚC 2 CỦA SHIPPER: TỚI QUÁN BẤM NHẬN ĐƠN THÀNH CÔNG -> TÍNH THỜI GIAN TỪ QUÁN TỚI KHÁCH & BÁO KHÁCH
     window.shipperActionPickedUp = function() {
       const name = localStorage.getItem('hyChayShipperName') || 'Tài xế';
       const commitPickup = (distToCusKm) => {
@@ -826,7 +858,7 @@
             timestamp: Date.now(),
             sender: 'shipper'
           }).catch(() => {});
-          alert(`🚀 Đã xác nhận lấy món tại quán!\n📍 Quãng đường giao tới khách: ~${distToCusKm} km\n⏳ Dự kiến: ~${etaToCustomerMins} phút tới nơi.\nBấm nút "Dẫn Đường Bằng Google Maps" để xem lộ trình!`);
+          alert(`🚀 Đã xác nhận lấy món tại quán!\nĐơn hàng trên máy Quản lý đã chuyển sang mục "Shipper Đang Giao".\nKhi giao tới khách, hãy chụp hình xác nhận để hoàn tất đơn!`);
         });
       };
 
@@ -848,13 +880,64 @@
       }
     };
 
-    // BƯỚC 3 CỦA SHIPPER: DẪN ĐƯỜNG MẶC ĐỊNH TỪ QUÁN (280 TRẦN HƯNG ĐẠO) ĐẾN KHÁCH HÀNG TRÊN GOOGLE MAPS
     window.shipperActionNavigate = function() {
       const mapUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(STORE_ADDRESS_TEXT)}&destination=${encodeURIComponent(currentOrderAddress)}&travelmode=driving`;
       window.open(mapUrl, '_blank');
     };
 
-    // BƯỚC 4 CỦA SHIPPER: NÚT HỦY ĐƠN KHI GẶP SỰ CỐ (XE HƯ...) -> PHÁT VOICE BÁO ĐỘNG LẠI CHO QUÁN
+    // XỬ LÝ CHỤP HÌNH XÁC NHẬN GIAO ĐƠN -> MỞ KHÓA & HIỂN THỊ NÚT HOÀN TẤT ĐƠN
+    window.handleShipperProofCapture = function(input) {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const cv = document.createElement('canvas');
+          let w = img.width, h = img.height;
+          if (w > 600) { h = Math.round(h * 600 / w); w = 600; }
+          cv.width = w; cv.height = h;
+          cv.getContext('2d').drawImage(img, 0, 0, w, h);
+          shipperDeliveryProofBase64 = cv.toDataURL('image/jpeg', 0.82);
+
+          document.getElementById('shipperProofPreviewImg').src = shipperDeliveryProofBase64;
+          document.getElementById('shipperProofPreviewBox').style.display = 'block';
+          document.getElementById('btnCompleteLockedNotice').style.display = 'none';
+          document.getElementById('btnShipperCompleteOrder').style.display = 'block';
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
+
+    window.shipperActionCompleteDelivery = function() {
+      if (!shipperDeliveryProofBase64) {
+        return alert("⚠️ Vui lòng chụp hình xác nhận đã giao đơn cho khách trước khi bấm Hoàn tất!");
+      }
+      const name = localStorage.getItem('hyChayShipperName') || 'Tài xế';
+      const btn = document.getElementById('btnShipperCompleteOrder');
+      btn.disabled = true;
+      btn.innerText = "⏳ ĐANG LƯU HÌNH & HOÀN TẤT ĐƠN...";
+
+      update(ref(db, `orders/${shipperOrderIdParam}`), {
+        status: 'Đã hoàn tất',
+        deliveryProof: shipperDeliveryProofBase64,
+        deliveryCompletedAt: new Date().toISOString(),
+        completedAt: new Date().toISOString()
+      }).then(() => {
+        set(ref(db, 'voice_sync/latest'), {
+          text: `Tài xế ${name} đã giao đơn hàng thành công và gửi hình ảnh xác nhận về hệ thống.`,
+          timestamp: Date.now(),
+          sender: 'shipper_complete'
+        }).catch(() => {});
+        alert("✅ Đã xác nhận giao đơn thành công! Hình ảnh đã được gửi về màn hình Quản lý.");
+      }).catch(err => {
+        btn.disabled = false;
+        btn.innerText = "🚀 XÁC NHẬN GIAO ĐƠN THÀNH CÔNG";
+        alert("❌ Lỗi kết nối khi lưu đơn: " + err.message);
+      });
+    };
+
     window.shipperActionIssue = function() {
       const name = localStorage.getItem('hyChayShipperName') || 'Tài xế';
       const phone = localStorage.getItem('hyChayShipperPhone') || '';
@@ -878,7 +961,6 @@
         alert("⚠️ Đã gửi thông báo sự cố bằng giọng nói về quán Hy Chay để quán điều phối Shipper khác!");
       });
     };
-
     // ==========================================
     // 2. DỮ LIỆU 70 MÓN ĂN & HIỂN THỊ MENU TỨC THÌ (ĐÃ KHÔI PHỤC 100%)
     // ==========================================
