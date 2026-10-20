@@ -169,14 +169,15 @@
 </head>
 <body>
 
-  <!-- =============================== -->
-  <!-- MÀN HÌNH NHẬN ĐƠN DÀNH RIÊNG CHO SHIPPER (CHỈ HIỆN KHI CÓ LINK ?shipper=...) -->
+<!-- =============================== -->
+  <!-- MÀN HÌNH NHẬN ĐƠN DÀNH RIÊNG CHO SHIPPER (V7 - NÂNG CẤP) -->
   <!-- =============================== -->
   <div id="shipperModeOverlay" class="shipper-mode-overlay">
     <div class="shipper-card" id="shipperLoginBox">
       <h2>🛵 ĐỘI SHIP HY CHAY</h2>
-      <p>Hệ thống tự động phân bổ đơn công bằng.</p>
-      <input type="tel" id="shipperPhoneInput" class="shipper-input" placeholder="Nhập SĐT của bạn để nhận đơn...">
+      <p>Nhập thông tin để quán và khách hàng dễ liên hệ.</p>
+      <input type="text" id="shipperNameInput" class="shipper-input" placeholder="Tên của bạn (VD: Chú Tư)..." style="margin-bottom:10px;">
+      <input type="tel" id="shipperPhoneInput" class="shipper-input" placeholder="Số điện thoại của bạn...">
       <button class="shipper-btn" onclick="shipperLogin()">TIẾP TỤC</button>
     </div>
 
@@ -184,17 +185,26 @@
       <h2>📦 CHI TIẾT ĐƠN HÀNG</h2>
       <div style="background:#0f172a; border-radius:12px; padding:15px; margin-bottom:20px; text-align:left; border:1px dashed #475569;">
         <p style="color:#94a3b8; margin-bottom:5px; font-size:0.9rem;">Mã đơn: <b id="shpOrderId" style="color:#fff;">--</b></p>
-        <p style="color:#94a3b8; margin-bottom:5px; font-size:0.9rem;">📍 Giao đến: <b id="shpAddress" style="color:#38bdf8;">--</b></p>
-        <p style="color:#94a3b8; font-size:0.9rem;">💰 Ship tài xế nhận: <b id="shpFee" style="color:#22c55e; font-size:1.1rem;">--</b></p>
+        <p style="color:#94a3b8; margin-bottom:5px; font-size:0.9rem;">📍 Khách: <b id="shpCustomerInfo" style="color:#fff;">--</b></p>
+        <p style="color:#94a3b8; margin-bottom:5px; font-size:0.9rem;">📍 Địa chỉ: <b id="shpAddress" style="color:#38bdf8;">--</b></p>
+        <p style="color:#94a3b8; font-size:0.9rem;">💰 Phí Ship bạn nhận: <b id="shpFee" style="color:#22c55e; font-size:1.1rem;">--</b></p>
       </div>
       
       <div id="shpStatusMsg" style="color:#fde047; font-weight:bold; margin-bottom:10px; min-height:24px;">Đang kiểm tra lượt...</div>
       <div class="shipper-countdown" id="shpCountdown">00</div>
       
+      <!-- Nút thao tác trước khi nhận -->
       <button id="btnAcceptOrder" class="shipper-btn" onclick="acceptOrderByShipper()" disabled>ĐANG XỬ LÝ LƯỢT...</button>
+
+      <!-- Các nút thao tác SAU KHI nhận (Ẩn mặc định) -->
+      <div id="shipperActionButtons" style="display:none; flex-direction:column; gap:10px; margin-top:15px;">
+        <button onclick="shipperActionPickedUp()" style="background:#22c55e; color:#fff; border:none; padding:14px; border-radius:10px; font-weight:800; font-size:1rem; cursor:pointer;">✅ ĐÃ LẤY MÓN - BẮT ĐẦU GIAO</button>
+        <button onclick="shipperActionNavigate()" style="background:#3b82f6; color:#fff; border:none; padding:14px; border-radius:10px; font-weight:800; font-size:1rem; cursor:pointer;">🗺️ DẪN ĐƯỜNG BẰNG GOOGLE MAPS</button>
+        <button onclick="shipperActionIssue()" style="background:#ef4444; color:#fff; border:none; padding:12px; border-radius:10px; font-weight:800; font-size:0.9rem; cursor:pointer;">⚠️ BÁO SỰ CỐ / HƯ XE (TRẢ ĐƠN)</button>
+      </div>
     </div>
   </div>
-
+  
   <!-- =============================== -->
   <!-- GIAO DIỆN KHÁCH HÀNG CHÍNH       -->
   <!-- =============================== -->
@@ -543,139 +553,41 @@
       "vpbank": "VPBank", "tpbank": "TPBank", "vib": "VIB", "hdbank": "HDBank"
     };
 
-    // ==========================================
-    // 1. CHẾ ĐỘ SHIPPER - THUẬT TOÁN THÁC NƯỚC (WATERFALL DISPATCHING)
-    // ==========================================
-    let shipperInterval = null;
-    if (shipperOrderIdParam) {
-      document.getElementById('customerAppWrapper').style.display = 'none';
-      document.getElementById('shipperModeOverlay').style.display = 'flex';
+<!-- =============================== -->
+  <!-- MÀN HÌNH NHẬN ĐƠN DÀNH RIÊNG CHO SHIPPER (V7 - NÂNG CẤP) -->
+  <!-- =============================== -->
+  <div id="shipperModeOverlay" class="shipper-mode-overlay">
+    <div class="shipper-card" id="shipperLoginBox">
+      <h2>🛵 ĐỘI SHIP HY CHAY</h2>
+      <p>Nhập thông tin để quán và khách hàng dễ liên hệ.</p>
+      <input type="text" id="shipperNameInput" class="shipper-input" placeholder="Tên của bạn (VD: Chú Tư)..." style="margin-bottom:10px;">
+      <input type="tel" id="shipperPhoneInput" class="shipper-input" placeholder="Số điện thoại của bạn...">
+      <button class="shipper-btn" onclick="shipperLogin()">TIẾP TỤC</button>
+    </div>
+
+    <div class="shipper-card" id="shipperOrderBox" style="display:none;">
+      <h2>📦 CHI TIẾT ĐƠN HÀNG</h2>
+      <div style="background:#0f172a; border-radius:12px; padding:15px; margin-bottom:20px; text-align:left; border:1px dashed #475569;">
+        <p style="color:#94a3b8; margin-bottom:5px; font-size:0.9rem;">Mã đơn: <b id="shpOrderId" style="color:#fff;">--</b></p>
+        <p style="color:#94a3b8; margin-bottom:5px; font-size:0.9rem;">📍 Khách: <b id="shpCustomerInfo" style="color:#fff;">--</b></p>
+        <p style="color:#94a3b8; margin-bottom:5px; font-size:0.9rem;">📍 Địa chỉ: <b id="shpAddress" style="color:#38bdf8;">--</b></p>
+        <p style="color:#94a3b8; font-size:0.9rem;">💰 Phí Ship bạn nhận: <b id="shpFee" style="color:#22c55e; font-size:1.1rem;">--</b></p>
+      </div>
       
-      const savedShipperPhone = localStorage.getItem('hyChayShipperPhone');
-      if (savedShipperPhone) {
-        document.getElementById('shipperPhoneInput').value = savedShipperPhone;
-        setTimeout(() => window.shipperLogin(), 500);
-      }
-    }
-
-    window.shipperLogin = function() {
-      const phone = document.getElementById('shipperPhoneInput').value.trim();
-      if (!phone || phone.length < 9) return alert("Vui lòng nhập số điện thoại hợp lệ!");
-      localStorage.setItem('hyChayShipperPhone', phone);
+      <div id="shpStatusMsg" style="color:#fde047; font-weight:bold; margin-bottom:10px; min-height:24px;">Đang kiểm tra lượt...</div>
+      <div class="shipper-countdown" id="shpCountdown">00</div>
       
-      document.getElementById('shipperLoginBox').style.display = 'none';
-      document.getElementById('shipperOrderBox').style.display = 'block';
-      
-      // Lắng nghe trạng thái đơn hàng thời gian thực
-      onValue(ref(db, `orders/${shipperOrderIdParam}`), (snap) => {
-        const order = snap.val();
-        if (!order) {
-          document.getElementById('shpStatusMsg').innerHTML = "<span style='color:#ef4444;'>❌ Đơn hàng không tồn tại hoặc đã bị xóa.</span>";
-          document.getElementById('shpCountdown').innerText = "--";
-          document.getElementById('btnAcceptOrder').style.display = 'none';
-          return;
-        }
+      <!-- Nút thao tác trước khi nhận -->
+      <button id="btnAcceptOrder" class="shipper-btn" onclick="acceptOrderByShipper()" disabled>ĐANG XỬ LÝ LƯỢT...</button>
 
-        document.getElementById('shpOrderId').innerText = `#HC-${shipperOrderIdParam.substring(shipperOrderIdParam.length - 5).toUpperCase()}`;
-        document.getElementById('shpAddress').innerText = order.address || '--';
-        document.getElementById('shpFee').innerText = (order.shippingFee || 0).toLocaleString() + 'đ';
-
-        // Nếu đơn đã có người nhận
-        if (order.status === 'Đang giao hàng' || order.shipperPhone) {
-          clearInterval(shipperInterval);
-          document.getElementById('shpCountdown').innerText = "00";
-          document.getElementById('btnAcceptOrder').disabled = true;
-          if (order.shipperPhone === phone) {
-            document.getElementById('shpStatusMsg').innerHTML = "<span style='color:#22c55e;'>✅ BẠN ĐÃ NHẬN ĐƠN NÀY! Vui lòng tới quán lấy đồ.</span>";
-            document.getElementById('btnAcceptOrder').innerText = "BẠN ĐANG GIAO ĐƠN NÀY";
-            document.getElementById('btnAcceptOrder').style.background = "#22c55e";
-          } else {
-            document.getElementById('shpStatusMsg').innerHTML = `<span style='color:#ef4444;'>⚠️ RẤT TIẾC! Tài xế khác (${order.shipperPhone}) đã nhận đơn này!</span>`;
-            document.getElementById('btnAcceptOrder').innerText = "ĐÃ CÓ NGƯỜI NHẬN";
-          }
-          return;
-        }
-
-        if (order.status === 'Đã hoàn tất' || order.status === 'Đã hủy') {
-          clearInterval(shipperInterval);
-          document.getElementById('shpStatusMsg').innerHTML = `<span style='color:#ef4444;'>Đơn hàng đã kết thúc (${order.status}).</span>`;
-          document.getElementById('btnAcceptOrder').disabled = true;
-          return;
-        }
-
-        // THUẬT TOÁN THÁC NƯỚC (20 GIÂY / NGƯỜI)
-        // Dùng mã Hash đơn giản từ SĐT tài xế để chia Slot (từ 0 đến 4)
-        const shipperSlot = (parseInt(phone.slice(-4)) || 0) % 5; 
-        const slotStart = shipperSlot * 20000; // Cửa sổ mở lúc: 0s, 20s, 40s, 60s, 80s
-        const slotEnd = slotStart + 20000;
-        const freeForAllTime = 100000; // Sau 100s thì mở cho tất cả mọi người giành
-
-        if (shipperInterval) clearInterval(shipperInterval);
-        
-        shipperInterval = setInterval(() => {
-          const elapsed = Date.now() - new Date(order.createdAt).getTime();
-          const btn = document.getElementById('btnAcceptOrder');
-          const msg = document.getElementById('shpStatusMsg');
-          const cd = document.getElementById('shpCountdown');
-
-          if (elapsed >= freeForAllTime) {
-            msg.innerHTML = "<span style='color:#22c55e;'>🔥 GIẢI CỨU ĐƠN - AI NHANH TAY THÌ ĐƯỢC!</span>";
-            cd.innerText = "GO!";
-            btn.disabled = false;
-            btn.innerText = "✅ NHẬN ĐƠN NGAY";
-            btn.style.background = "#22c55e";
-          } else if (elapsed >= slotStart && elapsed < slotEnd) {
-            const timeLeft = Math.ceil((slotEnd - elapsed) / 1000);
-            msg.innerHTML = "<span style='color:#ffd800;'>🟢 ĐẾN LƯỢT BẠN! Vui lòng xác nhận nhanh!</span>";
-            cd.innerText = timeLeft.toString().padStart(2, '0');
-            cd.style.color = "#22c55e";
-            btn.disabled = false;
-            btn.innerText = "✅ BẤM NHẬN ĐƠN NGAY";
-            btn.style.background = "#ffd800";
-          } else if (elapsed < slotStart) {
-            const waitTime = Math.ceil((slotStart - elapsed) / 1000);
-            msg.innerHTML = "<span style='color:#94a3b8;'>⏳ Đang ưu tiên cho tài xế tuyến khác...</span>";
-            cd.innerText = waitTime.toString().padStart(2, '0');
-            cd.style.color = "#ef4444";
-            btn.disabled = true;
-            btn.innerText = "CHƯA ĐẾN LƯỢT CỦA BẠN";
-            btn.style.background = "#475569";
-          } else {
-            const waitFree = Math.ceil((freeForAllTime - elapsed) / 1000);
-            msg.innerHTML = "<span style='color:#94a3b8;'>⏳ Đã qua lượt ưu tiên của bạn. Chờ giải cứu...</span>";
-            cd.innerText = waitFree.toString().padStart(2, '0');
-            cd.style.color = "#ef4444";
-            btn.disabled = true;
-            btn.innerText = "ĐÃ QUA LƯỢT - ĐANG CHỜ";
-            btn.style.background = "#475569";
-          }
-        }, 1000);
-      });
-    };
-
-    window.acceptOrderByShipper = function() {
-      const phone = localStorage.getItem('hyChayShipperPhone');
-      // Tranh chấp đồng thời: Dùng Transaction hoặc get() kiểm tra lại 1 lần cuối
-      get(ref(db, `orders/${shipperOrderIdParam}`)).then((snap) => {
-        const order = snap.val();
-        if (order && !order.shipperPhone && order.status !== 'Đang giao hàng') {
-          update(ref(db, `orders/${shipperOrderIdParam}`), {
-            status: 'Đang giao hàng',
-            shipperPhone: phone,
-            acceptedAt: new Date().toISOString()
-          }).then(() => {
-            alert("🎉 Chúc mừng! Bạn đã nhận đơn thành công. Vui lòng di chuyển đến quán lấy đồ!");
-          });
-        } else {
-          alert("⚠️ Rất tiếc, đơn hàng vừa được tài xế khác nhận mất!");
-        }
-      });
-    };
-
-    if (shipperOrderIdParam) {
-      // Dừng thực thi các code bên dưới nếu đang ở chế độ Shipper
-      throw new Error("Shipper Mode Activated - Halt Customer JS");
-    }
+      <!-- Các nút thao tác SAU KHI nhận (Ẩn mặc định) -->
+      <div id="shipperActionButtons" style="display:none; flex-direction:column; gap:10px; margin-top:15px;">
+        <button onclick="shipperActionPickedUp()" style="background:#22c55e; color:#fff; border:none; padding:14px; border-radius:10px; font-weight:800; font-size:1rem; cursor:pointer;">✅ ĐÃ LẤY MÓN - BẮT ĐẦU GIAO</button>
+        <button onclick="shipperActionNavigate()" style="background:#3b82f6; color:#fff; border:none; padding:14px; border-radius:10px; font-weight:800; font-size:1rem; cursor:pointer;">🗺️ DẪN ĐƯỜNG BẰNG GOOGLE MAPS</button>
+        <button onclick="shipperActionIssue()" style="background:#ef4444; color:#fff; border:none; padding:12px; border-radius:10px; font-weight:800; font-size:0.9rem; cursor:pointer;">⚠️ BÁO SỰ CỐ / HƯ XE (TRẢ ĐƠN)</button>
+      </div>
+    </div>
+  </div>
 
     // ==========================================
     // 2. DỮ LIỆU MENU & AUTO-FILL THÔNG TIN KHÁCH HÀNG
@@ -909,10 +821,12 @@
           if (order.status === 'Đã hoàn tất') totalSpent += (order.subtotal || 0);
           let itemsStr = []; for (let k in order.items) itemsStr.push(`${order.items[k].qty}x ${order.items[k].name}`);
           
-          const st = order.status; let trackerClass = '', trackerText = '';
+const st = order.status; let trackerClass = '', trackerText = '';
           if (st === 'Chờ xác nhận') { trackerClass = ''; trackerText = '⏳ Quán đang xác nhận đơn'; }
-          else if (st === 'Đang chế biến') { trackerClass = 'delivering'; trackerText = '🍳 Bếp đang lên món cho bạn'; }
-          else if (st === 'Đang giao hàng') { trackerClass = 'delivering'; trackerText = `🛵 ${order.shipperPhone ? 'Shipper ('+order.shipperPhone+')' : 'Tài xế'} đang giao!`; }
+          else if (st === 'Đang chế biến') { trackerClass = 'delivering'; trackerText = '🍳 Bếp đang nấu món cho bạn'; }
+          else if (st === 'Tài xế đang đến quán') { trackerClass = 'delivering'; trackerText = `🛵 Tài xế ${order.shipperName || ''} đang đến quán lấy món!`; }
+          else if (st === 'Đang giao hàng') { trackerClass = 'delivering'; trackerText = `🚀 Tài xế ${order.shipperName || ''} đang trên đường giao đến bạn!`; }
+          else if (st === 'Sự cố Shipper') { trackerClass = ''; trackerText = '⚠️ Quán đang điều phối lại Shipper khác'; }
           else if (st === 'Đã hoàn tất') { trackerClass = ''; trackerText = '✅ Đã giao thành công'; }
           else if (st === 'Đã hủy') { trackerClass = 'canceled'; trackerText = `❌ Đã hủy: ${order.cancelReason || 'Lý do khác'}`; }
 
