@@ -165,6 +165,12 @@
     .shipper-btn:hover { background: #eab308; }
     .shipper-btn:disabled { background: #475569; color: #94a3b8; cursor: not-allowed; }
     .shipper-countdown { font-size: 2.5rem; font-weight: 900; color: #ef4444; margin: 15px 0; font-family: monospace; }
+    .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
+ .switch input { opacity: 0; width: 0; height: 0; }
+ .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #475569; transition: .3s; border-radius: 24px; }
+ .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+ input:checked + .slider { background-color: #22c55e; }
+ input:checked + .slider:before { transform: translateX(22px); }
   </style>
 </head>
 <body>
@@ -1593,16 +1599,22 @@ const CAT_LABELS_MAP = {
     function saveCartLocal() { localStorage.setItem('hyChayCart', JSON.stringify(cart)); }
     function loadCartLocal() { const c = localStorage.getItem('hyChayCart'); if (c) { cart = JSON.parse(c); updateCartUI(); } }
 
-    window.addToCart = function(id, name, p) {
-      const safeKey = safeItemKey(name);
-      const c = menuCustomCache[id] || {};
-      const currentPrice = c.price !== undefined ? c.price : p;
-      if (c.soldOut) return alert("Món này đang tạm hết nguyên liệu!");
+window.addToCart = function(id, name, p) {
+   const safeKey = safeItemKey(name);
+   const c = menuCustomCache[id] || {};
+   const baseDish = ALL_MENU_DATA.find(d => d.id === id);
+   const catCode = c.cat || (baseDish ? baseDish.cat : 'bun');
+   const currentPrice = c.price !== undefined ? Number(c.price) : p;
+   if (c.soldOut) return alert("Món này đang tạm hết nguyên liệu!");
 
-      if (cart[safeKey]) cart[safeKey].qty++;
-      else cart[safeKey] = { name, price: currentPrice, qty: 1 };
-      updateCartUI(); saveCartLocal();
-    };
+   if (cart[safeKey]) {
+     cart[safeKey].qty++;
+     cart[safeKey].cat = catCode;
+   } else {
+     cart[safeKey] = { id, name, price: currentPrice, qty: 1, cat: catCode };
+   }
+   updateCartUI(); saveCartLocal();
+ };
 
     window.updateCartQty = function(safeKey, d) {
       if (cart[safeKey]) {
