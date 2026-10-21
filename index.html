@@ -1199,7 +1199,7 @@ const CAT_LABELS_MAP = {
       return list;
     }
 
-    function renderFeaturedDishes() {
+function renderFeaturedDishes() {
       const el = document.getElementById('featuredDishGrid');
       if (!el) return;
       let html = '';
@@ -1210,7 +1210,7 @@ const CAT_LABELS_MAP = {
         if (it.isDeleted) return;
         const safeName = it.name.replace(/'/g, "\\'");
         html += `
-          <div class="dish-card ${it.isSoldOut ? 'is-sold-out' : ''} ${it.isHot ? 'is-hot' : ''}" data-dish-id="${it.id}">
+          <div class="dish-card ${it.isSoldOut ? 'is-sold-out' : ''} is-hot" data-dish-id="${it.id}">
             <div class="dish-img-wrap"><span class="hot-badge">🔥 Bán chạy</span><img src="${it.image}" onerror="this.src='Logo nho.png'"><span class="sold-out-badge">Tạm Hết</span></div>
             <div class="dish-body">
               <h3>${it.name}</h3>
