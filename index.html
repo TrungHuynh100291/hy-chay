@@ -190,14 +190,17 @@
 
     <div class="shipper-card" id="shipperOrderBox" style="display:none;">
       <h2>📦 CHI TIẾT ĐƠN HÀNG</h2>
-      <!-- CÔNG TẮC TRẠNG THÁI TÀI XẾ -->
-      <div style="background:#1e293b; border:2px solid #475569; padding:10px; border-radius:10px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
+<!-- CÔNG TẮC TRẠNG THÁI TÀI XẾ & KÍCH HOẠT CÒI HÚ CHẠY NGẦM -->
+      <div style="background:#1e293b; border:2px solid #475569; padding:10px; border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
         <span style="font-size:0.9rem; font-weight:700; color:#fff;" id="shipperStatusText">Trạng thái: Đang nghỉ</span>
         <label class="switch">
           <input type="checkbox" id="shipperOnlineToggle" onchange="toggleShipperOnline(this.checked)">
           <span class="slider"></span>
         </label>
       </div>
+      <button type="button" id="btnShipperSoundArm" onclick="armShipperBackgroundAlarm()" style="width:100%; background:#dc2626; color:#fff; border:2px solid #fde047; padding:11px; border-radius:10px; font-weight:900; font-size:0.9rem; cursor:pointer; margin-bottom:14px; box-shadow:0 0 15px rgba(220,38,38,0.5);">
+        🔊 BẤM BẬT CÒI HÚ & RUNG CHẠY NGẦM (KỂ CẢ KHI KHÓA MÁY)
+      </button>
       <div style="background:#0f172a; border-radius:12px; padding:15px; margin-bottom:20px; text-align:left; border:1px dashed #475569;">
         <p style="color:#94a3b8; margin-bottom:5px; font-size:0.9rem;">Mã đơn: <b id="shpOrderId" style="color:#fff;">--</b></p>
         <p style="color:#94a3b8; margin-bottom:5px; font-size:0.9rem;">👤 Khách: <b id="shpCustomerInfo" style="color:#fff;">--</b></p>
@@ -638,12 +641,169 @@
     }
 
 // ==========================================
-    // 1. CHẾ ĐỘ SHIPPER V9 (ẨN BÁO SỰ CỐ KHI ĐÃ LẤY MÓN + BẮT BUỘC CHỤP ẢNH MỚI HIỆN NÚT HOÀN TẤT)
+    // 1. CHẾ ĐỘ SHIPPER V10 (TRẠM TRỰC ĐƠN NGẦM + CÒI HÚ XUYÊN ỒN + RUNG LIÊN HỒI + GIỌNG VIỆT)
     // ==========================================
     let shipperInterval = null;
     let currentOrderAddress = "";
     let currentOrderCached = null;
     let shipperDeliveryProofBase64 = null;
+    let activeShipperOrderId = (shipperOrderIdParam && shipperOrderIdParam !== 'hub' && shipperOrderIdParam !== '1') ? shipperOrderIdParam : null;
+    let singleOrderUnsubscribe = null;
+
+    // Bộ âm thanh chạy ngầm & Còi báo động xuyên ồn ngoài đường cho Bác tài
+    let shpAudioCtx = null;
+    let shpSilentCarrier = null;
+    let shpWakeLock = null;
+    let shpIsAlarmArmed = false;
+    let shpAlarmLoopTimer = null;
+    let shpIsRingingNow = false;
+    let shpTtsPlayer = new Audio();
+    shpTtsPlayer.referrerPolicy = "no-referrer";
+
+    function createShipperSilentWav() {
+      const sampleRate = 8000, numSamples = 8000;
+      const buffer = new ArrayBuffer(44 + numSamples * 2);
+      const view = new DataView(buffer);
+      const writeStr = (off, s) => { for (let i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); };
+      writeStr(0, 'RIFF'); view.setUint32(4, 36 + numSamples * 2, true); writeStr(8, 'WAVE');
+      writeStr(12, 'fmt '); view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true);
+      view.setUint32(24, sampleRate, true); view.setUint32(28, sampleRate * 2, true); view.setUint16(32, 2, true); view.setUint16(34, 16, true);
+      writeStr(36, 'data'); view.setUint32(40, numSamples * 2, true);
+      for (let i = 0; i < numSamples; i++) view.setInt16(44 + i * 2, (i % 2 === 0) ? 1 : -1, true);
+      const bytes = new Uint8Array(buffer); let bin = '';
+      for (let i = 0; i < bytes.byteLength; i++) bin += String.fromCharCode(bytes[i]);
+      return 'data:audio/wav;base64,' + btoa(bin);
+    }
+
+    // Phát tiếng Còi Hú Kép (Sóng vuông Square-Wave 1400Hz - 2200Hz) xuyên thủng tiếng ồn đường phố
+    function playStreetPiercingSiren() {
+      try {
+        if (!shpAudioCtx) shpAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (shpAudioCtx.state === 'suspended') shpAudioCtx.resume();
+        const now = shpAudioCtx.currentTime;
+        const sirenPattern = [
+          { freq: 1400, start: 0.0, dur: 0.18 },
+          { freq: 2200, start: 0.19, dur: 0.18 },
+          { freq: 1400, start: 0.38, dur: 0.18 },
+          { freq: 2200, start: 0.57, dur: 0.22 },
+          { freq: 1800, start: 0.82, dur: 0.30 }
+        ];
+        sirenPattern.forEach(n => {
+          const osc = shpAudioCtx.createOscillator();
+          const gain = shpAudioCtx.createGain();
+          osc.type = 'square'; // Sóng vuông cho âm lượng đanh, vang và lớn nhất trên loa điện thoại
+          osc.frequency.setValueAtTime(n.freq, now + n.start);
+          gain.gain.setValueAtTime(1.0, now + n.start);
+          gain.gain.exponentialRampToValueAtTime(0.05, now + n.start + n.dur);
+          osc.connect(gain);
+          gain.connect(shpAudioCtx.destination);
+          osc.start(now + n.start);
+          osc.stop(now + n.start + n.dur);
+        });
+      } catch (e) {}
+    }
+
+    function speakShipperOrderAlert(text) {
+      playStreetPiercingSiren();
+      if ('vibrate' in navigator) {
+        try { navigator.vibrate([700, 200, 700, 200, 900]); } catch (_) {}
+      }
+      setTimeout(() => {
+        if (!shpIsRingingNow) return;
+        const ttsUrl = `https://translate.googleapis.com/translate_tts?client=gtx&ie=UTF-8&tl=vi&dt=t&q=${encodeURIComponent(text)}`;
+        shpTtsPlayer.src = ttsUrl;
+        shpTtsPlayer.volume = 1.0;
+        shpTtsPlayer.play().catch(() => {
+          if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = 'vi-VN'; u.volume = 1.0; u.rate = 1.0;
+            window.speechSynthesis.speak(u);
+          }
+        });
+      }, 950);
+    }
+
+    function startContinuousShipperAlarm(order) {
+      if (shpIsRingingNow) return;
+      shpIsRingingNow = true;
+      const feeText = (order.shippingFee || 0).toLocaleString();
+      const shortAddr = (order.address || 'Phan Thiết').split(',')[0];
+      const voiceMsg = `Có đơn mới Hy Chay! Giao đi ${shortAddr}, phí ship ${feeText} đồng. Bấm nhận ngay!`;
+
+      speakShipperOrderAlert(voiceMsg);
+      if ('Notification' in window && Notification.permission === 'granted') {
+        try {
+          new Notification('🛵 ĐƠN MỚI HY CHAY - NHẬN NGAY!', {
+            body: `Giao: ${order.address} | Ship: ${feeText}đ`,
+            icon: 'https://hychayfood.vercel.app/Logo%20nho.png',
+            tag: 'shipper-incoming-order',
+            renotify: true
+          });
+        } catch (_) {}
+      }
+
+      // Lặp lại tiếng còi hú + rung + đọc giọng nói mỗi 4.5 giây liên tục cho đến khi bấm Nhận hoặc hết lượt
+      shpAlarmLoopTimer = setInterval(() => {
+        if (!shpIsRingingNow) {
+          clearInterval(shpAlarmLoopTimer);
+          shpAlarmLoopTimer = null;
+          return;
+        }
+        speakShipperOrderAlert(voiceMsg);
+      }, 4500);
+    }
+
+    function stopContinuousShipperAlarm() {
+      shpIsRingingNow = false;
+      if (shpAlarmLoopTimer) {
+        clearInterval(shpAlarmLoopTimer);
+        shpAlarmLoopTimer = null;
+      }
+      if ('vibrate' in navigator) {
+        try { navigator.vibrate(0); } catch (_) {}
+      }
+      try { shpTtsPlayer.pause(); } catch (_) {}
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    }
+
+    window.armShipperBackgroundAlarm = async function(silentInit = false) {
+      shpIsAlarmArmed = true;
+      playStreetPiercingSiren();
+      try {
+        if (!shpSilentCarrier) {
+          shpSilentCarrier = new Audio(createShipperSilentWav());
+          shpSilentCarrier.loop = true;
+          shpSilentCarrier.volume = 0.02;
+        }
+        await shpSilentCarrier.play();
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.metadata = new MediaMetadata({
+            title: 'Đội Ship Hy Chay - Đang Canh Đơn Ngầm',
+            artist: 'Bật Online để tự động đổ chuông khi có đơn',
+            album: 'Hy Chay 280 Trần Hưng Đạo',
+            artwork: [{ src: 'https://hychayfood.vercel.app/Logo%20nho.png', sizes: '192x192', type: 'image/png' }]
+          });
+          navigator.mediaSession.setActionHandler('play', () => shpSilentCarrier.play());
+          navigator.mediaSession.setActionHandler('pause', () => shpSilentCarrier.play());
+        }
+      } catch (_) {}
+
+      if ('wakeLock' in navigator) {
+        try { shpWakeLock = await navigator.wakeLock.request('screen'); } catch (_) {}
+      }
+      if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission().catch(() => {});
+      }
+
+      const btnArm = document.getElementById('btnShipperSoundArm');
+      if (btnArm) {
+        btnArm.style.background = '#16a34a';
+        btnArm.style.borderColor = '#86efac';
+        btnArm.style.boxShadow = 'none';
+        btnArm.innerText = '🔊 ĐÃ BẬT CÒI HÚ & RUNG CHẠY NGẦM (100% CÔNG SUẤT)';
+      }
+    };
 
     if (shipperOrderIdParam) {
       document.getElementById('customerAppWrapper').style.display = 'none';
@@ -662,165 +822,211 @@
       const name = (document.getElementById('shipperNameInput').value || '').trim();
       const phone = normalizePhone(document.getElementById('shipperPhoneInput').value);
       if (!name || !phone || phone.length < 9) {
-        return alert("Vui lòng nhập đầy đủ Tên và Số điện thoại của bạn (lần đầu tiên) để quán và khách hàng dễ liên hệ!");
+        return alert("Vui lòng nhập đầy đủ Tên và Số điện thoại của bạn!");
       }
       localStorage.setItem('hyChayShipperName', name);
       localStorage.setItem('hyChayShipperPhone', phone);
-      // Tự động đăng ký bác tài lên bảng Đội Tài Xế của Admin & báo Online
+
+      // Kích hoạt luôn âm thanh ngầm ngay khi bác tài bấm nút TIẾP TỤC
+      window.armShipperBackgroundAlarm(true);
+
       update(ref(db, `shippers/${phone}`), { name: name, phone: phone, isOnline: true, lastSeen: new Date().toISOString() }).catch(() => {});
+      document.getElementById('shipperOnlineToggle').checked = true;
+      document.getElementById('shipperStatusText').innerText = "Trạng thái: SẴN SÀNG NHẬN ĐƠN";
+      document.getElementById('shipperStatusText').style.color = "#22c55e";
 
       document.getElementById('shipperLoginBox').style.display = 'none';
       document.getElementById('shipperOrderBox').style.display = 'block';
 
-      onValue(ref(db, `orders/${shipperOrderIdParam}`), (snap) => {
-        const order = snap.val();
-        if (!order) {
-          document.getElementById('shpStatusMsg').innerHTML = "<span style='color:#ef4444;'>❌ Đơn hàng không tồn tại hoặc đã bị xóa.</span>";
-          document.getElementById('shpCountdown').style.display = "none";
-          document.getElementById('btnAcceptOrder').style.display = "none";
-          return;
-        }
+      // Lắng nghe toàn bộ nhánh orders: Tự động bắt ngay đơn hàng đang thuộc về bác tài HOẶC đơn mới vừa được Quán bắn ra!
+      onValue(ref(db, 'orders'), (allSnap) => {
+        const allOrders = allSnap.val() || {};
+        // 1. Ưu tiên kiểm tra xem bác tài có đang giao dở đơn nào không
+        let myActiveId = null;
+        let newestDispatchedId = null;
+        let newestDispatchTime = 0;
 
-        currentOrderCached = order;
-        currentOrderAddress = order.address || "Phan Thiết, Lâm Đồng";
-        document.getElementById('shpOrderId').innerText = `#HC-${shipperOrderIdParam.substring(shipperOrderIdParam.length - 5).toUpperCase()}`;
-        document.getElementById('shpCustomerInfo').innerText = `${order.customerName} (${order.phone})`;
-        document.getElementById('shpAddress').innerText = order.address || '--';
-        document.getElementById('shpFee').innerText = (order.shippingFee || 0).toLocaleString() + 'đ';
-
-        const isMyOrder = (normalizePhone(order.shipperPhone) === phone);
-        const actionBox = document.getElementById('shipperActionButtons');
-        const btnPickedUp = document.getElementById('btnShipperPickedUp');
-        const btnNavigate = document.getElementById('btnShipperNavigate');
-        const btnIssue = document.getElementById('btnShipperIssue');
-        const proofSection = document.getElementById('shipperProofSection');
-
-        if (order.status === 'Tài xế đang đến quán' || order.status === 'Đang giao hàng') {
-          if (shipperInterval) clearInterval(shipperInterval);
-          document.getElementById('shpCountdown').style.display = "none";
-
-          if (isMyOrder) {
-            document.getElementById('btnAcceptOrder').style.display = "none";
-            actionBox.style.display = "flex";
-
-            if (order.status === 'Tài xế đang đến quán') {
-              // Giai đoạn 1: Shipper đang chạy tới quán -> Hiện nút Đã tới quán + Dẫn đường + Báo sự cố; Ẩn khung chụp ảnh giao khách
-              if (btnPickedUp) btnPickedUp.style.display = 'block';
-              if (btnNavigate) btnNavigate.style.display = 'block';
-              if (btnIssue) btnIssue.style.display = 'block';
-              if (proofSection) proofSection.style.display = 'none';
-
-              const etaStore = order.etaToStoreMins || 5;
-              const distStore = order.shipperDistToStoreKm || 1.5;
-              document.getElementById('shpStatusMsg').innerHTML = `
-                <div style="background:#1e3a8a; border:1px solid #3b82f6; padding:10px; border-radius:10px; color:#fff; line-height:1.5;">
-                  🛵 <b>BẠN ĐANG TRÊN ĐƯỜNG TỚI QUÁN</b><br>
-                  📍 Cách quán khoảng <b>${distStore} km</b> (Dự kiến <b>~${etaStore} phút</b> tới quán)<br>
-                  <small style="color:#fde047;">👉 Khi tới quán lấy món xong, hãy bấm nút màu Xanh lá bên dưới!</small>
-                </div>`;
-            } else {
-              // Giai đoạn 2: Shipper ĐÃ NHẬN MÓN TẠI QUÁN & ĐANG GIAO KHÁCH
-              // Bỏ nút Báo sự cố & nút Đã tới quán; Chỉ hiện nút Dẫn đường + Khung chụp ảnh mở khóa nút Hoàn tất
-              if (btnPickedUp) btnPickedUp.style.display = 'none';
-              if (btnIssue) btnIssue.style.display = 'none';
-              if (btnNavigate) btnNavigate.style.display = 'block';
-              if (proofSection) proofSection.style.display = 'block';
-
-              const etaCus = order.etaToCustomerMins || 10;
-              const distCus = order.shipperDistToCusKm || 2.0;
-              document.getElementById('shpStatusMsg').innerHTML = `
-                <div style="background:#14532d; border:1px solid #22c55e; padding:10px; border-radius:10px; color:#fff; line-height:1.5;">
-                  🚀 <b>ĐÃ NHẬN MÓN TẠI QUÁN - ĐANG GIAO KHÁCH</b><br>
-                  📍 Quãng đường từ quán tới khách: <b>~${distCus} km</b><br>
-                  ⏳ Thời gian dự kiến tới khách: <b>~${etaCus} phút</b>
-                </div>`;
+        Object.keys(allOrders).forEach(oid => {
+          const o = allOrders[oid];
+          if (!o || o.archived || o.orderType === 'dine_in') return;
+          if (normalizePhone(o.shipperPhone) === phone && (o.status === 'Tài xế đang đến quán' || o.status === 'Đang giao hàng')) {
+            myActiveId = oid;
+          }
+          // Tìm đơn hàng mới nhất đang chờ Shipper nhận (đã được Admin bấm bắn đơn hoặc mới đặt)
+          if (!o.shipperPhone && (o.status === 'Chờ xác nhận' || o.status === 'Đang chế biến' || o.status === 'Sự cố Shipper') && o.dispatchResetAt) {
+            const t = new Date(o.dispatchResetAt).getTime();
+            if (t > newestDispatchTime) {
+              newestDispatchTime = t;
+              newestDispatchedId = oid;
             }
-          } else {
-            actionBox.style.display = "none";
-            document.getElementById('btnAcceptOrder').style.display = "block";
-            document.getElementById('btnAcceptOrder').disabled = true;
-            document.getElementById('btnAcceptOrder').innerText = "ĐÃ CÓ TÀI XẾ KHÁC NHẬN";
-            document.getElementById('shpStatusMsg').innerHTML = `<span style='color:#ef4444;'>⚠️ Tài xế <b>${order.shipperName || ''} (${order.shipperPhone || ''})</b> đã nhận đơn này!</span>`;
           }
-          return;
-        }
+        });
 
-        if (order.status === 'Đã hoàn tất' || order.status === 'Đã hủy') {
-          if (shipperInterval) clearInterval(shipperInterval);
-          document.getElementById('shpCountdown').style.display = "none";
-          document.getElementById('shpStatusMsg').innerHTML = `<span style='color:#22c55e; font-size:1.05rem;'>✅ ĐƠN HÀNG ĐÃ GIAO THÀNH CÔNG! Cảm ơn bác tài!</span>`;
-          document.getElementById('btnAcceptOrder').style.display = "none";
-          actionBox.style.display = "none";
-          return;
-        }
-
-        // Trạng thái đơn đang chờ Shipper nhận
-        document.getElementById('shpCountdown').style.display = "block";
-        document.getElementById('btnAcceptOrder').style.display = "block";
-        actionBox.style.display = "none";
-
-        const baseTimestamp = order.dispatchResetAt ? new Date(order.dispatchResetAt).getTime() : new Date(order.createdAt).getTime();
-        // THUẬT TOÁN THÁC NƯỚC ĐỘNG (DYNAMIC WATERFALL V9)
-        const queue = order.dispatchQueue || [];
-        const myIndex = queue.indexOf(phone);
-        
-        let slotStart = 0, slotEnd = 0, freeForAllTime = 0;
-
-        if (myIndex !== -1) {
-          // Tài xế có mặt trong danh sách ưu tiên do Admin bốc thăm
-          slotStart = myIndex * 20000;
-          slotEnd = slotStart + 20000;
-          freeForAllTime = queue.length * 20000;
+        const targetId = myActiveId || newestDispatchedId || activeShipperOrderId;
+        if (targetId && allOrders[targetId]) {
+          activeShipperOrderId = targetId;
+          renderShipperOrderScreen(targetId, allOrders[targetId], phone, name);
         } else {
-          // Tài xế quên bật Online, phải chờ tất cả người Online từ chối thì mới được giành đơn
-          slotStart = 9999999; 
-          freeForAllTime = (queue.length > 0 ? queue.length : 1) * 20000;
+          stopContinuousShipperAlarm();
+          if (shipperInterval) clearInterval(shipperInterval);
+          document.getElementById('shpOrderId').innerText = "ĐANG TRỰC ĐƠN...";
+          document.getElementById('shpCustomerInfo').innerText = "Chờ quán bắn đơn mới";
+          document.getElementById('shpAddress').innerText = "Hệ thống sẽ tự động hú còi khi có đơn!";
+          document.getElementById('shpFee').innerText = "--";
+          document.getElementById('shpStatusMsg').innerHTML = "<span style='color:#22c55e;'>🟢 Đang canh đơn trực tuyến... Bạn có thể khóa màn hình bỏ túi quần!</span>";
+          document.getElementById('shpCountdown').style.display = "none";
+          document.getElementById('btnAcceptOrder').style.display = "none";
+          document.getElementById('shipperActionButtons').style.display = "none";
         }
-
-        if (shipperInterval) clearInterval(shipperInterval);
-        shipperInterval = setInterval(() => {
-          const elapsed = Math.max(0, Date.now() - baseTimestamp);
-          const btn = document.getElementById('btnAcceptOrder');
-          const msg = document.getElementById('shpStatusMsg');
-          const cd = document.getElementById('shpCountdown');
-
-          if (order.status === 'Sự cố Shipper' || elapsed >= freeForAllTime) {
-            msg.innerHTML = `<span style='color:#22c55e;'>🔥 ĐƠN ƯU TIÊN NHẬN NGAY (${name} - ${phone})!</span>`;
-            cd.innerText = "NHẬN!";
-            cd.style.color = "#22c55e";
-            btn.disabled = false;
-            btn.innerText = "✅ BẤM NHẬN ĐƠN NGAY";
-            btn.style.background = "#22c55e";
-          } else if (elapsed >= slotStart && elapsed < slotEnd) {
-            const timeLeft = Math.ceil((slotEnd - elapsed) / 1000);
-            msg.innerHTML = `<span style='color:#ffd800;'>🟢 ĐẾN LƯỢT CỦA BẠN (${name})! Xác nhận trong 20s!</span>`;
-            cd.innerText = timeLeft.toString().padStart(2, '0') + "s";
-            cd.style.color = "#22c55e";
-            btn.disabled = false;
-            btn.innerText = "✅ BẤM NHẬN ĐƠN NGAY";
-            btn.style.background = "#ffd800";
-          } else if (elapsed < slotStart) {
-            const waitTime = Math.ceil((slotStart - elapsed) / 1000);
-            msg.innerHTML = "<span style='color:#94a3b8;'>⏳ Đang ưu tiên tài xế trước (20s/người)... Chờ đến lượt bạn:</span>";
-            cd.innerText = waitTime.toString().padStart(2, '0') + "s";
-            cd.style.color = "#ef4444";
-            btn.disabled = true;
-            btn.innerText = "ĐANG ĐỢI ĐẾN LƯỢT BẠN...";
-            btn.style.background = "#475569";
-          } else {
-            const waitFree = Math.ceil((freeForAllTime - elapsed) / 1000);
-            msg.innerHTML = "<span style='color:#94a3b8;'>⏳ Đã qua 20s của bạn. Chuyển cho người kế tiếp...</span>";
-            cd.innerText = waitFree.toString().padStart(2, '0') + "s";
-            cd.style.color = "#ef4444";
-            btn.disabled = true;
-            btn.innerText = "ĐÃ QUA LƯỢT - CHỜ MỞ TỰ DO";
-            btn.style.background = "#475569";
-          }
-        }, 500);
       });
     };
 
+    function renderShipperOrderScreen(orderId, order, phone, name) {
+      currentOrderCached = order;
+      currentOrderAddress = order.address || "Phan Thiết, Lâm Đồng";
+      document.getElementById('shpOrderId').innerText = `#HC-${orderId.substring(orderId.length - 5).toUpperCase()}`;
+      document.getElementById('shpCustomerInfo').innerText = `${order.customerName} (${order.phone})`;
+      document.getElementById('shpAddress').innerText = order.address || '--';
+      document.getElementById('shpFee').innerText = (order.shippingFee || 0).toLocaleString() + 'đ';
+
+      const isMyOrder = (normalizePhone(order.shipperPhone) === phone);
+      const actionBox = document.getElementById('shipperActionButtons');
+      const btnPickedUp = document.getElementById('btnShipperPickedUp');
+      const btnNavigate = document.getElementById('btnShipperNavigate');
+      const btnIssue = document.getElementById('btnShipperIssue');
+      const proofSection = document.getElementById('shipperProofSection');
+
+      if (order.status === 'Tài xế đang đến quán' || order.status === 'Đang giao hàng') {
+        stopContinuousShipperAlarm();
+        if (shipperInterval) clearInterval(shipperInterval);
+        document.getElementById('shpCountdown').style.display = "none";
+
+        if (isMyOrder) {
+          document.getElementById('btnAcceptOrder').style.display = "none";
+          actionBox.style.display = "flex";
+
+          if (order.status === 'Tài xế đang đến quán') {
+            if (btnPickedUp) btnPickedUp.style.display = 'block';
+            if (btnNavigate) btnNavigate.style.display = 'block';
+            if (btnIssue) btnIssue.style.display = 'block';
+            if (proofSection) proofSection.style.display = 'none';
+
+            const etaStore = order.etaToStoreMins || 5;
+            const distStore = order.shipperDistToStoreKm || 1.5;
+            document.getElementById('shpStatusMsg').innerHTML = `
+              <div style="background:#1e3a8a; border:1px solid #3b82f6; padding:10px; border-radius:10px; color:#fff; line-height:1.5;">
+                🛵 <b>BẠN ĐANG TRÊN ĐƯỜNG TỚI QUÁN</b><br>
+                📍 Cách quán khoảng <b>${distStore} km</b> (Dự kiến <b>~${etaStore} phút</b> tới quán)<br>
+                <small style="color:#fde047;">👉 Khi tới quán lấy món xong, hãy bấm nút màu Xanh lá bên dưới!</small>
+              </div>`;
+          } else {
+            if (btnPickedUp) btnPickedUp.style.display = 'none';
+            if (btnIssue) btnIssue.style.display = 'none';
+            if (btnNavigate) btnNavigate.style.display = 'block';
+            if (proofSection) proofSection.style.display = 'block';
+
+            const etaCus = order.etaToCustomerMins || 10;
+            const distCus = order.shipperDistToCusKm || 2.0;
+            document.getElementById('shpStatusMsg').innerHTML = `
+              <div style="background:#14532d; border:1px solid #22c55e; padding:10px; border-radius:10px; color:#fff; line-height:1.5;">
+                🚀 <b>ĐÃ NHẬN MÓN TẠI QUÁN - ĐANG GIAO KHÁCH</b><br>
+                📍 Quãng đường từ quán tới khách: <b>~${distCus} km</b><br>
+                ⏳ Thời gian dự kiến tới khách: <b>~${etaCus} phút</b>
+              </div>`;
+          }
+        } else {
+          actionBox.style.display = "none";
+          document.getElementById('btnAcceptOrder').style.display = "block";
+          document.getElementById('btnAcceptOrder').disabled = true;
+          document.getElementById('btnAcceptOrder').innerText = "ĐÃ CÓ TÀI XẾ KHÁC NHẬN";
+          document.getElementById('shpStatusMsg').innerHTML = `<span style='color:#ef4444;'>⚠️ Tài xế <b>${order.shipperName || ''} (${order.shipperPhone || ''})</b> đã nhận đơn này!</span>`;
+        }
+        return;
+      }
+
+      if (order.status === 'Đã hoàn tất' || order.status === 'Đã hủy') {
+        stopContinuousShipperAlarm();
+        if (shipperInterval) clearInterval(shipperInterval);
+        document.getElementById('shpCountdown').style.display = "none";
+        document.getElementById('shpStatusMsg').innerHTML = `<span style='color:#22c55e; font-size:1.05rem;'>✅ ĐƠN HÀNG ĐÃ GIAO THÀNH CÔNG! Đang chờ đơn tiếp theo...</span>`;
+        document.getElementById('btnAcceptOrder').style.display = "none";
+        actionBox.style.display = "none";
+        return;
+      }
+
+      // Đơn hàng đang chờ nhận -> Kích hoạt đồng hồ thác nước 20s và Còi báo động liên hồi khi đến lượt!
+      document.getElementById('shpCountdown').style.display = "block";
+      document.getElementById('btnAcceptOrder').style.display = "block";
+      actionBox.style.display = "none";
+
+      const baseTimestamp = order.dispatchResetAt ? new Date(order.dispatchResetAt).getTime() : new Date(order.createdAt).getTime();
+      const queue = order.dispatchQueue || [];
+      const myIndex = queue.indexOf(phone);
+      let slotStart = 0, slotEnd = 0, freeForAllTime = 0;
+
+      if (myIndex !== -1) {
+        slotStart = myIndex * 20000;
+        slotEnd = slotStart + 20000;
+        freeForAllTime = queue.length * 20000;
+      } else {
+        slotStart = 9999999;
+        freeForAllTime = (queue.length > 0 ? queue.length : 1) * 20000;
+      }
+
+      if (shipperInterval) clearInterval(shipperInterval);
+      shipperInterval = setInterval(() => {
+        const elapsed = Math.max(0, Date.now() - baseTimestamp);
+        const btn = document.getElementById('btnAcceptOrder');
+        const msg = document.getElementById('shpStatusMsg');
+        const cd = document.getElementById('shpCountdown');
+
+        if (order.status === 'Sự cố Shipper' || elapsed >= freeForAllTime) {
+          msg.innerHTML = `<span style='color:#22c55e;'>🔥 ĐƠN MỞ TỰ DO - BẤM NHẬN NGAY (${name})!</span>`;
+          cd.innerText = "NHẬN!";
+          cd.style.color = "#22c55e";
+          btn.disabled = false;
+          btn.innerText = "✅ BẤM NHẬN ĐƠN NGAY";
+          btn.style.background = "#22c55e";
+          // Hú còi liên tục nếu bác tài đang bật Online
+          if (document.getElementById('shipperOnlineToggle')?.checked) {
+            startContinuousShipperAlarm(order);
+          }
+        } else if (elapsed >= slotStart && elapsed < slotEnd) {
+          const timeLeft = Math.ceil((slotEnd - elapsed) / 1000);
+          msg.innerHTML = `<span style='color:#ffd800;'>🟢 ĐẾN LƯỢT CỦA BẠN (${name})! Còi đang hú - Nhận trong 20s!</span>`;
+          cd.innerText = timeLeft.toString().padStart(2, '0') + "s";
+          cd.style.color = "#22c55e";
+          btn.disabled = false;
+          btn.innerText = "✅ BẤM NHẬN ĐƠN NGAY";
+          btn.style.background = "#ffd800";
+          // Đúng 20 giây lượt của bác tài này -> Hú còi + Rung liên hồi!
+          startContinuousShipperAlarm(order);
+        } else if (elapsed < slotStart) {
+          stopContinuousShipperAlarm();
+          const waitTime = Math.ceil((slotStart - elapsed) / 1000);
+          msg.innerHTML = "<span style='color:#94a3b8;'>⏳ Đang ưu tiên tài xế trước (20s/người)... Chờ đến lượt bạn:</span>";
+          cd.innerText = waitTime.toString().padStart(2, '0') + "s";
+          cd.style.color = "#ef4444";
+          btn.disabled = true;
+          btn.innerText = "ĐANG ĐỢI ĐẾN LƯỢT BẠN...";
+          btn.style.background = "#475569";
+        } else {
+          // Đã qua 20 giây mà không bấm -> Ngắt còi máy này để chuyển sang máy bác tài tiếp theo
+          stopContinuousShipperAlarm();
+          const waitFree = Math.ceil((freeForAllTime - elapsed) / 1000);
+          msg.innerHTML = "<span style='color:#94a3b8;'>⏳ Đã qua 20s của bạn. Đang đổ chuông máy tài xế kế tiếp...</span>";
+          cd.innerText = waitFree.toString().padStart(2, '0') + "s";
+          cd.style.color = "#ef4444";
+          btn.disabled = true;
+          btn.innerText = "ĐÃ QUA LƯỢT - CHỜ MỞ TỰ DO";
+          btn.style.background = "#475569";
+        }
+      }, 500);
+    }
+
     window.acceptOrderByShipper = function() {
+      stopContinuousShipperAlarm();
+      if (!activeShipperOrderId) return;
       const phone = localStorage.getItem('hyChayShipperPhone');
       const name = localStorage.getItem('hyChayShipperName');
       const btn = document.getElementById('btnAcceptOrder');
@@ -829,10 +1035,10 @@
 
       const finalizeAccept = (distToStoreKm) => {
         const etaToStoreMins = Math.max(2, Math.round(distToStoreKm * 2.5 + 1));
-        get(ref(db, `orders/${shipperOrderIdParam}`)).then((snap) => {
+        get(ref(db, `orders/${activeShipperOrderId}`)).then((snap) => {
           const order = snap.val();
           if (order && !order.shipperPhone) {
-            update(ref(db, `orders/${shipperOrderIdParam}`), {
+            update(ref(db, `orders/${activeShipperOrderId}`), {
               status: 'Tài xế đang đến quán',
               shipperPhone: phone,
               shipperName: name,
@@ -875,10 +1081,11 @@
     };
 
     window.shipperActionPickedUp = function() {
+      if (!activeShipperOrderId) return;
       const name = localStorage.getItem('hyChayShipperName') || 'Tài xế';
       const commitPickup = (distToCusKm) => {
         const etaToCustomerMins = Math.max(3, Math.round(distToCusKm * 2.5 + 2));
-        update(ref(db, `orders/${shipperOrderIdParam}`), {
+        update(ref(db, `orders/${activeShipperOrderId}`), {
           status: 'Đang giao hàng',
           shipperDistToCusKm: distToCusKm,
           etaToCustomerMins: etaToCustomerMins,
@@ -889,23 +1096,12 @@
             timestamp: Date.now(),
             sender: 'shipper'
           }).catch(() => {});
-          alert(`🚀 Đã xác nhận lấy món tại quán!\nĐơn hàng trên máy Quản lý đã chuyển sang mục "Shipper Đang Giao".\nKhi giao tới khách, hãy chụp hình xác nhận để hoàn tất đơn!`);
+          alert(`🚀 Đã xác nhận lấy món tại quán!\nKhi giao tới khách, hãy chụp hình xác nhận để hoàn tất đơn!`);
         });
       };
 
       if (currentOrderCached && currentOrderCached.deliveryKm) {
         commitPickup(currentOrderCached.deliveryKm);
-      } else if (currentOrderAddress) {
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(currentOrderAddress)}`)
-          .then(r => r.json())
-          .then(d => {
-            if (d && d[0]) {
-              const km = calcRoadDistanceKm(STORE_LAT, STORE_LON, parseFloat(d[0].lat), parseFloat(d[0].lon));
-              commitPickup(km);
-            } else {
-              commitPickup(2.2);
-            }
-          }).catch(() => commitPickup(2.2));
       } else {
         commitPickup(2.2);
       }
@@ -916,7 +1112,6 @@
       window.open(mapUrl, '_blank');
     };
 
-    // XỬ LÝ CHỤP HÌNH XÁC NHẬN GIAO ĐƠN -> MỞ KHÓA & HIỂN THỊ NÚT HOÀN TẤT ĐƠN
     window.handleShipperProofCapture = function(input) {
       const file = input.files && input.files[0];
       if (!file) return;
@@ -936,11 +1131,7 @@
           document.getElementById('btnCompleteLockedNotice').style.display = 'none';
           const btnComplete = document.getElementById('btnShipperCompleteOrder');
           btnComplete.style.display = 'block';
-          
-          // Tự động trượt mượt mà màn hình xuống vị trí nút Hoàn tất
-          setTimeout(() => {
-            btnComplete.scrollIntoView({ behavior: 'smooth', block: 'end' });
-          }, 150);
+          setTimeout(() => { btnComplete.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, 150);
         };
         img.src = e.target.result;
       };
@@ -948,6 +1139,7 @@
     };
 
     window.shipperActionCompleteDelivery = function() {
+      if (!activeShipperOrderId) return;
       if (!shipperDeliveryProofBase64) {
         return alert("⚠️ Vui lòng chụp hình xác nhận đã giao đơn cho khách trước khi bấm Hoàn tất!");
       }
@@ -956,18 +1148,24 @@
       btn.disabled = true;
       btn.innerText = "⏳ ĐANG LƯU HÌNH & HOÀN TẤT ĐƠN...";
 
-      update(ref(db, `orders/${shipperOrderIdParam}`), {
+      update(ref(db, `orders/${activeShipperOrderId}`), {
         status: 'Đã hoàn tất',
         deliveryProof: shipperDeliveryProofBase64,
         deliveryCompletedAt: new Date().toISOString(),
         completedAt: new Date().toISOString()
       }).then(() => {
+        shipperDeliveryProofBase64 = null;
+        document.getElementById('shipperProofPreviewBox').style.display = 'none';
+        document.getElementById('btnCompleteLockedNotice').style.display = 'block';
+        btn.style.display = 'none';
+        btn.disabled = false;
+        btn.innerText = "🚀 XÁC NHẬN GIAO ĐƠN THÀNH CÔNG";
         set(ref(db, 'voice_sync/latest'), {
           text: `Tài xế ${name} đã giao đơn hàng thành công và gửi hình ảnh xác nhận về hệ thống.`,
           timestamp: Date.now(),
           sender: 'shipper_complete'
         }).catch(() => {});
-        alert("✅ Đã xác nhận giao đơn thành công! Hình ảnh đã được gửi về màn hình Quản lý.");
+        alert("✅ Đã xác nhận giao đơn thành công! Hệ thống tự động chuyển về chế độ chờ đơn tiếp theo.");
       }).catch(err => {
         btn.disabled = false;
         btn.innerText = "🚀 XÁC NHẬN GIAO ĐƠN THÀNH CÔNG";
@@ -976,12 +1174,13 @@
     };
 
     window.shipperActionIssue = function() {
+      if (!activeShipperOrderId) return;
       const name = localStorage.getItem('hyChayShipperName') || 'Tài xế';
       const phone = localStorage.getItem('hyChayShipperPhone') || '';
       const reason = prompt("⚠️ Nhập lý do sự cố (VD: Xe hư, bể bánh, kẹt việc đột xuất...) để báo về quán:", "Xe hư dọc đường");
       if (reason === null) return;
 
-      update(ref(db, `orders/${shipperOrderIdParam}`), {
+      update(ref(db, `orders/${activeShipperOrderId}`), {
         status: 'Sự cố Shipper',
         shipperIssueNote: `Tài xế ${name} (${phone}) báo sự cố: ${reason || 'Xe hư'}`,
         shipperPhone: null,
