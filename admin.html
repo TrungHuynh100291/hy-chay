@@ -324,7 +324,7 @@
         <div id="ordersContainer" class="orders-grid"></div>
       </div>
 
-      <!-- VIEW 2: POS TẠI BÀN (DÀNH CHO NHÂN VIÊN QUÁN ORDER) -->
+<!-- VIEW 2: POS TẠI BÀN (DÀNH CHO NHÂN VIÊN QUÁN ORDER) -->
       <div id="viewPosOrder" style="display: none;">
         <div class="pos-layout">
           <div class="pos-menu-panel">
@@ -340,8 +340,7 @@
               <button class="btn-table-pill" onclick="selectTable('Bàn 8', this)">Bàn 8</button>
               <button class="btn-table-pill" onclick="selectTable('Mang Về', this)">Mang Về</button>
             </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
-              <label style="font-weight:700; font-size:0.85rem; color:#64748b;">CHỌN HẠNG MỤC & MÓN ĂN:</label>
+            <label style="font-weight:700; font-size:0.85rem; color:#64748b; display:block; margin-bottom:6px;">CHỌN HẠNG MỤC & MÓN ĂN:</label>
             <input type="text" id="posSearchInput" placeholder="🔍 Tìm nhanh tên món ăn..." style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:8px; font-size:0.85rem;" oninput="renderPosDishGrid()">
             <div id="posCatFilterBar" class="admin-cat-bar">
               <button type="button" class="admin-cat-chip active" onclick="setPosCategory('all', this)">Tất Cả</button>
@@ -370,24 +369,9 @@
 
       <!-- VIEW 3: QUẢN LÝ MÓN ĂN & UPLOAD ẢNH NATIVE -->
       <div id="viewMenuStock" style="display: none;">
-<div class="menu-ctrl-header" style="background:#f0fdf4; border-color:#bbf7d0;">
-          <b style="color:var(--primary); font-size:0.88rem;">➕ Tạo Món Mới:</b>
-          <input type="text" id="newDishNameInput" class="search-input" placeholder="Nhập tên món mới..." style="flex:1; min-width:180px;">
-          <select id="newDishCatSelect" class="cat-select">
-            <option value="bun">Món Bún (5610)</option>
-            <option value="mi_pho">Mì, Phở & Hủ Tiếu (5610)</option>
-            <option value="com_kho">Cơm & Món Khô (5610)</option>
-            <option value="chien_dacbiet">Chiên & Đặc Biệt (5610)</option>
-            <option value="lau">Lẩu Chay (5610)</option>
-            <option value="soche">Sơ Chế & Đóng Gói (5610)</option>
-            <option value="douong">Đồ Uống BAL'S HOUSE (5630)</option>
-          </select>
-          <input type="number" id="newDishPriceInput" class="search-input" placeholder="Giá bán (VD: 35000)" step="1000" style="width:150px;">
-          <button onclick="createNewCustomDish()" style="background:var(--primary); color:#fff; border:none; padding:8px 16px; border-radius:8px; font-weight:800; cursor:pointer;">+ Thêm Món</button>
-        </div>
-        <!-- KHUNG THÊM MÓN MỚI TRỰC TIẾP TRÊN WEB ADMIN -->
-        <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:14px; padding:12px 14px; margin-bottom:14px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-          <b style="color:var(--primary); font-size:0.85rem;">➕ Thêm Món Mới:</b>
+        <!-- 1. KHUNG TẠO MÓN MỚI TRỰC TIẾP TRÊN FIREBASE -->
+        <div class="menu-ctrl-header" style="background:#f0fdf4; border-color:#86efac;">
+          <b style="color:var(--primary); font-size:0.88rem;">➕ Thêm Món Mới:</b>
           <input type="text" id="newDishNameInput" class="search-input" placeholder="Tên món mới (VD: Trà Mãng Cầu)..." style="flex:1.5; min-width:180px;">
           <select id="newDishCatSelect" class="cat-select">
             <option value="bun">Món Bún (5610)</option>
@@ -398,9 +382,26 @@
             <option value="soche">Sơ Chế & Đóng Gói (5610)</option>
             <option value="douong">Đồ Uống BAL'S HOUSE (5630)</option>
           </select>
-          <input type="number" id="newDishPriceInput" class="search-input" placeholder="Giá bán (VD: 25000)" step="1000" style="width:140px;">
+          <input type="number" id="newDishPriceInput" class="search-input" placeholder="Giá bán (VD: 25000)" step="1000" style="width:150px;">
           <button type="button" onclick="createNewCustomDish()" style="background:var(--primary); color:#fff; border:none; padding:9px 16px; border-radius:8px; font-weight:800; cursor:pointer; font-size:0.84rem;">💾 Tạo Món Ngay</button>
         </div>
+
+        <!-- 2. THANH TÌM KIẾM & LỌC DANH SÁCH MÓN HIỆN CÓ -->
+        <div class="menu-ctrl-header">
+          <input type="text" id="menuSearchInput" class="search-input" placeholder="🔍 Tìm tên món ăn..." oninput="renderMenuStockTable()">
+          <select id="menuCatFilter" class="cat-select" onchange="renderMenuStockTable()">
+            <option value="all">Tất cả nhóm món</option>
+            <option value="bun">Món Bún</option>
+            <option value="mi_pho">Mì, Phở & Hủ Tiếu</option>
+            <option value="com_kho">Cơm & Món Khô</option>
+            <option value="chien_dacbiet">Chiên & Đặc Biệt</option>
+            <option value="lau">Lẩu Chay</option>
+            <option value="soche">Sơ Chế & Đóng Gói</option>
+            <option value="douong">Đồ Uống BAL'S HOUSE</option>
+          </select>
+          <span style="font-size:0.8rem; color:#64748b; margin-left:auto;">💡 Ảnh, tên và giá cập nhật tại đây đồng bộ tức thì sang khách hàng!</span>
+        </div>
+
         <table class="menu-mgmt-table">
           <thead>
             <tr>
@@ -522,16 +523,6 @@
             <!-- Cột phải: Bảng chọn món phụ để thêm nhanh vào đơn -->
             <div class="edit-panel-box">
               <h4 style="font-size:0.9rem; color:var(--primary); margin-bottom:8px; border-bottom:1px solid #cbd5e1; padding-bottom:4px;">Thêm Món Mới Vào Đơn:</h4>
-              <div class="admin-cat-bar" id="editModalCatBar">
-                <button type="button" class="admin-cat-chip active" onclick="setEditModalCategory('all', this)">Tất Cả</button>
-                <button type="button" class="admin-cat-chip" onclick="setEditModalCategory('bun', this)">Món Bún</button>
-                <button type="button" class="admin-cat-chip" onclick="setEditModalCategory('mi_pho', this)">Mì - Phở</button>
-                <button type="button" class="admin-cat-chip" onclick="setEditModalCategory('com_kho', this)">Cơm & Khô</button>
-                <button type="button" class="admin-cat-chip" onclick="setEditModalCategory('chien_dacbiet', this)">Đặc Biệt</button>
-                <button type="button" class="admin-cat-chip" onclick="setEditModalCategory('lau', this)">Lẩu Chay</button>
-                <button type="button" class="admin-cat-chip" onclick="setEditModalCategory('soche', this)">Sơ Chế</button>
-                <button type="button" class="admin-cat-chip" onclick="setEditModalCategory('douong', this)">Đồ Uống</button>
-              </div>
               <input type="text" id="editModalSearchDish" placeholder="🔍 Tìm món ăn..." style="width:100%; padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.82rem; margin-bottom:8px;" oninput="renderEditModalDishPicker()">
               <div id="editModalCatBar" class="admin-cat-bar">
                 <button type="button" class="admin-cat-chip active" onclick="setEditModalCategory('all', this)">Tất Cả</button>
@@ -2208,7 +2199,7 @@ if (it.cat === 'douong' || (dishBase && dishBase.cat === 'douong')) {
     };
 
 // ==========================================
-    // 14. HỆ THỐNG MÁY IN POS CHUYÊN NGHIỆP (KHỔ 58MM/80MM, LOGO ĐẦU ĐOẠN & LỜI CHÚC CUỐI ĐOẠN)
+    // 14. HỆ THỐNG MÁY IN POS CHUYÊN NGHIỆP (CHUẨN XPRINTER XP-80C NÉT DÀY + ĐỦ HÀM LƯU & KẾT CA)
     // ==========================================
     let printerConfig = {
       paperSize: "80mm",
@@ -2220,7 +2211,7 @@ if (it.cat === 'douong' || (dishBase && dishBase.cat === 'douong')) {
       footer: "Cảm ơn Quý khách đã ủng hộ Hy Chay! Chúc Quý khách thân tâm an lạc & hẹn gặp lại!"
     };
 
-function applyDynamicPrintPageStyle(paperSize) {
+    function applyDynamicPrintPageStyle(paperSize) {
       let styleEl = document.getElementById('dynamicPrintPaperStyle');
       if (!styleEl) {
         styleEl = document.createElement('style');
@@ -2241,6 +2232,57 @@ function applyDynamicPrintPageStyle(paperSize) {
           }
         }`;
     }
+
+    onValue(ref(db, 'restaurant_config/printer'), (snap) => {
+      if (snap.exists()) {
+        printerConfig = { ...printerConfig, ...snap.val() };
+        if (document.getElementById('cfgPaperSize')) document.getElementById('cfgPaperSize').value = printerConfig.paperSize || '80mm';
+        if (document.getElementById('cfgShowLogo')) document.getElementById('cfgShowLogo').value = printerConfig.showLogo || 'yes';
+        if (document.getElementById('cfgPrintLogoUrl')) document.getElementById('cfgPrintLogoUrl').value = printerConfig.logoUrl || 'Logo nho.png';
+        if (document.getElementById('cfgPrintHeader1')) document.getElementById('cfgPrintHeader1').value = printerConfig.header1 || '';
+        if (document.getElementById('cfgPrintHeader2')) document.getElementById('cfgPrintHeader2').value = printerConfig.header2 || '';
+        if (document.getElementById('cfgPrintHeader3')) document.getElementById('cfgPrintHeader3').value = printerConfig.header3 || '';
+        if (document.getElementById('cfgPrintFooter')) document.getElementById('cfgPrintFooter').value = printerConfig.footer || '';
+        applyDynamicPrintPageStyle(printerConfig.paperSize);
+      }
+    });
+
+    window.uploadPrinterLogo = function(input) {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const cv = document.createElement('canvas');
+          let w = img.width, h = img.height;
+          if (w > 220) { h = Math.round(h * 220 / w); w = 220; }
+          cv.width = w; cv.height = h;
+          cv.getContext('2d').drawImage(img, 0, 0, w, h);
+          document.getElementById('cfgPrintLogoUrl').value = cv.toDataURL('image/png');
+          alert("✅ Đã nạp ảnh Logo máy in! Hãy bấm 'Lưu Cấu Hình Máy In'.");
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
+
+    window.savePrinterConfig = function() {
+      const payload = {
+        paperSize: document.getElementById('cfgPaperSize').value,
+        showLogo: document.getElementById('cfgShowLogo').value,
+        logoUrl: document.getElementById('cfgPrintLogoUrl').value.trim() || 'Logo nho.png',
+        header1: document.getElementById('cfgPrintHeader1').value.trim() || 'HY CHAY - BẢO ANH LÂM',
+        header2: document.getElementById('cfgPrintHeader2').value.trim() || 'MST: 3401289271 - 280 Trần Hưng Đạo, P. Phan Thiết',
+        header3: document.getElementById('cfgPrintHeader3').value.trim() || 'Hotline: 0903.242.400',
+        footer: document.getElementById('cfgPrintFooter').value.trim() || 'Cảm ơn Quý khách!',
+        updatedAt: new Date().toISOString()
+      };
+      set(ref(db, 'restaurant_config/printer'), payload).then(() => {
+        applyDynamicPrintPageStyle(payload.paperSize);
+        alert(`✅ Đã lưu cấu hình máy in khổ ${payload.paperSize}!`);
+      });
+    };
 
     function buildPrintHeaderHtml(billTitle) {
       const logoHtml = (printerConfig.showLogo !== 'no' && printerConfig.logoUrl)
@@ -2326,6 +2368,31 @@ function applyDynamicPrintPageStyle(paperSize) {
             <div style="display:flex; justify-content:space-between; font-weight:900; font-size:18px; margin-top:6px; border-top:2px dashed #000; padding-top:5px;"><span>TỔNG THANH TOÁN:</span><span>${total.toLocaleString()}đ</span></div>
           </div>
           ${buildPrintFooterHtml()}
+        </div>`;
+      window.print();
+    };
+
+    window.printShiftReport = function() {
+      const data = getTaxReportData(); let dailyRows = '';
+      const widthCSS = printerConfig.paperSize === '58mm' ? '54mm' : '76mm';
+      applyDynamicPrintPageStyle(printerConfig.paperSize);
+      for (let d in data.daily) {
+        const r = data.daily[d];
+        dailyRows += `<tr style="border-bottom:1px dashed #000;"><td style="padding:4px 0; font-weight:800;">${d}</td><td style="text-align:center; font-weight:800;">${r.count}</td><td style="text-align:right; font-weight:800;">${r.tax5610.toLocaleString()}</td><td style="text-align:right; font-weight:800;">${r.tax5630.toLocaleString()}</td></tr>`;
+      }
+      document.getElementById('printArea').innerHTML = `
+        <div style="width:${widthCSS}; margin:0 auto; color:#000;">
+          ${buildPrintHeaderHtml(`BẢNG KẾT CA (${data.labelPeriod})`)}
+          <div style="margin:3px 0; font-size:13px; font-weight:800;">Số đơn: ${data.count} | In lúc: ${new Date().toLocaleTimeString('vi-VN')}</div>
+          <div style="border-top:2px solid #000; border-bottom:2px solid #000; margin:6px 0; padding:6px 0; font-size:14px; font-weight:800;">
+            <div style="display:flex; justify-content:space-between;"><span>DT 5610 (Hy Chay):</span><span>${data.total5610.toLocaleString()}đ</span></div>
+            <div style="display:flex; justify-content:space-between;"><span>DT 5630 (BAL'S HOUSE):</span><span>${data.total5630.toLocaleString()}đ</span></div>
+            <div style="display:flex; justify-content:space-between; font-weight:900; font-size:16px; margin-top:4px; border-top:1.5px dashed #000; padding-top:4px;"><span>TỔNG DT CHỊU THUẾ:</span><span>${data.totalTaxable.toLocaleString()}đ</span></div>
+            <div style="display:flex; justify-content:space-between; margin-top:4px; padding-top:4px; border-top:1.5px dashed #000;"><span>Sổ Ship thu hộ (Trả tài xế):</span><span>${data.totalShip.toLocaleString()}đ</span></div>
+          </div>
+          <div style="font-weight:900; margin-top:8px; font-size:13px;">CHI TIẾT DOANH THU QUÁN:</div>
+          <table style="width:100%; border-collapse:collapse; font-size:12px; margin-top:4px;"><tr style="border-bottom:2px solid #000;"><th style="text-align:left;">Ngày</th><th>Đơn</th><th style="text-align:right;">5610</th><th style="text-align:right;">5630</th></tr>${dailyRows || '<tr><td colspan="4" style="text-align:center; padding:8px 0;">Không có dữ liệu</td></tr>'}</table>
+          <div style="margin-top:20px; display:flex; justify-content:space-between; text-align:center; font-size:12px; font-weight:800;"><div>Kế Toán / Thu Ngân<br><br><br>(Ký tên)</div><div>Đại Diện Quản Lý<br><br><br>Hoàng Huỳnh Huy Bảo</div></div>
         </div>`;
       window.print();
     };
