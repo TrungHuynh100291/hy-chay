@@ -1067,18 +1067,60 @@
       { id: "nuocngot", name: "Nước Ngọt Các Loại", defaultPrice: 15000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" }
     ];
 
+const CAT_LABELS_MAP = {
+      bun: "Món Bún",
+      mi_pho: "Mì - Phở",
+      com_kho: "Cơm & Khô",
+      chien_dacbiet: "Đặc Biệt",
+      lau: "Lẩu Chay",
+      soche: "Sơ Chế",
+      douong: "Đồ Uống"
+    };
+
     function getDishData(dish) {
       const c = menuCustomCache[dish.id] || {};
+      const catCode = c.cat || dish.cat;
       return {
         id: dish.id,
-        name: dish.name,
-        cat: dish.cat,
-        catName: dish.catName,
-        price: c.price !== undefined ? c.price : dish.defaultPrice,
+        name: c.name || dish.name,
+        cat: catCode,
+        catName: CAT_LABELS_MAP[catCode] || dish.catName,
+        price: c.price !== undefined ? Number(c.price) : dish.defaultPrice,
         image: c.image || dish.defaultImg || 'Logo nho.png',
         isSoldOut: !!c.soldOut,
+        isDeleted: !!c.isDeleted,
         isHot: dish.isHot
       };
+    }
+
+    function getUnifiedCustomerMenuList() {
+      const list = [];
+      const seenIds = new Set();
+
+      ALL_MENU_DATA.forEach(dish => {
+        const it = getDishData(dish);
+        if (it.isDeleted) return;
+        seenIds.add(dish.id);
+        list.push(it);
+      });
+
+      Object.keys(menuCustomCache).forEach(id => {
+        const c = menuCustomCache[id];
+        if (!seenIds.has(id) && c && c.isCustom && !c.isDeleted && c.name) {
+          const catCode = c.cat || 'bun';
+          list.push({
+            id: id,
+            name: c.name,
+            cat: catCode,
+            catName: CAT_LABELS_MAP[catCode] || 'Món Mới',
+            price: Number(c.price) || 0,
+            image: c.image || 'Logo nho.png',
+            isSoldOut: !!c.soldOut,
+            isHot: true
+          });
+        }
+      });
+      return list;
     }
 
     function renderFeaturedDishes() {
@@ -1089,6 +1131,7 @@
         const base = ALL_MENU_DATA.find(d => d.id === id);
         if (!base) return;
         const it = getDishData(base);
+        if (it.isDeleted) return;
         const safeName = it.name.replace(/'/g, "\\'");
         html += `
           <div class="dish-card ${it.isSoldOut ? 'is-sold-out' : ''} ${it.isHot ? 'is-hot' : ''}" data-dish-id="${it.id}">
@@ -1109,9 +1152,8 @@
       const el = document.getElementById('fullMenuContainer');
       if (!el) return;
       let html = '';
-      ALL_MENU_DATA.forEach(dish => {
-        if (currentFilterCat !== 'all' && dish.cat !== currentFilterCat) return;
-        const it = getDishData(dish);
+      getUnifiedCustomerMenuList().forEach(it => {
+        if (currentFilterCat !== 'all' && it.cat !== currentFilterCat) return;
         const safeName = it.name.replace(/'/g, "\\'");
         html += `
           <div class="menu-item-row ${it.isSoldOut ? 'is-sold-out' : ''}">
