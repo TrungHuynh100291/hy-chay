@@ -1223,7 +1223,10 @@ function renderFeaturedDishes() {
       });
       el.innerHTML = html;
     }
-
+    
+// Khai báo trực tiếp danh sách ID món đặc sắc và hàm render an toàn tuyệt đối
+    const FEATURED_IDS = ["bunchagio", "miquang", "hoanhthanhmi", "mispaghetti", "comga", "xoi", "banhcanh", "nomhoachuoi"];
+    
 function renderFullMenu() {
    const el = document.getElementById('fullMenuContainer');
    if (!el) return;
