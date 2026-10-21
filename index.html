@@ -292,6 +292,9 @@
         <p>Giá hiển thị là giá gốc tại quán - Trợ giá phí Ship lên đến 30% & Freeship đơn từ 200k</p>
         <div class="divider"></div>
       </div>
+      <div style="max-width: 520px; margin: 0 auto 14px;">
+     <input type="text" id="customerMenuSearchInput" placeholder="🔍 Tìm nhanh tên món ăn hoặc đồ uống (113 món)..." oninput="renderFullMenu()" style="width:100%; padding:11px 16px; border:2px solid var(--primary); border-radius:24px; font-size:0.95rem; outline:none; background:#f8fafc;">
+   </div>
       <div class="menu-filter-bar">
         <button class="filter-chip active" onclick="filterCat('all', this)">Tất Cả Món</button>
         <button class="filter-chip" onclick="filterCat('bun', this)">Món Bún</button>
@@ -995,11 +998,11 @@
         alert("⚠️ Đã gửi thông báo sự cố bằng giọng nói về quán Hy Chay để quán điều phối Shipper khác!");
       });
     };
+// ==========================================
+    // DỮ LIỆU CHUẨN 113 MÓN ĂN & ĐỒ UỐNG HY CHAY - BAL'S HOUSE (45 + 14 + 54 = 113 MÓN)
     // ==========================================
-    // 2. DỮ LIỆU 70 MÓN ĂN & HIỂN THỊ MENU TỨC THÌ (ĐÃ KHÔI PHỤC 100%)
-    // ==========================================
-    const FEATURED_IDS = ["bunchagio", "banhcanh", "hoanhthanhmi", "miquang", "comga", "xoi", "nomhoachuoi", "mispaghetti"];
     const ALL_MENU_DATA = [
+      // --- I. MÓN BÚN (7 MÓN - MENU 1 - MÃ NGÀNH 5610) ---
       { id: "bunmoc", name: "Bún Mọc Chay", defaultPrice: 30000, cat: "bun", catName: "Món Bún", defaultImg: "menu 1.jpg" },
       { id: "bunthai", name: "Bún Thái Chay", defaultPrice: 35000, cat: "bun", catName: "Món Bún", defaultImg: "menu 1.jpg" },
       { id: "bunrieu", name: "Bún Riêu Chay", defaultPrice: 30000, cat: "bun", catName: "Món Bún", defaultImg: "menu 1.jpg" },
@@ -1007,6 +1010,8 @@
       { id: "bunmam", name: "Bún Mắm Chay", defaultPrice: 35000, cat: "bun", catName: "Món Bún", defaultImg: "menu 1.jpg" },
       { id: "bunbokho", name: "Bún Bò Kho Chay", defaultPrice: 30000, cat: "bun", catName: "Món Bún", defaultImg: "menu 1.jpg" },
       { id: "bunchuathila", name: "Bún Chua Thì Là", defaultPrice: 35000, cat: "bun", catName: "Món Bún", defaultImg: "menu 1.jpg" },
+
+      // --- II. MÌ, PHỞ & HỦ TIẾU (13 MÓN - MENU 1 - MÃ NGÀNH 5610) ---
       { id: "miquang", name: "Mì Quảng Chay", defaultPrice: 35000, cat: "mi_pho", catName: "Mì - Phở", defaultImg: "Mi Quang Chay.png", isHot: true },
       { id: "mitiem", name: "Mì Tiềm Chay", defaultPrice: 35000, cat: "mi_pho", catName: "Mì - Phở", defaultImg: "menu 1.jpg" },
       { id: "hoanhthanhmi", name: "Mì Hoành Thánh Chay", defaultPrice: 35000, cat: "mi_pho", catName: "Mì - Phở", defaultImg: "Hoanh Thanh Mi.png", isHot: true },
@@ -1020,6 +1025,8 @@
       { id: "hutieubokho", name: "Hủ Tiếu Bò Kho Chay", defaultPrice: 30000, cat: "mi_pho", catName: "Mì - Phở", defaultImg: "menu 1.jpg" },
       { id: "banhmibokho", name: "Bánh Mì Bò Kho Chay", defaultPrice: 30000, cat: "mi_pho", catName: "Mì - Phở", defaultImg: "menu 1.jpg" },
       { id: "banhcanh", name: "Bánh Canh Chay", defaultPrice: 30000, cat: "mi_pho", catName: "Mì - Phở", defaultImg: "Banh Canh Chay.png" },
+
+      // --- III. CƠM & MÓN KHÔ (12 MÓN - MENU 1 - MÃ NGÀNH 5610) ---
       { id: "comga", name: "Cơm Gà Chay", defaultPrice: 35000, cat: "com_kho", catName: "Cơm & Khô", defaultImg: "Com Ga.png", isHot: true },
       { id: "comtam", name: "Cơm Tấm Chay", defaultPrice: 35000, cat: "com_kho", catName: "Cơm & Khô", defaultImg: "menu 1.jpg" },
       { id: "comdiathapcam", name: "Cơm Dĩa Thập Cẩm Chay", defaultPrice: 35000, cat: "com_kho", catName: "Cơm & Khô", defaultImg: "menu 1.jpg" },
@@ -1032,45 +1039,108 @@
       { id: "banhhoi", name: "Bánh Hỏi Chay", defaultPrice: 30000, cat: "com_kho", catName: "Cơm & Khô", defaultImg: "menu 1.jpg" },
       { id: "bunchagio", name: "Bún Chả Giò Chay", defaultPrice: 35000, cat: "com_kho", catName: "Cơm & Khô", defaultImg: "BunChaGio.png", isHot: true },
       { id: "bunmamnem", name: "Bún Mắm Nêm Chay", defaultPrice: 30000, cat: "com_kho", catName: "Cơm & Khô", defaultImg: "menu 1.jpg" },
-      { id: "chagiochien", name: "Chả Giò Chiên Giòn", defaultPrice: 60000, cat: "chien_dacbiet", catName: "Đặc Biệt", defaultImg: "combo 7 mon chay.png" },
-      { id: "baonguchienxu", name: "Bào Ngư Chiên Xù", defaultPrice: 70000, cat: "chien_dacbiet", catName: "Đặc Biệt", defaultImg: "menu 1.jpg" },
-      { id: "khoaitaychien", name: "Khoai Tây Chiên", defaultPrice: 40000, cat: "chien_dacbiet", catName: "Đặc Biệt", defaultImg: "menu 1.jpg" },
-      { id: "phomaivienchien", name: "Phô Mai Viên Chiên", defaultPrice: 70000, cat: "chien_dacbiet", catName: "Đặc Biệt", defaultImg: "menu 1.jpg" },
-      { id: "hoanhthanhchien", name: "Hoành Thánh Chiên Giòn", defaultPrice: 60000, cat: "chien_dacbiet", catName: "Đặc Biệt", defaultImg: "menu 1.jpg" },
-      { id: "dauhuchien", name: "Đậu Hũ Chiên Giòn", defaultPrice: 40000, cat: "chien_dacbiet", catName: "Đặc Biệt", defaultImg: "menu 1.jpg" },
-      { id: "namcuonthinh", name: "Nấm Cuộn Thính", defaultPrice: 70000, cat: "chien_dacbiet", catName: "Đặc Biệt", defaultImg: "menu 1.jpg" },
-      { id: "namxucbanhda", name: "Nấm Xúc Bánh Đa", defaultPrice: 70000, cat: "chien_dacbiet", catName: "Đặc Biệt", defaultImg: "menu 1.jpg" },
-      { id: "nomhoachuoi", name: "Nộm Hoa Chuối Tri Kỷ", defaultPrice: 70000, cat: "chien_dacbiet", catName: "Đặc Biệt", defaultImg: "Nom Hoa Chuoi.png" },
-      { id: "boluclacbanhmi", name: "Bò Lúc Lắc - Bánh Mì", defaultPrice: 60000, cat: "chien_dacbiet", catName: "Đặc Biệt", defaultImg: "menu 1.jpg" },
-      { id: "boluclackhoaitay", name: "Bò Lúc Lắc - Khoai Tây", defaultPrice: 70000, cat: "chien_dacbiet", catName: "Đặc Biệt", defaultImg: "menu 1.jpg" },
+
+      // --- IV. CHIÊN & ĐẶC BIỆT (11 MÓN - MENU 1 - MÃ NGÀNH 5610) ---
+      { id: "chagiochien", name: "Chả Giò Chiên Giòn", defaultPrice: 60000, cat: "chien_dacbiet", catName: "Chiên & Đặc Biệt", defaultImg: "combo 7 mon chay.png" },
+      { id: "baonguchienxu", name: "Bào Ngư Chiên Xù", defaultPrice: 70000, cat: "chien_dacbiet", catName: "Chiên & Đặc Biệt", defaultImg: "menu 1.jpg" },
+      { id: "khoaitaychien", name: "Khoai Tây Chiên", defaultPrice: 40000, cat: "chien_dacbiet", catName: "Chiên & Đặc Biệt", defaultImg: "menu 1.jpg" },
+      { id: "phomaivienchien", name: "Phô Mai Viên Chiên", defaultPrice: 70000, cat: "chien_dacbiet", catName: "Chiên & Đặc Biệt", defaultImg: "menu 1.jpg" },
+      { id: "hoanhthanhchien", name: "Hoành Thánh Chiên Giòn", defaultPrice: 60000, cat: "chien_dacbiet", catName: "Chiên & Đặc Biệt", defaultImg: "menu 1.jpg" },
+      { id: "dauhuchien", name: "Đậu Hũ Chiên Giòn", defaultPrice: 40000, cat: "chien_dacbiet", catName: "Chiên & Đặc Biệt", defaultImg: "menu 1.jpg" },
+      { id: "namcuonthinh", name: "Nấm Cuộn Thính", defaultPrice: 70000, cat: "chien_dacbiet", catName: "Chiên & Đặc Biệt", defaultImg: "menu 1.jpg" },
+      { id: "namxucbanhda", name: "Nấm Xúc Bánh Đa", defaultPrice: 70000, cat: "chien_dacbiet", catName: "Chiên & Đặc Biệt", defaultImg: "menu 1.jpg" },
+      { id: "nomhoachuoi", name: "Nộm Hoa Chuối Tri Kỷ", defaultPrice: 70000, cat: "chien_dacbiet", catName: "Chiên & Đặc Biệt", defaultImg: "Nom Hoa Chuoi.png" },
+      { id: "boluclacbanhmi", name: "Bò Lúc Lắc - Bánh Mì", defaultPrice: 60000, cat: "chien_dacbiet", catName: "Chiên & Đặc Biệt", defaultImg: "menu 1.jpg" },
+      { id: "boluclackhoaitay", name: "Bò Lúc Lắc - Khoai Tây", defaultPrice: 70000, cat: "chien_dacbiet", catName: "Chiên & Đặc Biệt", defaultImg: "menu 1.jpg" },
+
+      // --- V. LẨU CHAY (2 MÓN - MENU 1 - MÃ NGÀNH 5610) ---
       { id: "lauthai", name: "Lẩu Thái Chay (Nồi Lớn)", defaultPrice: 230000, cat: "lau", catName: "Lẩu Chay", defaultImg: "menu 1.jpg" },
       { id: "lauchao", name: "Lẩu Chao Chay (Nồi Lớn)", defaultPrice: 230000, cat: "lau", catName: "Lẩu Chay", defaultImg: "menu 1.jpg" },
-      { id: "chanamhuong", name: "Chả Nấm Hương (Đòn)", defaultPrice: 65000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
-      { id: "charaucunam", name: "Chả Rau Củ Nấm (Đòn)", defaultPrice: 70000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
+
+      // --- VI. THỰC PHẨM SƠ CHẾ - ĂN LIỀN (14 MÓN - MENU 3.JPG - MÃ NGÀNH 5610) ---
+      { id: "chanamhuong", name: "Chả Nấm Hương", defaultPrice: 65000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
+      { id: "charaucunam", name: "Chả Rau Củ Nấm", defaultPrice: 70000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
       { id: "chamitnon", name: "Chả Mít Non", defaultPrice: 75000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
-      { id: "channamhuong", name: "Chân Nấm Hương Thượng Hạng", defaultPrice: 120000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
-      { id: "gahukychuachien", name: "Gà Hũ Ky Cuộn Nấm", defaultPrice: 75000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
-      { id: "chagiochuachien", name: "Chả Giò Hộp", defaultPrice: 60000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
-      { id: "patehatdieu", name: "Pate Hạt Điều Béo Bùi", defaultPrice: 75000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
-      { id: "chabongnamhuonganlien", name: "Chà Bông Nấm Hương (Hũ)", defaultPrice: 120000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
-      { id: "chabongsuonanlien", name: "Chà Bông Sườn", defaultPrice: 70000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
-      { id: "rongbiensayanlien", name: "Rong Biển Sấy Giòn", defaultPrice: 40000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
-      { id: "suonsaymeanlien", name: "Sườn Sấy Mè Giòn", defaultPrice: 70000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
-      { id: "suonrimcayanlien", name: "Sườn Rim Cay Đậm Vị", defaultPrice: 70000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
-      { id: "cafeda", name: "Cà Phê Đen Đá", defaultPrice: 17000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
-      { id: "cafesua", name: "Cà Phê Sữa Đá", defaultPrice: 19000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
-      { id: "bacxiu", name: "Bạc Xỉu BAL", defaultPrice: 20000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
-      { id: "cafemuoi", name: "Cà Phê Muối Đặc Biệt", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
-      { id: "cafekemtrung", name: "Cà Phê Kem Trứng", defaultPrice: 30000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "channamhuong", name: "Chân Nấm Hương", defaultPrice: 120000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
+      { id: "gahukychuachien", name: "Gà (Hũ Ky Cuộn Nấm) (Chưa Chiên)", defaultPrice: 75000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
+      { id: "chagiochuachien", name: "Chả Giò (Chưa Chiên)", defaultPrice: 60000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
+      { id: "patehatdieu", name: "Pate Hạt Điều", defaultPrice: 75000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
+      { id: "chabongnamhuonganlien", name: "Chà Bông Nấm Hương (Ăn Liền)", defaultPrice: 120000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
+      { id: "chabongsuonanlien", name: "Chà Bông Sườn (Ăn Liền)", defaultPrice: 70000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
+      { id: "namchienxuchuachien", name: "Nấm Chiên Xù (Chưa Chiên)", defaultPrice: 70000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
+      { id: "rongbiensayanlien", name: "Rong Biển Sấy (Ăn Liền)", defaultPrice: 40000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
+      { id: "suonsaymeanlien", name: "Sườn Sấy Mè (Ăn Liền)", defaultPrice: 70000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
+      { id: "suonrimcayanlien", name: "Sườn Rim Cay (Ăn Liền)", defaultPrice: 70000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
+      { id: "mocvien", name: "Mọc Viên", defaultPrice: 70000, cat: "soche", catName: "Sơ Chế", defaultImg: "Menu 3.jpg" },
+
+      // --- VII. ĐỒ UỐNG BAL'S HOUSE (54 MÓN - MENU 4.JPG - MÃ NGÀNH 5630) ---
+      // 1. CAFE (8 món)
+      { id: "cafeda", name: "Cafe Đá", defaultPrice: 17000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "cafesua", name: "Cafe Sữa", defaultPrice: 19000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "bacxiu", name: "Bạc Xỉu", defaultPrice: 20000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "cafemuoi", name: "Cafe Muối", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "cafekemtrung", name: "Cafe Kem Trứng", defaultPrice: 30000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "cacaomuoi", name: "Cacao Muối", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "cacaosualac", name: "Cacao Sữa Lắc", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "cacaokemtrung", name: "Cacao Kem Trứng", defaultPrice: 30000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+
+      // 2. LATTE (6 món)
       { id: "lattematcha", name: "Latte Matcha", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "lattecacao", name: "Latte Cacao", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "lattecafe", name: "Latte Cafe", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "lattematchakemtrung", name: "Latte Matcha Kem Trứng", defaultPrice: 35000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "lattecacaokemtrung", name: "Latte Cacao Kem Trứng", defaultPrice: 35000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "lattecafekemtrung", name: "Latte Cafe Kem Trứng", defaultPrice: 35000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+
+      // 3. TRÀ (10 món)
       { id: "trataximuoi", name: "Trà Tắc Xí Muội", defaultPrice: 15000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
-      { id: "tradao", name: "Trà Đào Thanh Mát", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
-      { id: "tradau", name: "Trà Dâu Tươi", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
-      { id: "epcam", name: "Nước Ép Cam Tươi", defaultPrice: 20000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "tratacthaixanh", name: "Trà Tắc Thái Xanh", defaultPrice: 20000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "traoi", name: "Trà Ổi", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "traxoai", name: "Trà Xoài", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "tradao", name: "Trà Đào", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "tradau", name: "Trà Dâu", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "travietquat", name: "Trà Việt Quất", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "trachanhday", name: "Trà Chanh Dây", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "tramangcau", name: "Trà Mãng Cầu", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "tradualuoi", name: "Trà Dưa Lưới", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+
+      // 4. NƯỚC ÉP TRÁI CÂY (6 món)
+      { id: "epcam", name: "Ép Cam", defaultPrice: 20000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "epthom", name: "Ép Thơm", defaultPrice: 20000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "epoi", name: "Ép Ổi", defaultPrice: 20000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "epcarot", name: "Ép Cà Rốt", defaultPrice: 20000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "epcachua", name: "Ép Cà Chua", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "epduahau", name: "Ép Dưa Hấu", defaultPrice: 20000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+
+      // 5. YAOURT (11 món)
       { id: "yaourtda", name: "Yaourt Đá", defaultPrice: 20000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
-      { id: "sodadau", name: "Soda Dâu Tươi", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
-      { id: "nuocmia", name: "Nước Mía Sạch", defaultPrice: 10000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
-      { id: "nuocngot", name: "Nước Ngọt Các Loại", defaultPrice: 15000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" }
+      { id: "yaourtthomtuoi", name: "Yaourt Thơm Tươi", defaultPrice: 30000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "yaourtcamtuoi", name: "Yaourt Cam Tươi", defaultPrice: 30000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "yaourtdao", name: "Yaourt Đào", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "yaourtdau", name: "Yaourt Dâu", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "yaourtxoai", name: "Yaourt Xoài", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "yaourtoi", name: "Yaourt Ổi", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "yaourtvietquat", name: "Yaourt Việt Quất", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "yaourtchanhday", name: "Yaourt Chanh Dây", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "yaourtmangcau", name: "Yaourt Mãng Cầu", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "yaourtdualuoi", name: "Yaourt Dưa Lưới", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+
+      // 6. SODA (9 món)
+      { id: "suoitac", name: "Suối Tắc", defaultPrice: 20000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "sodadau", name: "Soda Dâu", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "sodaxoai", name: "Soda Xoài", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "sodaoi", name: "Soda Ổi", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "sodadao", name: "Soda Đào", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "sodavietquat", name: "Soda Việt Quất", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "sodachanhday", name: "Soda Chanh Dây", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "sodamangcau", name: "Soda Mãng Cầu", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "sodadualuoi", name: "Soda Dưa Lưới", defaultPrice: 25000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+
+      // 7. NƯỚC MÍA - NƯỚC NGỌT (4 món)
+      { id: "nuocmia", name: "Nước Mía", defaultPrice: 10000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "nuockhoangsuoigas", name: "Nước Khoáng / Suối Gas", defaultPrice: 10000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "nuocngot", name: "Nước Ngọt", defaultPrice: 15000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" },
+      { id: "bohucthai", name: "Bò Húc Thái", defaultPrice: 20000, cat: "douong", catName: "Đồ Uống", defaultImg: "Menu 4.jpg" }
     ];
 
 const CAT_LABELS_MAP = {
@@ -1154,22 +1224,24 @@ const CAT_LABELS_MAP = {
       el.innerHTML = html;
     }
 
-    function renderFullMenu() {
-      const el = document.getElementById('fullMenuContainer');
-      if (!el) return;
-      let html = '';
-      getUnifiedCustomerMenuList().forEach(it => {
-        if (currentFilterCat !== 'all' && it.cat !== currentFilterCat) return;
-        const safeName = it.name.replace(/'/g, "\\'");
-        html += `
-          <div class="menu-item-row ${it.isSoldOut ? 'is-sold-out' : ''}">
-            <div class="item-thumb"><img src="${it.image}" onerror="this.src='Logo nho.png'"></div>
-            <div class="item-meta"><span class="item-cat-label">${it.catName}</span><h4>${it.name} ${it.isHot ? '<span class="hot-label-small">🔥</span>' : ''}</h4><span class="item-price-tag">${it.price.toLocaleString()}đ</span></div>
-            <button class="btn-quick-add" ${it.isSoldOut ? 'disabled' : ''} onclick="addToCart('${it.id}', '${safeName}', ${it.price})">${it.isSoldOut ? 'Tạm Hết' : '+ Chọn Món'}</button>
-          </div>`;
-      });
-      el.innerHTML = html;
-    }
+function renderFullMenu() {
+   const el = document.getElementById('fullMenuContainer');
+   if (!el) return;
+   const kw = (document.getElementById('customerMenuSearchInput')?.value || '').toLowerCase().trim();
+   let html = '';
+   getUnifiedCustomerMenuList().forEach(it => {
+     if (currentFilterCat !== 'all' && it.cat !== currentFilterCat) return;
+     if (kw && !it.name.toLowerCase().includes(kw)) return;
+     const safeName = it.name.replace(/'/g, "\\'");
+     html += `
+       <div class="menu-item-row ${it.isSoldOut ? 'is-sold-out' : ''}">
+         <div class="item-thumb"><img src="${it.image}" onerror="this.src='Logo nho.png'"></div>
+         <div class="item-meta"><span class="item-cat-label">${it.catName}</span><h4>${it.name} ${it.isHot ? '<span class="hot-label-small">🔥</span>' : ''}</h4><span class="item-price-tag">${it.price.toLocaleString()}đ</span></div>
+         <button class="btn-quick-add" ${it.isSoldOut ? 'disabled' : ''} onclick="addToCart('${it.id}', '${safeName}', ${it.price})">${it.isSoldOut ? 'Tạm Hết' : '+ Chọn Món'}</button>
+       </div>`;
+   });
+   el.innerHTML = html || '<p style="grid-column:1/-1; text-align:center; color:#64748b; padding:20px;">Không tìm thấy món phù hợp.</p>';
+ }
 
     window.filterCat = function(c, btn) {
       currentFilterCat = c;
