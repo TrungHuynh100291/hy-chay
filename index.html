@@ -72,8 +72,11 @@
     .dish-price { font-weight: 800; color: #dc2626; font-size: 1.05rem; }
     .btn-add-cart { background: var(--primary); color: #fff; border: none; padding: 8px 14px; border-radius: 20px; font-weight: 600; cursor: pointer; }
 
-    .menu-filter-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px; scrollbar-width: none; }
+    .filter-nav-wrap { position: relative; display: flex; align-items: center; gap: 6px; margin-bottom: 16px; }
+    .menu-filter-bar { display: flex; gap: 8px; overflow-x: auto; scroll-behavior: smooth; padding: 4px 2px; margin-bottom: 0; scrollbar-width: none; flex: 1; }
     .menu-filter-bar::-webkit-scrollbar { display: none; }
+    .btn-scroll-nav { width: 36px; height: 36px; border-radius: 50%; border: 1px solid #cbd5e1; background: #ffffff; color: var(--primary); font-weight: 900; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: 0.2s; user-select: none; }
+    .btn-scroll-nav:hover { background: var(--primary); color: #ffffff; border-color: var(--primary); transform: scale(1.06); }
     .filter-chip { background: #ffffff; border: 1px solid var(--border); padding: 8px 16px; border-radius: 24px; font-size: 0.88rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
     .filter-chip.active { background: var(--primary); color: #ffffff; border-color: var(--primary); box-shadow: 0 4px 10px rgba(30, 94, 58, 0.2); }
     
@@ -298,28 +301,37 @@
       <div style="max-width: 520px; margin: 0 auto 14px;">
      <input type="text" id="customerMenuSearchInput" placeholder="🔍 Tìm nhanh tên món ăn hoặc đồ uống (113 món)..." oninput="renderFullMenu()" style="width:100%; padding:11px 16px; border:2px solid var(--primary); border-radius:24px; font-size:0.95rem; outline:none; background:#f8fafc;">
    </div>
-<div class="menu-filter-bar">
-        <button class="filter-chip active" onclick="filterCat('all', this)">Tất Cả Món</button>
-        <button class="filter-chip" onclick="filterCat('bun', this)">🍜 Món Bún</button>
-        <button class="filter-chip" onclick="filterCat('mi_pho', this)">🥢 Mì, Phở & Hủ Tiếu</button>
-        <button class="filter-chip" onclick="filterCat('com_kho', this)">🍚 Cơm & Món Khô</button>
-        <button class="filter-chip" onclick="filterCat('chien_dacbiet', this)">🥟 Chiên & Đặc Biệt</button>
-        <button class="filter-chip" onclick="filterCat('lau', this)">🍲 Lẩu Chay</button>
-        <button class="filter-chip" onclick="filterCat('soche', this)">📦 Sơ Chế & Đóng Gói</button>
-        <button class="filter-chip" onclick="filterCat('douong', this)">🥤 Đồ Uống BAL'S HOUSE (54)</button>
-        <button class="filter-chip" onclick="filterCat('topping', this)">➕ Thêm / Topping</button>
+<!-- THANH DANH MỤC CHÍNH CÓ NÚT BẤM QUA LẠI CHO LAPTOP & ĐIỆN THOẠI -->
+      <div class="filter-nav-wrap">
+        <button type="button" class="btn-scroll-nav" onclick="scrollFilterBar('mainMenuFilterBar', -280)" title="Trượt qua trái">❮</button>
+        <div id="mainMenuFilterBar" class="menu-filter-bar">
+          <button class="filter-chip active" onclick="filterCat('all', this)">Tất Cả Món</button>
+          <button class="filter-chip" onclick="filterCat('bun', this)">🍜 Món Bún</button>
+          <button class="filter-chip" onclick="filterCat('mi_pho', this)">🥢 Mì, Phở & Hủ Tiếu</button>
+          <button class="filter-chip" onclick="filterCat('com_kho', this)">🍚 Cơm & Món Khô</button>
+          <button class="filter-chip" onclick="filterCat('chien_dacbiet', this)">🥟 Chiên & Đặc Biệt</button>
+          <button class="filter-chip" onclick="filterCat('lau', this)">🍲 Lẩu Chay</button>
+          <button class="filter-chip" onclick="filterCat('soche', this)">📦 Sơ Chế & Đóng Gói</button>
+          <button class="filter-chip" onclick="filterCat('douong', this)">🥤 Đồ Uống BAL'S HOUSE (54)</button>
+          <button class="filter-chip" onclick="filterCat('topping', this)">➕ Thêm / Topping</button>
+        </div>
+        <button type="button" class="btn-scroll-nav" onclick="scrollFilterBar('mainMenuFilterBar', 280)" title="Trượt qua phải">❯</button>
       </div>
 
-      <!-- THANH PHÂN NHỎ 7 DANH MỤC ĐỒ UỐNG CHO KHÁCH HÀNG DỄ CHỌN -->
-      <div id="customerDrinkSubBar" class="menu-filter-bar" style="display:none; background:#f0fdf4; padding:10px 12px; border-radius:16px; border:1px solid #86efac; margin-top:-10px; margin-bottom:20px;">
-        <button class="filter-chip active" onclick="filterCustomerDrinkSub('all_drink', this)">Tất Cả Nước (54)</button>
-        <button class="filter-chip" onclick="filterCustomerDrinkSub('cafe_cacao', this)">☕ Cafe & Cacao (8)</button>
-        <button class="filter-chip" onclick="filterCustomerDrinkSub('latte', this)">🍵 Latte & Kem Trứng (6)</button>
-        <button class="filter-chip" onclick="filterCustomerDrinkSub('tra', this)">🍑 Trà Trái Cây (10)</button>
-        <button class="filter-chip" onclick="filterCustomerDrinkSub('nuocep', this)">🍊 Nước Ép Tươi (6)</button>
-        <button class="filter-chip" onclick="filterCustomerDrinkSub('yaourt', this)">🥣 Yaourt (11)</button>
-        <button class="filter-chip" onclick="filterCustomerDrinkSub('soda', this)">🫧 Soda & Suối Tắc (9)</button>
-        <button class="filter-chip" onclick="filterCustomerDrinkSub('giaikhat', this)">🎋 Nước Mía & Giải Khát (4)</button>
+      <!-- THANH PHÂN NHỎ 7 DANH MỤC ĐỒ UỐNG CÓ NÚT BẤM QUA LẠI CHO LAPTOP -->
+      <div id="customerDrinkSubWrap" class="filter-nav-wrap" style="display:none; background:#f0fdf4; padding:8px 10px; border-radius:18px; border:1px solid #86efac; margin-top:-6px; margin-bottom:20px;">
+        <button type="button" class="btn-scroll-nav" onclick="scrollFilterBar('customerDrinkSubBar', -260)" title="Trượt qua trái">❮</button>
+        <div id="customerDrinkSubBar" class="menu-filter-bar">
+          <button class="filter-chip active" onclick="filterCustomerDrinkSub('all_drink', this)">Tất Cả Nước (54)</button>
+          <button class="filter-chip" onclick="filterCustomerDrinkSub('cafe_cacao', this)">☕ Cafe & Cacao (8)</button>
+          <button class="filter-chip" onclick="filterCustomerDrinkSub('latte', this)">🍵 Latte & Kem Trứng (6)</button>
+          <button class="filter-chip" onclick="filterCustomerDrinkSub('tra', this)">🍑 Trà Trái Cây (10)</button>
+          <button class="filter-chip" onclick="filterCustomerDrinkSub('nuocep', this)">🍊 Nước Ép Tươi (6)</button>
+          <button class="filter-chip" onclick="filterCustomerDrinkSub('yaourt', this)">🥣 Yaourt (11)</button>
+          <button class="filter-chip" onclick="filterCustomerDrinkSub('soda', this)">🫧 Soda & Suối Tắc (9)</button>
+          <button class="filter-chip" onclick="filterCustomerDrinkSub('giaikhat', this)">🎋 Nước Mía & Giải Khát (4)</button>
+        </div>
+        <button type="button" class="btn-scroll-nav" onclick="scrollFilterBar('customerDrinkSubBar', 260)" title="Trượt qua phải">❯</button>
       </div>
       <div class="full-menu-container" id="fullMenuContainer"></div>
     </section>
@@ -1509,25 +1521,32 @@ function renderFullMenu() {
    el.innerHTML = html || '<p style="grid-column:1/-1; text-align:center; color:#64748b; padding:20px;">Không tìm thấy món phù hợp.</p>';
  }
 
+window.scrollFilterBar = function(barId, offset) {
+      const bar = document.getElementById(barId);
+      if (bar) bar.scrollBy({ left: offset, behavior: 'smooth' });
+    };
+
     window.filterCat = function(c, btn) {
       currentFilterCat = c;
-      document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
-      if (btn) btn.classList.add('active');
+      document.querySelectorAll('#mainMenuFilterBar .filter-chip').forEach(b => b.classList.remove('active'));
+      if (btn) {
+        btn.classList.add('active');
+        btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      }
+      const subWrap = document.getElementById('customerDrinkSubWrap');
+      if (subWrap) subWrap.style.display = (c === 'douong') ? 'flex' : 'none';
       renderFullMenu();
     };
 
-    if (!shipperOrderIdParam) {
-      renderFeaturedDishes();
-      renderFullMenu();
-    }
-
-    onValue(ref(db, 'restaurant_config/bank'), (s) => { if (s.val()) { bankConfig = s.val(); window.updateCalc(); } });
-    onValue(ref(db, 'menu_customizations'), (snap) => {
-      menuCustomCache = snap.val() || {};
-      if (!shipperOrderIdParam) {
-        renderFeaturedDishes();
-        renderFullMenu();
+    window.filterCustomerDrinkSub = function(subCat, btn) {
+      currentCustomerDrinkSub = subCat;
+      document.querySelectorAll('#customerDrinkSubBar .filter-chip').forEach(b => b.classList.remove('active'));
+      if (btn) {
+        btn.classList.add('active');
+        btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
       }
+      renderFullMenu();
+    };
     });
 
     // ==========================================
