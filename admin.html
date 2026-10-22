@@ -251,23 +251,36 @@
     <!-- KHUNG HIỆN THÔNG BÁO DỊCH VỤ DINE-IN -->
     <div id="serviceAlerts" class="service-alert-container no-print"></div>
 
-    <!-- MODAL HƯỚNG DẪN CÀI ICON APP -->
+<!-- MODAL TẢI FILE CÀI ĐẶT TRỰC TIẾP CHO WINDOWS, ANDROID, IOS -->
     <div id="installGuideModal" class="install-modal-overlay">
-      <div class="install-modal-box">
+      <div class="install-modal-box" style="max-width: 500px;">
         <span style="position:absolute; top:14px; right:16px; font-size:1.4rem; cursor:pointer;" onclick="closeInstallGuideModal()">&times;</span>
-        <h3 style="color:var(--primary); font-size:1.25rem; margin-bottom:12px;">📲 Cài Đặt Hy Chay POS Ra Màn Hình</h3>
-        <p style="font-size:0.88rem; color:#64748b; margin-bottom:14px;">Giúp mở phần mềm độc lập 1-chạm, toàn màn hình và giữ kết nối chạy ngầm:</p>
-        <div class="install-step-card">
-          <b style="color:var(--primary);">🍎 Dành cho iPhone / iPad (Safari):</b>
-          <p>1. Bấm vào biểu tượng <b>Chia sẻ (⎋ ô vuông mũi tên)</b> ở mép dưới.</p>
-          <p>2. Cuộn xuống chọn dòng <b>"Thêm vào MH chính" (➕)</b>.</p>
+        <h3 style="color:var(--primary); font-size:1.22rem; margin-bottom:8px;">📥 Tải Bộ Cài Đặt Hy Chay POS Về Máy</h3>
+        <p style="font-size:0.84rem; color:#64748b; margin-bottom:14px;">Chọn đúng thiết bị của bạn bên dưới để tải file cài đặt biểu tượng phần mềm độc lập ra màn hình chính:</p>
+        
+        <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:14px;">
+          <button type="button" onclick="downloadWindowsInstaller('admin')" style="width:100%; padding:13px 16px; background:#0284c7; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:0.92rem; cursor:pointer; text-align:left; display:flex; justify-content:space-between; align-items:center;">
+            <span>💻 1. Tải File Cài Đặt Cho Windows (.BAT)</span>
+            <span style="background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:6px; font-size:0.75rem;">Tải về PC</span>
+          </button>
+
+          <button type="button" onclick="triggerAndroidInstall('admin')" style="width:100%; padding:13px 16px; background:#16a34a; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:0.92rem; cursor:pointer; text-align:left; display:flex; justify-content:space-between; align-items:center;">
+            <span>🤖 2. Cài Đặt Trực Tiếp Cho Android (APK/PWA)</span>
+            <span style="background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:6px; font-size:0.75rem;">1-Chạm</span>
+          </button>
+
+          <button type="button" onclick="downloadIOSProfile('admin')" style="width:100%; padding:13px 16px; background:#0f172a; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:0.92rem; cursor:pointer; text-align:left; display:flex; justify-content:space-between; align-items:center;">
+            <span>🍎 3. Tải Cấu Hình Cài Đặt Cho iPhone / iPad (iOS)</span>
+            <span style="background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:6px; font-size:0.75rem;">WebClip</span>
+          </button>
         </div>
-        <div class="install-step-card">
-          <b style="color:var(--primary);">🤖 Dành cho Android (Chrome):</b>
-          <p>1. Bấm vào biểu tượng <b>3 dấu chấm (⋮)</b> ở góc trên bên phải.</p>
-          <p>2. Chọn <b>"Thêm vào màn hình chính"</b> rồi xác nhận.</p>
+
+        <div class="install-step-card" style="font-size:0.8rem; color:#475569;">
+          💡 <b>Hướng dẫn nhanh:</b><br>
+          • <b>Máy tính Windows:</b> Bấm nút số 1 để tải file <code>Cai_Dat_POS_HyChay.bat</code> về máy -> Nhấp đúp chạy file là tự động tạo Icon App ngoài màn hình Desktop.<br>
+          • <b>Điện thoại Android / iPhone:</b> Bấm nút số 2 hoặc số 3 (hoặc chọn "Thêm vào MH chính" trong trình duyệt).
         </div>
-        <button onclick="closeInstallGuideModal()" style="width:100%; padding:10px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-weight:700; cursor:pointer;">Đã Hiểu</button>
+        <button onclick="closeInstallGuideModal()" style="width:100%; padding:10px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-weight:700; cursor:pointer;">Đóng Cửa Sổ</button>
       </div>
     </div>
 
@@ -324,41 +337,62 @@
         <div id="ordersContainer" class="orders-grid"></div>
       </div>
 
-<!-- VIEW 2: POS TẠI BÀN (DÀNH CHO NHÂN VIÊN QUÁN ORDER) -->
+<!-- VIEW 2: POS TẠI BÀN (CÓ QUẢN LÝ THÊM/XÓA BÀN, TOPPING & CHIA NHỎ ĐỒ UỐNG) -->
       <div id="viewPosOrder" style="display: none;">
         <div class="pos-layout">
           <div class="pos-menu-panel">
-            <label style="font-weight:700; font-size:0.85rem; color:#64748b; display:block; margin-bottom:6px;">VỊ TRÍ BÀN ĂN:</label>
-            <div class="table-pills">
-              <button class="btn-table-pill active" onclick="selectTable('Bàn 1', this)">Bàn 1</button>
-              <button class="btn-table-pill" onclick="selectTable('Bàn 2', this)">Bàn 2</button>
-              <button class="btn-table-pill" onclick="selectTable('Bàn 3', this)">Bàn 3</button>
-              <button class="btn-table-pill" onclick="selectTable('Bàn 4', this)">Bàn 4</button>
-              <button class="btn-table-pill" onclick="selectTable('Bàn 5', this)">Bàn 5</button>
-              <button class="btn-table-pill" onclick="selectTable('Bàn 6', this)">Bàn 6</button>
-              <button class="btn-table-pill" onclick="selectTable('Bàn 7', this)">Bàn 7</button>
-              <button class="btn-table-pill" onclick="selectTable('Bàn 8', this)">Bàn 8</button>
-              <button class="btn-table-pill" onclick="selectTable('Mang Về', this)">Mang Về</button>
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+              <label style="font-weight:800; font-size:0.85rem; color:var(--primary);">🪑 VỊ TRÍ BÀN ĂN (ĐỒNG BỘ THỜI GIAN THỰC):</label>
+              <div id="tableAdminControls" style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                <input type="text" id="newTableNameInput" placeholder="Tên bàn mới (VD: Bàn 9, VIP 1)..." style="padding:5px 10px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.78rem; width:175px;">
+                <button type="button" onclick="addNewTable()" style="background:var(--primary); color:#fff; border:none; padding:5px 10px; border-radius:8px; font-weight:800; font-size:0.76rem; cursor:pointer;">+ Thêm Bàn</button>
+                <button type="button" id="btnToggleDeleteTable" onclick="toggleTableDeleteMode()" style="background:#fee2e2; color:#b91c1c; border:1px solid #fecaca; padding:5px 10px; border-radius:8px; font-weight:800; font-size:0.76rem; cursor:pointer;">🗑️ Xóa Bàn</button>
+              </div>
             </div>
+            <div class="table-pills" id="dynamicTablePills"></div>
+
+            <!-- KHUNG NHẬP NHANH ĐỒ THÊM / TÔ HỘP / PHỤ PHÍ TÙY Ý -->
+            <div style="background:#fffbeb; border:1px dashed #f59e0b; border-radius:10px; padding:8px 10px; margin-bottom:10px; display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+              <span style="font-size:0.78rem; font-weight:800; color:#b45309;">➕ Nhập nhanh Đồ thêm / Phụ phí:</span>
+              <input type="text" id="quickExtraName" placeholder="VD: Thêm tô giấy, Thêm chao..." style="flex:1.5; min-width:140px; padding:5px 8px; border:1px solid #fde68a; border-radius:6px; font-size:0.8rem;">
+              <input type="number" id="quickExtraPrice" placeholder="Giá (VD: 5000)" step="1000" style="width:110px; padding:5px 8px; border:1px solid #fde68a; border-radius:6px; font-size:0.8rem;">
+              <button type="button" onclick="addQuickExtraToPosCart()" style="background:#d97706; color:#fff; border:none; padding:6px 12px; border-radius:6px; font-weight:800; font-size:0.78rem; cursor:pointer;">+ Đưa Vào Đơn</button>
+            </div>
+
             <label style="font-weight:700; font-size:0.85rem; color:#64748b; display:block; margin-bottom:6px;">CHỌN HẠNG MỤC & MÓN ĂN:</label>
-            <input type="text" id="posSearchInput" placeholder="🔍 Tìm nhanh tên món ăn..." style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:8px; font-size:0.85rem;" oninput="renderPosDishGrid()">
+            <input type="text" id="posSearchInput" placeholder="🔍 Tìm nhanh tên món ăn, nước uống, topping..." style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:8px; font-size:0.85rem;" oninput="renderPosDishGrid()">
+            
             <div id="posCatFilterBar" class="admin-cat-bar">
               <button type="button" class="admin-cat-chip active" onclick="setPosCategory('all', this)">Tất Cả</button>
-              <button type="button" class="admin-cat-chip" onclick="setPosCategory('bun', this)">Món Bún</button>
-              <button type="button" class="admin-cat-chip" onclick="setPosCategory('mi_pho', this)">Mì - Phở</button>
-              <button type="button" class="admin-cat-chip" onclick="setPosCategory('com_kho', this)">Cơm & Khô</button>
-              <button type="button" class="admin-cat-chip" onclick="setPosCategory('chien_dacbiet', this)">Chiên & Đặc Biệt</button>
-              <button type="button" class="admin-cat-chip" onclick="setPosCategory('lau', this)">Lẩu Chay</button>
-              <button type="button" class="admin-cat-chip" onclick="setPosCategory('soche', this)">Sơ Chế</button>
-              <button type="button" class="admin-cat-chip" onclick="setPosCategory('douong', this)">Đồ Uống</button>
+              <button type="button" class="admin-cat-chip" onclick="setPosCategory('bun', this)">🍜 Món Bún</button>
+              <button type="button" class="admin-cat-chip" onclick="setPosCategory('mi_pho', this)">🥢 Mì - Phở</button>
+              <button type="button" class="admin-cat-chip" onclick="setPosCategory('com_kho', this)">🍚 Cơm & Khô</button>
+              <button type="button" class="admin-cat-chip" onclick="setPosCategory('chien_dacbiet', this)">🥟 Chiên & Đặc Biệt</button>
+              <button type="button" class="admin-cat-chip" onclick="setPosCategory('lau', this)">🍲 Lẩu Chay</button>
+              <button type="button" class="admin-cat-chip" onclick="setPosCategory('soche', this)">📦 Sơ Chế</button>
+              <button type="button" class="admin-cat-chip" onclick="setPosCategory('douong', this)">🥤 Đồ Uống (54)</button>
+              <button type="button" class="admin-cat-chip" style="border-color:#f59e0b; color:#b45309; background:#fffbeb;" onclick="setPosCategory('topping', this)">➕ Thêm / Topping</button>
             </div>
+
+            <!-- THANH LỌC CON 7 NHÓM ĐỒ UỐNG (TỰ ĐỘNG HIỆN KHI BẤM VÀO ĐỒ UỐNG) -->
+            <div id="posDrinkSubCatBar" class="admin-cat-bar" style="display:none; background:#eff6ff; padding:6px 8px; border-radius:10px; border:1px solid #bfdbfe;">
+              <button type="button" class="admin-cat-chip active" onclick="setPosDrinkSubCat('all_drink', this)">Tất Cả Nước (54)</button>
+              <button type="button" class="admin-cat-chip" onclick="setPosDrinkSubCat('cafe_cacao', this)">☕ Cafe & Cacao (8)</button>
+              <button type="button" class="admin-cat-chip" onclick="setPosDrinkSubCat('latte', this)">🍵 Latte & Kem Trứng (6)</button>
+              <button type="button" class="admin-cat-chip" onclick="setPosDrinkSubCat('tra', this)">🍑 Trà Trái Cây (10)</button>
+              <button type="button" class="admin-cat-chip" onclick="setPosDrinkSubCat('nuocep', this)">🍊 Nước Ép (6)</button>
+              <button type="button" class="admin-cat-chip" onclick="setPosDrinkSubCat('yaourt', this)">🥣 Yaourt (11)</button>
+              <button type="button" class="admin-cat-chip" onclick="setPosDrinkSubCat('soda', this)">🫧 Soda (9)</button>
+              <button type="button" class="admin-cat-chip" onclick="setPosDrinkSubCat('giaikhat', this)">🎋 Nước Mía & Ngọt (4)</button>
+            </div>
+
             <div class="pos-dish-grid" id="posDishGrid"></div>
           </div>
 
           <div class="pos-cart-panel">
             <h3 style="margin-bottom:10px;">Order: <span id="currentSelectedTable" style="color:#d97706;">Bàn 1</span></h3>
             <div class="pos-cart-items" id="posCartItemsList"><p style="color:#94a3b8; text-align:center; padding:40px 0;">Chưa có món nào.</p></div>
-            <input type="text" id="posOrderNote" placeholder="Ghi chú cho bếp..." style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:10px;">
+            <input type="text" id="posOrderNote" placeholder="Ghi chú cho bếp (VD: Không hành, thêm tô giấy...)" style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:10px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-weight:700;">
               <span>Tổng tiền:</span><span id="posCartTotal" style="font-size:1.3rem; color:#dc2626;">0đ</span>
             </div>
@@ -446,6 +480,42 @@
           <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px; margin-bottom:16px;">
             <h3 style="color:var(--primary); font-size:1.05rem;">CÔNG TY TNHH TMDV VÀ SẢN XUẤT BẢO ANH LÂM</h3>
             <p style="font-size:0.85rem; color:#166534;">MST: <b>3401289271</b> | Đ/c: 280 Trần Hưng Đạo, P. Phan Thiết, T. Lâm Đồng<br><i>Báo cáo kế toán tách biệt 100% Doanh thu bán hàng chịu thuế (Mã ngành 5610, 5630) và Sổ thu hộ phí vận chuyển trả cho Shipper (Không tính vào doanh thu chịu thuế của công ty).</i></p>
+       <!-- MODULE MỞ RỘNG SAAS: XUẤT TỜ KHAI THUẾ HỘ KINH DOANH (01/CNKD) & TÍCH HỢP HÓA ĐƠN ĐIỆN TỬ MTT -->
+          <div style="margin-top:24px; padding-top:18px; border-top:2px dashed #cbd5e1;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+              <div>
+                <h3 style="color:#0369a1; font-size:1.05rem;">🧾 CỔNG HÓA ĐƠN ĐIỆN TỬ KHỞI TẠO TỪ MÁY TÍNH TIỀN & TỜ KHAI THUẾ HỘ KINH DOANH</h3>
+                <p style="font-size:0.82rem; color:#64748b;">Tích hợp chuẩn API Nghị định 70/2025/NĐ-CP & Thông tư 40/2021/TT-BTC (Sẵn sàng đóng gói thương mại bán cho các Cửa hàng & Hộ kinh doanh).</p>
+              </div>
+              <button type="button" onclick="exportHouseholdTaxDeclarationCSV()" style="background:#7c3aed; color:#fff; border:none; padding:9px 16px; border-radius:8px; font-weight:800; cursor:pointer; font-size:0.85rem;">📥 Xuất Phụ Lục Thuế Hộ Kinh Doanh (01-2/BK-HĐKD)</button>
+            </div>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px; background:#f8fafc; padding:14px; border-radius:10px; border:1px solid var(--border);">
+              <div>
+                <label style="font-size:0.78rem; font-weight:700;">Nhà Cung Cấp HĐĐT:</label>
+                <select id="cfgEinvoiceProvider" style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:6px; margin-top:4px; font-weight:700;">
+                  <option value="none">-- Chưa bật tự động phát hành --</option>
+                  <option value="viettel">Viettel SInvoice (Máy tính tiền)</option>
+                  <option value="misa">MISA meInvoice (Máy tính tiền)</option>
+                  <option value="vnpt">VNPT Invoice (Máy tính tiền)</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:0.78rem; font-weight:700;">Mã Số Thuế Đơn Vị / HKD:</label>
+                <input type="text" id="cfgEinvoiceTaxCode" value="3401289271" style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:6px; margin-top:4px;">
+              </div>
+              <div>
+                <label style="font-size:0.78rem; font-weight:700;">Ký Hiệu Mẫu Hóa Đơn (MTT):</label>
+                <input type="text" id="cfgEinvoiceSeries" placeholder="VD: 1C26MHY" value="1C26MHY" style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:6px; margin-top:4px;">
+              </div>
+              <div>
+                <label style="font-size:0.78rem; font-weight:700;">API Token / Endpoint Kết Nối:</label>
+                <div style="display:flex; gap:6px; margin-top:4px;">
+                  <input type="password" id="cfgEinvoiceToken" placeholder="Nhập API Token..." style="flex:1; padding:7px; border:1px solid #cbd5e1; border-radius:6px;">
+                  <button type="button" onclick="saveEinvoiceConfig()" style="background:#0284c7; color:#fff; border:none; padding:7px 12px; border-radius:6px; font-weight:800; cursor:pointer;">Lưu</button>
+                </div>
+              </div>
+            </div>
+          </div>   
           </div>
 
           <div class="report-filter-bar">
@@ -522,8 +592,13 @@
 
             <!-- Cột phải: Bảng chọn món phụ để thêm nhanh vào đơn -->
             <div class="edit-panel-box">
-              <h4 style="font-size:0.9rem; color:var(--primary); margin-bottom:8px; border-bottom:1px solid #cbd5e1; padding-bottom:4px;">Thêm Món Mới Vào Đơn:</h4>
-              <input type="text" id="editModalSearchDish" placeholder="🔍 Tìm món ăn..." style="width:100%; padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.82rem; margin-bottom:8px;" oninput="renderEditModalDishPicker()">
+<h4 style="font-size:0.9rem; color:var(--primary); margin-bottom:8px; border-bottom:1px solid #cbd5e1; padding-bottom:4px;">Thêm Món / Topping Vào Đơn:</h4>
+              <div style="display:flex; gap:4px; margin-bottom:8px;">
+                <input type="text" id="editQuickExtraName" placeholder="Đồ thêm/Tô giấy..." style="flex:1; padding:5px 8px; border:1px solid #fde68a; background:#fffbeb; border-radius:6px; font-size:0.78rem;">
+                <input type="number" id="editQuickExtraPrice" placeholder="Giá..." step="1000" style="width:80px; padding:5px 6px; border:1px solid #fde68a; background:#fffbeb; border-radius:6px; font-size:0.78rem;">
+                <button type="button" onclick="addQuickExtraToEditOrder()" style="background:#d97706; color:#fff; border:none; padding:5px 8px; border-radius:6px; font-weight:800; font-size:0.75rem; cursor:pointer;">+ Thêm</button>
+              </div>
+              <input type="text" id="editModalSearchDish" placeholder="🔍 Tìm món ăn, nước uống, topping..." style="width:100%; padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.82rem; margin-bottom:8px;" oninput="renderEditModalDishPicker()">
               <div id="editModalCatBar" class="admin-cat-bar">
                 <button type="button" class="admin-cat-chip active" onclick="setEditModalCategory('all', this)">Tất Cả</button>
                 <button type="button" class="admin-cat-chip" onclick="setEditModalCategory('bun', this)">Bún</button>
@@ -533,6 +608,17 @@
                 <button type="button" class="admin-cat-chip" onclick="setEditModalCategory('lau', this)">Lẩu</button>
                 <button type="button" class="admin-cat-chip" onclick="setEditModalCategory('soche', this)">Sơ Chế</button>
                 <button type="button" class="admin-cat-chip" onclick="setEditModalCategory('douong', this)">Đồ Uống</button>
+                <button type="button" class="admin-cat-chip" style="border-color:#f59e0b; color:#b45309; background:#fffbeb;" onclick="setEditModalCategory('topping', this)">➕ Topping</button>
+              </div>
+              <div id="editModalDrinkSubBar" class="admin-cat-bar" style="display:none; background:#eff6ff; padding:4px 6px; border-radius:8px;">
+                <button type="button" class="admin-cat-chip active" onclick="setEditModalDrinkSub('all_drink', this)">Tất Cả Nước</button>
+                <button type="button" class="admin-cat-chip" onclick="setEditModalDrinkSub('cafe_cacao', this)">Cafe/Cacao</button>
+                <button type="button" class="admin-cat-chip" onclick="setEditModalDrinkSub('latte', this)">Latte</button>
+                <button type="button" class="admin-cat-chip" onclick="setEditModalDrinkSub('tra', this)">Trà</button>
+                <button type="button" class="admin-cat-chip" onclick="setEditModalDrinkSub('nuocep', this)">Nước Ép</button>
+                <button type="button" class="admin-cat-chip" onclick="setEditModalDrinkSub('yaourt', this)">Yaourt</button>
+                <button type="button" class="admin-cat-chip" onclick="setEditModalDrinkSub('soda', this)">Soda</button>
+                <button type="button" class="admin-cat-chip" onclick="setEditModalDrinkSub('giaikhat', this)">Mía/Ngọt</button>
               </div>
               <div id="editModalDishPickerList" style="max-height:35vh; overflow-y:auto;"></div>
             </div>
@@ -630,22 +716,54 @@
         </div>
       </div>
       
-      <!-- VIEW 6: PHÂN QUYỀN TÀI KHOẢN -->
+<!-- VIEW 6: PHÂN QUYỀN 4 CẤP & NHẬT KÝ CHỐNG GIAN LẬN NỘI BỘ -->
       <div id="viewUsers" style="display: none;">
-        <div class="report-card">
-          <h3 style="color:var(--primary); margin-bottom:8px;">Tạo Tài Khoản Cho Quản Lý / Thu Ngân</h3>
-          <p style="font-size:0.85rem; color:#64748b; margin-bottom:15px;">Các tài khoản phụ này chỉ có quyền bán hàng và xem báo cáo, không có quyền tạo tài khoản mới.</p>
+        <div class="report-card" style="margin-bottom: 18px;">
+          <h3 style="color:var(--primary); margin-bottom:6px;">👥 Phân Quyền Nhân Sự 4 Cấp & Chống Thông Đồng Gian Lận</h3>
+          <p style="font-size:0.84rem; color:#64748b; margin-bottom:14px;">
+            • <b>Quản lý (Manager):</b> Không được đổi STK VietQR, không được tự sửa giá gốc món ăn. Mọi thao tác hủy/giảm tiền sau khi đã in bill đều bị ghi vào Nhật ký chống gian lận.<br>
+            • <b>Thu ngân (Cashier):</b> Chỉ nhận đơn, in bill, thu tiền. Muốn hủy đơn hoặc sửa giảm món sau khi đã in bill bắt buộc phải có mật khẩu xác nhận chéo của Quản lý/Chủ quán.<br>
+            • <b>Nhân viên / Bếp (Staff):</b> Chỉ được Order tại bàn và gạch món bếp, ẩn toàn bộ doanh thu & báo cáo.
+          </p>
           
-          <div style="display:flex; gap:10px; margin-bottom: 25px; flex-wrap:wrap;">
-            <input type="text" id="newUsername" placeholder="Tên đăng nhập (VD: thungan1)..." style="padding:10px; border:1px solid #cbd5e1; border-radius:8px; flex:1; min-width:200px;">
-            <input type="text" id="newPassword" placeholder="Mật khẩu..." style="padding:10px; border:1px solid #cbd5e1; border-radius:8px; flex:1; min-width:200px;">
-            <button onclick="createSubAccount()" style="background:var(--primary); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-weight:700; cursor:pointer;">+ TẠO TÀI KHOẢN</button>
+          <div style="display:flex; gap:10px; margin-bottom: 20px; flex-wrap:wrap; background:#f8fafc; padding:12px; border-radius:10px; border:1px solid var(--border);">
+            <input type="text" id="newUsername" placeholder="Tên đăng nhập (VD: thungan1, quanly1)..." style="padding:10px; border:1px solid #cbd5e1; border-radius:8px; flex:1; min-width:180px;">
+            <input type="text" id="newPassword" placeholder="Mật khẩu..." style="padding:10px; border:1px solid #cbd5e1; border-radius:8px; flex:1; min-width:160px;">
+            <select id="newUserRole" style="padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-weight:700; color:var(--primary);">
+              <option value="cashier">💵 Thu Ngân (Khóa hủy/sửa sau in bill)</option>
+              <option value="manager">🛡️ Quản Lý Ca (Giám sát vận hành)</option>
+              <option value="staff">🍜 Nhân Viên Order / Bếp (Ẩn doanh thu)</option>
+            </select>
+            <button onclick="createSubAccount()" style="background:var(--primary); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-weight:800; cursor:pointer;">+ TẠO TÀI KHOẢN</button>
           </div>
 
-          <h3 style="font-size:1.05rem; color:var(--text-dark); margin-bottom:10px;">Danh Sách Tài Khoản Phụ</h3>
+          <h4 style="font-size:0.95rem; color:var(--text-main); margin-bottom:8px;">Danh Sách Tài Khoản Nhân Sự</h4>
           <table class="report-table">
-            <thead><tr style="background:#f1f5f9; text-align:left;"><th>Tên Đăng Nhập</th><th>Mật Khẩu</th><th>Quyền Hạn</th><th>Hành Động</th></tr></thead>
+            <thead><tr style="background:#f1f5f9; text-align:left;"><th>Tên Đăng Nhập</th><th>Mật Khẩu</th><th>Cấp Quyền Hạn</th><th>Hành Động</th></tr></thead>
             <tbody id="subAccountsBody"></tbody>
+          </table>
+        </div>
+
+        <!-- BẢNG NHẬT KÝ CHỐNG GIAN LẬN (CHỈ CHỦ QUÁN ROOT MỚI THẤY & XÓA ĐƯỢC) -->
+        <div class="report-card" style="border: 2px solid #ef4444; background: #fffdf9;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
+            <div>
+              <h3 style="color:#b91c1c;">🚨 NHẬT KÝ KIỂM TOÁN & PHÁT HIỆN GIAN LẬN (AUDIT LOGS)</h3>
+              <p style="font-size:0.82rem; color:#64748b;">Ghi vết tự động 100% các hành vi: Hủy đơn sau khi đã in bill, Sửa giảm tiền đơn hàng, Mở khóa chéo giữa Quản lý & Thu ngân (Nhân viên và Quản lý không thể xóa bảng này).</p>
+            </div>
+            <button onclick="clearAuditLogsByRoot()" style="background:#fee2e2; color:#b91c1c; border:1px solid #fecaca; padding:6px 12px; border-radius:8px; font-weight:700; font-size:0.78rem; cursor:pointer;">🗑️ Dọn Nhật Ký (Chỉ Giám Đốc)</button>
+          </div>
+          <table class="report-table">
+            <thead>
+              <tr style="background:#fef2f2; color:#991b1b;">
+                <th>Thời Gian</th>
+                <th>Tài Khoản Thực Hiện</th>
+                <th>Hành Vi Ghi Nhận</th>
+                <th>Chi Tiết Đối Soát (Trước & Sau)</th>
+                <th>Mức Độ</th>
+              </tr>
+            </thead>
+            <tbody id="auditLogsTableBody"></tbody>
           </table>
         </div>
       </div>
@@ -2900,6 +3018,595 @@ window.printKitchenTicket = (id, dData = null) => {
         alert("✅ Đã đổi trạng thái đơn sang: SHIPPER ĐANG GIAO!");
         window.closeDispatchModal();
       });
+    };
+    // =========================================================
+    // 16. NÂNG CẤP V11: QUẢN LÝ BÀN ĂN ĐỘNG, CHIA NHỎ ĐỒ UỐNG, TOPPING,
+    //     PHÂN QUYỀN 4 CẤP CHỐNG GIAN LẬN, HĐĐT & BỘ CÀI ĐẶT ĐA NỀN TẢNG
+    // =========================================================
+    let currentPosDrinkSubCat = 'all_drink';
+    let currentEditDrinkSubCat = 'all_drink';
+    let isTableDeleteMode = false;
+    let tablesListCache = ["Bàn 1", "Bàn 2", "Bàn 3", "Bàn 4", "Bàn 5", "Bàn 6", "Bàn 7", "Bàn 8", "Mang Về"];
+
+    // 16.1. ĐỒNG BỘ DANH SÁCH BÀN ĂN TỪ FIREBASE (TẠO THÊM BÀN / XÓA BÀN)
+    onValue(ref(db, 'restaurant_config/tables'), (snap) => {
+      if (snap.exists() && Array.isArray(snap.val()) && snap.val().length > 0) {
+        tablesListCache = snap.val();
+      }
+      renderDynamicTablePills();
+    });
+
+    function renderDynamicTablePills() {
+      const box = document.getElementById('dynamicTablePills');
+      if (!box) return;
+      if (!tablesListCache.includes(selectedTable)) {
+        selectedTable = tablesListCache[0] || "Bàn 1";
+        if (document.getElementById('currentSelectedTable')) {
+          document.getElementById('currentSelectedTable').innerText = selectedTable;
+        }
+      }
+      let html = '';
+      tablesListCache.forEach((tName, idx) => {
+        const isActive = (tName === selectedTable);
+        const safeT = tName.replace(/'/g, "\\'");
+        if (isTableDeleteMode) {
+          html += `<button type="button" class="btn-table-pill" style="background:#fee2e2; color:#b91c1c; border-color:#ef4444;" onclick="removeTableAtIndex(${idx})">❌ Xóa "${tName}"</button>`;
+        } else {
+          html += `<button type="button" class="btn-table-pill ${isActive ? 'active' : ''}" onclick="selectTable('${safeT}', this)">${tName}</button>`;
+        }
+      });
+      box.innerHTML = html;
+    }
+
+    window.addNewTable = function() {
+      const role = localStorage.getItem('hy_chay_active_role') || 'staff';
+      if (role === 'cashier' || role === 'staff') return alert("⛔ Tài khoản Thu ngân / Nhân viên không có quyền tự ý thêm hoặc xóa bàn!");
+      const inp = document.getElementById('newTableNameInput');
+      const newName = (inp?.value || '').trim();
+      if (!newName) return alert("Vui lòng nhập tên bàn mới (VD: Bàn 9, Bàn Sân Vườn)!");
+      if (tablesListCache.includes(newName)) return alert("Tên bàn này đã tồn tại!");
+      const updated = [...tablesListCache, newName];
+      set(ref(db, 'restaurant_config/tables'), updated).then(() => {
+        if (inp) inp.value = '';
+        writeAuditLog("THÊM BÀN ĂN MỚI", `Đã thêm bàn: ${newName}`, "INFO");
+      });
+    };
+
+    window.toggleTableDeleteMode = function() {
+      const role = localStorage.getItem('hy_chay_active_role') || 'staff';
+      if (role === 'cashier' || role === 'staff') return alert("⛔ Chỉ Chủ quán hoặc Quản lý mới được quyền xóa bàn!");
+      isTableDeleteMode = !isTableDeleteMode;
+      const btn = document.getElementById('btnToggleDeleteTable');
+      if (btn) {
+        btn.innerText = isTableDeleteMode ? "✅ Xong (Thoát Xóa)" : "🗑️ Xóa Bàn";
+        btn.style.background = isTableDeleteMode ? "#dcfce7" : "#fee2e2";
+        btn.style.color = isTableDeleteMode ? "#166534" : "#b91c1c";
+      }
+      renderDynamicTablePills();
+    };
+
+    window.removeTableAtIndex = function(idx) {
+      const targetName = tablesListCache[idx];
+      if (!targetName) return;
+      if (tablesListCache.length <= 1) return alert("Phải giữ lại ít nhất 1 vị trí bàn!");
+      if (!confirm(`⚠️ Xác nhận xóa "${targetName}" khỏi sơ đồ bàn?`)) return;
+      const updated = tablesListCache.filter((_, i) => i !== idx);
+      set(ref(db, 'restaurant_config/tables'), updated).then(() => {
+        writeAuditLog("XÓA BÀN ĂN", `Đã xóa bàn: ${targetName}`, "WARN");
+      });
+    };
+
+    // 16.2. MỞ RỘNG NHÃN DANH MỤC TOPPING & CHIA NHỎ 7 NHÓM ĐỒ UỐNG
+    CAT_LABELS_MAP.topping = "Thêm/Topping";
+
+    const menuCatSelect = document.getElementById('menuCatFilter');
+    if (menuCatSelect && !menuCatSelect.querySelector('option[value="topping"]')) {
+      menuCatSelect.insertAdjacentHTML('beforeend', `<option value="topping">➕ Thêm / Topping / Tô Hộp</option>`);
+    }
+    const newDishCatSel = document.getElementById('newDishCatSelect');
+    if (newDishCatSel && !newDishCatSel.querySelector('option[value="topping"]')) {
+      newDishCatSel.insertAdjacentHTML('beforeend', `<option value="topping">➕ Thêm / Topping / Tô Hộp (5610)</option>`);
+    }
+
+    window.setPosCategory = function(cat, btn) {
+      currentPosCatFilter = cat;
+      document.querySelectorAll('#posCatFilterBar .admin-cat-chip').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      const subBar = document.getElementById('posDrinkSubCatBar');
+      if (subBar) subBar.style.display = (cat === 'douong') ? 'flex' : 'none';
+      window.renderPosDishGrid();
+    };
+
+    window.setPosDrinkSubCat = function(subCat, btn) {
+      currentPosDrinkSubCat = subCat;
+      document.querySelectorAll('#posDrinkSubCatBar .admin-cat-chip').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      window.renderPosDishGrid();
+    };
+
+    window.renderPosDishGrid = function() {
+      const grid = document.getElementById('posDishGrid'); if (!grid) return;
+      const kw = (document.getElementById('posSearchInput')?.value || '').toLowerCase().trim();
+      let html = '';
+      getUnifiedMenuList().forEach(item => {
+        if (currentPosCatFilter !== 'all' && item.cat !== currentPosCatFilter) return;
+        if (currentPosCatFilter === 'douong' && currentPosDrinkSubCat !== 'all_drink') {
+          if (getDrinkSubCat(item.id, item.name) !== currentPosDrinkSubCat) return;
+        }
+        if (kw && !item.name.toLowerCase().includes(kw)) return;
+        const safeName = item.name.replace(/'/g, "\\'");
+        const badgeLabel = item.cat === 'douong' ? (DRINK_SUBCAT_LABELS[getDrinkSubCat(item.id, item.name)] || item.catName) : item.catName;
+        html += `
+          <button class="pos-dish-btn" ${item.isSoldOut ? 'disabled' : ''} onclick="addToPosCart('${safeName}', ${item.price}, '${item.cat}')">
+            <div>
+              <span style="font-size:0.66rem; color:#64748b; background:#f1f5f9; padding:1px 5px; border-radius:4px;">${badgeLabel}</span>
+              <h4 style="margin-top:3px; font-size:0.88rem;">${item.name}</h4>
+              ${item.isSoldOut ? '<small style="color:red; font-weight:bold;">Tạm hết</small>' : ''}
+            </div>
+            <span style="color:#dc2626; font-weight:800; margin-top:4px;">${item.price.toLocaleString()}đ</span>
+          </button>`;
+      });
+      grid.innerHTML = html || '<p style="grid-column:1/-1; text-align:center; color:#64748b; padding:20px;">Không tìm thấy món phù hợp.</p>';
+    };
+
+    window.addQuickExtraToPosCart = function() {
+      const nameInp = document.getElementById('quickExtraName');
+      const priceInp = document.getElementById('quickExtraPrice');
+      const rawName = (nameInp?.value || '').trim();
+      const price = parseInt(priceInp?.value || '0');
+      if (!rawName || isNaN(price) || price <= 0) return alert("Vui lòng nhập Tên đồ thêm/tô giấy và Số tiền hợp lệ!");
+      const fullExtraName = rawName.startsWith('Thêm') || rawName.startsWith('Topping') ? rawName : `Thêm: ${rawName}`;
+      window.addToPosCart(fullExtraName, price, 'topping');
+      nameInp.value = ''; priceInp.value = '';
+    };
+
+    window.setEditModalCategory = function(cat, btn) {
+      currentEditModalCatFilter = cat;
+      document.querySelectorAll('#editModalCatBar .admin-cat-chip').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      const subBar = document.getElementById('editModalDrinkSubBar');
+      if (subBar) subBar.style.display = (cat === 'douong') ? 'flex' : 'none';
+      window.renderEditModalDishPicker();
+    };
+
+    window.setEditModalDrinkSub = function(subCat, btn) {
+      currentEditDrinkSubCat = subCat;
+      document.querySelectorAll('#editModalDrinkSubBar .admin-cat-chip').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      window.renderEditModalDishPicker();
+    };
+
+    window.renderEditModalDishPicker = function() {
+      const pickerEl = document.getElementById('editModalDishPickerList');
+      if (!pickerEl) return;
+      const kw = (document.getElementById('editModalSearchDish')?.value || '').toLowerCase().trim();
+      let html = '';
+      getUnifiedMenuList().forEach(item => {
+        if (currentEditModalCatFilter !== 'all' && item.cat !== currentEditModalCatFilter) return;
+        if (currentEditModalCatFilter === 'douong' && currentEditDrinkSubCat !== 'all_drink') {
+          if (getDrinkSubCat(item.id, item.name) !== currentEditDrinkSubCat) return;
+        }
+        if (kw && !item.name.toLowerCase().includes(kw)) return;
+        const safeName = item.name.replace(/'/g, "\\'");
+        html += `
+          <div class="edit-add-dish-row">
+            <div>
+              <span style="font-size:0.68rem; color:#64748b; background:#f1f5f9; padding:1px 5px; border-radius:4px;">${item.catName}</span>
+              <b>${item.name}</b> ${item.isSoldOut ? '<small style="color:#ef4444;">(Tạm hết)</small>' : ''}<br>
+              <span style="color:#dc2626; font-weight:700;">${item.price.toLocaleString()}đ</span>
+            </div>
+            <button type="button" style="background:var(--primary); color:#fff; border:none; padding:5px 10px; border-radius:6px; font-weight:700; cursor:pointer; font-size:0.78rem;" onclick="addDishToEditOrder('${safeName}', ${item.price}, '${item.cat}')">+ Thêm</button>
+          </div>`;
+      });
+      pickerEl.innerHTML = html || '<p style="text-align:center; color:#64748b; padding:12px;">Không có món trong mục này.</p>';
+    };
+
+    window.addQuickExtraToEditOrder = function() {
+      const nameInp = document.getElementById('editQuickExtraName');
+      const priceInp = document.getElementById('editQuickExtraPrice');
+      const rawName = (nameInp?.value || '').trim();
+      const price = parseInt(priceInp?.value || '0');
+      if (!rawName || isNaN(price) || price <= 0) return alert("Vui lòng nhập Tên đồ thêm/tô giấy và Số tiền!");
+      const fullExtraName = rawName.startsWith('Thêm') ? rawName : `Thêm: ${rawName}`;
+      window.addDishToEditOrder(fullExtraName, price, 'topping');
+      nameInp.value = ''; priceInp.value = '';
+    };
+
+    // =========================================================
+    // 16.3. HỆ THỐNG PHÂN QUYỀN 4 CẤP (RBAC) & CHỐNG THÔNG ĐỒNG GIAN LẬN
+    // =========================================================
+    const ROLE_BADGE_MAP = {
+      root: '<span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:12px; font-size:0.8rem; font-weight:800;">👑 Chủ Quán (Root)</span>',
+      manager: '<span style="background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:12px; font-size:0.8rem; font-weight:800;">🛡️ Quản Lý Ca</span>',
+      cashier: '<span style="background:#dcfce7; color:#166534; padding:2px 8px; border-radius:12px; font-size:0.8rem; font-weight:800;">💵 Thu Ngân</span>',
+      staff: '<span style="background:#f1f5f9; color:#475569; padding:2px 8px; border-radius:12px; font-size:0.8rem; font-weight:800;">🍜 Nhân Viên / Bếp</span>'
+    };
+
+    function writeAuditLog(actionTitle, detailText, severity = "WARN") {
+      const actor = localStorage.getItem('hy_chay_active_user') || 'unknown';
+      const role = localStorage.getItem('hy_chay_active_role') || 'staff';
+      push(ref(db, 'audit_logs'), {
+        timestamp: new Date().toISOString(),
+        actor: actor,
+        role: role,
+        action: actionTitle,
+        detail: detailText,
+        severity: severity
+      }).catch(() => {});
+    }
+
+    function enforceGranularRolePermissions() {
+      const role = localStorage.getItem('hy_chay_active_role') || 'staff';
+      const user = localStorage.getItem('hy_chay_active_user') || '';
+      const allTabBtns = document.querySelectorAll('.tabs-bar .tab-btn');
+      // Thứ tự các tab: 0:Đơn hàng, 1:Order tại bàn, 2:Quản lý món, 3:VietQR, 4:Báo cáo, 5:Máy in, 6:Đội tài xế, 7:Phân quyền
+      const tabMenuStock = allTabBtns[2];
+      const tabBankCfg = allTabBtns[3];
+      const tabReport = document.getElementById('tabShiftReport');
+      const tabPrinter = allTabBtns[5];
+      const tabUsers = document.getElementById('tabUsers');
+      const btnEndShift = document.querySelector('.btn-end-shift');
+      const kpiTaxableBox = document.getElementById('kpiTaxableRev')?.closest('.stat-card');
+      const kpiShipBox = document.getElementById('kpiShippingRev')?.closest('.stat-card');
+
+      // Mặc định hiển thị lại trước khi lọc theo role
+      [tabMenuStock, tabBankCfg, tabReport, tabPrinter, tabUsers, btnEndShift, kpiTaxableBox, kpiShipBox].forEach(el => {
+        if (el) el.style.display = '';
+      });
+
+      if (role === 'root') {
+        // Chủ quán có toàn quyền 100%
+        if (tabUsers) tabUsers.style.display = 'inline-block';
+      } else if (role === 'manager') {
+        // Quản lý: Khóa Cấu hình VietQR và Phân quyền (Không cho tự đổi STK ngân hàng hoặc xóa Audit Log)
+        if (tabBankCfg) tabBankCfg.style.display = 'none';
+        if (tabUsers) tabUsers.style.display = 'none';
+      } else if (role === 'cashier') {
+        // Thu ngân: Khóa Quản lý món gốc, Khóa VietQR, Khóa Báo cáo thuế quý/tháng, Khóa Phân quyền
+        if (tabMenuStock) tabMenuStock.style.display = 'none';
+        if (tabBankCfg) tabBankCfg.style.display = 'none';
+        if (tabReport) tabReport.style.display = 'none';
+        if (tabUsers) tabUsers.style.display = 'none';
+      } else if (role === 'staff') {
+        // Nhân viên / Bếp: Chỉ thấy Đơn hàng KDS, Order tại bàn và Đội tài xế. Ẩn toàn bộ tiền doanh thu
+        if (tabMenuStock) tabMenuStock.style.display = 'none';
+        if (tabBankCfg) tabBankCfg.style.display = 'none';
+        if (tabReport) tabReport.style.display = 'none';
+        if (tabPrinter) tabPrinter.style.display = 'none';
+        if (tabUsers) tabUsers.style.display = 'none';
+        if (btnEndShift) btnEndShift.style.display = 'none';
+        if (kpiTaxableBox) kpiTaxableBox.style.display = 'none';
+        if (kpiShipBox) kpiShipBox.style.display = 'none';
+      }
+    }
+
+    // Ghi đè hàm tạo tài khoản phụ để hỗ trợ chọn 3 cấp: Quản lý, Thu ngân, Nhân viên
+    window.createSubAccount = function() {
+      const currentRole = localStorage.getItem('hy_chay_active_role');
+      if (currentRole !== 'root') return alert("⛔ Chỉ Chủ quán (Giám đốc) mới có quyền tạo tài khoản nhân sự!");
+      const rawUser = document.getElementById('newUsername').value.trim();
+      const pass = document.getElementById('newPassword').value.trim();
+      const roleVal = document.getElementById('newUserRole')?.value || 'cashier';
+      if (!rawUser || !pass) return alert("Vui lòng nhập đủ Tên đăng nhập và Mật khẩu!");
+      const safeUser = rawUser.replace(/\./g, '_').replace(/[#$\[\]\/]/g, '-');
+      set(ref(db, 'admin_users/' + safeUser), {
+        password: pass,
+        role: roleVal,
+        originalName: rawUser,
+        createdAt: new Date().toISOString()
+      }).then(() => {
+        writeAuditLog("TẠO TÀI KHOẢN NHÂN SỰ", `Tạo tài khoản ${rawUser} với quyền ${roleVal}`, "INFO");
+        alert(`✅ Đã tạo tài khoản "${rawUser}" thành công!`);
+        document.getElementById('newUsername').value = '';
+        document.getElementById('newPassword').value = '';
+      });
+    };
+
+    // Cập nhật đăng nhập nhận diện đúng Role từ Firebase
+    const origHandleAdminLogin = window.handleAdminLogin;
+    window.handleAdminLogin = function(e) {
+      e.preventDefault();
+      const rawUser = document.getElementById('adminEmail').value.trim();
+      const pass = document.getElementById('adminPassword').value;
+      const btn = document.getElementById('btnLoginSubmit');
+      const errBox = document.getElementById('loginErrorMsg');
+      errBox.style.display = 'none';
+      btn.innerText = "ĐANG XÁC THỰC..."; btn.disabled = true;
+
+      if ((rawUser === "balshousevn@gmail.com" && pass === "hychayfood") || (rawUser === "admin" && pass === "baochay2026")) {
+        localStorage.setItem('hy_chay_active_user', rawUser);
+        localStorage.setItem('hy_chay_active_role', 'root');
+        enforceGranularRolePermissions();
+        window.forceUnlockBackgroundAudio(false);
+        document.getElementById('adminLoginOverlay').style.display = 'none';
+        document.getElementById('mainAppWrapper').style.display = 'block';
+        btn.innerText = "VÀO HỆ THỐNG POS"; btn.disabled = false;
+        return;
+      }
+
+      const safeUser = rawUser.replace(/\./g, '_').replace(/[#$\[\]\/]/g, '-');
+      get(ref(db, 'admin_users/' + safeUser)).then((snap) => {
+        if (snap.exists() && String(snap.val().password) === String(pass)) {
+          const assignedRole = snap.val().role || 'cashier';
+          localStorage.setItem('hy_chay_active_user', rawUser);
+          localStorage.setItem('hy_chay_active_role', assignedRole);
+          enforceGranularRolePermissions();
+          window.forceUnlockBackgroundAudio(false);
+          document.getElementById('adminLoginOverlay').style.display = 'none';
+          document.getElementById('mainAppWrapper').style.display = 'block';
+          btn.innerText = "VÀO HỆ THỐNG POS"; btn.disabled = false;
+        } else {
+          errBox.style.display = 'block'; errBox.innerText = "Sai tên đăng nhập hoặc mật khẩu!";
+          btn.innerText = "VÀO HỆ THỐNG POS"; btn.disabled = false;
+        }
+      });
+    };
+
+    onValue(ref(db, 'admin_users'), (snap) => {
+      const users = snap.val() || {}; let html = '';
+      for (let key in users) {
+        const u = users[key];
+        const displayUser = u.originalName || key;
+        const badge = ROLE_BADGE_MAP[u.role || 'cashier'] || ROLE_BADGE_MAP.cashier;
+        html += `<tr><td><b>${displayUser}</b></td><td><code>${u.password}</code></td><td>${badge}</td><td><button onclick="deleteSubAccount('${key}')" style="background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; padding:4px 10px; border-radius:6px; font-weight:bold; cursor:pointer;">Xóa</button></td></tr>`;
+      }
+      const tbody = document.getElementById('subAccountsBody');
+      if (tbody) tbody.innerHTML = html || '<tr><td colspan="4" style="text-align:center;">Chưa có tài khoản nhân sự nào.</td></tr>';
+    });
+
+    // Hiển thị bảng Nhật Ký Chống Gian Lận (Audit Logs) cho Chủ quán
+    onValue(ref(db, 'audit_logs'), (snap) => {
+      const logs = snap.val() || {};
+      const tbody = document.getElementById('auditLogsTableBody');
+      if (!tbody) return;
+      const keys = Object.keys(logs).sort((a, b) => new Date(logs[b].timestamp) - new Date(logs[a].timestamp));
+      let html = '';
+      keys.slice(0, 60).forEach(k => {
+        const lg = logs[k];
+        const isDanger = lg.severity === 'DANGER';
+        const badge = isDanger
+          ? `<span style="background:#dc2626; color:#fff; padding:2px 7px; border-radius:6px; font-weight:800; font-size:0.72rem;">🚨 NGHI VẤN CAO</span>`
+          : `<span style="background:#fef3c7; color:#b45309; padding:2px 7px; border-radius:6px; font-weight:700; font-size:0.72rem;">⚠️ Giám sát</span>`;
+        html += `
+          <tr style="${isDanger ? 'background:#fff1f2;' : ''}">
+            <td style="font-size:0.78rem; white-space:nowrap;">${new Date(lg.timestamp).toLocaleString('vi-VN')}</td>
+            <td><b>${lg.actor}</b> <small style="color:#64748b;">(${lg.role})</small></td>
+            <td style="font-weight:800; color:${isDanger ? '#b91c1c' : '#0f172a'};">${lg.action}</td>
+            <td style="font-size:0.82rem;">${lg.detail}</td>
+            <td>${badge}</td>
+          </tr>`;
+      });
+      tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center; padding:18px; color:#16a34a; font-weight:700;">✅ Hệ thống an toàn tuyệt đối - Chưa phát hiện hành vi bất thường nào.</td></tr>';
+    });
+
+    window.clearAuditLogsByRoot = function() {
+      if (localStorage.getItem('hy_chay_active_role') !== 'root') return alert("⛔ Chỉ Chủ quán (Root) mới có quyền xóa Nhật ký kiểm toán!");
+      if (confirm("Xác nhận dọn dẹp lịch sử Nhật ký kiểm toán?")) {
+        remove(ref(db, 'audit_logs'));
+      }
+    };
+
+    // KHÓA CHỐNG GIAN LẬN KHI IN BILL, SỬA GIẢM TIỀN HOẶC HỦY ĐƠN SAU KHI IN BILL
+    const origPrintCustomerBill = window.printCustomerBill;
+    window.printCustomerBill = function(id) {
+      const o = ordersCache[id];
+      if (o) {
+        const nextCount = (o.billPrintedCount || 0) + 1;
+        update(ref(db, `orders/${id}`), {
+          billPrintedCount: nextCount,
+          lastBillPrintedAt: new Date().toISOString(),
+          lastBillPrintedBy: localStorage.getItem('hy_chay_active_user') || 'admin'
+        });
+        if (nextCount > 1) {
+          writeAuditLog("IN LẠI HÓA ĐƠN NHIỀU LẦN", `Đơn #HC-${id.substring(id.length - 5).toUpperCase()} (${o.customerName}) được in bill lần thứ ${nextCount} - Tổng: ${(o.grandTotal || 0).toLocaleString()}đ`, "WARN");
+        }
+      }
+      origPrintCustomerBill(id);
+    };
+
+    // Chặn Quản lý/Thu ngân tự ý sửa giá gốc món ăn hoặc đổi STK Ngân hàng
+    const origSaveDishInfoAndPrice = window.saveDishInfoAndPrice;
+    window.saveDishInfoAndPrice = function(id) {
+      const role = localStorage.getItem('hy_chay_active_role');
+      if (role !== 'root') {
+        writeAuditLog("CỐ Ý SỬA GIÁ MÓN ĂN", `Tài khoản cố tình bấm sửa giá/tên món ID: ${id}`, "DANGER");
+        return alert("⛔ CHỐNG GIAN LẬN: Chỉ Chủ quán (Giám đốc) mới có quyền thay đổi Giá bán hoặc Tên gốc của món ăn! Quản lý ca chỉ được bật/tắt trạng thái Tạm hết.");
+      }
+      origSaveDishInfoAndPrice(id);
+    };
+
+    const origSaveBankConfig = window.saveBankConfig;
+    window.saveBankConfig = function() {
+      if (localStorage.getItem('hy_chay_active_role') !== 'root') {
+        writeAuditLog("CỐ Ý ĐỔI TÀI KHOẢN NGÂN HÀNG VIETQR", `Phát hiện thao tác định thay đổi STK thụ hưởng của quán!`, "DANGER");
+        return alert("⛔ BẢO MẬT TÀI CHÍNH: Chỉ Chủ quán (Giám đốc) mới có quyền thay đổi Số tài khoản Ngân hàng nhận tiền!");
+      }
+      origSaveBankConfig();
+    };
+
+    // Giám sát chặt chẽ hành vi Sửa giảm tiền đơn hàng hoặc Hủy đơn sau khi đã In Bill
+    const origSaveEditedOrderChanges = window.saveEditedOrderChanges;
+    window.saveEditedOrderChanges = function() {
+      if (!editingOrderId) return;
+      const role = localStorage.getItem('hy_chay_active_role') || 'staff';
+      if (role === 'staff') return alert("⛔ Nhân viên không có quyền sửa đơn hàng!");
+
+      const o = ordersCache[editingOrderId];
+      const oldSub = o.subtotal || 0;
+      let newRawSub = 0;
+      let newItemsSummary = [];
+      for (let k in editingItemsTemp) {
+        newRawSub += editingItemsTemp[k].price * editingItemsTemp[k].qty;
+        newItemsSummary.push(`${editingItemsTemp[k].qty}x ${editingItemsTemp[k].name}`);
+      }
+      let oldItemsSummary = [];
+      for (let k in (o.items || {})) {
+        oldItemsSummary.push(`${o.items[k].qty}x ${o.items[k].name}`);
+      }
+
+      const isBillPrinted = (o.billPrintedCount || 0) > 0;
+      const isMoneyReduced = newRawSub < oldSub;
+
+      if (isBillPrinted || isMoneyReduced) {
+        if (role === 'cashier') {
+          const managerPin = prompt(`🔒 KHÓA CHỐNG GIAN LẬN:\nĐơn này ${isBillPrinted ? 'ĐÃ IN BILL TÍNH TIỀN' : 'đang bị giảm tổng tiền'} (${oldSub.toLocaleString()}đ -> ${newRawSub.toLocaleString()}đ).\nThu ngân không được tự ý giảm món. Vui lòng nhập Mật khẩu Chủ quán để mở khóa (Thao tác sẽ được ghi vào Nhật ký kiểm toán):`);
+          if (managerPin !== "hychayfood" && managerPin !== "baochay2026") {
+            writeAuditLog("THU NGÂN TỰ Ý GIẢM MÓN BỊ CHẶN", `Đơn #HC-${editingOrderId.substring(editingOrderId.length - 5).toUpperCase()}: Định giảm từ ${oldSub.toLocaleString()}đ xuống ${newRawSub.toLocaleString()}đ (Đã in bill: ${o.billPrintedCount || 0} lần)`, "DANGER");
+            return alert("❌ Mật khẩu Chủ quán không đúng! Hệ thống đã ghi nhận thao tác vào Nhật ký chống gian lận.");
+          }
+        }
+        writeAuditLog(
+          isBillPrinted ? "SỬA ĐƠN SAU KHI ĐÃ IN BILL" : "SỬA ĐƠN GIẢM TỔNG TIỀN",
+          `Đơn #HC-${editingOrderId.substring(editingOrderId.length - 5).toUpperCase()} (${o.customerName}) | In bill: ${o.billPrintedCount || 0} lần | Tiền cũ: ${oldSub.toLocaleString()}đ (${oldItemsSummary.join(', ')}) ➡️ Tiền mới: ${newRawSub.toLocaleString()}đ (${newItemsSummary.join(', ')})`,
+          "DANGER"
+        );
+      }
+      origSaveEditedOrderChanges();
+    };
+
+    const origConfirmCancelOrderWithReason = window.confirmCancelOrderWithReason;
+    window.confirmCancelOrderWithReason = function() {
+      if (!targetCancelOrderId) return;
+      const role = localStorage.getItem('hy_chay_active_role') || 'staff';
+      if (role === 'staff') return alert("⛔ Nhân viên không có quyền hủy đơn!");
+      const o = ordersCache[targetCancelOrderId];
+      const isBillPrinted = (o.billPrintedCount || 0) > 0;
+
+      if (role === 'cashier') {
+        const rootPin = prompt(`🔒 KHÓA CHỐNG GIAN LẬN:\nThu ngân không được tự ý hủy đơn hàng (#HC-${targetCancelOrderId.substring(targetCancelOrderId.length - 5).toUpperCase()} - ${(o.grandTotal || 0).toLocaleString()}đ).\nNhập mật khẩu Chủ quán để xác nhận hủy:`);
+        if (rootPin !== "hychayfood" && rootPin !== "baochay2026") {
+          writeAuditLog("THU NGÂN TỰ Ý HỦY ĐƠN BỊ CHẶN", `Đơn #HC-${targetCancelOrderId.substring(targetCancelOrderId.length - 5).toUpperCase()} (${(o.grandTotal || 0).toLocaleString()}đ - In bill: ${o.billPrintedCount || 0} lần)`, "DANGER");
+          return alert("❌ Không đúng mật khẩu Chủ quán! Đã lưu vết vào Nhật ký kiểm toán.");
+        }
+      }
+
+      writeAuditLog(
+        isBillPrinted ? "🚨 HỦY ĐƠN SAU KHI ĐÃ IN BILL" : "HỦY ĐƠN HÀNG",
+        `Đơn #HC-${targetCancelOrderId.substring(targetCancelOrderId.length - 5).toUpperCase()} (${o.customerName}) | Giá trị: ${(o.grandTotal || 0).toLocaleString()}đ | Đã in bill: ${o.billPrintedCount || 0} lần | Lý do: ${document.getElementById('cancelReasonSelect')?.value}`,
+        isBillPrinted ? "DANGER" : "WARN"
+      );
+      origConfirmCancelOrderWithReason();
+    };
+
+    // Kích hoạt phân quyền ngay khi mở trang
+    enforceGranularRolePermissions();
+
+    // =========================================================
+    // 16.4. XUẤT PHỤ LỤC KÊ KHAI THUẾ HỘ KINH DOANH (01-2/BK-HĐKD) & CẤU HÌNH HĐĐT
+    // =========================================================
+    window.saveEinvoiceConfig = function() {
+      const cfg = {
+        provider: document.getElementById('cfgEinvoiceProvider')?.value || 'none',
+        taxCode: document.getElementById('cfgEinvoiceTaxCode')?.value || '3401289271',
+        series: document.getElementById('cfgEinvoiceSeries')?.value || '1C26MHY',
+        updatedAt: new Date().toISOString()
+      };
+      set(ref(db, 'restaurant_config/einvoice'), cfg).then(() => {
+        alert("✅ Đã lưu cấu hình cổng Hóa đơn điện tử khởi tạo từ máy tính tiền!");
+      });
+    };
+
+    window.exportHouseholdTaxDeclarationCSV = function() {
+      const data = getTaxReportData();
+      // Tính toán tham chiếu theo biểu thuế Hộ kinh doanh (Thông tư 40/2021/TT-BTC):
+      // Dịch vụ ăn uống (F&B): GTGT 3% + TNCN 1.5% = 4.5% trên doanh thu chịu thuế
+      const vat3Percent = Math.round(data.totalTaxable * 0.03);
+      const pit15Percent = Math.round(data.totalTaxable * 0.015);
+      let csv = "\uFEFFPHỤ LỤC BẢNG KÊ HOẠT ĐỘNG KINH DOANH TRONG KỲ CỦA HỘ KINH DOANH / DOANH NGHIỆP (MẪU 01-2/BK-HĐKD - THÔNG TƯ 40/2021/TT-BTC)\n";
+      csv += `Đơn vị: CÔNG TY TNHH TMDV VÀ SẢN XUẤT BẢO ANH LÂM (HY CHAY - BAL'S HOUSE) | MST: 3401289271\n`;
+      csv += `Kỳ tính thuế: ${data.labelPeriod}\n\n`;
+      csv += "Chỉ Tiêu Ngành Nghề,Mã Ngành,Doanh Thu Tính Thuế (VNĐ),Tham Chiếu Thuế GTGT HKD (3%),Tham Chiếu Thuế TNCN HKD (1.5%),Ghi Chú Pháp Lý\n";
+      csv += `"1. Dịch vụ ăn uống & Thực phẩm chay (Hy Chay)",5610,${data.total5610},${Math.round(data.total5610 * 0.03)},${Math.round(data.total5610 * 0.015)},"Đã tách riêng tiền ship thu hộ"\n`;
+      csv += `"2. Dịch vụ phục vụ đồ uống (BAL'S HOUSE)",5630,${data.total5630},${Math.round(data.total5630 * 0.03)},${Math.round(data.total5630 * 0.015)},"Đã tách riêng tiền ship thu hộ"\n`;
+      csv += `"TỔNG CỘNG DOANH THU CHỊU THUẾ",5610+5630,${data.totalTaxable},${vat3Percent},${pit15Percent},"Tổng thuế HKD tham chiếu (4.5%): ${(vat3Percent + pit15Percent).toLocaleString()}đ"\n`;
+      csv += `"SỔ THU HỘ PHÍ VẬN CHUYỂN TRẢ TÀI XẾ",Không chịu thuế,${data.totalShip},0,0,"Khoản thu hộ trả Shipper - Không cộng vào DT chịu thuế"\n`;
+
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
+      a.download = `To_Khai_Thue_HKD_01_CNKD_${data.labelPeriod.replace(/\s+/g, '_')}.csv`;
+      a.click();
+    };
+
+    // =========================================================
+    // 16.5. TRÌNH TẠO FILE CÀI ĐẶT 1-CHẠM CHO WINDOWS (.BAT), ANDROID & IOS
+    // =========================================================
+    let deferredAdminPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredAdminPrompt = e;
+    });
+
+    window.downloadWindowsInstaller = function(mode = 'admin') {
+      const appUrl = window.location.origin + (mode === 'admin' ? '/admin.html' : '/index.html');
+      const appName = mode === 'admin' ? 'Hy Chay POS Admin' : 'Hy Chay Đặt Món';
+      const batContent = [
+        '@echo off',
+        'chcp 65001 >nul',
+        'title Cai Dat ' + appName,
+        'echo Đang tạo biểu tượng phần mềm ' + appName + ' ngoài màn hình Desktop Windows...',
+        'set "TARGET_URL=' + appUrl + '"',
+        'set "SHORTCUT_NAME=' + appName + '.lnk"',
+        'powershell -Command "$ws = New-Object -ComObject WScript.Shell; $s = $ws.CreateShortcut([Environment]::GetFolderPath(\'Desktop\') + \'\\\' + \'%SHORTCUT_NAME%\'); if (Test-Path \'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\') { $s.TargetPath = \'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\'; $s.Arguments = \'--app=%TARGET_URL%\'; } else { $s.TargetPath = \'msedge.exe\'; $s.Arguments = \'--app=%TARGET_URL%\'; }; $s.Save()"',
+        'echo ✅ Đã cài đặt thành công biểu tượng [' + appName + '] ra ngoài màn hình Desktop!',
+        'start "" msedge --app="' + appUrl + '" 2>nul || start "" chrome --app="' + appUrl + '" 2>nul || start "" "' + appUrl + '"',
+        'pause'
+      ].join('\r\n');
+
+      const blob = new Blob([batContent], { type: 'application/bat;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = mode === 'admin' ? 'Cai_Dat_HyChay_POS_Admin_Windows.bat' : 'Cai_Dat_HyChay_Windows.bat';
+      a.click();
+    };
+
+    window.triggerAndroidInstall = async function() {
+      if (deferredAdminPrompt) {
+        deferredAdminPrompt.prompt();
+        await deferredAdminPrompt.userChoice;
+        deferredAdminPrompt = null;
+      } else {
+        alert("🤖 Trên điện thoại Android:\nTrình duyệt đã sẵn sàng! Bạn hãy bấm vào biểu tượng 3 dấu chấm (⋮) ở góc trên bên phải trình duyệt Chrome -> Chọn 'Cài đặt ứng dụng' (hoặc 'Thêm vào màn hình chính') để tạo App ngay!");
+      }
+    };
+
+    window.downloadIOSProfile = function(mode = 'admin') {
+      const appUrl = window.location.origin + (mode === 'admin' ? '/admin.html' : '/index.html');
+      const appTitle = mode === 'admin' ? 'POS Hy Chay' : 'Hy Chay';
+      const uuid1 = '11111111-2222-3333-4444-' + Date.now().toString().slice(-12);
+      const uuid2 = '99999999-8888-7777-6666-' + Date.now().toString().slice(-12);
+      const mobileConfigXml = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>PayloadContent</key>
+  <array>
+    <dict>
+      <key>FullScreen</key><true/>
+      <key>IsRemovable</key><true/>
+      <key>Label</key><string>${appTitle}</string>
+      <key>PayloadDescription</key><string>Cài đặt biểu tượng ${appTitle} lên màn hình chính iOS</string>
+      <key>PayloadDisplayName</key><string>${appTitle}</string>
+      <key>PayloadIdentifier</key><string>com.baoanhlam.webclip.${mode}</string>
+      <key>PayloadType</key><string>com.apple.webClip.managed</string>
+      <key>PayloadUUID</key><string>${uuid1}</string>
+      <key>PayloadVersion</key><integer>1</integer>
+      <key>Precomposed</key><true/>
+      <key>URL</key><string>${appUrl}</string>
+    </dict>
+  </array>
+  <key>PayloadDisplayName</key><string>Bộ Cài Đặt ${appTitle} (Bảo Anh Lâm)</string>
+  <key>PayloadIdentifier</key><string>com.baoanhlam.profile.${mode}</string>
+  <key>PayloadRemovalDisallowed</key><false/>
+  <key>PayloadType</key><string>Configuration</string>
+  <key>PayloadUUID</key><string>${uuid2}</string>
+  <key>PayloadVersion</key><integer>1</integer>
+</dict>
+</plist>`;
+      const blob = new Blob([mobileConfigXml], { type: 'application/x-apple-aspen-config' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = mode === 'admin' ? 'HyChay_POS_iOS.mobileconfig' : 'HyChay_App_iOS.mobileconfig';
+      a.click();
     };
   </script>
 </body>
