@@ -298,9 +298,9 @@
         <p>Giá hiển thị là giá gốc tại quán - Trợ giá phí Ship lên đến 30% & Freeship đơn từ 200k</p>
         <div class="divider"></div>
       </div>
-      <div style="max-width: 520px; margin: 0 auto 14px;">
-     <input type="text" id="customerMenuSearchInput" placeholder="🔍 Tìm nhanh tên món ăn hoặc đồ uống (113 món)..." oninput="renderFullMenu()" style="width:100%; padding:11px 16px; border:2px solid var(--primary); border-radius:24px; font-size:0.95rem; outline:none; background:#f8fafc;">
-   </div>
+          <div style="max-width: 520px; margin: 0 auto 14px;">
+        <input type="search" id="customerMenuSearchInput" name="search_dish_q" autocomplete="off" readonly onfocus="this.removeAttribute('readonly');" placeholder="🔍 Tìm nhanh tên món ăn hoặc đồ uống (113 món)..." oninput="renderFullMenu()" style="width:100%; padding:11px 16px; border:2px solid var(--primary); border-radius:24px; font-size:0.95rem; outline:none; background:#f8fafc;">
+      </div>
 <!-- THANH DANH MỤC CHÍNH CÓ NÚT BẤM QUA LẠI CHO LAPTOP & ĐIỆN THOẠI -->
       <div class="filter-nav-wrap">
         <button type="button" class="btn-scroll-nav" onclick="scrollFilterBar('mainMenuFilterBar', -280)" title="Trượt qua trái">❮</button>
@@ -1474,7 +1474,15 @@ const CAT_LABELS_MAP = {
       return list;
     }
 
-function renderFeaturedDishes() {
+const FEATURED_IDS = ["bunchagio", "miquang", "hoanhthanhmi", "mispaghetti", "comga", "xoi", "banhcanh", "nomhoachuoi"];
+    CAT_LABELS_MAP.topping = "Thêm/Topping";
+    let currentCustomerDrinkSub = 'all_drink';
+
+const FEATURED_IDS = ["bunchagio", "miquang", "hoanhthanhmi", "mispaghetti", "comga", "xoi", "banhcanh", "nomhoachuoi"];
+    CAT_LABELS_MAP.topping = "Thêm/Topping";
+    let currentCustomerDrinkSub = 'all_drink';
+
+    function renderFeaturedDishes() {
       const el = document.getElementById('featuredDishGrid');
       if (!el) return;
       let html = '';
@@ -1482,7 +1490,6 @@ function renderFeaturedDishes() {
         const base = ALL_MENU_DATA.find(d => d.id === id);
         if (!base) return;
         const it = getDishData(base);
-        if (it.isDeleted) return;
         const safeName = it.name.replace(/'/g, "\\'");
         html += `
           <div class="dish-card ${it.isSoldOut ? 'is-sold-out' : ''} is-hot" data-dish-id="${it.id}">
@@ -1498,16 +1505,13 @@ function renderFeaturedDishes() {
       });
       el.innerHTML = html;
     }
-    
-// Khai báo trực tiếp danh sách ID món đặc sắc và hàm render an toàn tuyệt đối
-    const FEATURED_IDS = ["bunchagio", "miquang", "hoanhthanhmi", "mispaghetti", "comga", "xoi", "banhcanh", "nomhoachuoi"];
-    CAT_LABELS_MAP.topping = "Thêm/Topping";
-    let currentCustomerDrinkSub = 'all_drink';
 
     function renderFullMenu() {
       const el = document.getElementById('fullMenuContainer');
       if (!el) return;
-      const kw = (document.getElementById('customerMenuSearchInput')?.value || '').toLowerCase().trim();
+      const searchEl = document.getElementById('customerMenuSearchInput');
+      if (searchEl && searchEl.value.includes('@')) searchEl.value = '';
+      const kw = (searchEl?.value || '').toLowerCase().trim();
       let html = '';
       getUnifiedCustomerMenuList().forEach(it => {
         if (currentFilterCat !== 'all' && it.cat !== currentFilterCat) return;
