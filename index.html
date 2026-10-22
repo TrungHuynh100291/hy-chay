@@ -1501,27 +1501,33 @@ function renderFeaturedDishes() {
     
 // Khai báo trực tiếp danh sách ID món đặc sắc và hàm render an toàn tuyệt đối
     const FEATURED_IDS = ["bunchagio", "miquang", "hoanhthanhmi", "mispaghetti", "comga", "xoi", "banhcanh", "nomhoachuoi"];
-    
-function renderFullMenu() {
-   const el = document.getElementById('fullMenuContainer');
-   if (!el) return;
-   const kw = (document.getElementById('customerMenuSearchInput')?.value || '').toLowerCase().trim();
-   let html = '';
-   getUnifiedCustomerMenuList().forEach(it => {
-     if (currentFilterCat !== 'all' && it.cat !== currentFilterCat) return;
-     if (kw && !it.name.toLowerCase().includes(kw)) return;
-     const safeName = it.name.replace(/'/g, "\\'");
-     html += `
-       <div class="menu-item-row ${it.isSoldOut ? 'is-sold-out' : ''}">
-         <div class="item-thumb"><img src="${it.image}" onerror="this.src='Logo nho.png'"></div>
-         <div class="item-meta"><span class="item-cat-label">${it.catName}</span><h4>${it.name} ${it.isHot ? '<span class="hot-label-small">🔥</span>' : ''}</h4><span class="item-price-tag">${it.price.toLocaleString()}đ</span></div>
-         <button class="btn-quick-add" ${it.isSoldOut ? 'disabled' : ''} onclick="addToCart('${it.id}', '${safeName}', ${it.price})">${it.isSoldOut ? 'Tạm Hết' : '+ Chọn Món'}</button>
-       </div>`;
-   });
-   el.innerHTML = html || '<p style="grid-column:1/-1; text-align:center; color:#64748b; padding:20px;">Không tìm thấy món phù hợp.</p>';
- }
+    CAT_LABELS_MAP.topping = "Thêm/Topping";
+    let currentCustomerDrinkSub = 'all_drink';
 
-window.scrollFilterBar = function(barId, offset) {
+    function renderFullMenu() {
+      const el = document.getElementById('fullMenuContainer');
+      if (!el) return;
+      const kw = (document.getElementById('customerMenuSearchInput')?.value || '').toLowerCase().trim();
+      let html = '';
+      getUnifiedCustomerMenuList().forEach(it => {
+        if (currentFilterCat !== 'all' && it.cat !== currentFilterCat) return;
+        if (currentFilterCat === 'douong' && currentCustomerDrinkSub !== 'all_drink') {
+          if (getDrinkSubCat(it.id, it.name) !== currentCustomerDrinkSub) return;
+        }
+        if (kw && !it.name.toLowerCase().includes(kw)) return;
+        const safeName = it.name.replace(/'/g, "\\'");
+        const labelText = it.cat === 'douong' ? (DRINK_SUBCAT_LABELS[getDrinkSubCat(it.id, it.name)] || it.catName) : it.catName;
+        html += `
+          <div class="menu-item-row ${it.isSoldOut ? 'is-sold-out' : ''}">
+            <div class="item-thumb"><img src="${it.image}" onerror="this.src='Logo nho.png'"></div>
+            <div class="item-meta"><span class="item-cat-label">${labelText}</span><h4>${it.name} ${it.isHot ? '<span class="hot-label-small">🔥</span>' : ''}</h4><span class="item-price-tag">${it.price.toLocaleString()}đ</span></div>
+            <button class="btn-quick-add" ${it.isSoldOut ? 'disabled' : ''} onclick="addToCart('${it.id}', '${safeName}', ${it.price})">${it.isSoldOut ? 'Tạm Hết' : '+ Chọn Món'}</button>
+          </div>`;
+      });
+      el.innerHTML = html || '<p style="grid-column:1/-1; text-align:center; color:#64748b; padding:20px;">Không tìm thấy món phù hợp.</p>';
+    }
+
+    window.scrollFilterBar = function(barId, offset) {
       const bar = document.getElementById(barId);
       if (bar) bar.scrollBy({ left: offset, behavior: 'smooth' });
     };
@@ -1547,6 +1553,19 @@ window.scrollFilterBar = function(barId, offset) {
       }
       renderFullMenu();
     };
+
+    if (!shipperOrderIdParam) {
+      renderFeaturedDishes();
+      renderFullMenu();
+    }
+
+    onValue(ref(db, 'restaurant_config/bank'), (s) => { if (s.val()) { bankConfig = s.val(); window.updateCalc(); } });
+    onValue(ref(db, 'menu_customizations'), (snap) => {
+      menuCustomCache = snap.val() || {};
+      if (!shipperOrderIdParam) {
+        renderFeaturedDishes();
+        renderFullMenu();
+      }
     });
 
     // ==========================================
@@ -2313,49 +2332,6 @@ window.addToCart = function(id, name, p) {
         });
       }
     }
-    // PHÂN NHỎ 7 DANH MỤC ĐỒ UỐNG & TRÌNH CÀI ĐẶT ĐA NỀN TẢNG BÊN KHÁCH HÀNG
-    CAT_LABELS_MAP.topping = "Thêm/Topping";
-    let currentCustomerDrinkSub = 'all_drink';
-
-    window.filterCat = function(c, btn) {
-      currentFilterCat = c;
-      document.querySelectorAll('.menu-filter-bar:not(#customerDrinkSubBar) .filter-chip').forEach(b => b.classList.remove('active'));
-      if (btn) btn.classList.add('active');
-      const subBar = document.getElementById('customerDrinkSubBar');
-      if (subBar) subBar.style.display = (c === 'douong') ? 'flex' : 'none';
-      renderFullMenu();
-    };
-
-    window.filterCustomerDrinkSub = function(subCat, btn) {
-      currentCustomerDrinkSub = subCat;
-      document.querySelectorAll('#customerDrinkSubBar .filter-chip').forEach(b => b.classList.remove('active'));
-      if (btn) btn.classList.add('active');
-      renderFullMenu();
-    };
-
-    // Nâng cấp renderFullMenu hỗ trợ lọc theo 7 nhóm con Đồ uống
-    renderFullMenu = function() {
-      const el = document.getElementById('fullMenuContainer');
-      if (!el) return;
-      const kw = (document.getElementById('customerMenuSearchInput')?.value || '').toLowerCase().trim();
-      let html = '';
-      getUnifiedCustomerMenuList().forEach(it => {
-        if (currentFilterCat !== 'all' && it.cat !== currentFilterCat) return;
-        if (currentFilterCat === 'douong' && currentCustomerDrinkSub !== 'all_drink') {
-          if (getDrinkSubCat(it.id, it.name) !== currentCustomerDrinkSub) return;
-        }
-        if (kw && !it.name.toLowerCase().includes(kw)) return;
-        const safeName = it.name.replace(/'/g, "\\'");
-        const labelText = it.cat === 'douong' ? (DRINK_SUBCAT_LABELS[getDrinkSubCat(it.id, it.name)] || it.catName) : it.catName;
-        html += `
-          <div class="menu-item-row ${it.isSoldOut ? 'is-sold-out' : ''}">
-            <div class="item-thumb"><img src="${it.image}" onerror="this.src='Logo nho.png'"></div>
-            <div class="item-meta"><span class="item-cat-label">${labelText}</span><h4>${it.name} ${it.isHot ? '<span class="hot-label-small">🔥</span>' : ''}</h4><span class="item-price-tag">${it.price.toLocaleString()}đ</span></div>
-            <button class="btn-quick-add" ${it.isSoldOut ? 'disabled' : ''} onclick="addToCart('${it.id}', '${safeName}', ${it.price})">${it.isSoldOut ? 'Tạm Hết' : '+ Chọn Món'}</button>
-          </div>`;
-      });
-      el.innerHTML = html || '<p style="grid-column:1/-1; text-align:center; color:#64748b; padding:20px;">Không tìm thấy món phù hợp.</p>';
-    };
 
     let deferredCustomerPrompt = null;
     window.addEventListener('beforeinstallprompt', (e) => {
