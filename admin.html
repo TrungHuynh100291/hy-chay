@@ -3192,12 +3192,15 @@ window.printKitchenTicket = (id, dData = null) => {
       nameInp.value = ''; priceInp.value = '';
     };
 
-    window.setEditModalCategory = function(cat, btn) {
+window.setEditModalCategory = function(cat, btn) {
       currentEditModalCatFilter = cat;
       document.querySelectorAll('#editModalCatBar .admin-cat-chip').forEach(b => b.classList.remove('active'));
-      if (btn) btn.classList.add('active');
-      const subBar = document.getElementById('editModalDrinkSubBar');
-      if (subBar) subBar.style.display = (cat === 'douong') ? 'flex' : 'none';
+      if (btn) {
+        btn.classList.add('active');
+        btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      }
+      const subWrap = document.getElementById('editModalDrinkSubWrap') || document.getElementById('editModalDrinkSubBar');
+      if (subWrap) subWrap.style.display = (cat === 'douong') ? 'flex' : 'none';
       window.renderEditModalDishPicker();
     };
 
