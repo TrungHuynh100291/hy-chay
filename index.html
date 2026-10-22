@@ -1444,6 +1444,36 @@ const CAT_LABELS_MAP = {
       };
     }
 
+const CAT_LABELS_MAP = {
+      bun: "Món Bún",
+      mi_pho: "Mì - Phở",
+      com_kho: "Cơm & Khô",
+      chien_dacbiet: "Đặc Biệt",
+      lau: "Lẩu Chay",
+      soche: "Sơ Chế",
+      douong: "Đồ Uống",
+      topping: "Thêm/Topping"
+    };
+
+    const FEATURED_IDS = ["bunchagio", "miquang", "hoanhthanhmi", "mispaghetti", "comga", "xoi", "banhcanh", "nomhoachuoi"];
+    let currentCustomerDrinkSub = 'all_drink';
+
+    function getDishData(dish) {
+      const c = menuCustomCache[dish.id] || {};
+      const catCode = c.cat || dish.cat;
+      return {
+        id: dish.id,
+        name: c.name || dish.name,
+        cat: catCode,
+        catName: CAT_LABELS_MAP[catCode] || dish.catName,
+        price: c.price !== undefined ? Number(c.price) : dish.defaultPrice,
+        image: c.image || dish.defaultImg || 'Logo nho.png',
+        isSoldOut: !!c.soldOut,
+        isDeleted: !!c.isDeleted,
+        isHot: dish.isHot
+      };
+    }
+
     function getUnifiedCustomerMenuList() {
       const list = [];
       const seenIds = new Set();
@@ -1473,14 +1503,6 @@ const CAT_LABELS_MAP = {
       });
       return list;
     }
-
-const FEATURED_IDS = ["bunchagio", "miquang", "hoanhthanhmi", "mispaghetti", "comga", "xoi", "banhcanh", "nomhoachuoi"];
-    CAT_LABELS_MAP.topping = "Thêm/Topping";
-    let currentCustomerDrinkSub = 'all_drink';
-
-const FEATURED_IDS = ["bunchagio", "miquang", "hoanhthanhmi", "mispaghetti", "comga", "xoi", "banhcanh", "nomhoachuoi"];
-    CAT_LABELS_MAP.topping = "Thêm/Topping";
-    let currentCustomerDrinkSub = 'all_drink';
 
     function renderFeaturedDishes() {
       const el = document.getElementById('featuredDishGrid');
