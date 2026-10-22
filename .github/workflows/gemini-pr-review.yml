@@ -50,7 +50,7 @@ jobs:
           if len(diff) > 25000:
               diff = diff[:25000] + "\n... (Diff quá dài, đã lược bớt)"
 
-          # 2. Tạo yêu cầu gửi Gemini
+          # 2. Gửi yêu cầu phân tích tới Gemini 1.5 Flash
           prompt = f"""Bạn là chuyên gia phân tích mã nguồn. Hãy đánh giá các thay đổi sau:
           1. Tóm tắt ngắn gọn nội dung chỉnh sửa.
           2. Phát hiện lỗi tiềm ẩn (bugs), lỗ hổng bảo mật hoặc cấu trúc chưa tối ưu.
@@ -79,7 +79,7 @@ jobs:
           with open("review.md", "w", encoding="utf-8") as f:
               f.write(comment)
 
-          # 3. Đăng bình luận trực tiếp vào PR
+          # 3. Đăng bình luận trực tiếp vào Pull Request
           subprocess.run(["gh", "pr", "comment", pr_number, "--body-file", "review.md"], check=True)
           print("Đã hoàn tất review code!")
           EOF
