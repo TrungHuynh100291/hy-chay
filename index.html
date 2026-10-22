@@ -881,13 +881,20 @@
       });
     };
 
-    function renderShipperOrderScreen(orderId, order, phone, name) {
+     function renderShipperOrderScreen(orderId, order, phone, name) {
       currentOrderCached = order;
       currentOrderAddress = order.address || "Phan Thiết, Lâm Đồng";
-      document.getElementById('shpOrderId').innerText = `#HC-${orderId.substring(orderId.length - 5).toUpperCase()}`;
+      const seqLabel = order.dailySeq ? `ĐƠN #${String(order.dailySeq).padStart(2, '0')} ` : '';
+      document.getElementById('shpOrderId').innerText = `${seqLabel}(#HC-${orderId.substring(orderId.length - 5).toUpperCase()})`;
       document.getElementById('shpCustomerInfo').innerText = `${order.customerName} (${order.phone})`;
       document.getElementById('shpAddress').innerText = order.address || '--';
-      document.getElementById('shpFee').innerText = (order.shippingFee || 0).toLocaleString() + 'đ';
+      const isQR = order.paymentMethod === 'VIETQR';
+      const shipFeeVal = order.shippingFee || 0;
+      const foodVal = order.subtotal || 0;
+      const totalVal = order.grandTotal || (foodVal + shipFeeVal);
+      document.getElementById('shpFee').innerHTML = isQR
+        ? `${shipFeeVal.toLocaleString()}đ <br><span style="color:#38bdf8; font-size:0.85rem;">(Khách đã CK - Không thu tiền mặt khách, Quán cộng ${shipFeeVal.toLocaleString()}đ vào sổ cho bạn)</span>`
+        : `${shipFeeVal.toLocaleString()}đ <br><span style="color:#fde047; font-size:0.85rem;">(Thu mặt khách: ${totalVal.toLocaleString()}đ -> Bạn giữ luôn ${shipFeeVal.toLocaleString()}đ ship, nộp về quán ${foodVal.toLocaleString()}đ)</span>`;
 
       const isMyOrder = (normalizePhone(order.shipperPhone) === phone);
       const actionBox = document.getElementById('shipperActionButtons');
