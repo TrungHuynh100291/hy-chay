@@ -2466,11 +2466,12 @@ window.deleteDishFromMenu = function(id, name) {
       let total5610 = 0, total5630 = 0, totalShip = 0, count = 0, daily = {}, dishStats = {}, rawList = [];
       
       for (let id in ordersCache) {
-        const o = ordersCache[id]; if (!o || o.status !== 'Đã hoàn tất') continue;
-        const dObj = new Date(o.createdAt), y = dObj.getFullYear(), m = dObj.getMonth() + 1, dStr = dObj.toISOString().split('T')[0];
+        const o = ordersCache[id]; if (!o || o.status !== 'Đã hoàn tất' || !o.createdAt) continue;
+        const dStr = getVNDateStr(o.createdAt);
+        const y = parseInt(dStr.slice(0, 4)), m = parseInt(dStr.slice(5, 7));
         let match = false;
         if (mode === 'quarter') { const q = parseInt(document.getElementById('filterQuarter').value), qY = parseInt(document.getElementById('filterQuarterYear').value); labelPeriod = `Quý ${q} Năm ${qY}`; if (y === qY && m >= (q-1)*3+1 && m <= q*3) match = true; }
-        else if (mode === 'month') { labelPeriod = `Tháng ${document.getElementById('filterMonthInput').value}`; if (dObj.toISOString().startsWith(document.getElementById('filterMonthInput').value)) match = true; }
+        else if (mode === 'month') { labelPeriod = `Tháng ${document.getElementById('filterMonthInput').value}`; if (dStr.startsWith(document.getElementById('filterMonthInput').value)) match = true; }
         else if (mode === 'day') { labelPeriod = `Ngày ${document.getElementById('filterDayInput').value}`; if (dStr === document.getElementById('filterDayInput').value) match = true; }
 
         if (match) {
