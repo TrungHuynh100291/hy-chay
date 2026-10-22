@@ -298,15 +298,28 @@
       <div style="max-width: 520px; margin: 0 auto 14px;">
      <input type="text" id="customerMenuSearchInput" placeholder="🔍 Tìm nhanh tên món ăn hoặc đồ uống (113 món)..." oninput="renderFullMenu()" style="width:100%; padding:11px 16px; border:2px solid var(--primary); border-radius:24px; font-size:0.95rem; outline:none; background:#f8fafc;">
    </div>
-      <div class="menu-filter-bar">
+<div class="menu-filter-bar">
         <button class="filter-chip active" onclick="filterCat('all', this)">Tất Cả Món</button>
-        <button class="filter-chip" onclick="filterCat('bun', this)">Món Bún</button>
-        <button class="filter-chip" onclick="filterCat('mi_pho', this)">Mì, Phở & Hủ Tiếu</button>
-        <button class="filter-chip" onclick="filterCat('com_kho', this)">Cơm & Món Khô</button>
-        <button class="filter-chip" onclick="filterCat('chien_dacbiet', this)">Chiên & Đặc Biệt</button>
-        <button class="filter-chip" onclick="filterCat('lau', this)">Lẩu Chay</button>
-        <button class="filter-chip" onclick="filterCat('soche', this)">Sơ Chế & Đóng Gói</button>
-        <button class="filter-chip" onclick="filterCat('douong', this)">Đồ Uống BAL'S HOUSE</button>
+        <button class="filter-chip" onclick="filterCat('bun', this)">🍜 Món Bún</button>
+        <button class="filter-chip" onclick="filterCat('mi_pho', this)">🥢 Mì, Phở & Hủ Tiếu</button>
+        <button class="filter-chip" onclick="filterCat('com_kho', this)">🍚 Cơm & Món Khô</button>
+        <button class="filter-chip" onclick="filterCat('chien_dacbiet', this)">🥟 Chiên & Đặc Biệt</button>
+        <button class="filter-chip" onclick="filterCat('lau', this)">🍲 Lẩu Chay</button>
+        <button class="filter-chip" onclick="filterCat('soche', this)">📦 Sơ Chế & Đóng Gói</button>
+        <button class="filter-chip" onclick="filterCat('douong', this)">🥤 Đồ Uống BAL'S HOUSE (54)</button>
+        <button class="filter-chip" onclick="filterCat('topping', this)">➕ Thêm / Topping</button>
+      </div>
+
+      <!-- THANH PHÂN NHỎ 7 DANH MỤC ĐỒ UỐNG CHO KHÁCH HÀNG DỄ CHỌN -->
+      <div id="customerDrinkSubBar" class="menu-filter-bar" style="display:none; background:#f0fdf4; padding:10px 12px; border-radius:16px; border:1px solid #86efac; margin-top:-10px; margin-bottom:20px;">
+        <button class="filter-chip active" onclick="filterCustomerDrinkSub('all_drink', this)">Tất Cả Nước (54)</button>
+        <button class="filter-chip" onclick="filterCustomerDrinkSub('cafe_cacao', this)">☕ Cafe & Cacao (8)</button>
+        <button class="filter-chip" onclick="filterCustomerDrinkSub('latte', this)">🍵 Latte & Kem Trứng (6)</button>
+        <button class="filter-chip" onclick="filterCustomerDrinkSub('tra', this)">🍑 Trà Trái Cây (10)</button>
+        <button class="filter-chip" onclick="filterCustomerDrinkSub('nuocep', this)">🍊 Nước Ép Tươi (6)</button>
+        <button class="filter-chip" onclick="filterCustomerDrinkSub('yaourt', this)">🥣 Yaourt (11)</button>
+        <button class="filter-chip" onclick="filterCustomerDrinkSub('soda', this)">🫧 Soda & Suối Tắc (9)</button>
+        <button class="filter-chip" onclick="filterCustomerDrinkSub('giaikhat', this)">🎋 Nước Mía & Giải Khát (4)</button>
       </div>
       <div class="full-menu-container" id="fullMenuContainer"></div>
     </section>
@@ -324,27 +337,34 @@
       </div>
     </section>
 
-    <!-- MODAL HƯỚNG DẪN CÀI ICON APP CHO KHÁCH HÀNG -->
+<!-- MODAL TẢI FILE CÀI ĐẶT 1-CHẠM CHO ANDROID, IOS, WINDOWS TRÊN TRANG CHỦ -->
     <div id="installGuideModal" class="modal-overlay">
-      <div class="modal-content" style="max-width: 420px; text-align:center;">
+      <div class="modal-content" style="max-width: 460px; text-align:center;">
         <span class="modal-close" onclick="closeInstallGuideModal()">&times;</span>
-        <h3 style="color:var(--primary); margin-bottom:12px;">📲 Cài App Hy Chay</h3>
-        <p style="font-size:0.88rem; color:#64748b; margin-bottom:15px;">Thêm vào màn hình chính điện thoại để gọi món nhanh hơn, không cần tải qua App Store!</p>
+        <h3 style="color:var(--primary); margin-bottom:8px;">📲 Tải Ứng Dụng Đặt Món Hy Chay</h3>
+        <p style="font-size:0.86rem; color:#64748b; margin-bottom:14px;">Chọn thiết bị bạn đang dùng để tải trực tiếp biểu tượng App Hy Chay về màn hình chính:</p>
         
-        <button id="btnNativeInstall" style="display:none; width:100%; padding:14px; background:var(--accent); color:var(--text-dark); border:none; border-radius:10px; font-weight:800; cursor:pointer; margin-bottom:15px; font-size:1.05rem; box-shadow: 0 4px 15px rgba(255,216,0,0.3);" onclick="triggerNativeInstall()">🚀 CÀI ĐẶT APP TỰ ĐỘNG NGAY</button>
-        
-        <div class="install-step-card" style="background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 12px; text-align:left; font-size:0.9rem;">
-          <b style="color:var(--primary);">🍎 Dành cho iPhone / iPad (Safari):</b>
-          <p style="margin-top:6px;">1. Bấm nút <b>Chia sẻ (⎋ ô vuông mũi tên)</b> ở thanh dưới cùng.</p>
-          <p>2. Cuộn xuống, chọn <b>"Thêm vào MH chính" (➕)</b>.</p>
+        <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:15px;">
+          <button type="button" onclick="triggerNativeInstall()" style="width:100%; padding:14px; background:#16a34a; color:#fff; border:none; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.95rem; display:flex; justify-content:space-between; align-items:center;">
+            <span>🤖 1. Cài Đặt Cho Điện Thoại Android</span>
+            <span style="background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:6px; font-size:0.75rem;">Tự động</span>
+          </button>
+
+          <button type="button" onclick="downloadCustomerIOSProfile()" style="width:100%; padding:14px; background:#0f172a; color:#fff; border:none; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.95rem; display:flex; justify-content:space-between; align-items:center;">
+            <span>🍎 2. Tải Cấu Hình App Cho iPhone / iPad (iOS)</span>
+            <span style="background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:6px; font-size:0.75rem;">Tải về</span>
+          </button>
+
+          <button type="button" onclick="downloadCustomerWindowsApp()" style="width:100%; padding:14px; background:#0284c7; color:#fff; border:none; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.95rem; display:flex; justify-content:space-between; align-items:center;">
+            <span>💻 3. Tải File Cài Đặt Cho Máy Tính Windows (.BAT)</span>
+            <span style="background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:6px; font-size:0.75rem;">Desktop</span>
+          </button>
         </div>
-        
-        <div class="install-step-card" id="androidManualGuide" style="background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 15px; text-align:left; font-size:0.9rem;">
-          <b style="color:var(--primary);">🤖 Dành cho Android (Chrome):</b>
-          <p style="margin-top:6px;">1. Bấm nút <b>3 chấm (⋮)</b> ở góc trên bên phải.</p>
-          <p>2. Chọn dòng <b>"Thêm vào màn hình chính"</b>.</p>
+
+        <div class="install-step-card" style="background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 14px; text-align:left; font-size:0.82rem;">
+          <b style="color:var(--primary);">💡 Mẹo cài nhanh trên Safari (iPhone):</b> Bấm nút <b>Chia sẻ (⎋)</b> ở dưới cùng trình duyệt $\rightarrow$ Chọn <b>"Thêm vào MH chính" (➕)</b>.
         </div>
-        <button onclick="closeInstallGuideModal()" class="btn-primary" style="width:100%;">Đã Hiểu & Đóng</button>
+        <button onclick="closeInstallGuideModal()" class="btn-primary" style="width:100%;">Đóng Cửa Sổ</button>
       </div>
     </div>
 
@@ -2274,6 +2294,92 @@ window.addToCart = function(id, name, p) {
         });
       }
     }
+    // PHÂN NHỎ 7 DANH MỤC ĐỒ UỐNG & TRÌNH CÀI ĐẶT ĐA NỀN TẢNG BÊN KHÁCH HÀNG
+    CAT_LABELS_MAP.topping = "Thêm/Topping";
+    let currentCustomerDrinkSub = 'all_drink';
+
+    window.filterCat = function(c, btn) {
+      currentFilterCat = c;
+      document.querySelectorAll('.menu-filter-bar:not(#customerDrinkSubBar) .filter-chip').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      const subBar = document.getElementById('customerDrinkSubBar');
+      if (subBar) subBar.style.display = (c === 'douong') ? 'flex' : 'none';
+      renderFullMenu();
+    };
+
+    window.filterCustomerDrinkSub = function(subCat, btn) {
+      currentCustomerDrinkSub = subCat;
+      document.querySelectorAll('#customerDrinkSubBar .filter-chip').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderFullMenu();
+    };
+
+    // Nâng cấp renderFullMenu hỗ trợ lọc theo 7 nhóm con Đồ uống
+    renderFullMenu = function() {
+      const el = document.getElementById('fullMenuContainer');
+      if (!el) return;
+      const kw = (document.getElementById('customerMenuSearchInput')?.value || '').toLowerCase().trim();
+      let html = '';
+      getUnifiedCustomerMenuList().forEach(it => {
+        if (currentFilterCat !== 'all' && it.cat !== currentFilterCat) return;
+        if (currentFilterCat === 'douong' && currentCustomerDrinkSub !== 'all_drink') {
+          if (getDrinkSubCat(it.id, it.name) !== currentCustomerDrinkSub) return;
+        }
+        if (kw && !it.name.toLowerCase().includes(kw)) return;
+        const safeName = it.name.replace(/'/g, "\\'");
+        const labelText = it.cat === 'douong' ? (DRINK_SUBCAT_LABELS[getDrinkSubCat(it.id, it.name)] || it.catName) : it.catName;
+        html += `
+          <div class="menu-item-row ${it.isSoldOut ? 'is-sold-out' : ''}">
+            <div class="item-thumb"><img src="${it.image}" onerror="this.src='Logo nho.png'"></div>
+            <div class="item-meta"><span class="item-cat-label">${labelText}</span><h4>${it.name} ${it.isHot ? '<span class="hot-label-small">🔥</span>' : ''}</h4><span class="item-price-tag">${it.price.toLocaleString()}đ</span></div>
+            <button class="btn-quick-add" ${it.isSoldOut ? 'disabled' : ''} onclick="addToCart('${it.id}', '${safeName}', ${it.price})">${it.isSoldOut ? 'Tạm Hết' : '+ Chọn Món'}</button>
+          </div>`;
+      });
+      el.innerHTML = html || '<p style="grid-column:1/-1; text-align:center; color:#64748b; padding:20px;">Không tìm thấy món phù hợp.</p>';
+    };
+
+    let deferredCustomerPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredCustomerPrompt = e;
+      const btnNative = document.getElementById('btnNativeInstall');
+      if (btnNative) btnNative.style.display = 'block';
+    });
+
+    window.triggerNativeInstall = async function() {
+      if (deferredCustomerPrompt) {
+        deferredCustomerPrompt.prompt();
+        await deferredCustomerPrompt.userChoice;
+        deferredCustomerPrompt = null;
+      } else {
+        alert("🤖 Trên Android (Chrome): Hãy bấm nút 3 chấm (⋮) ở góc phải trên cùng trình duyệt -> Chọn 'Cài đặt ứng dụng' hoặc 'Thêm vào màn hình chính'!");
+      }
+    };
+
+    window.downloadCustomerWindowsApp = function() {
+      const appUrl = window.location.origin + '/index.html';
+      const bat = [
+        '@echo off',
+        'chcp 65001 >nul',
+        'powershell -Command "$ws = New-Object -ComObject WScript.Shell; $s = $ws.CreateShortcut([Environment]::GetFolderPath(\'Desktop\') + \'\\Hy Chay Đặt Món.lnk\'); $s.TargetPath = \'msedge.exe\'; $s.Arguments = \'--app=' + appUrl + '\'; $s.Save()"',
+        'start "" msedge --app="' + appUrl + '" 2>nul || start "" chrome --app="' + appUrl + '" 2>nul || start "" "' + appUrl + '"'
+      ].join('\r\n');
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([bat], { type: 'application/bat;charset=utf-8' }));
+      a.download = 'Cai_Dat_HyChay_Windows.bat';
+      a.click();
+    };
+
+    window.downloadCustomerIOSProfile = function() {
+      const appUrl = window.location.origin + '/index.html';
+      const uuid1 = '22222222-3333-4444-5555-' + Date.now().toString().slice(-12);
+      const uuid2 = '88888888-7777-6666-5555-' + Date.now().toString().slice(-12);
+      const xml = `<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>PayloadContent</key><array><dict><key>FullScreen</key><true/><key>IsRemovable</key><true/><key>Label</key><string>Hy Chay</string><key>PayloadDisplayName</key><string>Hy Chay Food</string><key>PayloadIdentifier</key><string>com.baoanhlam.webclip.customer</string><key>PayloadType</key><string>com.apple.webClip.managed</string><key>PayloadUUID</key><string>${uuid1}</string><key>PayloadVersion</key><integer>1</integer><key>Precomposed</key><true/><key>URL</key><string>${appUrl}</string></dict></array><key>PayloadDisplayName</key><string>Hy Chay App (iOS)</string><key>PayloadIdentifier</key><string>com.baoanhlam.profile.customer</string><key>PayloadRemovalDisallowed</key><false/><key>PayloadType</key><string>Configuration</string><key>PayloadUUID</key><string>${uuid2}</string><key>PayloadVersion</key><integer>1</integer></dict></plist>`;
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([xml], { type: 'application/x-apple-aspen-config' }));
+      a.download = 'HyChay_iOS.mobileconfig';
+      a.click();
+    };
   </script>
 </body>
 </html>
