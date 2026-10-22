@@ -18,6 +18,15 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Google Generative AI SDK
+        run: |
+          pip install --quiet google-generativeai
+
       - name: Run Gemini Review
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -27,13 +36,16 @@ jobs:
         run: |
           python3 - << 'EOF'
           import os
-          import json
-          import urllib.request
           import subprocess
+          import google.generativeai as genai
 
           api_key = os.environ.get("GEMINI_API_KEY")
           pr_number = os.environ.get("PR_NUMBER")
           base_ref = os.environ.get("BASE_REF", "main")
+
+          if not api_key:
+              print("❌ LỖI: Chưa tìm thấy GEMINI_API_KEY trong GitHub Secrets!")
+              exit(1)
 
           # 1. Lấy phần code thay đổi
           try:
@@ -44,16 +56,18 @@ jobs:
               diff = subprocess.check_output(["git", "diff", "HEAD~1", "HEAD"]).decode("utf-8", errors="ignore")
 
           if not diff.strip():
-              print("Không có thay đổi mã nguồn nào.")
+              print("ℹ️ Không có thay đổi mã nguồn nào cần review.")
               exit(0)
 
           if len(diff) > 25000:
               diff = diff[:25000] + "\n... (Diff quá dài, đã lược bớt)"
 
-          # 2. Gửi yêu cầu phân tích tới Gemini 1.5 Flash
-          prompt = f"""Bạn là chuyên gia phân tích mã nguồn. Hãy đánh giá các thay đổi sau:
+          # 2. Cấu hình SDK chính thức của Google
+          genai.configure(api_key=api_key)
+
+          prompt = f"""Bạn là một lập trình viên cao cấp (Senior Code Reviewer). Hãy đánh giá phần code thay đổi dưới đây:
           1. Tóm tắt ngắn gọn nội dung chỉnh sửa.
-          2. Phát hiện lỗi tiềm ẩn (bugs), lỗ hổng bảo mật hoặc cấu trúc chưa tối ưu.
+          2. Phát hiện lỗi tiềm ẩn (bugs, cú pháp, bảo mật hoặc hiệu năng).
           3. Đề xuất cách khắc phục cụ thể bằng Tiếng Việt.
 
           Code Diff:
@@ -62,24 +76,27 @@ jobs:
           ```
           """
 
-          url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
-          payload = {"contents": [{"parts": [{"text": prompt}]}]}
+          # Tự động chọn model khả dụng
+          review_text = ""
+          for model_name in ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash", "gemini-pro"]:
+              try:
+                  model = genai.GenerativeModel(model_name)
+                  response = model.generate_content(prompt)
+                  review_text = response.text
+                  print(f"✅ Đã phân tích thành công với model: {model_name}")
+                  break
+              except Exception as e:
+                  print(f"Model {model_name} chưa khả dụng, đang thử model tiếp theo: {e}")
 
-          req = urllib.request.Request(
-              url,
-              data=json.dumps(payload).encode("utf-8"),
-              headers={"Content-Type": "application/json"}
-          )
-
-          with urllib.request.urlopen(req) as resp:
-              data = json.loads(resp.read().decode("utf-8"))
-              review_text = data["candidates"][0]["content"]["parts"][0]["text"]
+          if not review_text:
+              print("❌ Lỗi: Không thể nhận kết quả từ Gemini API.")
+              exit(1)
 
           comment = f"### 🤖 Gemini AI Code Review\n\n{review_text}"
           with open("review.md", "w", encoding="utf-8") as f:
               f.write(comment)
 
-          # 3. Đăng bình luận trực tiếp vào Pull Request
-          subprocess.run(["gh", "pr", "comment", pr_number, "--body-file", "review.md"], check=True)
-          print("Đã hoàn tất review code!")
+          # 3. Đăng nhận xét trực tiếp vào Pull Request
+          subprocess.run(["gh", "pr", "comment", str(pr_number), "--body-file", "review.md"], check=True)
+          print("🎉 Đã đăng nhận xét lên Pull Request thành công!")
           EOF
