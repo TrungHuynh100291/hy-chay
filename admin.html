@@ -359,35 +359,40 @@
               <button type="button" onclick="addQuickExtraToPosCart()" style="background:#d97706; color:#fff; border:none; padding:6px 12px; border-radius:6px; font-weight:800; font-size:0.78rem; cursor:pointer;">+ Đưa Vào Đơn</button>
             </div>
 
-            <label style="font-weight:700; font-size:0.85rem; color:#64748b; display:block; margin-bottom:6px;">CHỌN HẠNG MỤC & MÓN ĂN:</label>
+<label style="font-weight:700; font-size:0.85rem; color:#64748b; display:block; margin-bottom:6px;">CHỌN HẠNG MỤC & MÓN ĂN:</label>
             <input type="text" id="posSearchInput" placeholder="🔍 Tìm nhanh tên món ăn, nước uống, topping..." style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:8px; font-size:0.85rem;" oninput="renderPosDishGrid()">
             
-            <div id="posCatFilterBar" class="admin-cat-bar">
-              <button type="button" class="admin-cat-chip active" onclick="setPosCategory('all', this)">Tất Cả</button>
-              <button type="button" class="admin-cat-chip" onclick="setPosCategory('bun', this)">🍜 Món Bún</button>
-              <button type="button" class="admin-cat-chip" onclick="setPosCategory('mi_pho', this)">🥢 Mì - Phở</button>
-              <button type="button" class="admin-cat-chip" onclick="setPosCategory('com_kho', this)">🍚 Cơm & Khô</button>
-              <button type="button" class="admin-cat-chip" onclick="setPosCategory('chien_dacbiet', this)">🥟 Chiên & Đặc Biệt</button>
-              <button type="button" class="admin-cat-chip" onclick="setPosCategory('lau', this)">🍲 Lẩu Chay</button>
-              <button type="button" class="admin-cat-chip" onclick="setPosCategory('soche', this)">📦 Sơ Chế</button>
-              <button type="button" class="admin-cat-chip" onclick="setPosCategory('douong', this)">🥤 Đồ Uống (54)</button>
-              <button type="button" class="admin-cat-chip" style="border-color:#f59e0b; color:#b45309; background:#fffbeb;" onclick="setPosCategory('topping', this)">➕ Thêm / Topping</button>
+            <div style="display:flex; align-items:center; gap:4px; margin-bottom:8px;">
+              <button type="button" onclick="document.getElementById('posCatFilterBar').scrollBy({left:-220,behavior:'smooth'})" style="border:1px solid #cbd5e1; background:#fff; border-radius:50%; width:28px; height:28px; font-weight:900; cursor:pointer; flex-shrink:0;">❮</button>
+              <div id="posCatFilterBar" class="admin-cat-bar" style="margin-bottom:0; flex:1;">
+                <button type="button" class="admin-cat-chip active" onclick="setPosCategory('all', this)">Tất Cả</button>
+                <button type="button" class="admin-cat-chip" onclick="setPosCategory('bun', this)">🍜 Món Bún</button>
+                <button type="button" class="admin-cat-chip" onclick="setPosCategory('mi_pho', this)">🥢 Mì - Phở</button>
+                <button type="button" class="admin-cat-chip" onclick="setPosCategory('com_kho', this)">🍚 Cơm & Khô</button>
+                <button type="button" class="admin-cat-chip" onclick="setPosCategory('chien_dacbiet', this)">🥟 Chiên & Đặc Biệt</button>
+                <button type="button" class="admin-cat-chip" onclick="setPosCategory('lau', this)">🍲 Lẩu Chay</button>
+                <button type="button" class="admin-cat-chip" onclick="setPosCategory('soche', this)">📦 Sơ Chế</button>
+                <button type="button" class="admin-cat-chip" onclick="setPosCategory('douong', this)">🥤 Đồ Uống (54)</button>
+                <button type="button" class="admin-cat-chip" style="border-color:#f59e0b; color:#b45309; background:#fffbeb;" onclick="setPosCategory('topping', this)">➕ Thêm / Topping</button>
+              </div>
+              <button type="button" onclick="document.getElementById('posCatFilterBar').scrollBy({left:220,behavior:'smooth'})" style="border:1px solid #cbd5e1; background:#fff; border-radius:50%; width:28px; height:28px; font-weight:900; cursor:pointer; flex-shrink:0;">❯</button>
             </div>
 
-            <!-- THANH LỌC CON 7 NHÓM ĐỒ UỐNG (TỰ ĐỘNG HIỆN KHI BẤM VÀO ĐỒ UỐNG) -->
-            <div id="posDrinkSubCatBar" class="admin-cat-bar" style="display:none; background:#eff6ff; padding:6px 8px; border-radius:10px; border:1px solid #bfdbfe;">
-              <button type="button" class="admin-cat-chip active" onclick="setPosDrinkSubCat('all_drink', this)">Tất Cả Nước (54)</button>
-              <button type="button" class="admin-cat-chip" onclick="setPosDrinkSubCat('cafe_cacao', this)">☕ Cafe & Cacao (8)</button>
-              <button type="button" class="admin-cat-chip" onclick="setPosDrinkSubCat('latte', this)">🍵 Latte & Kem Trứng (6)</button>
-              <button type="button" class="admin-cat-chip" onclick="setPosDrinkSubCat('tra', this)">🍑 Trà Trái Cây (10)</button>
-              <button type="button" class="admin-cat-chip" onclick="setPosDrinkSubCat('nuocep', this)">🍊 Nước Ép (6)</button>
-              <button type="button" class="admin-cat-chip" onclick="setPosDrinkSubCat('yaourt', this)">🥣 Yaourt (11)</button>
-              <button type="button" class="admin-cat-chip" onclick="setPosDrinkSubCat('soda', this)">🫧 Soda (9)</button>
-              <button type="button" class="admin-cat-chip" onclick="setPosDrinkSubCat('giaikhat', this)">🎋 Nước Mía & Ngọt (4)</button>
+            <!-- THANH LỌC CON 7 NHÓM ĐỒ UỐNG CÓ NÚT QUA LẠI -->
+            <div id="posDrinkSubCatWrap" style="display:none; align-items:center; gap:4px; background:#eff6ff; padding:6px 8px; border-radius:10px; border:1px solid #bfdbfe; margin-bottom:10px;">
+              <button type="button" onclick="document.getElementById('posDrinkSubCatBar').scrollBy({left:-200,behavior:'smooth'})" style="border:1px solid #93c5fd; background:#fff; border-radius:50%; width:26px; height:26px; font-weight:900; cursor:pointer; flex-shrink:0;">❮</button>
+              <div id="posDrinkSubCatBar" class="admin-cat-bar" style="margin-bottom:0; padding-bottom:0; flex:1;">
+                <button type="button" class="admin-cat-chip active" onclick="setPosDrinkSubCat('all_drink', this)">Tất Cả Nước (54)</button>
+                <button type="button" class="admin-cat-chip" onclick="setPosDrinkSubCat('cafe_cacao', this)">☕ Cafe & Cacao (8)</button>
+                <button type="button" class="admin-cat-chip" onclick="setPosDrinkSubCat('latte', this)">🍵 Latte & Kem Trứng (6)</button>
+                <button type="button" class="admin-cat-chip" onclick="setPosDrinkSubCat('tra', this)">🍑 Trà Trái Cây (10)</button>
+                <button type="button" class="admin-cat-chip" onclick="setPosDrinkSubCat('nuocep', this)">🍊 Nước Ép (6)</button>
+                <button type="button" class="admin-cat-chip" onclick="setPosDrinkSubCat('yaourt', this)">🥣 Yaourt (11)</button>
+                <button type="button" class="admin-cat-chip" onclick="setPosDrinkSubCat('soda', this)">🫧 Soda (9)</button>
+                <button type="button" class="admin-cat-chip" onclick="setPosDrinkSubCat('giaikhat', this)">🎋 Nước Mía & Ngọt (4)</button>
+              </div>
+              <button type="button" onclick="document.getElementById('posDrinkSubCatBar').scrollBy({left:200,behavior:'smooth'})" style="border:1px solid #93c5fd; background:#fff; border-radius:50%; width:26px; height:26px; font-weight:900; cursor:pointer; flex-shrink:0;">❯</button>
             </div>
-
-            <div class="pos-dish-grid" id="posDishGrid"></div>
-          </div>
 
           <div class="pos-cart-panel">
             <h3 style="margin-bottom:10px;">Order: <span id="currentSelectedTable" style="color:#d97706;">Bàn 1</span></h3>
@@ -577,7 +582,7 @@
         </div>
       </div>
 
-      <!-- MODAL SỬA ĐƠN HÀNG TRỰC TIẾP (THÊM / BỚT MÓN KHI GỌI ĐIỆN THOẠI KHÁCH) -->
+<!-- MODAL SỬA ĐƠN HÀNG TRỰC TIẾP (THÊM / BỚT MÓN KHI GỌI ĐIỆN THOẠI KHÁCH) -->
       <div id="editOrderModal" class="cancel-modal-overlay">
         <div class="cancel-modal-box" style="max-width:700px;">
           <h3 style="color:var(--primary); margin-bottom:6px;">✏️ Chỉnh Sửa Trực Tiếp Đơn Hàng <span id="editModalOrderId" style="color:#dc2626;"></span></h3>
@@ -590,36 +595,44 @@
               <div id="editModalCurrentItemsList"></div>
             </div>
 
-            <!-- Cột phải: Bảng chọn món phụ để thêm nhanh vào đơn -->
+            <!-- Cột phải: Bảng chọn món phụ để thêm nhanh vào đơn (Có nút ❮ ❯ cho Laptop) -->
             <div class="edit-panel-box">
-<h4 style="font-size:0.9rem; color:var(--primary); margin-bottom:8px; border-bottom:1px solid #cbd5e1; padding-bottom:4px;">Thêm Món / Topping Vào Đơn:</h4>
-              <div style="display:flex; gap:4px; margin-bottom:8px;">
-                <input type="text" id="editQuickExtraName" placeholder="Đồ thêm/Tô giấy..." style="flex:1; padding:5px 8px; border:1px solid #fde68a; background:#fffbeb; border-radius:6px; font-size:0.78rem;">
-                <input type="number" id="editQuickExtraPrice" placeholder="Giá..." step="1000" style="width:80px; padding:5px 6px; border:1px solid #fde68a; background:#fffbeb; border-radius:6px; font-size:0.78rem;">
-                <button type="button" onclick="addQuickExtraToEditOrder()" style="background:#d97706; color:#fff; border:none; padding:5px 8px; border-radius:6px; font-weight:800; font-size:0.75rem; cursor:pointer;">+ Thêm</button>
-              </div>
+              <h4 style="font-size:0.9rem; color:var(--primary); margin-bottom:8px; border-bottom:1px solid #cbd5e1; padding-bottom:4px;">Thêm Món / Topping Vào Đơn:</h4>
               <input type="text" id="editModalSearchDish" placeholder="🔍 Tìm món ăn, nước uống, topping..." style="width:100%; padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.82rem; margin-bottom:8px;" oninput="renderEditModalDishPicker()">
-              <div id="editModalCatBar" class="admin-cat-bar">
-                <button type="button" class="admin-cat-chip active" onclick="setEditModalCategory('all', this)">Tất Cả</button>
-                <button type="button" class="admin-cat-chip" onclick="setEditModalCategory('bun', this)">Bún</button>
-                <button type="button" class="admin-cat-chip" onclick="setEditModalCategory('mi_pho', this)">Mì/Phở</button>
-                <button type="button" class="admin-cat-chip" onclick="setEditModalCategory('com_kho', this)">Cơm/Khô</button>
-                <button type="button" class="admin-cat-chip" onclick="setEditModalCategory('chien_dacbiet', this)">Món Chiên</button>
-                <button type="button" class="admin-cat-chip" onclick="setEditModalCategory('lau', this)">Lẩu</button>
-                <button type="button" class="admin-cat-chip" onclick="setEditModalCategory('soche', this)">Sơ Chế</button>
-                <button type="button" class="admin-cat-chip" onclick="setEditModalCategory('douong', this)">Đồ Uống</button>
-                <button type="button" class="admin-cat-chip" style="border-color:#f59e0b; color:#b45309; background:#fffbeb;" onclick="setEditModalCategory('topping', this)">➕ Topping</button>
+              
+              <!-- Thanh danh mục chính có nút ❮ ❯ -->
+              <div style="display:flex; align-items:center; gap:4px; margin-bottom:8px;">
+                <button type="button" onclick="document.getElementById('editModalCatBar').scrollBy({left:-180,behavior:'smooth'})" style="border:1px solid #cbd5e1; background:#fff; border-radius:50%; width:26px; height:26px; font-weight:900; cursor:pointer; flex-shrink:0;">❮</button>
+                <div id="editModalCatBar" class="admin-cat-bar" style="margin-bottom:0; padding-bottom:0; flex:1;">
+                  <button type="button" class="admin-cat-chip active" onclick="setEditModalCategory('all', this)">Tất Cả</button>
+                  <button type="button" class="admin-cat-chip" onclick="setEditModalCategory('bun', this)">Bún</button>
+                  <button type="button" class="admin-cat-chip" onclick="setEditModalCategory('mi_pho', this)">Mì/Phở</button>
+                  <button type="button" class="admin-cat-chip" onclick="setEditModalCategory('com_kho', this)">Cơm/Khô</button>
+                  <button type="button" class="admin-cat-chip" onclick="setEditModalCategory('chien_dacbiet', this)">Món Chiên</button>
+                  <button type="button" class="admin-cat-chip" onclick="setEditModalCategory('lau', this)">Lẩu</button>
+                  <button type="button" class="admin-cat-chip" onclick="setEditModalCategory('soche', this)">Sơ Chế</button>
+                  <button type="button" class="admin-cat-chip" onclick="setEditModalCategory('douong', this)">Đồ Uống</button>
+                  <button type="button" class="admin-cat-chip" style="border-color:#f59e0b; color:#b45309; background:#fffbeb;" onclick="setEditModalCategory('topping', this)">➕ Topping</button>
+                </div>
+                <button type="button" onclick="document.getElementById('editModalCatBar').scrollBy({left:180,behavior:'smooth'})" style="border:1px solid #cbd5e1; background:#fff; border-radius:50%; width:26px; height:26px; font-weight:900; cursor:pointer; flex-shrink:0;">❯</button>
               </div>
-              <div id="editModalDrinkSubBar" class="admin-cat-bar" style="display:none; background:#eff6ff; padding:4px 6px; border-radius:8px;">
-                <button type="button" class="admin-cat-chip active" onclick="setEditModalDrinkSub('all_drink', this)">Tất Cả Nước</button>
-                <button type="button" class="admin-cat-chip" onclick="setEditModalDrinkSub('cafe_cacao', this)">Cafe/Cacao</button>
-                <button type="button" class="admin-cat-chip" onclick="setEditModalDrinkSub('latte', this)">Latte</button>
-                <button type="button" class="admin-cat-chip" onclick="setEditModalDrinkSub('tra', this)">Trà</button>
-                <button type="button" class="admin-cat-chip" onclick="setEditModalDrinkSub('nuocep', this)">Nước Ép</button>
-                <button type="button" class="admin-cat-chip" onclick="setEditModalDrinkSub('yaourt', this)">Yaourt</button>
-                <button type="button" class="admin-cat-chip" onclick="setEditModalDrinkSub('soda', this)">Soda</button>
-                <button type="button" class="admin-cat-chip" onclick="setEditModalDrinkSub('giaikhat', this)">Mía/Ngọt</button>
+
+              <!-- Thanh danh mục con 7 nhóm Đồ Uống có nút ❮ ❯ -->
+              <div id="editModalDrinkSubWrap" style="display:none; align-items:center; gap:4px; background:#eff6ff; padding:4px 6px; border-radius:8px; border:1px solid #bfdbfe; margin-bottom:8px;">
+                <button type="button" onclick="document.getElementById('editModalDrinkSubBar').scrollBy({left:-160,behavior:'smooth'})" style="border:1px solid #93c5fd; background:#fff; border-radius:50%; width:24px; height:24px; font-weight:900; cursor:pointer; flex-shrink:0;">❮</button>
+                <div id="editModalDrinkSubBar" class="admin-cat-bar" style="margin-bottom:0; padding-bottom:0; flex:1;">
+                  <button type="button" class="admin-cat-chip active" onclick="setEditModalDrinkSub('all_drink', this)">Tất Cả Nước</button>
+                  <button type="button" class="admin-cat-chip" onclick="setEditModalDrinkSub('cafe_cacao', this)">Cafe/Cacao</button>
+                  <button type="button" class="admin-cat-chip" onclick="setEditModalDrinkSub('latte', this)">Latte</button>
+                  <button type="button" class="admin-cat-chip" onclick="setEditModalDrinkSub('tra', this)">Trà</button>
+                  <button type="button" class="admin-cat-chip" onclick="setEditModalDrinkSub('nuocep', this)">Nước Ép</button>
+                  <button type="button" class="admin-cat-chip" onclick="setEditModalDrinkSub('yaourt', this)">Yaourt</button>
+                  <button type="button" class="admin-cat-chip" onclick="setEditModalDrinkSub('soda', this)">Soda</button>
+                  <button type="button" class="admin-cat-chip" onclick="setEditModalDrinkSub('giaikhat', this)">Mía/Ngọt</button>
+                </div>
+                <button type="button" onclick="document.getElementById('editModalDrinkSubBar').scrollBy({left:160,behavior:'smooth'})" style="border:1px solid #93c5fd; background:#fff; border-radius:50%; width:24px; height:24px; font-weight:900; cursor:pointer; flex-shrink:0;">❯</button>
               </div>
+
               <div id="editModalDishPickerList" style="max-height:35vh; overflow-y:auto;"></div>
             </div>
           </div>
@@ -1736,9 +1749,27 @@ function updatePiPCanvas() {
       }).then(() => alert(`✅ Đã lưu cập nhật món "${newName}" (${newPrice.toLocaleString()}đ)!`));
     };
 
-    window.deleteDishFromMenu = function(id, name) {
-      if (!confirm(`⚠️ Bạn có chắc muốn xóa/ẩn món "${name}" khỏi thực đơn?`)) return;
-      update(ref(db, `menu_customizations/${id}`), { isDeleted: true, updatedAt: new Date().toISOString() });
+window.deleteDishFromMenu = function(id, name) {
+      if (localStorage.getItem('hy_chay_active_role') !== 'root') {
+        return alert("⛔ Chỉ Chủ quán (Giám đốc) mới có quyền xóa món khỏi thực đơn!");
+      }
+      if (!confirm(`⚠️ Bạn có chắc chắn muốn XÓA món "${name}" khỏi thực đơn bán hàng?`)) return;
+      update(ref(db, `menu_customizations/${id}`), {
+        isDeleted: true,
+        updatedAt: new Date().toISOString()
+      }).then(() => {
+        if (typeof writeAuditLog === 'function') writeAuditLog("XÓA MÓN KHỎI MENU", `Đã xóa món: ${name} (${id})`, "WARN");
+      });
+    };
+
+    window.restoreDeletedDefaultDishes = function() {
+      if (localStorage.getItem('hy_chay_active_role') !== 'root') return alert("⛔ Chỉ Chủ quán mới có quyền khôi phục!");
+      Object.keys(menuCustomCache).forEach(id => {
+        if (menuCustomCache[id] && menuCustomCache[id].isDeleted && !menuCustomCache[id].isCustom) {
+          update(ref(db, `menu_customizations/${id}`), { isDeleted: false });
+        }
+      });
+      alert("✅ Đã khôi phục lại toàn bộ các món gốc bị xóa!");
     };
 
     window.renderMenuStockTable = function() {
@@ -1750,6 +1781,7 @@ function updatePiPCanvas() {
         if (cat !== 'all' && item.cat !== cat) return;
         if (keyword && !item.name.toLowerCase().includes(keyword)) return;
         const safeName = item.name.replace(/"/g, '&quot;');
+        const safeNameJs = item.name.replace(/'/g, "\\'");
         html += `
           <tr>
             <td>
@@ -1761,29 +1793,29 @@ function updatePiPCanvas() {
             </td>
             <td>
               <select id="c_in_${item.id}" style="padding:5px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.78rem; font-weight:600;">
-                <option value="bun" ${item.cat==='bun'?'selected':''}>Món Bún</option>
-                <option value="mi_pho" ${item.cat==='mi_pho'?'selected':''}>Mì - Phở</option>
-                <option value="com_kho" ${item.cat==='com_kho'?'selected':''}>Cơm & Khô</option>
-                <option value="chien_dacbiet" ${item.cat==='chien_dacbiet'?'selected':''}>Chiên & Đặc Biệt</option>
-                <option value="lau" ${item.cat==='lau'?'selected':''}>Lẩu Chay</option>
-                <option value="soche" ${item.cat==='soche'?'selected':''}>Sơ Chế</option>
+                <option value="bun" ${item.cat==='bun'?'selected':''}>Món Bún (5610)</option>
+                <option value="mi_pho" ${item.cat==='mi_pho'?'selected':''}>Mì - Phở (5610)</option>
+                <option value="com_kho" ${item.cat==='com_kho'?'selected':''}>Cơm & Khô (5610)</option>
+                <option value="chien_dacbiet" ${item.cat==='chien_dacbiet'?'selected':''}>Chiên & Đặc Biệt (5610)</option>
+                <option value="lau" ${item.cat==='lau'?'selected':''}>Lẩu Chay (5610)</option>
+                <option value="soche" ${item.cat==='soche'?'selected':''}>Sơ Chế (5610)</option>
                 <option value="douong" ${item.cat==='douong'?'selected':''}>Đồ Uống (5630)</option>
+                <option value="topping" ${item.cat==='topping'?'selected':''}>➕ Thêm / Topping (5610)</option>
               </select>
             </td>
             <td>
               <div style="display:flex; align-items:center; gap:4px;">
                 <input type="number" id="p_in_${item.id}" class="price-input" value="${item.price}" step="1000">
-                <button class="btn-save-price" onclick="saveDishInfoAndPrice('${item.id}')">Lưu</button>
-                ${item.isCustom ? `<button onclick="deleteDishFromMenu('${item.id}', '${item.name.replace(/'/g, "\\'")}')" style="background:#fee2e2; color:#b91c1c; border:none; padding:5px 7px; border-radius:6px; cursor:pointer; font-size:0.72rem; font-weight:700;">Xóa</button>` : ''}
+                <button type="button" class="btn-save-price" onclick="saveDishInfoAndPrice('${item.id}')">Lưu</button>
+                <button type="button" onclick="deleteDishFromMenu('${item.id}', '${safeNameJs}')" style="background:#fee2e2; color:#b91c1c; border:1px solid #fecaca; padding:5px 8px; border-radius:6px; cursor:pointer; font-size:0.72rem; font-weight:800;" title="Xóa món này khỏi thực đơn">🗑️ Xóa</button>
               </div>
             </td>
             <td>${item.isSoldOut ? '<b style="color:#ef4444;">Tạm hết</b>' : '<b style="color:#16a34a;">Đang bán</b>'}</td>
             <td style="text-align:center;"><label class="switch"><input type="checkbox" ${!item.isSoldOut ? 'checked' : ''} onchange="toggleDishStock('${item.id}', this.checked)"><span class="slider"></span></label></td>
           </tr>`;
       });
-      tbody.innerHTML = html;
+      tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center; padding:20px; color:#64748b;">Không có món ăn nào trong nhóm này.</td></tr>';
     };
-
     window.uploadDishImageDirect = function(input, dishId) {
       const file = input.files[0]; if (!file) return;
       const reader = new FileReader();
@@ -3112,7 +3144,7 @@ window.printKitchenTicket = (id, dData = null) => {
       currentPosCatFilter = cat;
       document.querySelectorAll('#posCatFilterBar .admin-cat-chip').forEach(b => b.classList.remove('active'));
       if (btn) btn.classList.add('active');
-      const subBar = document.getElementById('posDrinkSubCatBar');
+      const subBar = document.getElementById('posDrinkSubCatWrap') || document.getElementById('posDrinkSubCatBar');
       if (subBar) subBar.style.display = (cat === 'douong') ? 'flex' : 'none';
       window.renderPosDishGrid();
     };
