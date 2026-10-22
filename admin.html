@@ -612,7 +612,7 @@
             <button onclick="saveOrAddShipper()" style="background:var(--primary); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-weight:800; cursor:pointer;">+ THÊM / CẬP NHẬT TÀI XẾ</button>
           </div>
 
-          <table class="report-table">
+           <table class="report-table">
             <thead>
               <tr style="background:#f1f5f9; text-align:left;">
                 <th>Tên Tài Xế</th>
@@ -620,6 +620,7 @@
                 <th>Trạng Thái Kết Nối</th>
                 <th>Tình Trạng Giao Đơn</th>
                 <th style="text-align:center;">Đơn Hôm Nay</th>
+                <th style="background:#fefce8; color:#b45309;">💰 Đối Soát Tiền Mặt & Ship (Bù Trừ)</th>
                 <th>Trạng Thái Nhân Sự</th>
                 <th>Thao Tác Quản Lý</th>
               </tr>
@@ -1862,9 +1863,60 @@ function updatePiPCanvas() {
       }).catch(err => alert("❌ Lỗi khi lưu đơn: " + err.message));
     };
 
+// ==========================================
+    // 12. MÀN HÌNH ĐƠN HÀNG KDS THU GỌN, SỐ THỨ TỰ #01-#99 THEO NGÀY & TỰ ĐỘNG RESET QUA NGÀY MỚI
     // ==========================================
-    // 12. MÀN HÌNH ĐƠN HÀNG KDS THU GỌN & ĐỒNG BỘ GIỌNG NÓI
-    // ==========================================
+    // Hàm lấy chuẩn Ngày Việt Nam (GMT+7) định dạng YYYY-MM-DD (Đúng 00:00 đêm giờ VN là sang ngày mới)
+    function getVNDateStr(dateInput = new Date()) {
+      const d = (dateInput instanceof Date) ? dateInput : new Date(dateInput);
+      if (isNaN(d.getTime())) return '';
+      const vnTime = new Date(d.getTime() + 7 * 60 * 60 * 1000);
+      return vnTime.toISOString().split('T')[0];
+    }
+
+    // Map lưu Số thứ tự đơn hàng trong ngày (#01, #02...) và tự động reset về #01 khi qua ngày mới
+    let dailyOrderSeqMap = {};
+
+    function rebuildDailyOrderSequenceAndAutoReset() {
+      const todayVN = getVNDateStr();
+      const byDate = {};
+
+      Object.keys(ordersCache).forEach(id => {
+        const o = ordersCache[id];
+        if (!o || !o.createdAt) return;
+        const dStr = getVNDateStr(o.createdAt);
+        if (!byDate[dStr]) byDate[dStr] = [];
+        byDate[dStr].push({ id, time: new Date(o.createdAt).getTime(), order: o });
+
+        // TỰ ĐỘNG RESET HÓA ĐƠN KHI QUA NGÀY MỚI:
+        // Nếu đơn thuộc về những ngày trước hôm nay và đã Hoàn tất / Đã hủy thì tự động lưu trữ (archive)
+        if (dStr && dStr < todayVN && !o.archived && (o.status === 'Đã hoàn tất' || o.status === 'Đã hủy')) {
+          o.archived = true;
+          update(ref(db, `orders/${id}`), { archived: true }).catch(() => {});
+        }
+      });
+
+      dailyOrderSeqMap = {};
+      Object.keys(byDate).forEach(dStr => {
+        byDate[dStr].sort((a, b) => a.time - b.time);
+        byDate[dStr].forEach((item, idx) => {
+          const seqNum = idx + 1;
+          const seqFormatted = String(seqNum).padStart(2, '0');
+          dailyOrderSeqMap[item.id] = seqFormatted;
+          if (item.order.dailySeq !== seqNum) {
+            item.order.dailySeq = seqNum;
+          }
+        });
+      });
+    }
+
+    function getOrderSeqBadgeText(orderId) {
+      const o = ordersCache[orderId];
+      if (dailyOrderSeqMap[orderId]) return `#${dailyOrderSeqMap[orderId]}`;
+      if (o && o.dailySeq) return `#${String(o.dailySeq).padStart(2, '0')}`;
+      return `#01`;
+    }
+
     window.setOrderStatusFilter = function(filterVal, btn) {
       currentOrderStatusFilter = filterVal;
       document.querySelectorAll('.kds-filter-btn').forEach(b => b.classList.remove('active'));
@@ -1885,10 +1937,18 @@ function updatePiPCanvas() {
       });
     };
 
-window.openProofModal = function(orderId) {
+    // Đánh dấu 1 đơn lẻ đã đối soát tiền với Shipper
+    window.markOrderShipperSettled = function(orderId) {
+      update(ref(db, `orders/${orderId}`), {
+        shipperSettled: true,
+        shipperSettledAt: new Date().toISOString()
+      });
+    };
+
+    window.openProofModal = function(orderId) {
       const o = ordersCache[orderId];
       if (!o || !o.paymentProof) return alert("Đơn này khách không đính kèm ảnh chụp biên lai.");
-      document.getElementById('proofModalTitle').innerText = `Đơn #HC-${orderId.substring(orderId.length - 5).toUpperCase()} | Mã CK: ${o.paymentCode || 'QR'} | Tổng: ${(o.grandTotal || 0).toLocaleString()}đ`;
+      document.getElementById('proofModalTitle').innerText = `Đơn ${getOrderSeqBadgeText(orderId)} (#HC-${orderId.substring(orderId.length - 5).toUpperCase()}) | Mã CK: ${o.paymentCode || 'QR'} | Tổng: ${(o.grandTotal || 0).toLocaleString()}đ`;
       document.getElementById('proofModalImg').src = o.paymentProof;
       document.getElementById('proofModal').classList.add('active');
     };
@@ -1897,7 +1957,7 @@ window.openProofModal = function(orderId) {
       const o = ordersCache[orderId];
       if (!o || !o.deliveryProof) return alert("Đơn này chưa có ảnh chụp xác nhận giao hàng từ Shipper.");
       const doneTime = o.deliveryCompletedAt ? new Date(o.deliveryCompletedAt).toLocaleString('vi-VN') : '';
-      document.getElementById('proofModalTitle').innerText = `Đơn #HC-${orderId.substring(orderId.length - 5).toUpperCase()} | Shipper: ${o.shipperName || ''} (${o.shipperPhone || ''}) | Giao lúc: ${doneTime}`;
+      document.getElementById('proofModalTitle').innerText = `Đơn ${getOrderSeqBadgeText(orderId)} (#HC-${orderId.substring(orderId.length - 5).toUpperCase()}) | Shipper: ${o.shipperName || ''} (${o.shipperPhone || ''}) | Giao lúc: ${doneTime}`;
       document.getElementById('proofModalImg').src = o.deliveryProof;
       document.getElementById('proofModal').classList.add('active');
     };
@@ -1905,25 +1965,44 @@ window.openProofModal = function(orderId) {
     window.closeProofModal = () => document.getElementById('proofModal').classList.remove('active');
 
     let previousPendingCount = 0;
+    let lastCheckedVNDay = getVNDateStr();
+
+    // Tự động kiểm tra mỗi 30 giây: Nếu đồng hồ bước qua 00:00 ngày mới thì tự động Reset màn hình và đưa bộ đếm về #01
+    setInterval(() => {
+      const nowVNDay = getVNDateStr();
+      if (nowVNDay !== lastCheckedVNDay) {
+        lastCheckedVNDay = nowVNDay;
+        if (document.getElementById('filterDayInput')) document.getElementById('filterDayInput').value = nowVNDay;
+        rebuildDailyOrderSequenceAndAutoReset();
+        renderOrders();
+        window.renderShiftReport();
+        if (typeof window.renderShippersTable === 'function') window.renderShippersTable();
+      }
+    }, 30000);
 
     onValue(ref(db, 'orders'), (snapshot) => {
       ordersCache = snapshot.val() || {};
+      rebuildDailyOrderSequenceAndAutoReset();
       renderOrders();
       window.renderShiftReport();
+      if (typeof window.renderShippersTable === 'function') window.renderShippersTable();
     });
 
     function renderOrders() {
       const container = document.getElementById('ordersContainer');
       if (!container) return;
+      rebuildDailyOrderSequenceAndAutoReset();
+
       let countPending = 0, countCooking = 0, countDelivering = 0, countDoneCancel = 0, countIssue = 0, taxableRevToday = 0, shipRevToday = 0, cardsHtml = '';
-      const todayStr = new Date().toISOString().split('T')[0];
+      const todayStr = getVNDateStr();
 
       const allKeys = Object.keys(ordersCache);
       allKeys.forEach(id => {
         const o = ordersCache[id];
         if (!o || !o.createdAt) return;
-        // Khi Shipper nhận món tại quán ('Đang giao hàng') hoặc 'Đã hoàn tất' thì phần việc của quán đã hoàn tất
-        if (new Date(o.createdAt).toISOString().split('T')[0] === todayStr && (o.status === 'Đã hoàn tất' || o.status === 'Đang giao hàng')) {
+        const orderDayStr = getVNDateStr(o.createdAt);
+
+        if (orderDayStr === todayStr && (o.status === 'Đã hoàn tất' || o.status === 'Đang giao hàng')) {
           taxableRevToday += (o.subtotal || 0);
           shipRevToday += (o.shippingFee || 0);
         }
@@ -1959,13 +2038,13 @@ window.openProofModal = function(orderId) {
         const isDone = order.status === 'Đã hoàn tất';
         const isCanceled = order.status === 'Đã hủy';
 
-        // Khi Shipper đã lấy món tại quán (isDelivering), đơn tự động chuyển sang ô "🛵 Shipper Đang Giao" để nhường chỗ trống cho đơn mới tại quán
         if (currentOrderStatusFilter === 'active_only' && !isPending && !isShipperIssue && !isCooking && !isDriverToStore) return;
         if (currentOrderStatusFilter === 'Chờ xác nhận' && !isPending && !isShipperIssue) return;
         if (currentOrderStatusFilter === 'Đang chế biến' && !isCooking && !isDriverToStore) return;
         if (currentOrderStatusFilter === 'shipper_delivering' && !isDelivering) return;
         if (currentOrderStatusFilter === 'done_cancel' && !isDone && !isCanceled) return;
 
+        const seqBadge = getOrderSeqBadgeText(id);
         const isDineIn = order.orderType === 'dine_in';
         const subtotal = order.subtotal || 0;
         const shipFee = order.shippingFee || 0;
@@ -1994,13 +2073,32 @@ window.openProofModal = function(orderId) {
             </tr>`;
         }
 
-        // Hiển thị Tên, SĐT Shipper, Trạng thái di chuyển & Ảnh chụp xác nhận giao hàng của Shipper (chỉ Admin thấy)
+        // Hiển thị thông tin Shipper + Trạng thái Công nợ tiền mặt / tiền ship của đơn này
+        const isQR = order.paymentMethod === 'VIETQR';
         let shipperInfoHtml = '';
         if (order.shipperPhone) {
           const etaBadge = isDriverToStore
             ? `<br><span style="color:#b45309;">⏳ Đang tới quán (~${order.etaToStoreMins || 5} phút - cách ${order.shipperDistToStoreKm || 1.5}km)</span>`
-            : (isDelivering ? `<br><span style="color:#15803d;">🚀 Quán đã giao xong món cho Shipper - Đang giao khách (~${order.etaToCustomerMins || 10} phút)</span>` : '');
+            : (isDelivering ? `<br><span style="color:#15803d;">🚀 Đang giao khách (~${order.etaToCustomerMins || 10} phút)</span>` : '');
           
+          let cashAccountingBadge = '';
+          if (!isDineIn && (isDelivering || isDone)) {
+            if (order.shipperSettled) {
+              cashAccountingBadge = `<div style="margin-top:4px; background:#dcfce7; color:#166534; padding:3px 6px; border-radius:4px; font-size:0.74rem;">✅ Đã tất toán tiền đơn này với Shipper</div>`;
+            } else if (!isQR) {
+              cashAccountingBadge = `
+                <div style="margin-top:4px; background:#fff1f2; color:#be123c; border:1px solid #fecdd3; padding:4px 6px; border-radius:4px; font-size:0.74rem; display:flex; justify-content:space-between; align-items:center;">
+                  <span>💵 Shipper thu khách ${grandTotal.toLocaleString()}đ -> <b>Phải nộp quán: ${subtotal.toLocaleString()}đ</b></span>
+                  <button type="button" onclick="markOrderShipperSettled('${id}')" style="background:#be123c; color:#fff; border:none; padding:2px 6px; border-radius:4px; font-weight:800; cursor:pointer; font-size:0.7rem;">Đã thu</button>
+                </div>`;
+            } else {
+              cashAccountingBadge = `
+                <div style="margin-top:4px; background:#fefce8; color:#a16207; border:1px solid #fde047; padding:4px 6px; border-radius:4px; font-size:0.74rem;">
+                  💳 Khách đã CK cho quán -> <b>Ghi có cộng ${shipFee.toLocaleString()}đ ship vào sổ bù trừ cho Shipper</b>
+                </div>`;
+            }
+          }
+
           const deliveryProofHtml = order.deliveryProof
             ? `<div style="margin-top:6px; padding-top:6px; border-top:1px dashed #93c5fd; text-align:center;">
                  <div style="color:#166534; font-weight:800; font-size:0.76rem; margin-bottom:4px;">📸 Shipper đã chụp ảnh giao đơn thành công!</div>
@@ -2013,6 +2111,7 @@ window.openProofModal = function(orderId) {
             <div style="background:#e0f2fe; color:#0369a1; padding:8px; border-radius:6px; margin-bottom:8px; font-size:0.78rem; font-weight:700; border:1px solid #bae6fd; line-height:1.4;">
               🛵 Tài xế: <b>${order.shipperName || 'Shipper'}</b> (<a href="tel:${order.shipperPhone}" style="text-decoration:underline; color:#0369a1;">📞 ${order.shipperPhone}</a>)
               ${etaBadge}
+              ${cashAccountingBadge}
               ${deliveryProofHtml}
             </div>`;
         }
@@ -2024,7 +2123,6 @@ window.openProofModal = function(orderId) {
             </div>`;
         }
 
-        const isQR = order.paymentMethod === 'VIETQR';
         const qrCodeLabel = order.paymentCode || ('HC' + id.substring(id.length - 4).toUpperCase());
         const bankLabel = BANK_NAMES_MAP[order.paymentBank] || order.paymentBank || 'Ngân hàng';
         const customerBankNote = order.customerSelectedBank ? ` (Khách dùng: ${order.customerSelectedBank})` : '';
@@ -2050,7 +2148,10 @@ window.openProofModal = function(orderId) {
         cardsHtml += `
           <div class="order-card ${(isPending || isShipperIssue) ? 'pending' : ((isCooking || isDriverToStore) ? 'cooking' : '')}">
             <div class="card-top">
-              <span class="order-id">#HC-${id.substring(id.length - 5).toUpperCase()}</span>
+              <span class="order-id">
+                <span style="background:var(--primary); color:var(--accent); padding:2px 8px; border-radius:6px; font-weight:900; font-size:0.95rem; margin-right:5px;">${seqBadge}</span>
+                <span style="color:#475569; font-size:0.78rem;">#HC-${id.substring(id.length - 5).toUpperCase()}</span>
+              </span>
               <span class="order-time-badge">🕒 ${timeStr}</span>
               ${waitBadgeHtml}
               <span class="state-badge ${(isPending || isShipperIssue) ? 'state-new' : ((isDone || isDelivering) ? 'state-complete' : (isCanceled ? 'state-canceled' : 'state-process'))}">${isDelivering ? 'SHIPPER ĐANG GIAO' : order.status}</span>
@@ -2081,7 +2182,7 @@ window.openProofModal = function(orderId) {
               </div>
             </div>
             <div class="card-footer">
-              ${isPending ? `<button class="btn-act btn-accept" onclick="updateOrderStatus('${id}', 'Đang chế biến')">⚡ TIẾP NHẬN & CHUYỂN BẾP</button>` : ''}
+              ${isPending ? `<button class="btn-act btn-accept" onclick="updateOrderStatus('${id}', 'Đang chế biến')">⚡ TIẾP NHẬN & CHUYỂN BẾP (${seqBadge})</button>` : ''}
               <button class="btn-act btn-print-kitchen" onclick="window.printKitchenTicket('${id}')">🍳 In Bếp</button>
               <button class="btn-act btn-print-bill" onclick="window.printCustomerBill('${id}')">🧾 In Bill</button>
               ${(!isDineIn && !isDone && !isCanceled && !isDelivering) ? `<button class="btn-act" style="grid-column: span 2; background:${isShipperIssue ? '#dc2626' : '#0284c7'}; color:#fff; padding:8px;" onclick="openDispatchModal('${id}')">🛵 ${order.shipperPhone ? 'ĐỔI / BẮN LẠI LINK SHIPPER' : 'GỌI SHIPPER (ZALO / GRAB)'}</button>` : ''}
@@ -2153,11 +2254,11 @@ window.openProofModal = function(orderId) {
         if ((o.status === 'Đã hoàn tất' || o.status === 'Đã hủy') && !o.archived) update(ref(db, 'orders/' + id), { archived: true });
       }
       alert("✅ Đã kết ca và dọn dẹp màn hình thành công!");
-      document.getElementById('filterMode').value = 'day'; document.getElementById('filterDayInput').value = new Date().toISOString().split('T')[0];
+      document.getElementById('filterMode').value = 'day'; document.getElementById('filterDayInput').value = getVNDateStr();
       window.onFilterModeChange(); setTimeout(() => { window.printShiftReport(); }, 500);
     };
 
-    window.openCancelModal = function(id) { targetCancelOrderId = id; document.getElementById('cancelOrderIdText').innerText = `#HC-${id.substring(id.length - 5).toUpperCase()}`; document.getElementById('cancelModal').classList.add('active'); };
+    window.openCancelModal = function(id) { targetCancelOrderId = id; document.getElementById('cancelOrderIdText').innerText = `${getOrderSeqBadgeText(id)} (#HC-${id.substring(id.length - 5).toUpperCase()})`; document.getElementById('cancelModal').classList.add('active'); };
     window.closeCancelModal = () => document.getElementById('cancelModal').classList.remove('active');
     
     window.confirmCancelOrderWithReason = function() {
@@ -2392,8 +2493,9 @@ if (it.cat === 'douong' || (dishBase && dishBase.cat === 'douong')) {
       window.print();
     };
 
-    window.printKitchenTicket = (id, dData = null) => {
+window.printKitchenTicket = (id, dData = null) => {
       const o = dData || ordersCache[id]; if (!o) return; let rows = '';
+      const seqBadge = getOrderSeqBadgeText(id);
       const timeStr = new Date(o.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
       const widthCSS = printerConfig.paperSize === '58mm' ? '54mm' : '76mm';
       applyDynamicPrintPageStyle(printerConfig.paperSize);
@@ -2403,7 +2505,7 @@ if (it.cat === 'douong' || (dishBase && dishBase.cat === 'douong')) {
       document.getElementById('printArea').innerHTML = `
         <div style="width:${widthCSS}; margin:0 auto; color:#000;">
           <div style="text-align:center; border-bottom:2px solid #000; padding-bottom:6px;">
-            <div style="margin:0; font-size:20px; font-weight:900;">PHIẾU BÁO BẾP</div>
+            <div style="margin:0; font-size:22px; font-weight:900;">PHIẾU BÁO BẾP - ĐƠN ${seqBadge}</div>
             <div style="margin:3px 0; font-size:14px; font-weight:800;">Mã: #HC-${id.substring(id.length - 5).toUpperCase()} | Giờ: ${timeStr}</div>
             <div style="font-size:18px; font-weight:900; margin:4px 0; border:2px solid #000; padding:4px;">${o.orderType === 'dine_in' ? o.table : 'ĐƠN GIAO SHIP - ' + (o.customerName || '')}</div>
           </div>
@@ -2415,6 +2517,7 @@ if (it.cat === 'douong' || (dishBase && dishBase.cat === 'douong')) {
 
     window.printCustomerBill = (id) => {
       const o = ordersCache[id]; if (!o) return; let sub = o.subtotal || 0, ship = o.shippingFee || 0, total = sub + ship, rows = '';
+      const seqBadge = getOrderSeqBadgeText(id);
       const timeStr = new Date(o.createdAt).toLocaleString('vi-VN');
       const payText = o.paymentMethod === 'VIETQR' ? `Chuyển khoản QR (${o.paymentCode || ''})` : 'Tiền mặt (COD)';
       const widthCSS = printerConfig.paperSize === '58mm' ? '54mm' : '76mm';
@@ -2424,7 +2527,7 @@ if (it.cat === 'douong' || (dishBase && dishBase.cat === 'douong')) {
       }
       document.getElementById('printArea').innerHTML = `
         <div style="width:${widthCSS}; margin:0 auto; color:#000;">
-          ${buildPrintHeaderHtml(`HÓA ĐƠN (#HC-${id.substring(id.length - 5).toUpperCase()})`)}
+          ${buildPrintHeaderHtml(`HÓA ĐƠN ${seqBadge} (#HC-${id.substring(id.length - 5).toUpperCase()})`)}
           <div style="margin:3px 0; font-size:13px; font-weight:700;">Giờ đặt: <b>${timeStr}</b></div>
           <div style="margin:3px 0; font-size:14px; font-weight:800;">Khách: ${o.customerName} (${o.phone})</div>
           ${o.orderType !== 'dine_in' ? `<div style="margin:3px 0; font-size:13px; font-weight:700;">Đ/c: <b>${o.address}</b></div>` : ''}
@@ -2466,10 +2569,11 @@ if (it.cat === 'douong' || (dishBase && dishBase.cat === 'douong')) {
     };
 
     // ==========================================
-    // 15. QUẢN LÝ ĐỘI TÀI XẾ (THÊM/BỚT, TRẠNG THÁI ONLINE/OFFLINE) & PHÂN BỔ ĐƠN THÁC NƯỚC ĐỘNG
+    // 15. QUẢN LÝ ĐỘI TÀI XẾ & SỔ BÙ TRỪ CÔNG NỢ TỰ ĐỘNG (COD TRỪ SHIP VIETQR)
     // ==========================================
     let shippersCache = {};
     let currentDispatchOrderId = null;
+    const SHIPPER_CASH_LIMIT = 500000; // Hạn mức tối đa cho phép Shipper cầm tiền mặt COD của quán (500.000đ)
 
     function normalizeShipperPhone(raw) {
       return (raw || '').trim().replace(/\s+/g, '').replace(/^\+84/, '0').replace(/[^0-9]/g, '');
@@ -2523,26 +2627,67 @@ if (it.cat === 'douong' || (dishBase && dishBase.cat === 'douong')) {
       }
     };
 
-    window.renderShippersTable = function() {
-      const tbody = document.getElementById('shippersTableBody');
-      if (!tbody) return;
-      const todayStr = new Date().toISOString().split('T')[0];
+    // Chốt và Tất toán toàn bộ đơn chưa đối soát của 1 bác tài về 0đ chỉ bằng 1 chạm
+    window.settleAllOrdersForShipper = function(phone, netAmount, shipperName) {
+      const msg = netAmount > 0
+        ? `💰 XÁC NHẬN THU TIỀN TÀI XẾ:\n\nTài xế ${shipperName} đã nộp đủ ${netAmount.toLocaleString()}đ tiền mặt (đã trừ cấn tiền ship các đơn chuyển khoản) về cho quán?`
+        : (netAmount < 0
+            ? `💸 XÁC NHẬN TRẢ TIỀN SHIP CHO TÀI XẾ:\n\nQuán đã trả đủ ${Math.abs(netAmount).toLocaleString()}đ tiền ship (của các đơn khách chuyển khoản) cho tài xế ${shipperName}?`
+            : `✅ Xác nhận chốt sổ cân bằng (0đ) cho tài xế ${shipperName}?`);
+      if (!confirm(msg)) return;
 
-      // Tính xem tài xế nào đang kẹt giao đơn khác và đếm số đơn hôm nay của từng người
-      const busyMap = {};
-      const todayCountMap = {};
+      const updates = {};
+      const nowIso = new Date().toISOString();
+      for (let oid in ordersCache) {
+        const o = ordersCache[oid];
+        if (!o || !o.shipperPhone) continue;
+        if (normalizeShipperPhone(o.shipperPhone) === phone && !o.shipperSettled && (o.status === 'Đã hoàn tất' || o.status === 'Đang giao hàng')) {
+          updates[`orders/${oid}/shipperSettled`] = true;
+          updates[`orders/${oid}/shipperSettledAt`] = nowIso;
+        }
+      }
+      update(ref(db), updates).then(() => {
+        alert(`✅ Đã tất toán công nợ cho tài xế ${shipperName} về 0đ!`);
+      });
+    };
+
+    // Hàm tính toán bảng công nợ bù trừ cho từng tài xế
+    function computeShipperAccountingMap() {
+      const todayStr = getVNDateStr();
+      const map = {};
       for (let oid in ordersCache) {
         const o = ordersCache[oid];
         if (!o || !o.shipperPhone) continue;
         const sp = normalizeShipperPhone(o.shipperPhone);
-        if (o.status === 'Tài xế đang đến quán' || o.status === 'Đang giao hàng') {
-          busyMap[sp] = `#HC-${oid.substring(oid.length - 5).toUpperCase()}`;
+        if (!map[sp]) {
+          map[sp] = { busyOrderCode: null, todayOrders: 0, codFoodHeld: 0, qrShipOwed: 0, unsettledCount: 0 };
         }
-        if (o.createdAt && new Date(o.createdAt).toISOString().split('T')[0] === todayStr && (o.status === 'Đã hoàn tất' || o.status === 'Đang giao hàng')) {
-          todayCountMap[sp] = (todayCountMap[sp] || 0) + 1;
+        if (o.status === 'Tài xế đang đến quán' || o.status === 'Đang giao hàng') {
+          map[sp].busyOrderCode = `${getOrderSeqBadgeText(oid)} (#HC-${oid.substring(oid.length - 5).toUpperCase()})`;
+        }
+        if (o.createdAt && getVNDateStr(o.createdAt) === todayStr && (o.status === 'Đã hoàn tất' || o.status === 'Đang giao hàng')) {
+          map[sp].todayOrders++;
+        }
+        // Tính công nợ các đơn chưa tất toán (đã lấy hàng hoặc đã hoàn tất)
+        if (!o.shipperSettled && (o.status === 'Đã hoàn tất' || o.status === 'Đang giao hàng')) {
+          map[sp].unsettledCount++;
+          if (o.paymentMethod === 'VIETQR') {
+            // Đơn khách chuyển khoản cho quán -> Quán giữ hộ tiền ship của tài xế
+            map[sp].qrShipOwed += (o.shippingFee || 0);
+          } else {
+            // Đơn COD khách trả tiền mặt -> Tài xế tự lấy tiền ship, còn cầm của quán tiền món (subtotal)
+            map[sp].codFoodHeld += (o.subtotal || 0);
+          }
         }
       }
+      return map;
+    }
 
+    window.renderShippersTable = function() {
+      const tbody = document.getElementById('shippersTableBody');
+      if (!tbody) return;
+
+      const accMap = computeShipperAccountingMap();
       let html = '';
       let onlineReadyCount = 0;
       const phones = Object.keys(shippersCache);
@@ -2553,31 +2698,59 @@ if (it.cat === 'douong' || (dishBase && dishBase.cat === 'douong')) {
         const isOnline = isActive && (shp.isOnline === true);
         if (isOnline) onlineReadyCount++;
 
-        const busyOrderCode = busyMap[phone];
-        const todayOrders = todayCountMap[phone] || 0;
+        const st = accMap[phone] || { busyOrderCode: null, todayOrders: 0, codFoodHeld: 0, qrShipOwed: 0, unsettledCount: 0 };
+        const netPayToStore = st.codFoodHeld - st.qrShipOwed;
+        const isOverLimit = netPayToStore >= SHIPPER_CASH_LIMIT;
         const lastSeenStr = shp.lastSeen ? new Date(shp.lastSeen).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '--:--';
 
         const onlineBadge = isOnline
-          ? `<span style="background:#dcfce7; color:#166534; padding:3px 8px; border-radius:12px; font-weight:800; font-size:0.76rem;">🟢 ONLINE (Cập nhật: ${lastSeenStr})</span>`
+          ? `<span style="background:#dcfce7; color:#166534; padding:3px 8px; border-radius:12px; font-weight:800; font-size:0.76rem;">🟢 ONLINE (${lastSeenStr})</span>`
           : `<span style="background:#f1f5f9; color:#64748b; padding:3px 8px; border-radius:12px; font-weight:700; font-size:0.76rem;">🔴 OFFLINE</span>`;
 
         const busyBadge = !isActive
           ? `<span style="color:#94a3b8;">--</span>`
-          : (busyOrderCode
-              ? `<span style="background:#fef3c7; color:#b45309; padding:3px 8px; border-radius:8px; font-weight:800; font-size:0.76rem;">🛵 Đang giao ${busyOrderCode}</span>`
-              : (isOnline ? `<span style="color:#16a34a; font-weight:800;">⚡ Đang rảnh (Sẵn sàng)</span>` : `<span style="color:#64748b;">Đang tạm nghỉ</span>`));
+          : (st.busyOrderCode
+              ? `<span style="background:#fef3c7; color:#b45309; padding:3px 8px; border-radius:8px; font-weight:800; font-size:0.76rem;">🛵 Đang giao ${st.busyOrderCode}</span>`
+              : (isOnline ? `<span style="color:#16a34a; font-weight:800;">⚡ Đang rảnh</span>` : `<span style="color:#64748b;">Tạm nghỉ</span>`));
+
+        // Cột Đối soát Bù trừ Tiền mặt COD & Tiền Ship VietQR
+        let accountingCellHtml = '';
+        if (st.unsettledCount === 0) {
+          accountingCellHtml = `<span style="color:#16a34a; font-weight:800; font-size:0.8rem;">✅ Đã tất toán (0đ)</span>`;
+        } else {
+          const detailLine = `<div style="font-size:0.72rem; color:#475569; margin-bottom:4px;">• Cầm tiền món COD: <b>${st.codFoodHeld.toLocaleString()}đ</b><br>• Quán giữ Ship CK: <b>-${st.qrShipOwed.toLocaleString()}đ</b></div>`;
+          const netLine = netPayToStore > 0
+            ? `<div style="color:#dc2626; font-weight:900; font-size:0.84rem;">👉 Phải nộp về Quán: ${netPayToStore.toLocaleString()}đ</div>`
+            : (netPayToStore < 0
+                ? `<div style="color:#0284c7; font-weight:900; font-size:0.84rem;">👉 Quán trả thêm Shipper: ${Math.abs(netPayToStore).toLocaleString()}đ</div>`
+                : `<div style="color:#16a34a; font-weight:900; font-size:0.84rem;">👉 Cân bằng: 0đ</div>`);
+          const limitAlert = isOverLimit
+            ? `<div style="background:#fee2e2; color:#b91c1c; padding:2px 6px; border-radius:4px; font-size:0.7rem; font-weight:800; margin-top:3px;">⚠️ Vượt hạn mức 500k! Yêu cầu về nộp tiền</div>`
+            : '';
+          const safeName = (shp.name || 'Tài xế').replace(/'/g, "\\'");
+          accountingCellHtml = `
+            <div style="background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:6px 8px;">
+              ${detailLine}
+              ${netLine}
+              ${limitAlert}
+              <button type="button" onclick="settleAllOrdersForShipper('${phone}', ${netPayToStore}, '${safeName}')" style="margin-top:5px; width:100%; background:#16a34a; color:#fff; border:none; padding:5px 8px; border-radius:6px; font-weight:800; font-size:0.74rem; cursor:pointer;">
+                💰 Chốt & Tất Toán (${st.unsettledCount} đơn)
+              </button>
+            </div>`;
+        }
 
         const activeBadge = isActive
           ? `<span style="color:#0284c7; font-weight:800;">Đang chạy</span>`
           : `<span style="color:#dc2626; font-weight:800; text-decoration:line-through;">Đã nghỉ</span>`;
 
         html += `
-          <tr style="${!isActive ? 'opacity:0.6; background:#f8fafc;' : ''}">
+          <tr style="${!isActive ? 'opacity:0.6; background:#f8fafc;' : (isOverLimit ? 'background:#fff1f2;' : '')}">
             <td><b>${shp.name || 'Tài xế'}</b>${shp.vehicle ? `<br><small style="color:#64748b;">${shp.vehicle}</small>` : ''}</td>
             <td><a href="tel:${phone}" style="color:var(--primary); font-weight:700; text-decoration:underline;">📞 ${phone}</a></td>
             <td>${onlineBadge}</td>
             <td>${busyBadge}</td>
-            <td style="text-align:center; font-weight:800; color:var(--primary);">${todayOrders} đơn</td>
+            <td style="text-align:center; font-weight:800; color:var(--primary);">${st.todayOrders} đơn</td>
+            <td>${accountingCellHtml}</td>
             <td>${activeBadge}</td>
             <td>
               <div style="display:flex; gap:5px; flex-wrap:wrap;">
@@ -2595,7 +2768,7 @@ if (it.cat === 'douong' || (dishBase && dishBase.cat === 'douong')) {
           </tr>`;
       });
 
-      tbody.innerHTML = html || '<tr><td colspan="7" style="text-align:center; padding:20px; color:#64748b;">Chưa có tài xế nào trong danh sách. Hãy thêm tài xế ở khung phía trên!</td></tr>';
+      tbody.innerHTML = html || '<tr><td colspan="8" style="text-align:center; padding:20px; color:#64748b;">Chưa có tài xế nào trong danh sách. Hãy thêm tài xế ở khung phía trên!</td></tr>';
       if (document.getElementById('onlineShipperCount')) {
         document.getElementById('onlineShipperCount').innerText = `🟢 Đang Online: ${onlineReadyCount} bác tài`;
       }
@@ -2603,7 +2776,7 @@ if (it.cat === 'douong' || (dishBase && dishBase.cat === 'douong')) {
 
     window.openDispatchModal = function(id) {
       currentDispatchOrderId = id;
-      document.getElementById('dispatchOrderIdText').innerText = `#HC-${id.substring(id.length - 5).toUpperCase()}`;
+      document.getElementById('dispatchOrderIdText').innerText = `${getOrderSeqBadgeText(id)} (#HC-${id.substring(id.length - 5).toUpperCase()})`;
       document.getElementById('dispatchModal').classList.add('active');
     };
 
@@ -2615,62 +2788,54 @@ if (it.cat === 'douong' || (dishBase && dishBase.cat === 'douong')) {
     window.copyZaloDispatch = function() {
       if (!currentDispatchOrderId) return;
       const o = ordersCache[currentDispatchOrderId];
-      const shortId = `HC-${currentDispatchOrderId.substring(currentDispatchOrderId.length - 5).toUpperCase()}`;
-      const todayStr = new Date().toISOString().split('T')[0];
+      const seqBadge = getOrderSeqBadgeText(currentDispatchOrderId);
+      const shortId = `${seqBadge} - #HC-${currentDispatchOrderId.substring(currentDispatchOrderId.length - 5).toUpperCase()}`;
+      const accMap = computeShipperAccountingMap();
 
-      // 1. Kiểm tra ai đang kẹt giao đơn khác và số đơn đã chạy hôm nay để xếp hàng đợi công bằng
-      const busyMap = {};
-      const todayCountMap = {};
-      for (let oid in ordersCache) {
-        const ord = ordersCache[oid];
-        if (!ord || !ord.shipperPhone) continue;
-        const sp = normalizeShipperPhone(ord.shipperPhone);
-        if (ord.status === 'Tài xế đang đến quán' || ord.status === 'Đang giao hàng') busyMap[sp] = true;
-        if (ord.createdAt && new Date(ord.createdAt).toISOString().split('T')[0] === todayStr && (ord.status === 'Đã hoàn tất' || ord.status === 'Đang giao hàng')) {
-          todayCountMap[sp] = (todayCountMap[sp] || 0) + 1;
-        }
-      }
-
-      // 2. Chỉ lọc các bác tài Đang Chạy (isActive !== false) VÀ Đang Online (isOnline === true)
       let candidates = Object.keys(shippersCache).filter(phone => {
         const s = shippersCache[phone];
         return s && s.isActive !== false && s.isOnline === true;
       });
 
-      // Ưu tiên 1: Tài xế đang rảnh (không vướng đơn đang giao) đứng trước
-      // Ưu tiên 2: Tài xế chạy ít đơn hơn trong ngày đứng trước (chia đều thu nhập)
-      // Ưu tiên 3: Ngẫu nhiên nếu bằng nhau
+      // Ưu tiên 1: Tài xế không bị vượt hạn mức giữ tiền mặt 500k đứng trước
+      // Ưu tiên 2: Tài xế đang rảnh đứng trước
+      // Ưu tiên 3: Tài xế ít đơn hơn trong ngày đứng trước
       candidates.sort((a, b) => {
-        const busyA = busyMap[a] ? 1 : 0;
-        const busyB = busyMap[b] ? 1 : 0;
+        const stA = accMap[a] || { codFoodHeld: 0, qrShipOwed: 0, busyOrderCode: null, todayOrders: 0 };
+        const stB = accMap[b] || { codFoodHeld: 0, qrShipOwed: 0, busyOrderCode: null, todayOrders: 0 };
+        const overA = (stA.codFoodHeld - stA.qrShipOwed) >= SHIPPER_CASH_LIMIT ? 1 : 0;
+        const overB = (stB.codFoodHeld - stB.qrShipOwed) >= SHIPPER_CASH_LIMIT ? 1 : 0;
+        if (overA !== overB) return overA - overB;
+
+        const busyA = stA.busyOrderCode ? 1 : 0;
+        const busyB = stB.busyOrderCode ? 1 : 0;
         if (busyA !== busyB) return busyA - busyB;
-        const cntA = todayCountMap[a] || 0;
-        const cntB = todayCountMap[b] || 0;
-        if (cntA !== cntB) return cntA - cntB;
+
+        if (stA.todayOrders !== stB.todayOrders) return stA.todayOrders - stB.todayOrders;
         return Math.random() - 0.5;
       });
 
       const queueNames = candidates.map((p, idx) => `${idx + 1}. ${shippersCache[p]?.name || p} (${idx * 20}s-${(idx + 1) * 20}s)`).join(' -> ');
 
-      // Ghi hàng đợi ưu tiên lên Firebase của đơn hàng
       update(ref(db, `orders/${currentDispatchOrderId}`), {
+        dailySeq: parseInt(seqBadge.replace('#', '')) || 1,
         dispatchQueue: candidates,
         dispatchResetAt: new Date().toISOString()
       });
 
       const isPaid = (o.paymentMethod === 'VIETQR' && o.paymentVerified) || o.paymentStatus === 'Đã nhận CK';
       const payStr = isPaid 
-        ? "✅ KHÁCH ĐÃ CHUYỂN KHOẢN - CHỈ GIAO ĐỒ (KHÔNG THU TIỀN)" 
-        : `💰 THU TIỀN MẶT KHÁCH (COD): ${(o.grandTotal || 0).toLocaleString()}đ`;
+        ? `✅ KHÁCH ĐÃ CHUYỂN KHOẢN - KHÔNG THU TIỀN KHÁCH (Quán cộng ${(o.shippingFee || 0).toLocaleString()}đ ship vào sổ cuối ca cho bác tài)` 
+        : `💰 THU TIỀN MẶT KHÁCH (COD): ${(o.grandTotal || 0).toLocaleString()}đ (Bác tài giữ luôn ${(o.shippingFee || 0).toLocaleString()}đ ship, nộp về quán ${(o.subtotal || 0).toLocaleString()}đ tiền món)`;
       
       const domain = window.location.host;
       const protocol = window.location.protocol;
       const queueText = candidates.length > 0 ? `\n⏱️ Thứ tự ưu tiên (20s/người): ${queueNames}` : `\n⏱️ Chế độ mở tự do (Ai bấm trước nhận trước)`;
       
-      const text = `📦 ĐƠN MỚI - HY CHAY (${shortId})\n📍 Giao đến: ${o.address}\n📞 SĐT: ${o.phone}\n${payStr}${queueText}\n\n👉 BẤM VÀO LINK ĐỂ NHẬN ĐƠN NÀY:\n${protocol}//${domain}/index.html?shipper=${currentDispatchOrderId}`;
+      const text = `📦 ĐƠN MỚI ${shortId}\n📍 Giao đến: ${o.address}\n📞 SĐT: ${o.phone}\n${payStr}${queueText}\n\n👉 BẤM VÀO LINK ĐỂ NHẬN ĐƠN NÀY:\n${protocol}//${domain}/index.html?shipper=${currentDispatchOrderId}`;
       
       navigator.clipboard.writeText(text).then(() => {
-        alert(`✅ Đã copy Mẫu Bắn Đơn Zalo!\nHệ thống đã xếp lượt ưu tiên 20s/người cho ${candidates.length} bác tài đang ONLINE.\nHãy mở Zalo và dán vào nhóm Đội Ship Hy Chay.`);
+        alert(`✅ Đã bắn tín hiệu chuông cho ${candidates.length} bác tài đang ONLINE và copy mẫu tin nhắn Zalo (${shortId})!`);
         window.closeDispatchModal();
       }).catch(() => {
         prompt("Copy đoạn tin nhắn này:", text);
