@@ -291,10 +291,6 @@
       </div>
     </div>
 
-        <button type="button" onclick="closeInstallGuideModal()" style="width:100%; padding:12px; background:#ef4444; color:#fff; border:none; border-radius:10px; font-weight:800; cursor:pointer;">✖ ĐÓNG CỬA SỐ NÀY</button>
-      </div>
-    </div>
-
     <header class="topbar no-print">
       <div class="brand-group">
         <img src="Logo nho.png" class="brand-logo" onerror="this.src='https://hychayfood.vercel.app/Logo%20nho.png'">
@@ -1104,12 +1100,12 @@ const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platfor
    if (isIOS) {
      if (manifestLink) manifestLink.remove(); // Giúp iOS kích hoạt 100% chế độ Fullscreen của apple-mobile-web-app-capable
    } else if (manifestLink) {
-     const dynamicManifest = {
-       id: window.location.origin + "/admin.html",
+const dynamicManifest = {
+       id: "/hychay-pos-admin-v3",
        name: "Hy Chay POS - Trung Tâm Điều Hành",
        short_name: "POS Hy Chay",
        start_url: window.location.origin + "/admin.html",
-       scope: window.location.origin + "/",
+       scope: window.location.origin + "/admin.html",
        display: "standalone",
        background_color: "#ffd800",
        theme_color: "#ffd800",
@@ -3949,24 +3945,19 @@ window.setEditModalCategory = function(cat, btn) {
     }
 
     // Hàm xuất file .mobileconfig kích hoạt trực tiếp trình cài đặt gốc của iOS (Full màn hình + Có sẵn Logo)
-    window.downloadIOSProfile = async function(mode = 'admin') {
+window.downloadIOSProfile = function(mode = 'admin') {
       const originUrl = window.location.origin;
-      let appUrl = originUrl + '/index.html';
-      let appTitle = 'Hy Chay';
-
-      if (mode === 'admin') {
-        appUrl = originUrl + '/admin.html';
-        appTitle = 'POS Hy Chay';
-      } else if (mode === 'shipper') {
-        appUrl = originUrl + '/index.html?shipper=hub';
-        appTitle = 'Ship Hy Chay';
-      }
-
-      const iconBase64 = await getLogoBase64ForIOS();
-      const iconXmlTag = iconBase64 ? `<key>Icon</key><data>${iconBase64}</data>` : '';
-
-      const uuid1 = '11111111-2222-3333-4444-' + Date.now().toString().slice(-12);
-      const uuid2 = '99999999-8888-7777-6666-' + Date.now().toString().slice(-12);
+      const cv = document.createElement('canvas');
+      cv.width = 192; cv.height = 192;
+      const ctx = cv.getContext('2d');
+      ctx.fillStyle = '#ffd800'; ctx.fillRect(0, 0, 192, 192);
+      ctx.strokeStyle = '#1e5e3a'; ctx.lineWidth = 10; ctx.strokeRect(5, 5, 182, 182);
+      ctx.fillStyle = '#dc2626'; ctx.fillRect(16, 20, 160, 52);
+      ctx.fillStyle = '#ffffff'; ctx.font = '900 34px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('POS', 96, 48);
+      ctx.fillStyle = '#1e5e3a'; ctx.font = '900 26px Arial'; ctx.fillText('HY CHAY', 96, 115);
+      ctx.fillStyle = '#0f172a'; ctx.font = '800 18px Arial'; ctx.fillText('QUẢN LÝ', 96, 152);
+      const iconBase64 = cv.toDataURL('image/png').split(',')[1] || '';
 
       const mobileConfigXml = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -3977,26 +3968,35 @@ window.setEditModalCategory = function(cat, btn) {
     <dict>
       <key>FullScreen</key><true/>
       <key>IsRemovable</key><true/>
-      ${iconXmlTag}
-      <key>Label</key><string>${appTitle}</string>
-      <key>PayloadDescription</key><string>Cài đặt biểu tượng ${appTitle} Full Màn Hình</string>
-      <key>PayloadDisplayName</key><string>${appTitle}</string>
-      <key>PayloadIdentifier</key><string>com.baoanhlam.webclip.${mode}</string>
+      <key>Icon</key><data>${iconBase64}</data>
+      <key>Label</key><string>POS Hy Chay</string>
+      <key>PayloadDescription</key><string>Trung Tâm Điều Hành POS Hy Chay</string>
+      <key>PayloadDisplayName</key><string>POS Hy Chay</string>
+      <key>PayloadIdentifier</key><string>vn.baoanhlam.hychay.webclip.admin</string>
       <key>PayloadType</key><string>com.apple.webClip.managed</string>
-      <key>PayloadUUID</key><string>${uuid1}</string>
+      <key>PayloadUUID</key><string>33333333-AAAA-4333-8333-333333333301</string>
       <key>PayloadVersion</key><integer>1</integer>
       <key>Precomposed</key><true/>
-      <key>URL</key><string>${appUrl}</string>
+      <key>URL</key><string>${originUrl}/admin.html</string>
     </dict>
   </array>
-  <key>PayloadDisplayName</key><string>Bộ Cài Đặt ${appTitle} (Bảo Anh Lâm)</string>
-  <key>PayloadIdentifier</key><string>com.baoanhlam.profile.${mode}</string>
+  <key>PayloadDisplayName</key><string>Bộ Cài Đặt POS Hy Chay (Độc Lập)</string>
+  <key>PayloadIdentifier</key><string>vn.baoanhlam.hychay.profile.admin</string>
   <key>PayloadRemovalDisallowed</key><false/>
   <key>PayloadType</key><string>Configuration</string>
-  <key>PayloadUUID</key><string>${uuid2}</string>
+  <key>PayloadUUID</key><string>33333333-BBBB-4333-8333-333333333302</string>
   <key>PayloadVersion</key><integer>1</integer>
 </dict>
 </plist>`;
+
+      const blob = new Blob([mobileConfigXml], { type: 'application/x-apple-aspen-config' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = '3_App_POS_QuanLy_HyChay.mobileconfig';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    };
 
       // Chuyển sang Data URI chuẩn của Apple để Safari bật thẳng hộp thoại "Cho phép tải hồ sơ cấu hình"
       const base64Config = btoa(unescape(encodeURIComponent(mobileConfigXml)));
