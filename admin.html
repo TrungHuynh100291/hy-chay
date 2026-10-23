@@ -251,51 +251,49 @@
     <!-- KHUNG HIỆN THÔNG BÁO DỊCH VỤ DINE-IN -->
     <div id="serviceAlerts" class="service-alert-container no-print"></div>
 
-<!-- MODAL 3 MÃ QR QUÉT CÀI ĐẶT 1-CHẠM CHO KHÁCH HÀNG, BÁC TÀI SHIPPER & QUẢN LÝ -->
-    <div id="installGuideModal" class="install-modal-overlay">
-      <div class="install-modal-box" style="max-width: 680px;">
-        <span style="position:absolute; top:14px; right:16px; font-size:1.4rem; cursor:pointer;" onclick="closeInstallGuideModal()">&times;</span>
-        <h3 style="color:var(--primary); font-size:1.2rem; margin-bottom:6px;">📲 Bộ 3 Mã QR Cài Đặt App 1-Chạm (Ẩn Đường Link Web)</h3>
-        <p style="font-size:0.82rem; color:#64748b; margin-bottom:12px;">Đưa mã QR tương ứng cho Khách hàng, Bác tài hoặc Quản lý quét bằng Camera / Zalo — Điện thoại sẽ tự động bật hộp thoại hỏi cài App ra màn hình chính:</p>
-        
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-bottom:14px; text-align:center;">
-          <!-- QR 1: KHÁCH HÀNG -->
-          <div style="background:#f0fdf4; border:2px solid #16a34a; border-radius:12px; padding:12px;">
-            <b style="color:#166534; font-size:0.82rem; display:block; margin-bottom:6px;">🥗 1. APP KHÁCH ĐẶT MÓN</b>
-            <img id="qrInstallCustomerImg" src="" alt="QR Khách" style="width:140px; height:140px; margin:0 auto 6px; border-radius:8px; background:#fff; padding:4px; border:1px solid #bbf7d0;">
-            <small style="color:#15803d; font-weight:700; display:block; margin-bottom:6px;">Quét là hỏi cài App Hy Chay</small>
-            <button type="button" onclick="window.open(document.getElementById('qrInstallCustomerImg').src, '_blank')" style="background:#16a34a; color:#fff; border:none; padding:5px 10px; border-radius:6px; font-size:0.74rem; font-weight:800; cursor:pointer; width:100%;">📥 Tải Ảnh QR Khách</button>
-          </div>
-
-          <!-- QR 2: BÁC TÀI SHIPPER -->
-          <div style="background:#eff6ff; border:2px solid #0284c7; border-radius:12px; padding:12px;">
-            <b style="color:#0369a1; font-size:0.82rem; display:block; margin-bottom:6px;">🛵 2. APP BÁC TÀI SHIP</b>
-            <img id="qrInstallShipperImg" src="" alt="QR Shipper" style="width:140px; height:140px; margin:0 auto 6px; border-radius:8px; background:#fff; padding:4px; border:1px solid #bae6fd;">
-            <small style="color:#0369a1; font-weight:700; display:block; margin-bottom:6px;">Quét là cài Trạm Nhận Đơn</small>
-            <button type="button" onclick="window.open(document.getElementById('qrInstallShipperImg').src, '_blank')" style="background:#0284c7; color:#fff; border:none; padding:5px 10px; border-radius:6px; font-size:0.74rem; font-weight:800; cursor:pointer; width:100%;">📥 Tải Ảnh QR Bác Tài</button>
-          </div>
-
-          <!-- QR 3: QUẢN LÝ / THU NGÂN POS -->
-          <div style="background:#fefce8; border:2px solid #d97706; border-radius:12px; padding:12px;">
-            <b style="color:#b45309; font-size:0.82rem; display:block; margin-bottom:6px;">🛡️ 3. APP QUẢN LÝ POS</b>
-            <img id="qrInstallAdminImg" src="" alt="QR Admin POS" style="width:140px; height:140px; margin:0 auto 6px; border-radius:8px; background:#fff; padding:4px; border:1px solid #fde68a;">
-            <small style="color:#b45309; font-weight:700; display:block; margin-bottom:6px;">Quét là cài Trung Tâm POS</small>
-            <button type="button" onclick="window.open(document.getElementById('qrInstallAdminImg').src, '_blank')" style="background:#d97706; color:#fff; border:none; padding:5px 10px; border-radius:6px; font-size:0.74rem; font-weight:800; cursor:pointer; width:100%;">📥 Tải Ảnh QR Quản Lý</button>
-          </div>
+<!-- MODAL 3 MÃ QR QUÉT CÀI ĐẶT (ĐÃ TỐI ƯU CUỘN MƯỢT & ĐÓNG 1-CHẠM TRÊN ĐIỆN THOẠI) -->
+    <div id="installGuideModal" class="install-modal-overlay" onclick="if(event.target===this) closeInstallGuideModal()">
+      <div class="install-modal-box" style="max-width: 680px; max-height: 88vh; overflow-y: auto; padding: 18px;">
+        <div style="position:sticky; top:-18px; background:#fff; padding:10px 0; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; z-index:10; margin-bottom:12px;">
+          <h3 style="color:var(--primary); font-size:1.05rem; margin:0;">📲 Bộ 3 Mã QR & Cài App Full Màn Hình</h3>
+          <button type="button" onclick="closeInstallGuideModal()" style="background:#ef4444; color:#fff; border:none; padding:6px 12px; border-radius:8px; font-weight:800; font-size:0.82rem; cursor:pointer;">✖ ĐÓNG</button>
         </div>
 
-        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">
-          <button type="button" onclick="triggerAndroidInstall('admin')" style="width:100%; padding:11px 14px; background:#16a34a; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:0.88rem; cursor:pointer; text-align:left; display:flex; justify-content:space-between; align-items:center;">
-            <span>📱 Đưa App Quản Trị POS Này Ra Màn Hình Điện Thoại</span>
-            <span style="background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:6px; font-size:0.75rem;">1-Chạm</span>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:14px;">
+          <button type="button" onclick="triggerAndroidInstall('admin')" style="width:100%; padding:12px; background:#16a34a; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:0.86rem; cursor:pointer; text-align:left; display:flex; justify-content:space-between; align-items:center;">
+            <span>🤖 1. Cài App POS Ra Màn Hình Android (1-Chạm)</span>
+            <span style="background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:6px; font-size:0.75rem;">Android</span>
           </button>
-          <button type="button" onclick="downloadWindowsInstaller('admin')" style="width:100%; padding:11px 14px; background:#0284c7; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:0.88rem; cursor:pointer; text-align:left; display:flex; justify-content:space-between; align-items:center;">
-            <span>💻 Tạo Icon App POS Ngoài Màn Hình Desktop Windows (.BAT)</span>
-            <span style="background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:6px; font-size:0.75rem;">Tải về PC</span>
+          <button type="button" onclick="downloadIOSProfile('admin')" style="width:100%; padding:12px; background:#0f172a; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:0.86rem; cursor:pointer; text-align:left; display:flex; justify-content:space-between; align-items:center;">
+            <span>🍎 2. Tải App POS Full Màn Hình Cho iPhone (.mobileconfig)</span>
+            <span style="background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:6px; font-size:0.75rem;">iOS Full</span>
+          </button>
+          <button type="button" onclick="downloadWindowsInstaller('admin')" style="width:100%; padding:12px; background:#0284c7; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:0.86rem; cursor:pointer; text-align:left; display:flex; justify-content:space-between; align-items:center;">
+            <span>💻 3. Tải Icon POS Cho Máy Tính Windows (.BAT)</span>
+            <span style="background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:6px; font-size:0.75rem;">PC</span>
           </button>
         </div>
 
-        <button onclick="closeInstallGuideModal()" style="width:100%; padding:10px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-weight:700; cursor:pointer;">Đóng Cửa Sổ</button>
+        <p style="font-size:0.8rem; color:#64748b; margin-bottom:10px;">Hoặc đưa 3 Mã QR dưới đây cho Khách hàng / Bác tài / Quản lý quét:</p>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; margin-bottom:14px; text-align:center;">
+          <div style="background:#f0fdf4; border:2px solid #16a34a; border-radius:12px; padding:10px;">
+            <b style="color:#166534; font-size:0.78rem; display:block; margin-bottom:4px;">🥗 1. QR KHÁCH ĐẶT MÓN</b>
+            <img id="qrInstallCustomerImg" src="" alt="QR Khách" style="width:120px; height:120px; margin:0 auto 6px; border-radius:8px; background:#fff; padding:4px;">
+            <button type="button" onclick="window.open(document.getElementById('qrInstallCustomerImg').src, '_blank')" style="background:#16a34a; color:#fff; border:none; padding:5px 8px; border-radius:6px; font-size:0.72rem; font-weight:800; cursor:pointer; width:100%;">📥 Tải QR Khách</button>
+          </div>
+          <div style="background:#eff6ff; border:2px solid #0284c7; border-radius:12px; padding:10px;">
+            <b style="color:#0369a1; font-size:0.78rem; display:block; margin-bottom:4px;">🛵 2. QR BÁC TÀI SHIP</b>
+            <img id="qrInstallShipperImg" src="" alt="QR Shipper" style="width:120px; height:120px; margin:0 auto 6px; border-radius:8px; background:#fff; padding:4px;">
+            <button type="button" onclick="window.open(document.getElementById('qrInstallShipperImg').src, '_blank')" style="background:#0284c7; color:#fff; border:none; padding:5px 8px; border-radius:6px; font-size:0.72rem; font-weight:800; cursor:pointer; width:100%;">📥 Tải QR Bác Tài</button>
+          </div>
+          <div style="background:#fefce8; border:2px solid #d97706; border-radius:12px; padding:10px;">
+            <b style="color:#b45309; font-size:0.78rem; display:block; margin-bottom:4px;">🛡️ 3. QR QUẢN LÝ POS</b>
+            <img id="qrInstallAdminImg" src="" alt="QR Admin POS" style="width:120px; height:120px; margin:0 auto 6px; border-radius:8px; background:#fff; padding:4px;">
+            <button type="button" onclick="window.open(document.getElementById('qrInstallAdminImg').src, '_blank')" style="background:#d97706; color:#fff; border:none; padding:5px 8px; border-radius:6px; font-size:0.72rem; font-weight:800; cursor:pointer; width:100%;">📥 Tải QR Quản Lý</button>
+          </div>
+        </div>
+
+        <button type="button" onclick="closeInstallGuideModal()" style="width:100%; padding:12px; background:#ef4444; color:#fff; border:none; border-radius:10px; font-weight:800; cursor:pointer;">✖ ĐÓNG CỬA SỐ NÀY</button>
       </div>
     </div>
 
@@ -1088,21 +1086,25 @@
       if (fav) fav.href = iconDataUrl;
       if (touch) touch.href = iconDataUrl;
 
-      const dynamicManifest = {
-        id: "/hychay-pos-admin-standalone",
-        name: "Hy Chay POS - Trung Tâm Điều Hành",
-        short_name: "POS Hy Chay",
-        start_url: window.location.pathname || "/admin.html",
-        scope: window.location.pathname || "/admin.html",
-        display: "standalone",
-        background_color: "#ffd800",
-        theme_color: "#ffd800",
-        icons: [{ src: iconDataUrl, sizes: "192x192", type: "image/png", purpose: "any maskable" }]
-      };
-      const manifestBlob = new Blob([JSON.stringify(dynamicManifest)], { type: 'application/json' });
-      const manifestLink = document.getElementById('adminManifestLink');
-      if (manifestLink) manifestLink.href = URL.createObjectURL(manifestBlob);
-    }
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+   const manifestLink = document.getElementById('adminManifestLink');
+   if (isIOS) {
+     if (manifestLink) manifestLink.remove(); // Giúp iOS kích hoạt 100% chế độ Fullscreen của apple-mobile-web-app-capable
+   } else if (manifestLink) {
+     const dynamicManifest = {
+       id: window.location.origin + "/admin.html",
+       name: "Hy Chay POS - Trung Tâm Điều Hành",
+       short_name: "POS Hy Chay",
+       start_url: window.location.origin + "/admin.html",
+       scope: window.location.origin + "/",
+       display: "standalone",
+       background_color: "#ffd800",
+       theme_color: "#ffd800",
+       icons: [{ src: iconDataUrl, sizes: "192x192", type: "image/png", purpose: "any maskable" }]
+     };
+     const manifestBlob = new Blob([JSON.stringify(dynamicManifest)], { type: 'application/json' });
+     manifestLink.href = URL.createObjectURL(manifestBlob);
+   }
     setupDistinctAdminAppIdentity();
 
     // ==========================================
@@ -3956,7 +3958,7 @@ window.setEditModalCategory = function(cat, btn) {
     // =========================================================
     // Tự động tạo ảnh QR cài App khi mở Modal Cài Icon
 const origOpenInstallGuideV13 = window.openInstallGuideModal;
- window.openInstallGuideModal = function() {
+window.openInstallGuideModal = function() {
    const baseUrl = window.location.origin;
    const cusUrl = `${baseUrl}/index.html?install=1`;
    const shpUrl = `${baseUrl}/index.html?shipper=hub&install=1`;
@@ -3967,7 +3969,23 @@ const origOpenInstallGuideV13 = window.openInstallGuideModal;
    if (qrCus) qrCus.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(cusUrl)}`;
    if (qrShp) qrShp.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(shpUrl)}`;
    if (qrAdm) qrAdm.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(admUrl)}`;
-   origOpenInstallGuideV13();
+   const modal = document.getElementById('installGuideModal');
+   if (modal) {
+     modal.classList.add('active');
+     modal.style.display = 'flex';
+   }
+ };
+
+ window.closeInstallGuideModal = function() {
+   const modal = document.getElementById('installGuideModal');
+   if (modal) {
+     modal.classList.remove('active');
+     modal.style.display = 'none';
+   }
+   // Xóa ngay ?install=1 khỏi thanh địa chỉ để khi F5 hoặc đăng nhập không bao giờ tự bật lại nữa
+   if (window.location.search.includes('install=1')) {
+     window.history.replaceState({}, document.title, window.location.pathname);
+   }
  };
 
  // Tự động bật bảng hỏi cài đặt khi Quản lý quét mã QR ?install=1
