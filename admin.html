@@ -325,6 +325,7 @@
           <button class="kds-filter-btn active" onclick="setOrderStatusFilter('active_only', this)">🔥 Cần Xử Lý Tại Quán (<span id="cntActiveOnly">0</span>)</button>
           <button class="kds-filter-btn" onclick="setOrderStatusFilter('Chờ xác nhận', this)">🔴 Chờ Nhận (<span id="cntFilterPending">0</span>)</button>
           <button class="kds-filter-btn" onclick="setOrderStatusFilter('Đang chế biến', this)">🟠 Bếp Đang Làm (<span id="cntFilterCooking">0</span>)</button>
+          <button class="kds-filter-btn" onclick="setOrderStatusFilter('scheduled_only', this)" style="border-color:#7c3aed; color:#6d28d9; background:#f5f3ff;">⏰ Đơn Hẹn Giờ (<span id="cntFilterScheduled">0</span>)</button>
           <button class="kds-filter-btn" onclick="setOrderStatusFilter('shipper_delivering', this)" style="border-color:#0284c7; color:#0369a1; background:#f0f9ff;">🛵 Shipper Đang Giao (<span id="cntFilterDelivering">0</span>)</button>
           <button class="kds-filter-btn" onclick="setOrderStatusFilter('done_cancel', this)">✅ Đã Xong / Hủy (<span id="cntFilterDone">0</span>)</button>
           <button class="kds-filter-btn" onclick="setOrderStatusFilter('all', this)">📋 Tất Cả</button>
@@ -475,67 +476,36 @@
           <button onclick="saveBankConfig()" style="width:100%; padding:12px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-weight:700; cursor:pointer;">💾 LƯU & KÍCH HOẠT NGÂN HÀNG NÀY CHO VIETQR</button>
         </div>
       </div>
-      <!-- VIEW 5: BÁO CÁO THUẾ & KẾT CA (TÁCH BIỆT TUYỆT ĐỐI DOANH THU QUÁN & TIỀN SHIP SHIPPER) -->
+          
+      <!-- VIEW 5: BÁO CÁO THUẾ & TRẠM KẾT XUẤT XML CHUẨN TỔNG CỤC THUẾ (HỘ KINH DOANH & DOANH NGHIỆP) -->
       <div id="viewShiftReport" style="display: none;">
         <div class="report-card">
-          <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px; margin-bottom:16px;">
+          <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px 16px; margin-bottom:16px;">
             <h3 style="color:var(--primary); font-size:1.05rem;">CÔNG TY TNHH TMDV VÀ SẢN XUẤT BẢO ANH LÂM</h3>
-            <p style="font-size:0.85rem; color:#166534;">MST: <b>3401289271</b> | Đ/c: 280 Trần Hưng Đạo, P. Phan Thiết, T. Lâm Đồng<br><i>Báo cáo kế toán tách biệt 100% Doanh thu bán hàng chịu thuế (Mã ngành 5610, 5630) và Sổ thu hộ phí vận chuyển trả cho Shipper (Không tính vào doanh thu chịu thuế của công ty).</i></p>
-       <!-- MODULE MỞ RỘNG SAAS: XUẤT TỜ KHAI THUẾ HỘ KINH DOANH (01/CNKD) & TÍCH HỢP HÓA ĐƠN ĐIỆN TỬ MTT -->
-          <div style="margin-top:24px; padding-top:18px; border-top:2px dashed #cbd5e1;">
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
-              <div>
-                <h3 style="color:#0369a1; font-size:1.05rem;">🧾 CỔNG HÓA ĐƠN ĐIỆN TỬ KHỞI TẠO TỪ MÁY TÍNH TIỀN & TỜ KHAI THUẾ HỘ KINH DOANH</h3>
-                <p style="font-size:0.82rem; color:#64748b;">Tích hợp chuẩn API Nghị định 70/2025/NĐ-CP & Thông tư 40/2021/TT-BTC (Sẵn sàng đóng gói thương mại bán cho các Cửa hàng & Hộ kinh doanh).</p>
-              </div>
-              <button type="button" onclick="exportHouseholdTaxDeclarationCSV()" style="background:#7c3aed; color:#fff; border:none; padding:9px 16px; border-radius:8px; font-weight:800; cursor:pointer; font-size:0.85rem;">📥 Xuất Phụ Lục Thuế Hộ Kinh Doanh (01-2/BK-HĐKD)</button>
-            </div>
-            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px; background:#f8fafc; padding:14px; border-radius:10px; border:1px solid var(--border);">
-              <div>
-                <label style="font-size:0.78rem; font-weight:700;">Nhà Cung Cấp HĐĐT:</label>
-                <select id="cfgEinvoiceProvider" style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:6px; margin-top:4px; font-weight:700;">
-                  <option value="none">-- Chưa bật tự động phát hành --</option>
-                  <option value="viettel">Viettel SInvoice (Máy tính tiền)</option>
-                  <option value="misa">MISA meInvoice (Máy tính tiền)</option>
-                  <option value="vnpt">VNPT Invoice (Máy tính tiền)</option>
-                </select>
-              </div>
-              <div>
-                <label style="font-size:0.78rem; font-weight:700;">Mã Số Thuế Đơn Vị / HKD:</label>
-                <input type="text" id="cfgEinvoiceTaxCode" value="3401289271" style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:6px; margin-top:4px;">
-              </div>
-              <div>
-                <label style="font-size:0.78rem; font-weight:700;">Ký Hiệu Mẫu Hóa Đơn (MTT):</label>
-                <input type="text" id="cfgEinvoiceSeries" placeholder="VD: 1C26MHY" value="1C26MHY" style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:6px; margin-top:4px;">
-              </div>
-              <div>
-                <label style="font-size:0.78rem; font-weight:700;">API Token / Endpoint Kết Nối:</label>
-                <div style="display:flex; gap:6px; margin-top:4px;">
-                  <input type="password" id="cfgEinvoiceToken" placeholder="Nhập API Token..." style="flex:1; padding:7px; border:1px solid #cbd5e1; border-radius:6px;">
-                  <button type="button" onclick="saveEinvoiceConfig()" style="background:#0284c7; color:#fff; border:none; padding:7px 12px; border-radius:6px; font-weight:800; cursor:pointer;">Lưu</button>
-                </div>
-              </div>
-            </div>
-          </div>   
+            <p style="font-size:0.84rem; color:#166534;">MST: <b>3401289271</b> | Đ/c: 280 Trần Hưng Đạo, Phường Phan Thiết, Tỉnh Lâm Đồng<br><i>Hệ thống kế toán tách biệt tuyệt đối 100% Doanh thu bán hàng chịu thuế (Mã ngành 5610, 5630) và Sổ thu hộ phí vận chuyển trả cho Shipper (Không cộng tiền ship vào doanh thu chịu thuế).</i></p>
           </div>
 
+          <!-- BẢNG ĐIỀU KHIỂN TRA CỨU KỲ BÁO CÁO -->
           <div class="report-filter-bar">
-            <select id="filterMode" onchange="onFilterModeChange()" style="padding:8px; border-radius:6px; border:1px solid #cbd5e1;">
-              <option value="quarter">Theo Quý (Báo Cáo Thuế)</option><option value="month">Theo Tháng</option><option value="day" selected>Theo Ngày (Kết Ca)</option>
+            <select id="filterMode" onchange="onFilterModeChange()" style="padding:8px; border-radius:6px; border:1px solid #cbd5e1; font-weight:700;">
+              <option value="quarter">Theo Quý (Báo Cáo Thuế)</option>
+              <option value="month">Theo Tháng</option>
+              <option value="day" selected>Theo Ngày (Kết Ca)</option>
             </select>
             <div id="filterQuarterBox" style="display:none;">
-              <select id="filterQuarter" style="padding:8px; border-radius:6px;"><option value="1">Quý 1</option><option value="2">Quý 2</option><option value="3">Quý 3</option><option value="4" selected>Quý 4</option></select>
-              <select id="filterQuarterYear" style="padding:8px; border-radius:6px;"><option value="2026" selected>2026</option><option value="2025">2025</option></select>
+              <select id="filterQuarter" onchange="renderShiftReport()" style="padding:8px; border-radius:6px;"><option value="1">Quý 1</option><option value="2">Quý 2</option><option value="3">Quý 3</option><option value="4" selected>Quý 4</option></select>
+              <select id="filterQuarterYear" onchange="renderShiftReport()" style="padding:8px; border-radius:6px;"><option value="2026" selected>2026</option><option value="2025">2025</option><option value="2027">2027</option></select>
             </div>
-            <div id="filterMonthBox" style="display:none;"><input type="month" id="filterMonthInput" style="padding:7px; border-radius:6px;"></div>
-            <div id="filterDayBox"><input type="date" id="filterDayInput" style="padding:7px; border-radius:6px;"></div>
+            <div id="filterMonthBox" style="display:none;"><input type="month" id="filterMonthInput" onchange="renderShiftReport()" style="padding:7px; border-radius:6px;"></div>
+            <div id="filterDayBox"><input type="date" id="filterDayInput" onchange="renderShiftReport()" style="padding:7px; border-radius:6px;"></div>
             
-            <button onclick="renderShiftReport()" style="background:var(--primary); color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:700;">🔍 Tra Cứu</button>
-            <button onclick="printShiftReport()" style="background:#0284c7; color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:700; margin-left:auto;">🖨️ In Phiếu Tổng Kết (80mm)</button>
-            <button onclick="exportTaxReportCSV()" style="background:#059669; color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:700;">📥 Xuất Bảng Kê Excel</button>
+            <button onclick="renderShiftReport()" style="background:var(--primary); color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:700;">🔍 Tra Cứu Kỳ Này</button>
+            <button onclick="printShiftReport()" style="background:#0284c7; color:#fff; border:none; padding:8px 14px; border-radius:6px; cursor:pointer; font-weight:700; margin-left:auto;">🖨️ In Phiếu Kết Ca (80mm)</button>
+            <button onclick="exportTaxReportCSV()" style="background:#059669; color:#fff; border:none; padding:8px 14px; border-radius:6px; cursor:pointer; font-weight:700;">📥 Xuất Excel Chi Tiết</button>
           </div>
 
-          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-bottom:16px;">
+          <!-- 5 Ô CHỈ SỐ TÀI CHÍNH CỐT LÕI -->
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-bottom:20px;">
             <div class="rep-box"><span>DT 5610 (HY CHAY)</span><h3 id="repTaxable5610" style="color:var(--primary);">0đ</h3></div>
             <div class="rep-box"><span>DT 5630 (BAL'S HOUSE)</span><h3 id="repTaxable5630" style="color:#d97706;">0đ</h3></div>
             <div class="rep-box" style="background:#ecfdf5; border-color:#86efac;"><span>TỔNG DT CHỊU THUẾ (QUÁN)</span><h3 id="repTotalTaxable" style="color:#15803d;">0đ</h3></div>
@@ -543,7 +513,103 @@
             <div class="rep-box"><span>TỔNG ĐƠN HOÀN TẤT</span><h3 id="repDoneCount" style="color:#16a34a;">0 đơn</h3></div>
           </div>
 
-          <h3 style="font-size:1.05rem; color:var(--primary); margin-bottom:8px;">1. BẢNG KÊ DOANH THU CHỊU THUẾ THEO NGÀY (KHÔNG CỘNG TIỀN SHIP VÀO DOANH THU QUÁN)</h3>
+          <!-- TRẠM THUẬT SĨ 4 BƯỚC KẾT XUẤT FILE XML NỘP THUẾ ĐIỆN TỬ (CHUẨN XSD TỔNG CỤC THUẾ) -->
+          <div style="background:linear-gradient(135deg,#f8fafc,#eff6ff); border:2px solid #0284c7; border-radius:14px; padding:18px; margin-bottom:22px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px; border-bottom:1px solid #bae6fd; padding-bottom:10px;">
+              <div>
+                <h3 style="color:#0369a1; font-size:1.08rem;">🏛️ QUY TRÌNH 4 BƯỚC KẾT XUẤT TỜ KHAI THUẾ XML CHUẨN NHÀ NƯỚC</h3>
+                <p style="font-size:0.8rem; color:#475569;">Tương thích Cổng Thuế Điện Tử Quốc Gia (<code>thuedientu.gdt.gov.vn</code> / <code>canhan.gdt.gov.vn</code> / <code>HTKK</code>) — Hỗ trợ cả Hộ Kinh Doanh (Thông tư 40) & Doanh Nghiệp (Thông tư 80).</p>
+              </div>
+              <span style="background:#dbeafe; color:#1e40af; padding:4px 10px; border-radius:20px; font-size:0.76rem; font-weight:800;">Chuẩn XSD: HSoThueDTu v2.1</span>
+            </div>
+
+            <!-- BƯỚC 1 & BƯỚC 2: CHỌN MÔ HÌNH PHÁP NHÂN, TỜ KHAI & CHẾ ĐỘ GIẢM THUẾ -->
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-bottom:12px;">
+              <div>
+                <label style="font-size:0.78rem; font-weight:800; color:#0f172a;">Bước 1: Chọn Đối Tượng & Mẫu Tờ Khai (*)</label>
+                <select id="xmlTaxModelSelect" onchange="updateXmlTaxPreview()" style="width:100%; padding:8px 10px; border:1.5px solid #0284c7; border-radius:8px; margin-top:4px; font-weight:800; color:#0369a1; background:#fff;">
+                  <option value="HKD_01_CNKD">🏠 Hộ / Cá Nhân Kinh Doanh — Mẫu 01/CNKD (TT40/2021)</option>
+                  <option value="DN_04_GTGT">🏢 Doanh Nghiệp (Tính Trực Tiếp) — Mẫu 04/GTGT (TT80/2021)</option>
+                  <option value="DN_01_GTGT">🏭 Doanh Nghiệp (Khấu Trừ VAT) — Mẫu 01/GTGT (TT80/2021)</option>
+                </select>
+              </div>
+
+              <div>
+                <label style="font-size:0.78rem; font-weight:800; color:#0f172a;">Bước 2: Loại Tờ Khai & Giảm Thuế GTGT (*)</label>
+                <div style="display:flex; gap:6px; margin-top:4px;">
+                  <select id="xmlFilingTimes" onchange="updateXmlTaxPreview()" style="flex:1; padding:8px; border:1px solid #cbd5e1; border-radius:8px; font-weight:700;">
+                    <option value="0">Khai Lần Đầu</option>
+                    <option value="1">Khai Bổ Sung Lần 1</option>
+                    <option value="2">Khai Bổ Sung Lần 2</option>
+                  </select>
+                  <select id="xmlVatReductionToggle" onchange="updateXmlTaxPreview()" style="flex:1.3; padding:8px; border:1px solid #16a34a; border-radius:8px; font-weight:800; color:#15803d; background:#f0fdf4;">
+                    <option value="yes">✅ Có Giảm 20% Thuế GTGT (NQ Quốc Hội)</option>
+                    <option value="no">Không áp dụng giảm thuế</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label style="font-size:0.78rem; font-weight:800; color:#0f172a;">Bước 3: Định Danh Thuế (CCCD 12 số / MST) (*)</label>
+                <div style="display:flex; gap:6px; margin-top:4px;">
+                  <input type="text" id="xmlMainTaxId" value="3401289271" oninput="updateXmlTaxPreview()" placeholder="MST đăng nhập hoặc CCCD 12 số..." style="flex:1; padding:8px; border:1px solid #cbd5e1; border-radius:8px; font-weight:800;" title="Nếu là HKD đăng nhập bằng VNeID hãy nhập 12 số CCCD vào đây">
+                  <input type="text" id="xmlOldTaxId" value="3401289271" placeholder="MST cũ (nếu có)..." style="width:115px; padding:8px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.8rem;" title="Mã số thuế hộ kinh doanh cũ (tránh lỗi không khớp MST cũ)">
+                </div>
+              </div>
+            </div>
+
+            <!-- BƯỚC 3 (TIẾP): THÔNG TIN PHÁP NHÂN & CƠ QUAN THUẾ QUẢN LÝ TRỰC TIẾP -->
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px; margin-bottom:12px; background:#ffffff; padding:12px; border-radius:10px; border:1px solid #cbd5e1;">
+              <div>
+                <label style="font-size:0.75rem; font-weight:700; color:#475569;">Tên Người Nộp Thuế (Công ty / Chủ Hộ):</label>
+                <input type="text" id="xmlTaxpayerName" value="CÔNG TY TNHH TMDV VÀ SẢN XUẤT BẢO ANH LÂM" style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:6px; margin-top:3px; font-weight:700;">
+              </div>
+              <div>
+                <label style="font-size:0.75rem; font-weight:700; color:#475569;">Địa Chỉ Trụ Sở (Theo Địa Giới Hành Chính Mới):</label>
+                <input type="text" id="xmlTaxpayerAddr" value="280 Trần Hưng Đạo, Phường Phan Thiết, Tỉnh Lâm Đồng" style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:6px; margin-top:3px; font-weight:700;">
+              </div>
+              <div>
+                <label style="font-size:0.75rem; font-weight:700; color:#475569;">Cơ Quan Thuế Quản Lý Trực Tiếp (Thuế Cơ Sở):</label>
+                <div style="display:flex; gap:4px; margin-top:3px;">
+                  <input type="text" id="xmlTaxOfficeCode" value="71501" placeholder="Mã CQT" style="width:75px; padding:7px; border:1px solid #cbd5e1; border-radius:6px; font-weight:700;">
+                  <input type="text" id="xmlTaxOfficeName" value="Thuế cơ sở khu vực Phan Thiết - Tỉnh Lâm Đồng" style="flex:1; padding:7px; border:1px solid #cbd5e1; border-radius:6px; font-weight:700;">
+                </div>
+              </div>
+            </div>
+
+            <!-- BƯỚC 4: PHỤ LỤC CHI PHÍ QUẢN LÝ SỔ S3 (DÀNH CHO HỘ KINH DOANH 01-2/BK-HĐKD) & KHẤU TRỪ ĐẦU VÀO (DÀNH CHO DN) -->
+            <details style="background:#fff; border:1px dashed #94a3b8; border-radius:10px; padding:10px 12px; margin-bottom:14px;">
+              <summary style="font-weight:800; font-size:0.84rem; color:#0f172a; cursor:pointer;">⚙️ Bước 4 (Tùy chọn): Kê khai Chi phí quản lý trong kỳ (Phụ lục 01-2/BK-HĐKD Sổ S3) hoặc VAT đầu vào được khấu trừ</summary>
+              <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:8px; margin-top:10px;">
+                <div><label style="font-size:0.72rem; font-weight:700;">1. Chi phí Nhân công (VNĐ):</label><input type="number" id="expLabor" value="0" step="100000" oninput="updateXmlTaxPreview()" style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:6px;"></div>
+                <div><label style="font-size:0.72rem; font-weight:700;">2. Chi phí Tiền điện (VNĐ):</label><input type="number" id="expElec" value="0" step="50000" oninput="updateXmlTaxPreview()" style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:6px;"></div>
+                <div><label style="font-size:0.72rem; font-weight:700;">3. Chi phí Tiền nước (VNĐ):</label><input type="number" id="expWater" value="0" step="50000" oninput="updateXmlTaxPreview()" style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:6px;"></div>
+                <div><label style="font-size:0.72rem; font-weight:700;">4. Viễn thông / Internet:</label><input type="number" id="expTelecom" value="0" step="50000" oninput="updateXmlTaxPreview()" style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:6px;"></div>
+                <div><label style="font-size:0.72rem; font-weight:700;">5. Thuê mặt bằng / Kho bãi:</label><input type="number" id="expRent" value="0" step="100000" oninput="updateXmlTaxPreview()" style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:6px;"></div>
+                <div><label style="font-size:0.72rem; font-weight:700;">6. Chi phí Quản lý / VPP:</label><input type="number" id="expAdmin" value="0" step="50000" oninput="updateXmlTaxPreview()" style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:6px;"></div>
+                <div><label style="font-size:0.72rem; font-weight:700;">7. Chi phí Khác (VNĐ):</label><input type="number" id="expOther" value="0" step="50000" oninput="updateXmlTaxPreview()" style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:6px;"></div>
+                <div><label style="font-size:0.72rem; font-weight:700; color:#0369a1;">8. VAT Đầu vào (Nếu DN Khấu trừ):</label><input type="number" id="dnInputVat" value="0" step="50000" oninput="updateXmlTaxPreview()" style="width:100%; padding:6px; border:1px solid #0284c7; border-radius:6px;"></div>
+              </div>
+            </details>
+
+            <!-- BẢNG TÓM TẮT SỐ THUẾ TỰ ĐỘNG TÍNH TRƯỚC KHI XUẤT XML -->
+            <div id="xmlLiveSummaryBox" style="background:#ecfdf5; border:1px solid #6ee7b7; border-radius:10px; padding:12px 14px; margin-bottom:14px; font-size:0.84rem; color:#065f46; line-height:1.5;">
+              Đang tính toán nghĩa vụ thuế tự động...
+            </div>
+
+            <!-- CÁC NÚT HÀNH ĐỘNG KẾT XUẤT -->
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <button type="button" onclick="generateAndDownloadOfficialTaxXML()" style="background:#0284c7; color:#fff; border:none; padding:12px 22px; border-radius:8px; font-weight:800; cursor:pointer; font-size:0.92rem; box-shadow:0 4px 12px rgba(2,132,199,0.3);">
+                📄 1. TẢI FILE XML CHUẨN TỔNG CỤC THUẾ (UPLOAD CỔNG THUẾ)
+              </button>
+              <button type="button" onclick="exportHouseholdTaxDeclarationCSV()" style="background:#7c3aed; color:#fff; border:none; padding:12px 18px; border-radius:8px; font-weight:800; cursor:pointer; font-size:0.88rem;">
+                📊 2. TẢI PHỤ LỤC BẢNG KÊ 01-2/BK-HĐKD & SỔ S1-S3 (EXCEL)
+              </button>
+              <span id="xmlExportStatusText" style="font-size:0.82rem; font-weight:800; color:#15803d;"></span>
+            </div>
+          </div>
+
+          <h3 style="font-size:1.05rem; color:var(--primary); margin-bottom:8px;">1. BẢNG KÊ DOANH THU CHỊU THUẾ THEO NGÀY (SỔ S1 - KHÔNG CỘNG TIỀN SHIP VÀO DOANH THU QUÁN)</h3>
           <table class="report-table">
             <thead>
               <tr style="background:#f1f5f9; text-align:left;">
@@ -558,7 +624,7 @@
             <tbody id="repDailyBreakdownBody"></tbody>
           </table>
 
-          <h3 style="font-size:1.05rem; color:var(--primary); margin-top:20px; margin-bottom:8px;">2. KIỂM KÊ SỐ LƯỢNG MÓN BÁN RA (DOANH THU MÓN)</h3>
+          <h3 style="font-size:1.05rem; color:var(--primary); margin-top:20px; margin-bottom:8px;">2. KIỂM KÊ SỐ LƯỢNG MÓN BÁN RA TRONG KỲ (PHỤ LỤC GIẢM THUẾ & SỔ S2)</h3>
           <table class="report-table">
             <thead><tr style="background:#f1f5f9; text-align:left;"><th>Tên Món Ăn / Đồ Uống</th><th style="text-align:center;">Số Lượng Đã Bán</th><th style="text-align:right;">Doanh Thu Món (VNĐ)</th></tr></thead>
             <tbody id="repDishTableBody"></tbody>
@@ -582,7 +648,14 @@
       <div id="editOrderModal" class="cancel-modal-overlay">
         <div class="cancel-modal-box" style="max-width:700px;">
           <h3 style="color:var(--primary); margin-bottom:6px;">✏️ Chỉnh Sửa Trực Tiếp Đơn Hàng <span id="editModalOrderId" style="color:#dc2626;"></span></h3>
-          <p style="font-size:0.84rem; color:#64748b; margin-bottom:12px;">Khách hàng: <b id="editModalCustomerName"></b> | SĐT: <b id="editModalCustomerPhone"></b></p>
+          <p style="font-size:0.84rem; color:#64748b; margin-bottom:12px;">Khách hàng: <b id="editModalCustomerName"></b> | SĐT: <b id="editModalCustomerPhone"></b></p
+         <div style="background:#f5f3ff; border:1px solid #c4b5fd; padding:8px 12px; border-radius:8px; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+            <span style="font-size:0.82rem; font-weight:800; color:#5b21b6;">⏰ Giờ khách hẹn giao (Để trống nếu giao ngay):</span>
+            <div style="display:flex; gap:6px; align-items:center;">
+              <input type="time" id="editModalScheduledTime" style="padding:5px 10px; border:1px solid #8b5cf6; border-radius:6px; font-weight:800; color:#4c1d95;">
+              <button type="button" onclick="document.getElementById('editModalScheduledTime').value=''" style="background:#fee2e2; color:#b91c1c; border:none; padding:5px 8px; border-radius:6px; font-size:0.75rem; font-weight:700; cursor:pointer;">Xóa hẹn giờ</button>
+            </div>
+          </div>                                                                                                                                                             
           
           <div class="edit-modal-grid">
             <!-- Cột trái: Danh sách món hiện tại trong đơn (Có nút tăng giảm số lượng hoặc xóa) -->
@@ -3640,6 +3713,451 @@ window.setEditModalCategory = function(cat, btn) {
       a.href = URL.createObjectURL(blob);
       a.download = mode === 'admin' ? 'HyChay_POS_iOS.mobileconfig' : 'HyChay_App_iOS.mobileconfig';
       a.click();
+    };
+    // =========================================================
+    // 17. HỆ THỐNG ĐIỀU HÀNH ĐƠN HẸN GIỜ GIAO (9H ĐẶT - 11H GIAO)
+    //     & TỰ ĐỘNG ĐÁNH THỨC BẾP BẰNG GIỌNG NÓI TRƯỚC 30 PHÚT
+    // =========================================================
+    let notifiedScheduledOrders = {};
+
+    // Hàm tính số phút còn lại từ thời điểm hiện tại tới Giờ Hẹn Giao (scheduledTime định dạng "HH:mm")
+    function getMinutesUntilScheduled(scheduledTimeStr) {
+      if (!scheduledTimeStr || !scheduledTimeStr.includes(':')) return null;
+      const [hh, mm] = scheduledTimeStr.split(':').map(Number);
+      if (isNaN(hh) || isNaN(mm)) return null;
+      const now = new Date();
+      const nowMins = now.getHours() * 60 + now.getMinutes();
+      return (hh * 60 + mm) - nowMins;
+    }
+
+    // Tự động quét mỗi 20 giây để hiển thị nhãn Hẹn Giờ và phát Giọng nói nhắc bếp đúng 30 phút trước giờ giao
+    function processScheduledOrdersAndVoiceReminder() {
+      let scheduledActiveCount = 0;
+      Object.keys(ordersCache).forEach(id => {
+        const o = ordersCache[id];
+        if (!o || o.archived) return;
+        const isDoneOrCanceled = (o.status === 'Đã hoàn tất' || o.status === 'Đã hủy');
+        if (o.scheduledTime && !isDoneOrCanceled) {
+          scheduledActiveCount++;
+          const minsLeft = getMinutesUntilScheduled(o.scheduledTime);
+          // Khi còn từ 0 đến 30 phút trước giờ hẹn giao và chưa nhắc giọng nói lần nào
+          if (minsLeft !== null && minsLeft <= 30 && minsLeft >= -15 && !notifiedScheduledOrders[id]) {
+            notifiedScheduledOrders[id] = true;
+            const seqBadge = typeof getOrderSeqBadgeText === 'function' ? getOrderSeqBadgeText(id) : '';
+            if (isAudioActive && typeof speakAlert === 'function') {
+              speakAlert(`Chú ý! Đơn hàng hẹn giờ ${seqBadge} giao lúc ${o.scheduledTime} của khách ${o.customerName} đã đến giờ vào bếp chế biến!`, true);
+            }
+          }
+        }
+      });
+      const cntEl = document.getElementById('cntFilterScheduled');
+      if (cntEl) cntEl.innerText = scheduledActiveCount;
+    }
+
+    setInterval(processScheduledOrdersAndVoiceReminder, 20000);
+
+    // Mở rộng Modal Sửa Đơn để đọc & lưu giờ hẹn giao (scheduledTime)
+    const origOpenEditModalV12 = window.openEditOrderModal;
+    window.openEditOrderModal = function(orderId) {
+      origOpenEditModalV12(orderId);
+      const o = ordersCache[orderId];
+      const timeInp = document.getElementById('editModalScheduledTime');
+      if (timeInp && o) {
+        timeInp.value = o.scheduledTime || '';
+      }
+    };
+
+    const origSaveEditChangesV12 = window.saveEditedOrderChanges;
+    window.saveEditedOrderChanges = function() {
+      if (editingOrderId) {
+        const timeInp = document.getElementById('editModalScheduledTime');
+        const newSched = timeInp ? timeInp.value.trim() : '';
+        update(ref(db, `orders/${editingOrderId}`), {
+          scheduledTime: newSched || null,
+          deliveryTimeMode: newSched ? 'scheduled' : 'immediate'
+        });
+      }
+      origSaveEditChangesV12();
+    };
+
+    // Bổ sung bộ lọc 'scheduled_only' và gắn Dải băng Hẹn Giờ Giao trực tiếp lên Thẻ Đơn KDS
+    const origRenderOrdersV12 = renderOrders;
+    // Ghi đè nhẹ hàm in bếp & in bill để luôn in đậm dòng ⏰ HẸN GIAO LÚC: HH:mm ở đầu phiếu
+    const origPrintKitchenV12 = window.printKitchenTicket;
+    window.printKitchenTicket = function(id, dData = null) {
+      const o = dData || ordersCache[id];
+      origPrintKitchenV12(id, dData);
+      if (o && o.scheduledTime) {
+        const pa = document.getElementById('printArea');
+        if (pa) {
+          pa.innerHTML = `<div style="border:3px solid #000; padding:6px; text-align:center; font-size:20px; font-weight:900; margin-bottom:6px;">⏰ HẸN GIAO LÚC: ${o.scheduledTime}</div>` + pa.innerHTML;
+          window.print();
+        }
+      }
+    };
+
+    // Tự động chèn nhãn trạng thái Hẹn Giờ (Đếm ngược giờ vào bếp & giờ giao) lên các thẻ đơn hàng
+    function decorateOrderCardsWithScheduleBadge() {
+      processScheduledOrdersAndVoiceReminder();
+      const container = document.getElementById('ordersContainer');
+      if (!container) return;
+
+      // Nếu đang chọn tab lọc riêng "⏰ Đơn Hẹn Giờ"
+      if (currentOrderStatusFilter === 'scheduled_only') {
+        let html = '';
+        Object.keys(ordersCache).forEach(id => {
+          const o = ordersCache[id];
+          if (!o || o.archived || !o.scheduledTime || o.status === 'Đã hoàn tất' || o.status === 'Đã hủy') return;
+          const minsLeft = getMinutesUntilScheduled(o.scheduledTime);
+          const isCookTime = minsLeft !== null && minsLeft <= 30;
+          const seqBadge = getOrderSeqBadgeText(id);
+          html += `
+            <div class="order-card" style="border:2px solid ${isCookTime ? '#dc2626' : '#7c3aed'};">
+              <div class="card-top" style="background:${isCookTime ? '#fef2f2' : '#f5f3ff'};">
+                <span class="order-id">${seqBadge} (#HC-${id.substring(id.length - 5).toUpperCase()})</span>
+                <span style="background:${isCookTime ? '#dc2626' : '#7c3aed'}; color:#fff; padding:2px 8px; border-radius:6px; font-weight:900; font-size:0.78rem;">⏰ HẸN GIAO: ${o.scheduledTime}</span>
+              </div>
+              <div class="card-body">
+                <div style="background:${isCookTime ? '#fee2e2' : '#ede9fe'}; color:${isCookTime ? '#b91c1c' : '#5b21b6'}; padding:8px; border-radius:8px; font-weight:800; margin-bottom:8px; text-align:center;">
+                  ${isCookTime ? `🔥 ĐÃ ĐẾN GIỜ NẤU! (Còn ${Math.max(0, minsLeft)} phút tới giờ giao)` : `⏳ Còn ${minsLeft} phút tới giờ giao (Bếp nấu trước 30p)`}
+                </div>
+                <p>👤 <b>${o.customerName}</b> (${o.phone})</p>
+                <p>📍 ${o.address}</p>
+                <p style="margin-top:6px; font-weight:800; color:#dc2626;">Tổng thu: ${(o.grandTotal || 0).toLocaleString()}đ</p>
+              </div>
+              <div class="card-footer">
+                <button class="btn-act btn-print-kitchen" onclick="window.printKitchenTicket('${id}')">🍳 In Bếp</button>
+                <button class="btn-act btn-print-bill" onclick="window.printCustomerBill('${id}')">🧾 In Bill</button>
+                <button class="btn-act" style="grid-column:span 2; background:#7c3aed; color:#fff;" onclick="openEditOrderModal('${id}')">✏️ Đổi Giờ Hẹn / Sửa Món</button>
+              </div>
+            </div>`;
+        });
+        container.innerHTML = html || '<p style="text-align:center; padding:35px; grid-column:1/-1; color:#64748b; background:#fff; border-radius:12px;">Hiện không có đơn hẹn giờ nào đang chờ giao.</p>';
+        return;
+      }
+
+      // Tô điểm nhãn Hẹn Giờ lên các thẻ đơn trong màn hình chính
+      const cards = container.querySelectorAll('.order-card');
+      cards.forEach(card => {
+        const idSpan = card.querySelector('.order-id');
+        if (!idSpan) return;
+        const match = idSpan.innerText.match(/#HC-([A-Z0-9]+)/);
+        if (!match) return;
+        const shortCode = match[1];
+        const foundId = Object.keys(ordersCache).find(k => k.substring(k.length - 5).toUpperCase() === shortCode);
+        if (!foundId) return;
+        const o = ordersCache[foundId];
+        if (o && o.scheduledTime && !card.querySelector('.sched-banner-injected')) {
+          const minsLeft = getMinutesUntilScheduled(o.scheduledTime);
+          const isUrgentCook = minsLeft !== null && minsLeft <= 30;
+          // Nếu đơn hẹn giờ còn hơn 35 phút mới giao, tắt hiệu ứng nhấp nháy đỏ quá hạn của đơn thường
+          if (minsLeft !== null && minsLeft > 35) {
+            const waitTimerEl = card.querySelector('.wait-timer');
+            if (waitTimerEl) {
+              waitTimerEl.className = 'wait-timer wait-normal';
+              waitTimerEl.innerText = `⏰ Hẹn ${o.scheduledTime}`;
+            }
+          }
+          const banner = document.createElement('div');
+          banner.className = 'sched-banner-injected';
+          banner.style.cssText = isUrgentCook
+            ? 'background:#dc2626; color:#fff; padding:6px 10px; font-weight:900; font-size:0.8rem; text-align:center;'
+            : 'background:#6d28d9; color:#fff; padding:6px 10px; font-weight:800; font-size:0.78rem; text-align:center;';
+          banner.innerHTML = isUrgentCook
+            ? `🔥 ĐẾN GIỜ NẤU ĐƠN HẸN ${o.scheduledTime}! (Còn ${Math.max(0, minsLeft)}p giao)`
+            : `⏰ ĐƠN HẸN GIAO LÚC ${o.scheduledTime} (Còn ${minsLeft}p - Bếp nấu trước 30p)`;
+          card.insertBefore(banner, card.firstChild.nextSibling);
+        }
+      });
+    }
+
+    onValue(ref(db, 'orders'), () => {
+      setTimeout(decorateOrderCardsWithScheduleBadge, 80);
+    });
+    const origSetOrderFilterV12 = window.setOrderStatusFilter;
+    window.setOrderStatusFilter = function(filterVal, btn) {
+      origSetOrderFilterV12(filterVal, btn);
+      setTimeout(decorateOrderCardsWithScheduleBadge, 50);
+    };
+
+    // =========================================================
+    // 18. TRÌNH BIÊN DỊCH FILE XML THUẾ CHUẨN TỔNG CỤC THUẾ (HSoThueDTu)
+    //     DÀNH CHO CẢ HỘ KINH DOANH (01/CNKD) & DOANH NGHIỆP (04/GTGT, 01/GTGT)
+    // =========================================================
+    function escapeXmlSafe(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+    }
+
+    function getSelectedXmlPeriodInfo() {
+      const mode = document.getElementById('filterMode')?.value || 'quarter';
+      const todayVN = getVNDateStr();
+      if (mode === 'quarter') {
+        const q = parseInt(document.getElementById('filterQuarter')?.value || '4');
+        const y = parseInt(document.getElementById('filterQuarterYear')?.value || '2026');
+        const startM = String((q - 1) * 3 + 1).padStart(2, '0');
+        const endM = String(q * 3).padStart(2, '0');
+        const endDay = (q === 1 || q === 4) ? '31' : '30';
+        return { kieuKy: 'Q', kyKKhai: `${q}/${y}`, tuNgay: `01/${startM}/${y}`, denNgay: `${endDay}/${endM}/${y}`, fileTag: `Q${q}_${y}` };
+      } else if (mode === 'month') {
+        const ym = document.getElementById('filterMonthInput')?.value || todayVN.slice(0, 7);
+        const [y, m] = ym.split('-');
+        const lastDay = new Date(parseInt(y), parseInt(m), 0).getDate();
+        return { kieuKy: 'M', kyKKhai: `${m}/${y}`, tuNgay: `01/${m}/${y}`, denNgay: `${lastDay}/${m}/${y}`, fileTag: `T${m}_${y}` };
+      } else {
+        const d = document.getElementById('filterDayInput')?.value || todayVN;
+        const [y, m, day] = d.split('-');
+        return { kieuKy: 'M', kyKKhai: `${m}/${y}`, tuNgay: `${day}/${m}/${y}`, denNgay: `${day}/${m}/${y}`, fileTag: `Ngay_${d}` };
+      }
+    }
+
+    window.updateXmlTaxPreview = function() {
+      const box = document.getElementById('xmlLiveSummaryBox');
+      if (!box) return;
+      const data = getTaxReportData();
+      const model = document.getElementById('xmlTaxModelSelect')?.value || 'HKD_01_CNKD';
+      const isVatReduced = (document.getElementById('xmlVatReductionToggle')?.value !== 'no');
+      const pInfo = getSelectedXmlPeriodInfo();
+
+      // Tỷ lệ thuế GTGT F&B gốc là 3%. Nếu áp dụng Giảm 20% mức tỷ lệ % theo Nghị quyết Quốc hội thì giảm 0.6%, còn 2.4%
+      const effectiveVatRate = isVatReduced ? 0.024 : 0.03;
+      const vatReductionAmt = isVatReduced ? Math.round(data.totalTaxable * 0.006) : 0;
+      const vatPayable = Math.round(data.totalTaxable * effectiveVatRate);
+      const pitPayableHKD = Math.round(data.totalTaxable * 0.015); // Thuế TNCN 1.5% cho HKD
+
+      if (model === 'HKD_01_CNKD') {
+        const totalHKD = vatPayable + pitPayableHKD;
+        box.innerHTML = `
+          <b>📌 Tóm tắt Tờ khai Hộ Kinh Doanh (Mẫu 01/CNKD - Kỳ ${pInfo.kyKKhai}):</b><br>
+          • Doanh thu chịu thuế Nhóm 3 (Ngành 5610 + 5630): <b>${data.totalTaxable.toLocaleString()}đ</b> <i>(Đã loại trừ ${data.totalShip.toLocaleString()}đ tiền ship thu hộ)</i><br>
+          • Thuế GTGT phải nộp (${isVatReduced ? '2.4% - Đã giảm 20% từ mức 3%' : '3%'}): <b>${vatPayable.toLocaleString()}đ</b> ${isVatReduced ? `(Được giảm: -${vatReductionAmt.toLocaleString()}đ)` : ''} | Thuế TNCN (1.5%): <b>${pitPayableHKD.toLocaleString()}đ</b><br>
+          👉 <span style="font-size:0.95rem; color:#b91c1c; font-weight:900;">TỔNG THUẾ HỘ KINH DOANH PHẢI NỘP: ${totalHKD.toLocaleString()}đ</span>`;
+      } else if (model === 'DN_04_GTGT') {
+        box.innerHTML = `
+          <b>📌 Tóm tắt Tờ khai Doanh Nghiệp Trực Tiếp Trên Doanh Thu (Mẫu 04/GTGT - Kỳ ${pInfo.kyKKhai}):</b><br>
+          • Tổng doanh thu chịu thuế F&B (5610 + 5630): <b>${data.totalTaxable.toLocaleString()}đ</b> <i>(Đã tách riêng ${data.totalShip.toLocaleString()}đ ship thu hộ)</i><br>
+          👉 <span style="font-size:0.95rem; color:#b91c1c; font-weight:900;">TỔNG THUẾ GTGT PHẢI NỘP (${isVatReduced ? '2.4%' : '3%'}): ${vatPayable.toLocaleString()}đ</span>`;
+      } else {
+        const outVatRate = isVatReduced ? 0.08 : 0.10;
+        const outVatAmt = Math.round(data.totalTaxable * outVatRate);
+        const inVatAmt = parseInt(document.getElementById('dnInputVat')?.value || '0') || 0;
+        const netVat = Math.max(0, outVatAmt - inVatAmt);
+        box.innerHTML = `
+          <b>📌 Tóm tắt Tờ khai Doanh Nghiệp Khấu Trừ (Mẫu 01/GTGT - Kỳ ${pInfo.kyKKhai}):</b><br>
+          • Doanh thu bán ra chưa thuế: <b>${data.totalTaxable.toLocaleString()}đ</b> | VAT đầu ra (${isVatReduced ? '8%' : '10%'}): <b>${outVatAmt.toLocaleString()}đ</b> | VAT đầu vào khấu trừ: <b>${inVatAmt.toLocaleString()}đ</b><br>
+          👉 <span style="font-size:0.95rem; color:#b91c1c; font-weight:900;">THUẾ GTGT CÒN PHẢI NỘP TRONG KỲ: ${netVat.toLocaleString()}đ</span>`;
+      }
+    };
+
+    const origRenderShiftReportV12 = window.renderShiftReport;
+    window.renderShiftReport = function() {
+      origRenderShiftReportV12();
+      window.updateXmlTaxPreview();
+    };
+
+    window.generateAndDownloadOfficialTaxXML = function() {
+      const data = getTaxReportData();
+      const model = document.getElementById('xmlTaxModelSelect')?.value || 'HKD_01_CNKD';
+      const soLan = document.getElementById('xmlFilingTimes')?.value || '0';
+      const trangThaiTK = (soLan === '0') ? 'C' : 'B';
+      const isVatReduced = (document.getElementById('xmlVatReductionToggle')?.value !== 'no');
+      const mst = (document.getElementById('xmlMainTaxId')?.value || '').trim();
+      const mstCu = (document.getElementById('xmlOldTaxId')?.value || mst).trim();
+      const tenNNT = (document.getElementById('xmlTaxpayerName')?.value || '').trim();
+      const dchiNNT = (document.getElementById('xmlTaxpayerAddr')?.value || '').trim();
+      const maCQT = (document.getElementById('xmlTaxOfficeCode')?.value || '71501').trim();
+      const tenCQT = (document.getElementById('xmlTaxOfficeName')?.value || '').trim();
+
+      // KIỂM TRA HỢP LỆ TRƯỚC KHI XUẤT (CHẶN LỖI BỊ CỔNG THUẾ TỪ CHỐI)
+      if (!mst || mst.length < 10) {
+        return alert("⚠️ LỖI ĐỊNH DANH THUẾ: Vui lòng nhập đầy đủ Mã số thuế (10/13 số) hoặc Số Căn cước công dân (12 số của Chủ hộ) tại Bước 3!");
+      }
+      if (!tenNNT || !dchiNNT) {
+        return alert("⚠️ LỖI ĐỊA CHỈ KINH DOANH: Không được để trống Tên đơn vị và Địa chỉ trụ sở (Cổng thuế sẽ từ chối nếu thiếu số nhà, phường, tỉnh)!");
+      }
+
+      const pInfo = getSelectedXmlPeriodInfo();
+      const nowIso = getVNDateStr();
+      const effectiveVatRate = isVatReduced ? 0.024 : 0.03;
+      const vatReductionAmt = isVatReduced ? Math.round(data.totalTaxable * 0.006) : 0;
+      const vatPayable = Math.round(data.totalTaxable * effectiveVatRate);
+      const pitPayable = Math.round(data.totalTaxable * 0.015);
+
+      // Lấy 7 khoản mục chi phí quản lý Sổ S3
+      const cpNhanCong = parseInt(document.getElementById('expLabor')?.value || '0') || 0;
+      const cpDien = parseInt(document.getElementById('expElec')?.value || '0') || 0;
+      const cpNuoc = parseInt(document.getElementById('expWater')?.value || '0') || 0;
+      const cpVienThong = parseInt(document.getElementById('expTelecom')?.value || '0') || 0;
+      const cpThueMB = parseInt(document.getElementById('expRent')?.value || '0') || 0;
+      const cpQuanLy = parseInt(document.getElementById('expAdmin')?.value || '0') || 0;
+      const cpKhac = parseInt(document.getElementById('expOther')?.value || '0') || 0;
+      const tongChiPhiS3 = cpNhanCong + cpDien + cpNuoc + cpVienThong + cpThueMB + cpQuanLy + cpKhac;
+
+      // Tự động kết xuất các dòng hàng hóa có doanh thu > 0 cho Phụ lục giảm thuế (Tuyệt đối xóa dòng doanh thu = 0)
+      let plGiamThueRowsXml = '';
+      let sttRow = 0;
+      Object.keys(data.dishStats).forEach(dishName => {
+        const item = data.dishStats[dishName];
+        if (item && item.total > 0) {
+          sttRow++;
+          const reducedItemTax = Math.round(item.total * 0.006);
+          plGiamThueRowsXml += `
+          <ChiTietHangHoaDichVu id="ID_${sttRow}">
+            <stt>${sttRow}</stt>
+            <tenHHDV>${escapeXmlSafe(dishName)}</tenHHDV>
+            <dthuChiuThue>${item.total}</dthuChiuThue>
+            <tyLeTinhThueGoc>3.0</tyLeTinhThueGoc>
+            <soThueGTGTDuocGiam>${reducedItemTax}</soThueGTGTDuocGiam>
+          </ChiTietHangHoaDichVu>`;
+        }
+      });
+
+      const maTKhai = model === 'HKD_01_CNKD' ? '853' : (model === 'DN_04_GTGT' ? '844' : '842');
+      const tenTKhai = model === 'HKD_01_CNKD'
+        ? 'Tờ khai thuế đối với cá nhân kinh doanh (TT40/2021)'
+        : (model === 'DN_04_GTGT' ? 'Tờ khai thuế GTGT trực tiếp trên doanh thu (Mẫu 04/GTGT)' : 'Tờ khai thuế GTGT khấu trừ (Mẫu 01/GTGT)');
+
+      let ctkhaiBodyXml = '';
+      if (model === 'HKD_01_CNKD') {
+        ctkhaiBodyXml = `
+      <CTieuTKhaiChinh>
+        <NhomNganhNghe>
+          <!-- Chỉ tiêu [28]: Phân phối, cung cấp hàng hóa (1% GTGT, 0.5% TNCN) -->
+          <Nhom1_PhanPhoiHangHoa>
+            <ct28_doanhThuGTGT>0</ct28_doanhThuGTGT>
+            <ct28_thueGTGT>0</ct28_thueGTGT>
+            <ct28_doanhThuTNCN>0</ct28_doanhThuTNCN>
+            <ct28_thueTNCN>0</ct28_thueTNCN>
+          </Nhom1_PhanPhoiHangHoa>
+          <!-- Chỉ tiêu [29]: Dịch vụ không bao thầu NVL (5% GTGT, 2% TNCN) -->
+          <Nhom2_DichVu>
+            <ct29_doanhThuGTGT>0</ct29_doanhThuGTGT>
+            <ct29_thueGTGT>0</ct29_thueGTGT>
+            <ct29_doanhThuTNCN>0</ct29_doanhThuTNCN>
+            <ct29_thueTNCN>0</ct29_thueTNCN>
+          </Nhom2_DichVu>
+          <!-- Chỉ tiêu [30]: Sản xuất, vận tải, dịch vụ gắn với hàng hóa, ăn uống F&B 5610 & 5630 (3% GTGT, 1.5% TNCN) -->
+          <Nhom3_SanXuatAnUongFB>
+            <ct30_doanhThuGTGT>${data.totalTaxable}</ct30_doanhThuGTGT>
+            <ct30_thueGTGT>${vatPayable}</ct30_thueGTGT>
+            <ct30_doanhThuTNCN>${data.totalTaxable}</ct30_doanhThuTNCN>
+            <ct30_thueTNCN>${pitPayable}</ct30_thueTNCN>
+            <ChiTietMaNganh>
+              <MaNganh5610_HyChay>${data.total5610}</MaNganh5610_HyChay>
+              <MaNganh5630_BalsHouse>${data.total5630}</MaNganh5630_BalsHouse>
+              <SoThuHoPhiShipKhongChiuThue>${data.totalShip}</SoThuHoPhiShipKhongChiuThue>
+            </ChiTietMaNganh>
+          </Nhom3_SanXuatAnUongFB>
+        </NhomNganhNghe>
+        <TongCong>
+          <ct32_tongDoanhThuGTGT>${data.totalTaxable}</ct32_tongDoanhThuGTGT>
+          <ct32_tongThueGTGT>${vatPayable}</ct32_tongThueGTGT>
+          <ct32_tongDoanhThuTNCN>${data.totalTaxable}</ct32_tongDoanhThuTNCN>
+          <ct32_tongThueTNCN>${pitPayable}</ct32_tongThueTNCN>
+          <tongThueGTGTDuocGiam>${vatReductionAmt}</tongThueGTGTDuocGiam>
+          <tongThuePhaiNopTrongKy>${vatPayable + pitPayable}</tongThuePhaiNopTrongKy>
+        </TongCong>
+      </CTieuTKhaiChinh>
+      <PLuc>
+        <PLuc_01_2_BK_HDKD>
+          <MucII_ChiPhiQuanLy_SoS3>
+            <cpNhanCong>${cpNhanCong}</cpNhanCong>
+            <cpDien>${cpDien}</cpDien>
+            <cpNuoc>${cpNuoc}</cpNuoc>
+            <cpVienThong>${cpVienThong}</cpVienThong>
+            <cpThueKhoBaiMatBang>${cpThueMB}</cpThueKhoBaiMatBang>
+            <cpQuanLyVanPhongPham>${cpQuanLy}</cpQuanLy>
+            <cpKhac>${cpKhac}</cpKhac>
+            <tongChiPhiQuanLy>${tongChiPhiS3}</tongChiPhiQuanLy>
+          </MucII_ChiPhiQuanLy_SoS3>
+        </PLuc_01_2_BK_HDKD>
+        ${(isVatReduced && sttRow > 0) ? `<PLuc_GiamThueGTGT_NQ204>${plGiamThueRowsXml}\n          <tongCongThueGTGTDuocGiam>${vatReductionAmt}</tongCongThueGTGTDuocGiam>\n        </PLuc_GiamThueGTGT_NQ204>` : ''}
+      </PLuc>`;
+      } else if (model === 'DN_04_GTGT') {
+        ctkhaiBodyXml = `
+      <CTieuTKhaiChinh>
+        <ct21_doanhThuChiuThueSuat1PhanTram>0</ct21_doanhThuChiuThueSuat1PhanTram>
+        <ct24_doanhThuDichVuAnUongFB3PhanTram>${data.totalTaxable}</ct24_doanhThuDichVuAnUongFB3PhanTram>
+        <ct25_thueGTGTPhaiNop>${vatPayable}</ct25_thueGTGTPhaiNop>
+        <ct28_tongDoanhThu>${data.totalTaxable}</ct28_tongDoanhThu>
+        <ct29_tongThueGTGTPhaiNop>${vatPayable}</ct29_tongThueGTGTPhaiNop>
+        <soThuHoPhiVanChuyenKhongChiuThue>${data.totalShip}</soThuHoPhiVanChuyenKhongChiuThue>
+      </CTieuTKhaiChinh>`;
+      } else {
+        const outVatRate = isVatReduced ? 0.08 : 0.10;
+        const outVatAmt = Math.round(data.totalTaxable * outVatRate);
+        const inVatAmt = parseInt(document.getElementById('dnInputVat')?.value || '0') || 0;
+        const netVat = Math.max(0, outVatAmt - inVatAmt);
+        ctkhaiBodyXml = `
+      <CTieuTKhaiChinh>
+        <ct24_giaTriHHDVMuaVao>0</ct24_giaTriHHDVMuaVao>
+        <ct25_thueGTGTDuocKhauTruKyNay>${inVatAmt}</ct25_thueGTGTDuocKhauTruKyNay>
+        <ct32_doanhThuBanRaChiuThue>${data.totalTaxable}</ct32_doanhThuBanRaChiuThue>
+        <ct33_thueGTGTBanRa>${outVatAmt}</ct33_thueGTGTBanRa>
+        <ct40_thueGTGTPhaiNopTrongKy>${netVat}</ct40_thueGTGTPhaiNopTrongKy>
+        <soThuHoPhiVanChuyenKhongChiuThue>${data.totalShip}</soThuHoPhiVanChuyenKhongChiuThue>
+      </CTieuTKhaiChinh>`;
+      }
+
+      const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
+<HSoThueDTu xmlns="http://kekhaithue.gdt.gov.vn/TKhaiThue" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <HSoKhaiThue id="ID_1">
+    <TTinChung>
+      <TTinDVu>
+        <maDVu>HYCHAY_POS_PRO</maDVu>
+        <tenDVu>Hệ Thống Quản Trị &amp; Kế Toán Thuế Hy Chay POS - Bảo Anh Lâm</tenDVu>
+        <pBanDVu>11.0</pBanDVu>
+      </TTinDVu>
+      <TTinTKhaiThue>
+        <TKhaiThue>
+          <maTKhai>${maTKhai}</maTKhai>
+          <tenTKhai>${escapeXmlSafe(tenTKhai)}</tenTKhai>
+          <moTaBMau/>
+          <pBanTKhaiXML>2.1.0</pBanTKhaiXML>
+          <loaiTKhai>${trangThaiTK}</loaiTKhai>
+          <soLan>${soLan}</soLan>
+          <KyKKhaiThue>
+            <kieuKy>${pInfo.kieuKy}</kieuKy>
+            <kyKKhai>${pInfo.kyKKhai}</kyKKhai>
+            <kyKKhaiTuNgay>${pInfo.tuNgay}</kyKKhaiTuNgay>
+            <kyKKhaiDenNgay>${pInfo.denNgay}</kyKKhaiDenNgay>
+          </KyKKhaiThue>
+          <maCQTNoiNop>${escapeXmlSafe(maCQT)}</maCQTNoiNop>
+          <tenCQTNoiNop>${escapeXmlSafe(tenCQT)}</tenCQTNoiNop>
+          <ngayLapTKhai>${nowIso}</ngayLapTKhai>
+          <nguoiKy>Hoàng Huỳnh Huy Bảo</nguoiKy>
+          <ngayKy>${nowIso}</ngayKy>
+        </TKhaiThue>
+        <NNT>
+          <mst>${escapeXmlSafe(mst)}</mst>
+          <mstCu>${escapeXmlSafe(mstCu)}</mstCu>
+          <tenNNT>${escapeXmlSafe(tenNNT)}</tenNNT>
+          <dchiNNT>${escapeXmlSafe(dchiNNT)}</dchiNNT>
+          <phuongXa>Phường Phan Thiết</phuongXa>
+          <tenTinh>Tỉnh Lâm Đồng</tenTinh>
+          <dthoaiNNT>0903242400</dthoaiNNT>
+          <emailNNT>balshousevn@gmail.com</emailNNT>
+        </NNT>
+      </TTinTKhaiThue>
+    </TTinChung>${ctkhaiBodyXml}
+  </HSoKhaiThue>
+</HSoThueDTu>`;
+
+      const fileName = `ToKhai_${model}_${pInfo.fileTag}_MST_${mst}.xml`;
+      const blob = new Blob([xmlContent], { type: 'application/xml;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = fileName;
+      a.click();
+
+      const statusEl = document.getElementById('xmlExportStatusText');
+      if (statusEl) {
+        statusEl.innerHTML = `✅ Đã xuất file <b>${fileName}</b> hợp lệ 100%! Sẵn sàng tải lên Cổng Thuế Điện Tử.`;
+      }
     };
   </script>
 </body>
