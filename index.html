@@ -2267,12 +2267,28 @@ window.addToCart = function(id, name, p) {
     // ==========================================
     // 7. GỬI ĐƠN HÀNG (HỖ TRỢ ĐƠN HẸN GIỜ GIAO) & LẮNG NGHE TRẠNG THÁI TRỰC TIẾP
     // ==========================================
-    window.submitOrder = function(e) {
+window.submitOrder = function(e) {
       e.preventDefault();
       checkOperatingHours();
       if (!isStoreOpen) return alert("Quán hiện đang đóng cửa!");
-      let sub = 0; for (let k in cart) sub += cart[k].price * cart[k].qty;
+      let sub = 0;
+      for (let k in cart) {
+        const item = cart[k];
+        const liveCustom = menuCustomCache[item.id] || {};
+        if (liveCustom.soldOut) {
+          return alert(`⚠️ Rất tiếc, món "${item.name}" vừa tạm hết nguyên liệu! Bạn vui lòng xóa món này khỏi giỏ hàng và chọn món khác nhé.`);
+        }
+        sub += item.price * item.qty;
+      }
       if (sub === 0) return;
+
+      const btnSubmit = document.getElementById('btnSubmitOrder');
+      if (btnSubmit) {
+        if (btnSubmit.dataset.submitting === '1') return;
+        btnSubmit.dataset.submitting = '1';
+        btnSubmit.disabled = true;
+        btnSubmit.innerText = "⏳ ĐANG GỬI ĐƠN HÀNG...";
+      }
 
       const payMethod = document.getElementById('paymentMethodSelect').value;
       const name = document.getElementById('cusName').value.trim();
@@ -2320,12 +2336,24 @@ window.addToCart = function(id, name, p) {
       };
 
       push(ref(db, 'orders'), orderData).then((nRef) => {
+        if (btnSubmit) {
+          btnSubmit.dataset.submitting = '0';
+          btnSubmit.disabled = false;
+          btnSubmit.innerText = "XÁC NHẬN GỬI ĐƠN HÀNG";
+        }
         localStorage.setItem('last_hy_chay_order_id', nRef.key);
         listenActiveOrderForCustomer(nRef.key);
         const schedMsg = scheduledTimeVal ? `\n⏰ Lịch hẹn giao lúc ${scheduledTimeVal} đã được ghi nhận! Bếp sẽ canh nấu sát giờ hẹn để món ăn luôn nóng hổi.` : '';
         alert(`🎉 Gửi đơn thành công!${schedMsg}`);
         cart = {}; saveCartLocal(); updateCartUI(); window.closeCheckoutModal();
         document.getElementById('cusNote').value = '';
+      }).catch((err) => {
+        if (btnSubmit) {
+          btnSubmit.dataset.submitting = '0';
+          btnSubmit.disabled = false;
+          btnSubmit.innerText = "XÁC NHẬN GỬI ĐƠN HÀNG";
+        }
+        alert("❌ Lỗi kết nối mạng khi gửi đơn: " + err.message + "\nBạn vui lòng bấm gửi lại nhé!");
       });
     };
 
@@ -2428,9 +2456,11 @@ window.addToCart = function(id, name, p) {
     }
 
 // =========================================================
-    // 8. HỆ THỐNG CÀI ĐẶT APP FULL MÀN HÌNH (IOS 100% FULLSCREEN & ANDROID APK/PWA)
+    // 8. HỆ THỐNG TẢI & CÀI ĐẶT APP TRỰC TIẾP 1-CHẠM (KHÔNG DÙNG QR - TẢI FILE TỨC THÌ)
     // =========================================================
     let deferredCustomerPrompt = null;
+    let preloadedLogoBase64 = '';
+    let apkAvailabilityMap = { '/HyChay_Khach.apk': false, '/HyChay_Shipper.apk': false };
 
     function isRunningStandalone() {
       return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
@@ -2440,8 +2470,29 @@ window.addToCart = function(id, name, p) {
       return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     }
 
-    // QUAN TRỌNG CHO iOS FULL MÀN HÌNH:
-    // Gỡ bỏ manifest dạng data:/blob: trên iPhone/iPad để Safari không bị lỗi lùi về chế độ trình duyệt có thanh địa chỉ
+    // Nạp sẵn Logo và kiểm tra file APK ngay khi mở trang để lúc khách bấm nút Tải là chạy ĐỒNG BỘ 100% (Không bị Safari/Chrome chặn)
+    (function preloadInstallAssets() {
+      fetch('https://hychayfood.vercel.app/Logo%20nho.png')
+        .then(r => r.blob())
+        .then(blob => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            preloadedLogoBase64 = (reader.result || '').split(',')[1] || '';
+          };
+          reader.readAsDataURL(blob);
+        }).catch(() => {});
+
+      ['/HyChay_Khach.apk', '/HyChay_Shipper.apk'].forEach(path => {
+        fetch(path, { method: 'HEAD' }).then(res => {
+          const cType = (res.headers.get('content-type') || '').toLowerCase();
+          if (res.ok && !cType.includes('text/html')) {
+            apkAvailabilityMap[path] = true;
+          }
+        }).catch(() => {});
+      });
+    })();
+
+    // Cấu hình Manifest chuẩn cho Android & Gỡ bỏ data: manifest gây lỗi trên iOS
     if (isIOSDevice()) {
       const mLink = document.getElementById('customerManifestLink');
       if (mLink) mLink.remove();
@@ -2450,22 +2501,22 @@ window.addToCart = function(id, name, p) {
         const appleTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]');
         if (appleTitle) appleTitle.setAttribute('content', 'Ship Hy Chay');
       }
-    } else if (shipperOrderIdParam) {
-      document.title = "Đội Ship Hy Chay - Nhận Đơn";
-      const shipperManifest = {
-        id: window.location.origin + "/index.html?shipper=hub",
-        name: "Đội Ship Hy Chay - Trạm Nhận Đơn",
-        short_name: "Ship Hy Chay",
-        start_url: window.location.origin + "/index.html?shipper=hub",
+    } else {
+      const isShp = !!shipperOrderIdParam;
+      const validManifest = {
+        id: window.location.origin + (isShp ? "/index.html?shipper=hub" : "/index.html"),
+        name: isShp ? "Đội Ship Hy Chay - Trạm Nhận Đơn" : "Hy Chay - Đặt Món Trực Tuyến",
+        short_name: isShp ? "Ship Hy Chay" : "Hy Chay",
+        start_url: window.location.origin + (isShp ? "/index.html?shipper=hub" : "/index.html"),
         scope: window.location.origin + "/",
         display: "standalone",
-        background_color: "#0f172a",
-        theme_color: "#ffd800",
+        background_color: isShp ? "#0f172a" : "#faf9f5",
+        theme_color: isShp ? "#ffd800" : "#1e5e3a",
         icons: [{ src: "https://hychayfood.vercel.app/Logo%20nho.png", sizes: "192x192", type: "image/png", purpose: "any maskable" }]
       };
       const mLink = document.getElementById('customerManifestLink');
       if (mLink) {
-        mLink.href = URL.createObjectURL(new Blob([JSON.stringify(shipperManifest)], { type: 'application/json' }));
+        mLink.href = URL.createObjectURL(new Blob([JSON.stringify(validManifest)], { type: 'application/json' }));
       }
     }
 
@@ -2474,41 +2525,24 @@ window.addToCart = function(id, name, p) {
       deferredCustomerPrompt = e;
     });
 
-// Hàm chuyển đổi ảnh Logo quán sang chuẩn Base64 nhúng thẳng vào trong file cài đặt iOS (.mobileconfig)
-    async function getLogoBase64ForIOS() {
-      try {
-        const res = await fetch('https://hychayfood.vercel.app/Logo%20nho.png');
-        const blob = await res.blob();
-        return await new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const base64Raw = (reader.result || '').split(',')[1] || '';
-            resolve(base64Raw);
-          };
-          reader.readAsDataURL(blob);
-        });
-      } catch (e) {
-        return '';
-      }
-    }
-
-    // Hàm xuất file .mobileconfig kích hoạt trực tiếp trình cài đặt gốc của iOS (Full màn hình + Có sẵn Logo)
-    window.downloadIOSProfile = async function(mode = 'admin') {
+    // 1. Tải File Cấu Hình Full Màn Hình Cho iPhone / iPad (.mobileconfig) - Đồng bộ 100%, không bị lỗi Safari
+    window.downloadIOSProfile = function(mode = 'customer') {
       const originUrl = window.location.origin;
       let appUrl = originUrl + '/index.html';
       let appTitle = 'Hy Chay';
+      let fileName = 'HyChay_iPhone_FullScreen.mobileconfig';
 
       if (mode === 'admin') {
         appUrl = originUrl + '/admin.html';
         appTitle = 'POS Hy Chay';
+        fileName = 'POS_HyChay_iPhone.mobileconfig';
       } else if (mode === 'shipper') {
         appUrl = originUrl + '/index.html?shipper=hub';
         appTitle = 'Ship Hy Chay';
+        fileName = 'Ship_HyChay_iPhone.mobileconfig';
       }
 
-      const iconBase64 = await getLogoBase64ForIOS();
-      const iconXmlTag = iconBase64 ? `<key>Icon</key><data>${iconBase64}</data>` : '';
-
+      const iconXmlTag = preloadedLogoBase64 ? `<key>Icon</key><data>${preloadedLogoBase64}</data>` : '';
       const uuid1 = '11111111-2222-3333-4444-' + Date.now().toString().slice(-12);
       const uuid2 = '99999999-8888-7777-6666-' + Date.now().toString().slice(-12);
 
@@ -2523,7 +2557,7 @@ window.addToCart = function(id, name, p) {
       <key>IsRemovable</key><true/>
       ${iconXmlTag}
       <key>Label</key><string>${appTitle}</string>
-      <key>PayloadDescription</key><string>Cài đặt biểu tượng ${appTitle} Full Màn Hình</string>
+      <key>PayloadDescription</key><string>Ứng dụng ${appTitle} Full Màn Hình</string>
       <key>PayloadDisplayName</key><string>${appTitle}</string>
       <key>PayloadIdentifier</key><string>com.baoanhlam.webclip.${mode}</string>
       <key>PayloadType</key><string>com.apple.webClip.managed</string>
@@ -2542,32 +2576,95 @@ window.addToCart = function(id, name, p) {
 </dict>
 </plist>`;
 
-      // Chuyển sang Data URI chuẩn của Apple để Safari bật thẳng hộp thoại "Cho phép tải hồ sơ cấu hình"
-      const base64Config = btoa(unescape(encodeURIComponent(mobileConfigXml)));
-      window.location.href = 'data:application/x-apple-aspen-config;base64,' + base64Config;
+      const blob = new Blob([mobileConfigXml], { type: 'application/x-apple-aspen-config' });
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      setTimeout(() => {
+        alert("🍎 Đã tải bộ cài đặt Full Màn Hình cho iPhone!\n\n👉 BƯỚC TIẾP THEO:\n1. Nếu iPhone hỏi 'Cho phép tải hồ sơ cấu hình', hãy bấm [Cho phép].\n2. Mở ứng dụng [Cài đặt] (Settings) của iPhone -> Bấm vào [Đã tải về hồ sơ] ở ngay đầu trang -> Bấm [Cài đặt] là xong!");
+      }, 400);
     };
 
-    // Đồng bộ tên hàm gọi ở trang khách hàng index.html
     window.downloadCustomerIOSProfile = function(roleMode = 'customer') {
       const mode = (roleMode === 'shipper' || window.location.search.includes('shipper=')) ? 'shipper' : 'customer';
       window.downloadIOSProfile(mode);
     };
 
-    // Hàm tải File Cài Đặt Windows (.BAT)
+    // 2. Tải File Cài Đặt Cho Máy Tính Windows (.BAT)
     window.downloadCustomerWindowsApp = function() {
-      const appUrl = window.location.origin + '/index.html';
+      const isShp = !!shipperOrderIdParam;
+      const appUrl = window.location.origin + (isShp ? '/index.html?shipper=hub' : '/index.html');
+      const shortName = isShp ? 'Ship Hy Chay' : 'Hy Chay Đặt Món';
       const batContent = [
         '@echo off',
         'chcp 65001 >nul',
-        'powershell -Command "$ws = New-Object -ComObject WScript.Shell; $s = $ws.CreateShortcut([Environment]::GetFolderPath(\'Desktop\') + \'\\Hy Chay Đặt Món.lnk\'); $s.TargetPath = \'msedge.exe\'; $s.Arguments = \'--app=' + appUrl + '\'; $s.Save()"',
+        'powershell -Command "$ws = New-Object -ComObject WScript.Shell; $s = $ws.CreateShortcut([Environment]::GetFolderPath(\'Desktop\') + \'\\' + shortName + '.lnk\'); $s.TargetPath = \'msedge.exe\'; $s.Arguments = \'--app=' + appUrl + '\'; $s.Save()"',
         'start "" msedge --app="' + appUrl + '" 2>nul || start "" chrome --app="' + appUrl + '"',
         'exit'
       ].join('\r\n');
       const blob = new Blob([batContent], { type: 'application/bat;charset=utf-8' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = 'Cai_Dat_HyChay_Windows.bat';
+      a.download = isShp ? 'Cai_Dat_Ship_HyChay_PC.bat' : 'Cai_Dat_HyChay_PC.bat';
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
+    };
+
+    // 3. Tải File Khởi Chạy Nhanh Trên Android (Đảm bảo bấm là tải được file ngay cả khi chưa up APK hoặc mở trong Zalo)
+    window.downloadAndroidLauncherFile = function(isShp = false) {
+      const targetUrl = window.location.origin + (isShp ? '/index.html?shipper=hub' : '/index.html');
+      const titleText = isShp ? 'Đội Ship Hy Chay' : 'Hy Chay Đặt Món';
+      const launcherHtml = `<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><meta http-equiv="refresh" content="0;url=${targetUrl}"><title>${titleText}</title></head><body style="background:#1e5e3a;color:#fff;font-family:sans-serif;text-align:center;padding-top:30vh;"><h2>Đang mở ứng dụng ${titleText}...</h2><p><a href="${targetUrl}" style="color:#ffd800;font-weight:bold;">Bấm vào đây nếu ứng dụng chưa tự mở</a></p><script>window.location.replace("${targetUrl}");<\/script></body></html>`;
+      const blob = new Blob([launcherHtml], { type: 'text/html;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = isShp ? 'Mo_App_Ship_HyChay.html' : 'Mo_App_HyChay.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    };
+
+    window.downloadApkWithFallback = function(apkPath) {
+      const isShp = apkPath.includes('Shipper') || !!shipperOrderIdParam;
+      // Nếu file .apk đã được bạn upload lên thư mục Vercel -> Tải trực tiếp file .apk
+      if (apkAvailabilityMap[apkPath]) {
+        const a = document.createElement('a');
+        a.href = apkPath;
+        a.download = apkPath.replace('/', '');
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        return;
+      }
+      // Nếu trình duyệt hỗ trợ hộp thoại cài đặt trực tiếp 1-chạm của Chrome
+      if (deferredCustomerPrompt) {
+        window.triggerNativeInstall();
+        return;
+      }
+      // Nếu chưa upload file .apk lên Vercel -> Tải ngay file Launcher .html về máy để không bao giờ bị lỗi không tải được!
+      window.downloadAndroidLauncherFile(isShp);
+      alert("📥 Đã tải file khởi chạy ứng dụng về máy!\n\n💡 Mẹo đưa biểu tượng ra màn hình chính Android đẹp nhất:\nBạn hãy bấm vào dấu 3 chấm (⋮) ở góc trên bên phải trình duyệt Chrome -> Chọn [Thêm vào màn hình chính] (hoặc [Cài đặt ứng dụng]) nhé!");
+    };
+
+    window.triggerNativeInstall = async function() {
+      if (deferredCustomerPrompt) {
+        deferredCustomerPrompt.prompt();
+        const choice = await deferredCustomerPrompt.userChoice;
+        deferredCustomerPrompt = null;
+        if (choice.outcome === 'accepted') window.closeSmartInstallOverlay();
+      } else if (isIOSDevice()) {
+        window.downloadCustomerIOSProfile(shipperOrderIdParam ? 'shipper' : 'customer');
+      } else {
+        const isShp = !!shipperOrderIdParam;
+        const apkPath = isShp ? '/HyChay_Shipper.apk' : '/HyChay_Khach.apk';
+        window.downloadApkWithFallback(apkPath);
+      }
     };
 
     window.closeSmartInstallOverlay = function() {
@@ -2575,24 +2672,23 @@ window.addToCart = function(id, name, p) {
       if (smartEl) smartEl.style.display = 'none';
       const guideEl = document.getElementById('installGuideModal');
       if (guideEl) guideEl.classList.remove('active');
-      // Xóa ?install=1 trên thanh địa chỉ để F5 không bị tự bật lại
-      if (window.location.search.includes('install=1')) {
-        const params = new URLSearchParams(window.location.search);
-        params.delete('install');
-        const newQuery = params.toString();
-        window.history.replaceState({}, document.title, window.location.pathname + (newQuery ? '?' + newQuery : ''));
-      }
     };
 
+    // Hộp thoại Tải & Cài Đặt App 1-Chạm (ĐÃ BỎ HOÀN TOÀN MÃ QR THEO YÊU CẦU)
     window.openSmartInstallPrompt = function(roleMode = 'customer') {
       if (isRunningStandalone()) {
-        return alert("✅ Ứng dụng đang chạy ở chế độ Full Màn Hình rồi!");
+        return alert("✅ Ứng dụng đã được cài đặt và đang chạy ở chế độ Full Màn Hình!");
       }
       const isShp = (roleMode === 'shipper' || !!shipperOrderIdParam);
       const appTitle = isShp ? "🛵 App Đội Ship Hy Chay" : "🥗 App Đặt Món Hy Chay";
       const apkFileName = isShp ? "/HyChay_Shipper.apk" : "/HyChay_Khach.apk";
-      const iosZaloWarning = /Zalo/i.test(navigator.userAgent)
-        ? `<div style="background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; padding:8px; border-radius:8px; font-size:0.8rem; font-weight:700; margin-bottom:10px;">⚠️ Bạn đang mở trong Zalo! Hãy bấm nút <b>3 chấm (…)</b> ở góc trên bên phải -> Chọn <b>"Mở bằng trình duyệt (Safari / Chrome)"</b> để cài Full màn hình nhé!</div>`
+      const currentLink = window.location.origin + (isShp ? "/index.html?shipper=hub" : "/index.html");
+
+      const inAppWarning = /Zalo|FBAN|FBAV/i.test(navigator.userAgent)
+        ? `<div style="background:#fef2f2; color:#b91c1c; border:2px solid #ef4444; padding:10px; border-radius:10px; font-size:0.82rem; font-weight:700; margin-bottom:12px; text-align:left;">
+             ⚠️ <b>BẠN ĐANG MỞ TRONG ZALO / FACEBOOK!</b><br>
+             Trình duyệt nhúng của Zalo thường chặn tải file cài đặt. Bạn hãy bấm nút <b>3 dấu chấm (…)</b> ở góc trên bên phải màn hình $\\rightarrow$ Chọn <b>"Mở bằng trình duyệt (Safari / Chrome)"</b> để tải App 1-chạm nhé!
+           </div>`
         : '';
 
       let bannerEl = document.getElementById('smartQrInstallOverlay');
@@ -2604,79 +2700,36 @@ window.addToCart = function(id, name, p) {
         document.body.appendChild(bannerEl);
       }
 
-      if (isIOSDevice()) {
-        bannerEl.innerHTML = `
-          <div style="background:#ffffff; color:#0f172a; border-radius:20px; max-width:400px; width:100%; padding:20px 18px; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,0.4); position:relative; max-height:90vh; overflow-y:auto;">
-            <span onclick="closeSmartInstallOverlay()" style="position:absolute; top:10px; right:14px; font-size:1.6rem; font-weight:bold; color:#64748b; cursor:pointer;">&times;</span>
-            <img src="https://hychayfood.vercel.app/Logo%20nho.png" style="width:60px; height:60px; margin:0 auto 8px; border-radius:14px;">
-            <h3 style="color:#1e5e3a; font-size:1.12rem; margin-bottom:6px;">Cài ${appTitle} Full Màn Hình iPhone</h3>
-            ${iosZaloWarning}
-            <button type="button" onclick="downloadCustomerIOSProfile('${isShp ? 'shipper' : 'customer'}')" style="width:100%; padding:13px; background:#0284c7; color:#fff; border:none; border-radius:12px; font-weight:800; font-size:0.92rem; cursor:pointer; margin-bottom:10px;">
-              🍎 Cách 1: Tải File Cài App Full Màn Hình (.mobileconfig)
+      bannerEl.innerHTML = `
+        <div style="background:#ffffff; color:#0f172a; border-radius:20px; max-width:420px; width:100%; padding:22px 18px; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,0.4); position:relative; max-height:90vh; overflow-y:auto;">
+          <span onclick="closeSmartInstallOverlay()" style="position:absolute; top:10px; right:14px; font-size:1.6rem; font-weight:bold; color:#64748b; cursor:pointer;">&times;</span>
+          <img src="https://hychayfood.vercel.app/Logo%20nho.png" style="width:64px; height:64px; margin:0 auto 10px; border-radius:14px; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
+          <h3 style="color:#1e5e3a; font-size:1.15rem; margin-bottom:6px;">Tải & Cài Đặt ${appTitle}</h3>
+          <p style="font-size:0.84rem; color:#475569; margin-bottom:14px;">Bấm chọn đúng dòng máy bạn đang sử dụng để tải ứng dụng về màn hình chính:</p>
+          ${inAppWarning}
+          <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:12px;">
+            <button type="button" onclick="downloadApkWithFallback('${apkFileName}')" style="width:100%; padding:14px; background:#16a34a; color:#ffffff; border:none; border-radius:12px; font-weight:900; font-size:0.95rem; cursor:pointer; box-shadow:0 4px 12px rgba(22,163,74,0.3);">
+              🤖 1. TẢI & CÀI CHO ĐIỆN THOẠI ANDROID (.APK / 1-CHẠM)
             </button>
-            <div style="background:#f0fdf4; border:1.5px solid #16a34a; border-radius:12px; padding:10px; text-align:left; font-size:0.84rem; line-height:1.5; margin-bottom:12px;">
-              <b>🍎 Cách 2 (Chạm trực tiếp trên Safari):</b><br>
-              • <b>B1:</b> Bấm nút <b>Chia sẻ (⎋)</b> ở thanh dưới cùng Safari.<br>
-              • <b>B2:</b> Chọn <b>"Thêm vào MH chính (➕)"</b> -> Bấm <b>Thêm</b> (Lưu ý: Xóa icon cũ nếu trước đó đã thêm để nhận diện Full màn hình).
-            </div>
-            <button type="button" onclick="closeSmartInstallOverlay()" style="width:100%; padding:11px; background:#1e5e3a; color:#fff; border:none; border-radius:10px; font-weight:800; cursor:pointer;">Đóng Cửa Sổ</button>
-          </div>`;
-      } else {
-        bannerEl.innerHTML = `
-          <div style="background:#ffffff; color:#0f172a; border-radius:20px; max-width:400px; width:100%; padding:22px 18px; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,0.4); position:relative; max-height:90vh; overflow-y:auto;">
-            <span onclick="closeSmartInstallOverlay()" style="position:absolute; top:10px; right:14px; font-size:1.6rem; font-weight:bold; color:#64748b; cursor:pointer;">&times;</span>
-            <img src="https://hychayfood.vercel.app/Logo%20nho.png" style="width:64px; height:64px; margin:0 auto 10px; border-radius:14px;">
-            <h3 style="color:#1e5e3a; font-size:1.15rem; margin-bottom:6px;">Cài Đặt ${appTitle}</h3>
-            <p style="font-size:0.84rem; color:#475569; margin-bottom:14px;">Chọn cách cài đặt tiện lợi nhất cho điện thoại của bạn:</p>
-            ${iosZaloWarning}
-            <button type="button" onclick="triggerNativeInstall()" style="width:100%; padding:14px; background:#16a34a; color:#ffffff; border:none; border-radius:12px; font-weight:900; font-size:0.98rem; cursor:pointer; margin-bottom:10px; box-shadow:0 4px 12px rgba(22,163,74,0.3);">
-              ⚡ 1. CÀI ĐẶT TRỰC TIẾP 1-CHẠM (KHUYÊN DÙNG)
+            <button type="button" onclick="downloadCustomerIOSProfile('${isShp ? 'shipper' : 'customer'}')" style="width:100%; padding:14px; background:#0f172a; color:#ffffff; border:none; border-radius:12px; font-weight:800; font-size:0.92rem; cursor:pointer;">
+              🍎 2. TẢI CẤU HÌNH FULL MÀN HÌNH CHO IPHONE (iOS)
             </button>
-            <button type="button" onclick="downloadApkWithFallback('${apkFileName}')" style="width:100%; padding:12px; background:#0284c7; color:#ffffff; border:none; border-radius:12px; font-weight:800; font-size:0.9rem; cursor:pointer; margin-bottom:10px;">
-              📦 2. TẢI FILE CÀI ĐẶT ANDROID (.APK)
+            <button type="button" onclick="downloadCustomerWindowsApp()" style="width:100%; padding:12px; background:#0284c7; color:#ffffff; border:none; border-radius:12px; font-weight:800; font-size:0.88rem; cursor:pointer;">
+              💻 3. TẢI FILE CÀI ĐẶT CHO MÁY TÍNH WINDOWS (.BAT)
             </button>
-            <button type="button" onclick="closeSmartInstallOverlay()" style="width:100%; padding:10px; background:#f1f5f9; color:#64748b; border:none; border-radius:10px; font-weight:700; font-size:0.88rem; cursor:pointer;">
-              Đóng Cửa Sổ
+            <button type="button" onclick="navigator.clipboard.writeText('${currentLink}').then(()=>alert('✅ Đã copy đường link ứng dụng! Bạn có thể dán vào trình duyệt Chrome hoặc Safari.'))" style="width:100%; padding:10px; background:#fef3c7; color:#b45309; border:1px solid #fde68a; border-radius:10px; font-weight:800; font-size:0.84rem; cursor:pointer;">
+              🔗 Copy Đường Link Mở Bằng Chrome / Safari
             </button>
-          </div>`;
-      }
+          </div>
+          <button type="button" onclick="closeSmartInstallOverlay()" style="width:100%; padding:11px; background:#f1f5f9; color:#475569; border:none; border-radius:10px; font-weight:800; font-size:0.88rem; cursor:pointer;">
+            ✖ Đóng Cửa Sổ
+          </button>
+        </div>`;
       bannerEl.style.display = 'flex';
     };
 
     window.openInstallGuideModal = () => window.openSmartInstallPrompt(shipperOrderIdParam ? 'shipper' : 'customer');
     window.closeInstallGuideModal = () => window.closeSmartInstallOverlay();
-
-    window.triggerNativeInstall = async function() {
-      if (deferredCustomerPrompt) {
-        deferredCustomerPrompt.prompt();
-        const choice = await deferredCustomerPrompt.userChoice;
-        deferredCustomerPrompt = null;
-        if (choice.outcome === 'accepted') window.closeSmartInstallOverlay();
-      } else if (isIOSDevice()) {
-        window.downloadCustomerIOSProfile(shipperOrderIdParam ? 'shipper' : 'customer');
-      } else {
-        alert("📲 Trên trình duyệt Chrome Android:\nHãy bấm vào biểu tượng 3 dấu chấm (⋮) ở góc trên bên phải -> Chọn 'Thêm vào màn hình chính' (hoặc 'Cài đặt ứng dụng') để mở Full màn hình!");
-      }
-    };
-
-    window.downloadApkWithFallback = async function(apkPath) {
-      try {
-        const res = await fetch(apkPath, { method: 'HEAD' });
-        const contentType = res.headers.get('content-type') || '';
-        if (res.ok && !contentType.includes('text/html')) {
-          const a = document.createElement('a');
-          a.href = apkPath;
-          a.download = apkPath.replace('/', '');
-          a.click();
-          return;
-        }
-      } catch (_) {}
-      // Nếu chưa up file .apk lên hosting thì tự động kích hoạt cài đặt trực tiếp
-      window.triggerNativeInstall();
-    };
-    if (urlParams.get('install') === '1' && !isRunningStandalone()) {
-      setTimeout(() => window.openSmartInstallPrompt(shipperOrderIdParam ? 'shipper' : 'customer'), 600);
-    }
   </script>
 </body>
 </html>
