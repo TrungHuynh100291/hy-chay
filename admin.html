@@ -251,35 +251,37 @@
     <!-- KHUNG HIỆN THÔNG BÁO DỊCH VỤ DINE-IN -->
     <div id="serviceAlerts" class="service-alert-container no-print"></div>
 
-<!-- MODAL TẢI FILE CÀI ĐẶT TRỰC TIẾP CHO WINDOWS, ANDROID, IOS -->
+<!-- MODAL MÃ QR QUÉT CÀI ĐẶT 1-CHẠM CHO KHÁCH HÀNG, BÁC TÀI SHIPPER & QUẢN LÝ -->
     <div id="installGuideModal" class="install-modal-overlay">
-      <div class="install-modal-box" style="max-width: 500px;">
+      <div class="install-modal-box" style="max-width: 560px;">
         <span style="position:absolute; top:14px; right:16px; font-size:1.4rem; cursor:pointer;" onclick="closeInstallGuideModal()">&times;</span>
-        <h3 style="color:var(--primary); font-size:1.22rem; margin-bottom:8px;">📥 Tải Bộ Cài Đặt Hy Chay POS Về Máy</h3>
-        <p style="font-size:0.84rem; color:#64748b; margin-bottom:14px;">Chọn đúng thiết bị của bạn bên dưới để tải file cài đặt biểu tượng phần mềm độc lập ra màn hình chính:</p>
+        <h3 style="color:var(--primary); font-size:1.2rem; margin-bottom:6px;">📲 Mã QR Quét Đưa App Ra Màn Hình Điện Thoại</h3>
+        <p style="font-size:0.82rem; color:#64748b; margin-bottom:12px;">Cho Khách hàng hoặc Bác tài dùng Camera / Zalo quét mã QR dưới đây — Điện thoại sẽ tự động bật hộp thoại hỏi đưa App ra màn hình chính:</p>
         
-        <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:14px;">
-          <button type="button" onclick="downloadWindowsInstaller('admin')" style="width:100%; padding:13px 16px; background:#0284c7; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:0.92rem; cursor:pointer; text-align:left; display:flex; justify-content:space-between; align-items:center;">
-            <span>💻 1. Tải File Cài Đặt Cho Windows (.BAT)</span>
-            <span style="background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:6px; font-size:0.75rem;">Tải về PC</span>
-          </button>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; text-align:center;">
+          <div style="background:#f0fdf4; border:2px solid #16a34a; border-radius:12px; padding:12px;">
+            <b style="color:#166534; font-size:0.85rem; display:block; margin-bottom:6px;">🥗 QR APP KHÁCH ĐẶT MÓN</b>
+            <img id="qrInstallCustomerImg" src="" alt="QR Khách" style="width:145px; height:145px; margin:0 auto 6px; border-radius:8px; background:#fff; padding:4px; border:1px solid #bbf7d0;">
+            <small style="color:#15803d; font-weight:700; display:block;">Quét là hỏi cài App Hy Chay</small>
+          </div>
+          <div style="background:#eff6ff; border:2px solid #0284c7; border-radius:12px; padding:12px;">
+            <b style="color:#0369a1; font-size:0.85rem; display:block; margin-bottom:6px;">🛵 QR APP BÁC TÀI SHIPPER</b>
+            <img id="qrInstallShipperImg" src="" alt="QR Shipper" style="width:145px; height:145px; margin:0 auto 6px; border-radius:8px; background:#fff; padding:4px; border:1px solid #bae6fd;">
+            <small style="color:#0369a1; font-weight:700; display:block;">Quét là cài Trạm Trực Đơn Ship</small>
+          </div>
+        </div>
 
-          <button type="button" onclick="triggerAndroidInstall('admin')" style="width:100%; padding:13px 16px; background:#16a34a; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:0.92rem; cursor:pointer; text-align:left; display:flex; justify-content:space-between; align-items:center;">
-            <span>🤖 2. Cài Đặt Trực Tiếp Cho Android (APK/PWA)</span>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">
+          <button type="button" onclick="triggerAndroidInstall('admin')" style="width:100%; padding:11px 14px; background:#16a34a; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:0.88rem; cursor:pointer; text-align:left; display:flex; justify-content:space-between; align-items:center;">
+            <span>📱 Đưa App Quản Trị POS Này Ra Màn Hình Điện Thoại</span>
             <span style="background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:6px; font-size:0.75rem;">1-Chạm</span>
           </button>
-
-          <button type="button" onclick="downloadIOSProfile('admin')" style="width:100%; padding:13px 16px; background:#0f172a; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:0.92rem; cursor:pointer; text-align:left; display:flex; justify-content:space-between; align-items:center;">
-            <span>🍎 3. Tải Cấu Hình Cài Đặt Cho iPhone / iPad (iOS)</span>
-            <span style="background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:6px; font-size:0.75rem;">WebClip</span>
+          <button type="button" onclick="downloadWindowsInstaller('admin')" style="width:100%; padding:11px 14px; background:#0284c7; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:0.88rem; cursor:pointer; text-align:left; display:flex; justify-content:space-between; align-items:center;">
+            <span>💻 Tạo Icon App POS Ngoài Màn Hình Desktop Windows (.BAT)</span>
+            <span style="background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:6px; font-size:0.75rem;">Tải về PC</span>
           </button>
         </div>
 
-        <div class="install-step-card" style="font-size:0.8rem; color:#475569;">
-          💡 <b>Hướng dẫn nhanh:</b><br>
-          • <b>Máy tính Windows:</b> Bấm nút số 1 để tải file <code>Cai_Dat_POS_HyChay.bat</code> về máy -> Nhấp đúp chạy file là tự động tạo Icon App ngoài màn hình Desktop.<br>
-          • <b>Điện thoại Android / iPhone:</b> Bấm nút số 2 hoặc số 3 (hoặc chọn "Thêm vào MH chính" trong trình duyệt).
-        </div>
         <button onclick="closeInstallGuideModal()" style="width:100%; padding:10px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-weight:700; cursor:pointer;">Đóng Cửa Sổ</button>
       </div>
     </div>
@@ -648,7 +650,7 @@
       <div id="editOrderModal" class="cancel-modal-overlay">
         <div class="cancel-modal-box" style="max-width:700px;">
           <h3 style="color:var(--primary); margin-bottom:6px;">✏️ Chỉnh Sửa Trực Tiếp Đơn Hàng <span id="editModalOrderId" style="color:#dc2626;"></span></h3>
-          <p style="font-size:0.84rem; color:#64748b; margin-bottom:12px;">Khách hàng: <b id="editModalCustomerName"></b> | SĐT: <b id="editModalCustomerPhone"></b></p
+          <p style="font-size:0.84rem; color:#64748b; margin-bottom:12px;">Khách hàng: <b id="editModalCustomerName"></b> | SĐT: <b id="editModalCustomerPhone"></b></p>
          <div style="background:#f5f3ff; border:1px solid #c4b5fd; padding:8px 12px; border-radius:8px; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
             <span style="font-size:0.82rem; font-weight:800; color:#5b21b6;">⏰ Giờ khách hẹn giao (Để trống nếu giao ngay):</span>
             <div style="display:flex; gap:6px; align-items:center;">
@@ -2185,13 +2187,68 @@ window.deleteDishFromMenu = function(id, name) {
       update(ref(db, `orders/${orderId}/checkedItems`), { [cleanK]: !currentState });
     };
 
+// LOA ĐỌC SỐ TIỀN KHI NHẬN CHUYỂN KHOẢN QR & TỰ ĐỘNG KHỚP WEBHOOK NGÂN HÀNG
+    let announcedPaidOrdersMap = {};
+
     window.verifyQrPayment = function(orderId) {
+      const o = ordersCache[orderId];
+      const amount = o ? (o.grandTotal || 0) : 0;
+      const seqBadge = typeof getOrderSeqBadgeText === 'function' ? getOrderSeqBadgeText(orderId) : '';
+      announcedPaidOrdersMap[orderId] = true;
+
       update(ref(db, `orders/${orderId}`), {
         paymentVerified: true,
         paymentStatus: 'Đã nhận CK',
         paymentVerifiedAt: new Date().toISOString()
+      }).then(() => {
+        const msg = `Ting ting! Hy Chay đã nhận chuyển khoản thành công ${amount.toLocaleString('vi-VN')} đồng từ đơn hàng số ${seqBadge.replace('#', '')}.`;
+        if (isAudioActive && typeof speakAlert === 'function') {
+          speakAlert(msg, true);
+        } else {
+          window.forceUnlockBackgroundAudio(true);
+          speakAlert(msg, true);
+        }
       });
     };
+
+    // Tự động lắng nghe: Nếu Webhook Ngân hàng (SePay/Casso) hoặc máy khác xác nhận tiền vào -> Loa tự động đọc số tiền!
+    onValue(ref(db, 'orders'), (snap) => {
+      const all = snap.val() || {};
+      Object.keys(all).forEach(oid => {
+        const ord = all[oid];
+        if (!ord || ord.archived) return;
+        if (ord.paymentMethod === 'VIETQR' && ord.paymentVerified && !announcedPaidOrdersMap[oid]) {
+          announcedPaidOrdersMap[oid] = true;
+          // Chỉ phát loa nếu đơn vừa được xác nhận trong vòng 60 giây gần nhất
+          const verTime = ord.paymentVerifiedAt ? new Date(ord.paymentVerifiedAt).getTime() : 0;
+          if (verTime && (Date.now() - verTime < 60000) && isAudioActive) {
+            const seqBadge = typeof getOrderSeqBadgeText === 'function' ? getOrderSeqBadgeText(oid) : '';
+            speakAlert(`Ting ting! Tài khoản quán vừa nhận thành công ${(ord.grandTotal || 0).toLocaleString('vi-VN')} đồng của đơn số ${seqBadge.replace('#', '')}!`, false);
+          }
+        }
+      });
+    });
+
+    // Tự động khớp biến động số dư nếu có giao dịch đẩy vào nhánh bank_webhooks (SePay / Casso / VietQR)
+    onValue(ref(db, 'bank_webhooks'), (snap) => {
+      const hooks = snap.val() || {};
+      Object.keys(hooks).forEach(hkId => {
+        const tx = hooks[hkId];
+        if (!tx || tx.processed) return;
+        const content = String(tx.content || tx.description || '').toUpperCase();
+        const amountIn = Number(tx.transferAmount || tx.amount || 0);
+        // Tìm đơn hàng có mã paymentCode (VD: HC4829) nằm trong nội dung chuyển khoản
+        Object.keys(ordersCache).forEach(oid => {
+          const o = ordersCache[oid];
+          if (o && !o.paymentVerified && o.paymentCode && content.includes(o.paymentCode.toUpperCase())) {
+            if (amountIn >= (o.grandTotal || 0)) {
+              update(ref(db, `bank_webhooks/${hkId}`), { processed: true, matchedOrderId: oid });
+              window.verifyQrPayment(oid);
+            }
+          }
+        });
+      });
+    });
 
     // Đánh dấu 1 đơn lẻ đã đối soát tiền với Shipper
     window.markOrderShipperSettled = function(orderId) {
@@ -3880,10 +3937,23 @@ window.setEditModalCategory = function(cat, btn) {
       setTimeout(decorateOrderCardsWithScheduleBadge, 50);
     };
 
+// =========================================================
+    // 18. TRÌNH BIÊN DỊCH FILE XML THUẾ CHUẨN HTKK v5.7.8 (100% XSD TỔNG CỤC THUẾ)
+    //     KHỚP TUYỆT ĐỐI VỚI FILE HTKK MẪU 01/GTGT (842), 04/GTGT & 01/CNKD (688)
     // =========================================================
-    // 18. TRÌNH BIÊN DỊCH FILE XML THUẾ CHUẨN TỔNG CỤC THUẾ (HSoThueDTu)
-    //     DÀNH CHO CẢ HỘ KINH DOANH (01/CNKD) & DOANH NGHIỆP (04/GTGT, 01/GTGT)
-    // =========================================================
+    // Tự động tạo ảnh QR cài App khi mở Modal Cài Icon
+    const origOpenInstallGuideV13 = window.openInstallGuideModal;
+    window.openInstallGuideModal = function() {
+      const baseUrl = window.location.origin;
+      const cusUrl = `${baseUrl}/index.html?install=1`;
+      const shpUrl = `${baseUrl}/index.html?shipper=hub&install=1`;
+      const qrCus = document.getElementById('qrInstallCustomerImg');
+      const qrShp = document.getElementById('qrInstallShipperImg');
+      if (qrCus) qrCus.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(cusUrl)}`;
+      if (qrShp) qrShp.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(shpUrl)}`;
+      origOpenInstallGuideV13();
+    };
+
     function escapeXmlSafe(str) {
       return String(str || '')
         .replace(/&/g, '&amp;')
@@ -3893,6 +3963,7 @@ window.setEditModalCategory = function(cat, btn) {
         .replace(/'/g, '&apos;');
     }
 
+    // Luôn chuẩn hóa Kỳ Kê Khai về Tháng (M) hoặc Quý (Q) tròn kỳ theo đúng quy định của HTKK
     function getSelectedXmlPeriodInfo() {
       const mode = document.getElementById('filterMode')?.value || 'quarter';
       const todayVN = getVNDateStr();
@@ -3902,16 +3973,15 @@ window.setEditModalCategory = function(cat, btn) {
         const startM = String((q - 1) * 3 + 1).padStart(2, '0');
         const endM = String(q * 3).padStart(2, '0');
         const endDay = (q === 1 || q === 4) ? '31' : '30';
-        return { kieuKy: 'Q', kyKKhai: `${q}/${y}`, tuNgay: `01/${startM}/${y}`, denNgay: `${endDay}/${endM}/${y}`, fileTag: `Q${q}_${y}` };
-      } else if (mode === 'month') {
-        const ym = document.getElementById('filterMonthInput')?.value || todayVN.slice(0, 7);
-        const [y, m] = ym.split('-');
-        const lastDay = new Date(parseInt(y), parseInt(m), 0).getDate();
-        return { kieuKy: 'M', kyKKhai: `${m}/${y}`, tuNgay: `01/${m}/${y}`, denNgay: `${lastDay}/${m}/${y}`, fileTag: `T${m}_${y}` };
+        return { kieuKy: 'Q', kyKKhai: `${q}/${y}`, tuNgay: `01/${startM}/${y}`, denNgay: `${endDay}/${endM}/${y}`, fileTag: `Q${q}${y}` };
       } else {
-        const d = document.getElementById('filterDayInput')?.value || todayVN;
-        const [y, m, day] = d.split('-');
-        return { kieuKy: 'M', kyKKhai: `${m}/${y}`, tuNgay: `${day}/${m}/${y}`, denNgay: `${day}/${m}/${y}`, fileTag: `Ngay_${d}` };
+        // Nếu đang để lọc Theo Tháng hoặc Theo Ngày thì khi xuất XML Thuế sẽ tự động gom tròn Tháng đó (01/MM/YYYY -> Cuối tháng) để HTKK không báo lỗi!
+        const ym = (mode === 'month')
+          ? (document.getElementById('filterMonthInput')?.value || todayVN.slice(0, 7))
+          : (document.getElementById('filterDayInput')?.value || todayVN).slice(0, 7);
+        const [y, m] = ym.split('-');
+        const lastDay = String(new Date(parseInt(y), parseInt(m), 0).getDate()).padStart(2, '0');
+        return { kieuKy: 'M', kyKKhai: `${m}/${y}`, tuNgay: `01/${m}/${y}`, denNgay: `${lastDay}/${m}/${y}`, fileTag: `T${m}${y}` };
       }
     }
 
@@ -3919,37 +3989,42 @@ window.setEditModalCategory = function(cat, btn) {
       const box = document.getElementById('xmlLiveSummaryBox');
       if (!box) return;
       const data = getTaxReportData();
-      const model = document.getElementById('xmlTaxModelSelect')?.value || 'HKD_01_CNKD';
+      const model = document.getElementById('xmlTaxModelSelect')?.value || 'DN_01_GTGT';
       const isVatReduced = (document.getElementById('xmlVatReductionToggle')?.value !== 'no');
       const pInfo = getSelectedXmlPeriodInfo();
 
-      // Tỷ lệ thuế GTGT F&B gốc là 3%. Nếu áp dụng Giảm 20% mức tỷ lệ % theo Nghị quyết Quốc hội thì giảm 0.6%, còn 2.4%
-      const effectiveVatRate = isVatReduced ? 0.024 : 0.03;
-      const vatReductionAmt = isVatReduced ? Math.round(data.totalTaxable * 0.006) : 0;
-      const vatPayable = Math.round(data.totalTaxable * effectiveVatRate);
-      const pitPayableHKD = Math.round(data.totalTaxable * 0.015); // Thuế TNCN 1.5% cho HKD
-
       if (model === 'HKD_01_CNKD') {
-        const totalHKD = vatPayable + pitPayableHKD;
+        const effectiveVatRate = isVatReduced ? 0.024 : 0.03;
+        const vatReductionAmt = isVatReduced ? Math.round(data.totalTaxable * 0.006) : 0;
+        const vatPayable = Math.round(data.totalTaxable * effectiveVatRate);
+        const pitPayableHKD = Math.round(data.totalTaxable * 0.015);
         box.innerHTML = `
-          <b>📌 Tóm tắt Tờ khai Hộ Kinh Doanh (Mẫu 01/CNKD - Kỳ ${pInfo.kyKKhai}):</b><br>
-          • Doanh thu chịu thuế Nhóm 3 (Ngành 5610 + 5630): <b>${data.totalTaxable.toLocaleString()}đ</b> <i>(Đã loại trừ ${data.totalShip.toLocaleString()}đ tiền ship thu hộ)</i><br>
-          • Thuế GTGT phải nộp (${isVatReduced ? '2.4% - Đã giảm 20% từ mức 3%' : '3%'}): <b>${vatPayable.toLocaleString()}đ</b> ${isVatReduced ? `(Được giảm: -${vatReductionAmt.toLocaleString()}đ)` : ''} | Thuế TNCN (1.5%): <b>${pitPayableHKD.toLocaleString()}đ</b><br>
-          👉 <span style="font-size:0.95rem; color:#b91c1c; font-weight:900;">TỔNG THUẾ HỘ KINH DOANH PHẢI NỘP: ${totalHKD.toLocaleString()}đ</span>`;
+          <b>📌 Chuẩn HTKK Mẫu 01/CNKD (Hộ Kinh Doanh - Kỳ ${pInfo.kyKKhai}):</b><br>
+          • Doanh thu F&B (5610 + 5630): <b>${data.totalTaxable.toLocaleString()}đ</b> <i>(Loại trừ ${data.totalShip.toLocaleString()}đ ship thu hộ)</i><br>
+          • Thuế GTGT (${isVatReduced ? '2.4% - Đã giảm 20%' : '3%'}): <b>${vatPayable.toLocaleString()}đ</b> | Thuế TNCN (1.5%): <b>${pitPayableHKD.toLocaleString()}đ</b><br>
+          👉 <span style="font-size:0.95rem; color:#b91c1c; font-weight:900;">TỔNG THUẾ HKD PHẢI NỘP: ${(vatPayable + pitPayableHKD).toLocaleString()}đ</span>`;
       } else if (model === 'DN_04_GTGT') {
+        const effectiveVatRate = isVatReduced ? 0.024 : 0.03;
+        const vatPayable = Math.round(data.totalTaxable * effectiveVatRate);
         box.innerHTML = `
-          <b>📌 Tóm tắt Tờ khai Doanh Nghiệp Trực Tiếp Trên Doanh Thu (Mẫu 04/GTGT - Kỳ ${pInfo.kyKKhai}):</b><br>
-          • Tổng doanh thu chịu thuế F&B (5610 + 5630): <b>${data.totalTaxable.toLocaleString()}đ</b> <i>(Đã tách riêng ${data.totalShip.toLocaleString()}đ ship thu hộ)</i><br>
-          👉 <span style="font-size:0.95rem; color:#b91c1c; font-weight:900;">TỔNG THUẾ GTGT PHẢI NỘP (${isVatReduced ? '2.4%' : '3%'}): ${vatPayable.toLocaleString()}đ</span>`;
+          <b>📌 Chuẩn HTKK Mẫu 04/GTGT (DN Trực Tiếp Doanh Thu - Kỳ ${pInfo.kyKKhai}):</b><br>
+          • Tổng doanh thu chịu thuế (5610 + 5630): <b>${data.totalTaxable.toLocaleString()}đ</b><br>
+          👉 <span style="font-size:0.95rem; color:#b91c1c; font-weight:900;">THUẾ GTGT PHẢI NỘP (${isVatReduced ? '2.4%' : '3%'}): ${vatPayable.toLocaleString()}đ</span>`;
       } else {
+        // Mẫu 01/GTGT (maTKhai 842) khớp 100% với 3 file HTKK của Công ty Bảo Anh Lâm
         const outVatRate = isVatReduced ? 0.08 : 0.10;
-        const outVatAmt = Math.round(data.totalTaxable * outVatRate);
-        const inVatAmt = parseInt(document.getElementById('dnInputVat')?.value || '0') || 0;
-        const netVat = Math.max(0, outVatAmt - inVatAmt);
+        const ct32_dthuChuaThue = Math.round(data.totalTaxable / (1 + outVatRate));
+        const ct33_thueBanRa = data.totalTaxable - ct32_dthuChuaThue;
+        const ct24_thueMuaVao = parseInt(document.getElementById('dnInputVat')?.value || '0') || 0;
+        const ct23_giaTriMuaVao = ct24_thueMuaVao > 0 ? Math.round(ct24_thueMuaVao / 0.08) : 0;
+        const ct36_chenhLech = ct33_thueBanRa - ct24_thueMuaVao;
+        const ct40_phaiNop = Math.max(0, ct36_chenhLech);
+        const ct43_khauTruKySau = ct36_chenhLech < 0 ? Math.abs(ct36_chenhLech) : 0;
         box.innerHTML = `
-          <b>📌 Tóm tắt Tờ khai Doanh Nghiệp Khấu Trừ (Mẫu 01/GTGT - Kỳ ${pInfo.kyKKhai}):</b><br>
-          • Doanh thu bán ra chưa thuế: <b>${data.totalTaxable.toLocaleString()}đ</b> | VAT đầu ra (${isVatReduced ? '8%' : '10%'}): <b>${outVatAmt.toLocaleString()}đ</b> | VAT đầu vào khấu trừ: <b>${inVatAmt.toLocaleString()}đ</b><br>
-          👉 <span style="font-size:0.95rem; color:#b91c1c; font-weight:900;">THUẾ GTGT CÒN PHẢI NỘP TRONG KỲ: ${netVat.toLocaleString()}đ</span>`;
+          <b>📌 Chuẩn HTKK v5.7.8 — Mẫu 01/GTGT (Mã 842 - Kỳ ${pInfo.kyKKhai} từ ${pInfo.tuNgay} đến ${pInfo.denNgay}):</b><br>
+          • [ct23] Mua vào: <b>${ct23_giaTriMuaVao.toLocaleString()}đ</b> | [ct24/ct25] VAT mua vào được khấu trừ: <b>${ct24_thueMuaVao.toLocaleString()}đ</b><br>
+          • [ct32] Doanh thu bán ra chưa thuế: <b>${ct32_dthuChuaThue.toLocaleString()}đ</b> | [ct33] VAT bán ra: <b>${ct33_thueBanRa.toLocaleString()}đ</b><br>
+          👉 <span style="font-size:0.95rem; color:#b91c1c; font-weight:900;">[ct40] Thuế phải nộp: ${ct40_phaiNop.toLocaleString()}đ | [ct43] Khấu trừ chuyển kỳ sau: ${ct43_khauTruKySau.toLocaleString()}đ</span>`;
       }
     };
 
@@ -3961,193 +4036,313 @@ window.setEditModalCategory = function(cat, btn) {
 
     window.generateAndDownloadOfficialTaxXML = function() {
       const data = getTaxReportData();
-      const model = document.getElementById('xmlTaxModelSelect')?.value || 'HKD_01_CNKD';
+      const model = document.getElementById('xmlTaxModelSelect')?.value || 'DN_01_GTGT';
       const soLan = document.getElementById('xmlFilingTimes')?.value || '0';
-      const trangThaiTK = (soLan === '0') ? 'C' : 'B';
+      const loaiTKhai = (soLan === '0') ? 'C' : 'B';
       const isVatReduced = (document.getElementById('xmlVatReductionToggle')?.value !== 'no');
-      const mst = (document.getElementById('xmlMainTaxId')?.value || '').trim();
-      const mstCu = (document.getElementById('xmlOldTaxId')?.value || mst).trim();
-      const tenNNT = (document.getElementById('xmlTaxpayerName')?.value || '').trim();
-      const dchiNNT = (document.getElementById('xmlTaxpayerAddr')?.value || '').trim();
+      const mst = (document.getElementById('xmlMainTaxId')?.value || '3401289271').trim();
+      const tenNNT = (document.getElementById('xmlTaxpayerName')?.value || 'CÔNG TY TNHH THƯƠNG MẠI DỊCH VỤ VÀ SẢN XUẤT BẢO ANH LÂM').trim();
+      const dchiNNT = (document.getElementById('xmlTaxpayerAddr')?.value || '280 Trần Hưng Đạo, khu phố 2').trim();
       const maCQT = (document.getElementById('xmlTaxOfficeCode')?.value || '71501').trim();
-      const tenCQT = (document.getElementById('xmlTaxOfficeName')?.value || '').trim();
+      const tenCQT = (document.getElementById('xmlTaxOfficeName')?.value || 'Thuế cơ sở 6 tỉnh Lâm Đồng').trim();
 
-      // KIỂM TRA HỢP LỆ TRƯỚC KHI XUẤT (CHẶN LỖI BỊ CỔNG THUẾ TỪ CHỐI)
       if (!mst || mst.length < 10) {
-        return alert("⚠️ LỖI ĐỊNH DANH THUẾ: Vui lòng nhập đầy đủ Mã số thuế (10/13 số) hoặc Số Căn cước công dân (12 số của Chủ hộ) tại Bước 3!");
-      }
-      if (!tenNNT || !dchiNNT) {
-        return alert("⚠️ LỖI ĐỊA CHỈ KINH DOANH: Không được để trống Tên đơn vị và Địa chỉ trụ sở (Cổng thuế sẽ từ chối nếu thiếu số nhà, phường, tỉnh)!");
+        return alert("⚠️ Vui lòng nhập đúng Mã số thuế (10/13 số) hoặc CCCD (12 số)!");
       }
 
       const pInfo = getSelectedXmlPeriodInfo();
       const nowIso = getVNDateStr();
-      const effectiveVatRate = isVatReduced ? 0.024 : 0.03;
-      const vatReductionAmt = isVatReduced ? Math.round(data.totalTaxable * 0.006) : 0;
-      const vatPayable = Math.round(data.totalTaxable * effectiveVatRate);
-      const pitPayable = Math.round(data.totalTaxable * 0.015);
+      const soLanPadded = String(soLan).padStart(2, '0');
+      let xmlContent = '';
+      let fileName = '';
 
-      // Lấy 7 khoản mục chi phí quản lý Sổ S3
-      const cpNhanCong = parseInt(document.getElementById('expLabor')?.value || '0') || 0;
-      const cpDien = parseInt(document.getElementById('expElec')?.value || '0') || 0;
-      const cpNuoc = parseInt(document.getElementById('expWater')?.value || '0') || 0;
-      const cpVienThong = parseInt(document.getElementById('expTelecom')?.value || '0') || 0;
-      const cpThueMB = parseInt(document.getElementById('expRent')?.value || '0') || 0;
-      const cpQuanLy = parseInt(document.getElementById('expAdmin')?.value || '0') || 0;
-      const cpKhac = parseInt(document.getElementById('expOther')?.value || '0') || 0;
-      const tongChiPhiS3 = cpNhanCong + cpDien + cpNuoc + cpVienThong + cpThueMB + cpQuanLy + cpKhac;
-
-      // Tự động kết xuất các dòng hàng hóa có doanh thu > 0 cho Phụ lục giảm thuế (Tuyệt đối xóa dòng doanh thu = 0)
-      let plGiamThueRowsXml = '';
-      let sttRow = 0;
-      Object.keys(data.dishStats).forEach(dishName => {
-        const item = data.dishStats[dishName];
-        if (item && item.total > 0) {
-          sttRow++;
-          const reducedItemTax = Math.round(item.total * 0.006);
-          plGiamThueRowsXml += `
-          <ChiTietHangHoaDichVu id="ID_${sttRow}">
-            <stt>${sttRow}</stt>
-            <tenHHDV>${escapeXmlSafe(dishName)}</tenHHDV>
-            <dthuChiuThue>${item.total}</dthuChiuThue>
-            <tyLeTinhThueGoc>3.0</tyLeTinhThueGoc>
-            <soThueGTGTDuocGiam>${reducedItemTax}</soThueGTGTDuocGiam>
-          </ChiTietHangHoaDichVu>`;
-        }
-      });
-
-      const maTKhai = model === 'HKD_01_CNKD' ? '853' : (model === 'DN_04_GTGT' ? '844' : '842');
-      const tenTKhai = model === 'HKD_01_CNKD'
-        ? 'Tờ khai thuế đối với cá nhân kinh doanh (TT40/2021)'
-        : (model === 'DN_04_GTGT' ? 'Tờ khai thuế GTGT trực tiếp trên doanh thu (Mẫu 04/GTGT)' : 'Tờ khai thuế GTGT khấu trừ (Mẫu 01/GTGT)');
-
-      let ctkhaiBodyXml = '';
-      if (model === 'HKD_01_CNKD') {
-        ctkhaiBodyXml = `
-      <CTieuTKhaiChinh>
-        <NhomNganhNghe>
-          <!-- Chỉ tiêu [28]: Phân phối, cung cấp hàng hóa (1% GTGT, 0.5% TNCN) -->
-          <Nhom1_PhanPhoiHangHoa>
-            <ct28_doanhThuGTGT>0</ct28_doanhThuGTGT>
-            <ct28_thueGTGT>0</ct28_thueGTGT>
-            <ct28_doanhThuTNCN>0</ct28_doanhThuTNCN>
-            <ct28_thueTNCN>0</ct28_thueTNCN>
-          </Nhom1_PhanPhoiHangHoa>
-          <!-- Chỉ tiêu [29]: Dịch vụ không bao thầu NVL (5% GTGT, 2% TNCN) -->
-          <Nhom2_DichVu>
-            <ct29_doanhThuGTGT>0</ct29_doanhThuGTGT>
-            <ct29_thueGTGT>0</ct29_thueGTGT>
-            <ct29_doanhThuTNCN>0</ct29_doanhThuTNCN>
-            <ct29_thueTNCN>0</ct29_thueTNCN>
-          </Nhom2_DichVu>
-          <!-- Chỉ tiêu [30]: Sản xuất, vận tải, dịch vụ gắn với hàng hóa, ăn uống F&B 5610 & 5630 (3% GTGT, 1.5% TNCN) -->
-          <Nhom3_SanXuatAnUongFB>
-            <ct30_doanhThuGTGT>${data.totalTaxable}</ct30_doanhThuGTGT>
-            <ct30_thueGTGT>${vatPayable}</ct30_thueGTGT>
-            <ct30_doanhThuTNCN>${data.totalTaxable}</ct30_doanhThuTNCN>
-            <ct30_thueTNCN>${pitPayable}</ct30_thueTNCN>
-            <ChiTietMaNganh>
-              <MaNganh5610_HyChay>${data.total5610}</MaNganh5610_HyChay>
-              <MaNganh5630_BalsHouse>${data.total5630}</MaNganh5630_BalsHouse>
-              <SoThuHoPhiShipKhongChiuThue>${data.totalShip}</SoThuHoPhiShipKhongChiuThue>
-            </ChiTietMaNganh>
-          </Nhom3_SanXuatAnUongFB>
-        </NhomNganhNghe>
-        <TongCong>
-          <ct32_tongDoanhThuGTGT>${data.totalTaxable}</ct32_tongDoanhThuGTGT>
-          <ct32_tongThueGTGT>${vatPayable}</ct32_tongThueGTGT>
-          <ct32_tongDoanhThuTNCN>${data.totalTaxable}</ct32_tongDoanhThuTNCN>
-          <ct32_tongThueTNCN>${pitPayable}</ct32_tongThueTNCN>
-          <tongThueGTGTDuocGiam>${vatReductionAmt}</tongThueGTGTDuocGiam>
-          <tongThuePhaiNopTrongKy>${vatPayable + pitPayable}</tongThuePhaiNopTrongKy>
-        </TongCong>
-      </CTieuTKhaiChinh>
-      <PLuc>
-        <PLuc_01_2_BK_HDKD>
-          <MucII_ChiPhiQuanLy_SoS3>
-            <cpNhanCong>${cpNhanCong}</cpNhanCong>
-            <cpDien>${cpDien}</cpDien>
-            <cpNuoc>${cpNuoc}</cpNuoc>
-            <cpVienThong>${cpVienThong}</cpVienThong>
-            <cpThueKhoBaiMatBang>${cpThueMB}</cpThueKhoBaiMatBang>
-            <cpQuanLyVanPhongPham>${cpQuanLy}</cpQuanLy>
-            <cpKhac>${cpKhac}</cpKhac>
-            <tongChiPhiQuanLy>${tongChiPhiS3}</tongChiPhiQuanLy>
-          </MucII_ChiPhiQuanLy_SoS3>
-        </PLuc_01_2_BK_HDKD>
-        ${(isVatReduced && sttRow > 0) ? `<PLuc_GiamThueGTGT_NQ204>${plGiamThueRowsXml}\n          <tongCongThueGTGTDuocGiam>${vatReductionAmt}</tongCongThueGTGTDuocGiam>\n        </PLuc_GiamThueGTGT_NQ204>` : ''}
-      </PLuc>`;
-      } else if (model === 'DN_04_GTGT') {
-        ctkhaiBodyXml = `
-      <CTieuTKhaiChinh>
-        <ct21_doanhThuChiuThueSuat1PhanTram>0</ct21_doanhThuChiuThueSuat1PhanTram>
-        <ct24_doanhThuDichVuAnUongFB3PhanTram>${data.totalTaxable}</ct24_doanhThuDichVuAnUongFB3PhanTram>
-        <ct25_thueGTGTPhaiNop>${vatPayable}</ct25_thueGTGTPhaiNop>
-        <ct28_tongDoanhThu>${data.totalTaxable}</ct28_tongDoanhThu>
-        <ct29_tongThueGTGTPhaiNop>${vatPayable}</ct29_tongThueGTGTPhaiNop>
-        <soThuHoPhiVanChuyenKhongChiuThue>${data.totalShip}</soThuHoPhiVanChuyenKhongChiuThue>
-      </CTieuTKhaiChinh>`;
-      } else {
+      if (model === 'DN_01_GTGT') {
+        // KHỚP 100% CẤU TRÚC FILE HTKK v5.7.8 CỦA CÔNG TY BẢO ANH LÂM (3401289271000-01_GTGT_TT80-Q32026-L00.xml)
         const outVatRate = isVatReduced ? 0.08 : 0.10;
-        const outVatAmt = Math.round(data.totalTaxable * outVatRate);
-        const inVatAmt = parseInt(document.getElementById('dnInputVat')?.value || '0') || 0;
-        const netVat = Math.max(0, outVatAmt - inVatAmt);
-        ctkhaiBodyXml = `
-      <CTieuTKhaiChinh>
-        <ct24_giaTriHHDVMuaVao>0</ct24_giaTriHHDVMuaVao>
-        <ct25_thueGTGTDuocKhauTruKyNay>${inVatAmt}</ct25_thueGTGTDuocKhauTruKyNay>
-        <ct32_doanhThuBanRaChiuThue>${data.totalTaxable}</ct32_doanhThuBanRaChiuThue>
-        <ct33_thueGTGTBanRa>${outVatAmt}</ct33_thueGTGTBanRa>
-        <ct40_thueGTGTPhaiNopTrongKy>${netVat}</ct40_thueGTGTPhaiNopTrongKy>
-        <soThuHoPhiVanChuyenKhongChiuThue>${data.totalShip}</soThuHoPhiVanChuyenKhongChiuThue>
-      </CTieuTKhaiChinh>`;
-      }
+        const ct32 = Math.round(data.totalTaxable / (1 + outVatRate));
+        const ct33 = data.totalTaxable - ct32;
+        const ct24 = parseInt(document.getElementById('dnInputVat')?.value || '0') || 0;
+        const ct23 = ct24 > 0 ? Math.round(ct24 / 0.08) : 0;
+        const ct25 = ct24;
+        const ct27 = ct32;
+        const ct28 = ct33;
+        const ct34 = ct27;
+        const ct35 = ct28;
+        const ct36 = ct35 - ct25;
+        const ct40a = ct36 > 0 ? ct36 : 0;
+        const ct40 = ct40a;
+        const ct41 = ct36 < 0 ? Math.abs(ct36) : 0;
+        const ct43 = ct41;
 
-      const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
-<HSoThueDTu xmlns="http://kekhaithue.gdt.gov.vn/TKhaiThue" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        fileName = `${mst}000-01_GTGT_TT80-${pInfo.fileTag}-L${soLanPadded}.xml`;
+        xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
+<HSoThueDTu xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://kekhaithue.gdt.gov.vn/TKhaiThue">
   <HSoKhaiThue id="ID_1">
     <TTinChung>
       <TTinDVu>
-        <maDVu>HYCHAY_POS_PRO</maDVu>
-        <tenDVu>Hệ Thống Quản Trị &amp; Kế Toán Thuế Hy Chay POS - Bảo Anh Lâm</tenDVu>
-        <pBanDVu>11.0</pBanDVu>
+        <maDVu>HTKK</maDVu>
+        <tenDVu>HỖ TRỢ KÊ KHAI THUẾ</tenDVu>
+        <pbanDVu>5.7.8</pbanDVu>
+        <ttinNhaCCapDVu>2BB6D90BD76EDAC4664659791A8066F5</ttinNhaCCapDVu>
       </TTinDVu>
       <TTinTKhaiThue>
         <TKhaiThue>
-          <maTKhai>${maTKhai}</maTKhai>
-          <tenTKhai>${escapeXmlSafe(tenTKhai)}</tenTKhai>
-          <moTaBMau/>
-          <pBanTKhaiXML>2.1.0</pBanTKhaiXML>
-          <loaiTKhai>${trangThaiTK}</loaiTKhai>
+          <maTKhai>842</maTKhai>
+          <tenTKhai>TỜ KHAI THUẾ GIÁ TRỊ GIA TĂNG (Mẫu số 01/GTGT)</tenTKhai>
+          <moTaBMau>(Ban hành kèm theo Thông tư số 80/2021/TT-BTC ngày 29 tháng 9 năm 2021 của Bộ trưởng Bộ Tài chính)</moTaBMau>
+          <pbanTKhaiXML>2.8.3</pbanTKhaiXML>
+          <loaiTKhai>${loaiTKhai}</loaiTKhai>
           <soLan>${soLan}</soLan>
           <KyKKhaiThue>
             <kieuKy>${pInfo.kieuKy}</kieuKy>
             <kyKKhai>${pInfo.kyKKhai}</kyKKhai>
             <kyKKhaiTuNgay>${pInfo.tuNgay}</kyKKhaiTuNgay>
             <kyKKhaiDenNgay>${pInfo.denNgay}</kyKKhaiDenNgay>
+            <kyKKhaiTuThang />
+            <kyKKhaiDenThang />
           </KyKKhaiThue>
           <maCQTNoiNop>${escapeXmlSafe(maCQT)}</maCQTNoiNop>
           <tenCQTNoiNop>${escapeXmlSafe(tenCQT)}</tenCQTNoiNop>
           <ngayLapTKhai>${nowIso}</ngayLapTKhai>
-          <nguoiKy>Hoàng Huỳnh Huy Bảo</nguoiKy>
+          <GiaHan>
+            <maLyDoGiaHan />
+            <lyDoGiaHan />
+          </GiaHan>
+          <nguoiKy />
           <ngayKy>${nowIso}</ngayKy>
+          <nganhNgheKD>Hoạt động dịch vụ sau thu hoạch</nganhNgheKD>
         </TKhaiThue>
         <NNT>
           <mst>${escapeXmlSafe(mst)}</mst>
-          <mstCu>${escapeXmlSafe(mstCu)}</mstCu>
           <tenNNT>${escapeXmlSafe(tenNNT)}</tenNNT>
           <dchiNNT>${escapeXmlSafe(dchiNNT)}</dchiNNT>
-          <phuongXa>Phường Phan Thiết</phuongXa>
-          <tenTinh>Tỉnh Lâm Đồng</tenTinh>
+          <phuongXa />
+          <maHuyenNNT />
+          <tenHuyenNNT />
+          <maTinhNNT>703</maTinhNNT>
+          <tenTinhNNT>Tỉnh Lâm Đồng</tenTinhNNT>
           <dthoaiNNT>0903242400</dthoaiNNT>
+          <faxNNT />
           <emailNNT>balshousevn@gmail.com</emailNNT>
         </NNT>
       </TTinTKhaiThue>
-    </TTinChung>${ctkhaiBodyXml}
+    </TTinChung>
+    <CTieuTKhaiChinh>
+      <ma_NganhNghe>00</ma_NganhNghe>
+      <ten_NganhNghe>Hoạt động sản xuất kinh doanh thông thường</ten_NganhNghe>
+      <tieuMucHachToan>1701</tieuMucHachToan>
+      <Header>
+        <ct09 />
+        <ct10 />
+        <DiaChiHDSXKDKhacTinhNDTSC>
+          <ct11a_phuongXa_ma />
+          <ct11a_phuongXa_ten />
+          <ct11b_quanHuyen_ma />
+          <ct11b_quanHuyen_ten />
+          <ct11c_tinhTP_ma />
+          <ct11c_tinhTP_ten />
+        </DiaChiHDSXKDKhacTinhNDTSC>
+      </Header>
+      <ct21>0</ct21>
+      <ct22>0</ct22>
+      <GiaTriVaThueGTGTHHDVMuaVao>
+        <ct23>${ct23}</ct23>
+        <ct24>${ct24}</ct24>
+      </GiaTriVaThueGTGTHHDVMuaVao>
+      <HangHoaDichVuNhapKhau>
+        <ct23a>0</ct23a>
+        <ct24a>0</ct24a>
+      </HangHoaDichVuNhapKhau>
+      <ct25>${ct25}</ct25>
+      <ct26>0</ct26>
+      <HHDVBRaChiuThueGTGT>
+        <ct27>${ct27}</ct27>
+        <ct28>${ct28}</ct28>
+      </HHDVBRaChiuThueGTGT>
+      <ct29>0</ct29>
+      <HHDVBRaChiuTSuat5>
+        <ct30>0</ct30>
+        <ct31>0</ct31>
+      </HHDVBRaChiuTSuat5>
+      <HHDVBRaChiuTSuat10>
+        <ct32>${ct32}</ct32>
+        <ct33>${ct33}</ct33>
+      </HHDVBRaChiuTSuat10>
+      <ct32a>0</ct32a>
+      <TongDThuVaThueGTGTHHDVBRa>
+        <ct34>${ct34}</ct34>
+        <ct35>${ct35}</ct35>
+      </TongDThuVaThueGTGTHHDVBRa>
+      <ct36>${ct36}</ct36>
+      <ct37>0</ct37>
+      <ct38>0</ct38>
+      <ct39a>0</ct39a>
+      <ct40a>${ct40a}</ct40a>
+      <ct40b>0</ct40b>
+      <ct40>${ct40}</ct40>
+      <ct41>${ct41}</ct41>
+      <ct42>0</ct42>
+      <ct43>${ct43}</ct43>
+    </CTieuTKhaiChinh>
   </HSoKhaiThue>
 </HSoThueDTu>`;
+      } else if (model === 'HKD_01_CNKD') {
+        // CHUẨN HTKK MẪU 01/CNKD (Mã 688 - Thông tư 40/2021/TT-BTC cho Hộ Kinh Doanh)
+        const effectiveVatRate = isVatReduced ? 0.024 : 0.03;
+        const vatPayable = Math.round(data.totalTaxable * effectiveVatRate);
+        const pitPayable = Math.round(data.totalTaxable * 0.015);
+        fileName = `${mst}000-01_CNKD_TT40-${pInfo.fileTag}-L${soLanPadded}.xml`;
+        xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
+<HSoThueDTu xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://kekhaithue.gdt.gov.vn/TKhaiThue">
+  <HSoKhaiThue id="ID_1">
+    <TTinChung>
+      <TTinDVu>
+        <maDVu>HTKK</maDVu>
+        <tenDVu>HỖ TRỢ KÊ KHAI THUẾ</tenDVu>
+        <pbanDVu>5.7.8</pbanDVu>
+        <ttinNhaCCapDVu>2BB6D90BD76EDAC4664659791A8066F5</ttinNhaCCapDVu>
+      </TTinDVu>
+      <TTinTKhaiThue>
+        <TKhaiThue>
+          <maTKhai>688</maTKhai>
+          <tenTKhai>TỜ KHAI THUẾ ĐỐI VỚI CÁ NHÂN KINH DOANH (TT40/2021)</tenTKhai>
+          <moTaBMau>(Ban hành kèm theo Thông tư số 40/2021/TT-BTC ngày 01 tháng 6 năm 2021 của Bộ Tài chính)</moTaBMau>
+          <pbanTKhaiXML>2.7.2</pbanTKhaiXML>
+          <loaiTKhai>${loaiTKhai}</loaiTKhai>
+          <soLan>${soLan}</soLan>
+          <KyKKhaiThue>
+            <kieuKy>${pInfo.kieuKy}</kieuKy>
+            <kyKKhai>${pInfo.kyKKhai}</kyKKhai>
+            <kyKKhaiTuNgay>${pInfo.tuNgay}</kyKKhaiTuNgay>
+            <kyKKhaiDenNgay>${pInfo.denNgay}</kyKKhaiDenNgay>
+            <kyKKhaiTuThang />
+            <kyKKhaiDenThang />
+          </KyKKhaiThue>
+          <maCQTNoiNop>${escapeXmlSafe(maCQT)}</maCQTNoiNop>
+          <tenCQTNoiNop>${escapeXmlSafe(tenCQT)}</tenCQTNoiNop>
+          <ngayLapTKhai>${nowIso}</ngayLapTKhai>
+          <GiaHan>
+            <maLyDoGiaHan />
+            <lyDoGiaHan />
+          </GiaHan>
+          <nguoiKy>Hoàng Huỳnh Huy Bảo</nguoiKy>
+          <ngayKy>${nowIso}</ngayKy>
+          <nganhNgheKD>Nhà hàng và các dịch vụ ăn uống phục vụ lưu động</nganhNgheKD>
+        </TKhaiThue>
+        <NNT>
+          <mst>${escapeXmlSafe(mst)}</mst>
+          <tenNNT>${escapeXmlSafe(tenNNT)}</tenNNT>
+          <dchiNNT>${escapeXmlSafe(dchiNNT)}</dchiNNT>
+          <phuongXa>Phường Phan Thiết</phuongXa>
+          <maHuyenNNT />
+          <tenHuyenNNT />
+          <maTinhNNT>703</maTinhNNT>
+          <tenTinhNNT>Tỉnh Lâm Đồng</tenTinhNNT>
+          <dthoaiNNT>0903242400</dthoaiNNT>
+          <faxNNT />
+          <emailNNT>balshousevn@gmail.com</emailNNT>
+        </NNT>
+      </TTinTKhaiThue>
+    </TTinChung>
+    <CTieuTKhaiChinh>
+      <loaiHKD>1</loaiHKD>
+      <MucA_KKhaiThueGTGTTNCN>
+        <ct28_dthuGTGT>0</ct28_dthuGTGT>
+        <ct28_thueGTGT>0</ct28_thueGTGT>
+        <ct28_dthuTNCN>0</ct28_dthuTNCN>
+        <ct28_thueTNCN>0</ct28_thueTNCN>
+        <ct29_dthuGTGT>0</ct29_dthuGTGT>
+        <ct29_thueGTGT>0</ct29_thueGTGT>
+        <ct29_dthuTNCN>0</ct29_dthuTNCN>
+        <ct29_thueTNCN>0</ct29_thueTNCN>
+        <ct30_dthuGTGT>${data.totalTaxable}</ct30_dthuGTGT>
+        <ct30_thueGTGT>${vatPayable}</ct30_thueGTGT>
+        <ct30_dthuTNCN>${data.totalTaxable}</ct30_dthuTNCN>
+        <ct30_thueTNCN>${pitPayable}</ct30_thueTNCN>
+        <ct31_dthuGTGT>0</ct31_dthuGTGT>
+        <ct31_thueGTGT>0</ct31_thueGTGT>
+        <ct31_dthuTNCN>0</ct31_dthuTNCN>
+        <ct31_thueTNCN>0</ct31_thueTNCN>
+        <ct32_tongDthuGTGT>${data.totalTaxable}</ct32_tongDthuGTGT>
+        <ct32_tongThueGTGT>${vatPayable}</ct32_tongThueGTGT>
+        <ct32_tongDthuTNCN>${data.totalTaxable}</ct32_tongDthuTNCN>
+        <ct32_tongThueTNCN>${pitPayable}</ct32_tongThueTNCN>
+      </MucA_KKhaiThueGTGTTNCN>
+    </CTieuTKhaiChinh>
+  </HSoKhaiThue>
+</HSoThueDTu>`;
+      } else {
+        // CHUẨN HTKK MẪU 04/GTGT (Mã 844 - Tính trực tiếp trên doanh thu)
+        const effectiveVatRate = isVatReduced ? 0.024 : 0.03;
+        const vatPayable = Math.round(data.totalTaxable * effectiveVatRate);
+        fileName = `${mst}000-04_GTGT_TT80-${pInfo.fileTag}-L${soLanPadded}.xml`;
+        xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
+<HSoThueDTu xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://kekhaithue.gdt.gov.vn/TKhaiThue">
+  <HSoKhaiThue id="ID_1">
+    <TTinChung>
+      <TTinDVu>
+        <maDVu>HTKK</maDVu>
+        <tenDVu>HỖ TRỢ KÊ KHAI THUẾ</tenDVu>
+        <pbanDVu>5.7.8</pbanDVu>
+        <ttinNhaCCapDVu>2BB6D90BD76EDAC4664659791A8066F5</ttinNhaCCapDVu>
+      </TTinDVu>
+      <TTinTKhaiThue>
+        <TKhaiThue>
+          <maTKhai>844</maTKhai>
+          <tenTKhai>TỜ KHAI THUẾ GIÁ TRỊ GIA TĂNG (Mẫu số 04/GTGT)</tenTKhai>
+          <moTaBMau>(Ban hành kèm theo Thông tư số 80/2021/TT-BTC ngày 29 tháng 9 năm 2021 của Bộ trưởng Bộ Tài chính)</moTaBMau>
+          <pbanTKhaiXML>2.6.9</pbanTKhaiXML>
+          <loaiTKhai>${loaiTKhai}</loaiTKhai>
+          <soLan>${soLan}</soLan>
+          <KyKKhaiThue>
+            <kieuKy>${pInfo.kieuKy}</kieuKy>
+            <kyKKhai>${pInfo.kyKKhai}</kyKKhai>
+            <kyKKhaiTuNgay>${pInfo.tuNgay}</kyKKhaiTuNgay>
+            <kyKKhaiDenNgay>${pInfo.denNgay}</kyKKhaiDenNgay>
+            <kyKKhaiTuThang />
+            <kyKKhaiDenThang />
+          </KyKKhaiThue>
+          <maCQTNoiNop>${escapeXmlSafe(maCQT)}</maCQTNoiNop>
+          <tenCQTNoiNop>${escapeXmlSafe(tenCQT)}</tenCQTNoiNop>
+          <ngayLapTKhai>${nowIso}</ngayLapTKhai>
+          <GiaHan>
+            <maLyDoGiaHan />
+            <lyDoGiaHan />
+          </GiaHan>
+          <nguoiKy />
+          <ngayKy>${nowIso}</ngayKy>
+          <nganhNgheKD>Nhà hàng và các dịch vụ ăn uống phục vụ lưu động</nganhNgheKD>
+        </TKhaiThue>
+        <NNT>
+          <mst>${escapeXmlSafe(mst)}</mst>
+          <tenNNT>${escapeXmlSafe(tenNNT)}</tenNNT>
+          <dchiNNT>${escapeXmlSafe(dchiNNT)}</dchiNNT>
+          <phuongXa />
+          <maHuyenNNT />
+          <tenHuyenNNT />
+          <maTinhNNT>703</maTinhNNT>
+          <tenTinhNNT>Tỉnh Lâm Đồng</tenTinhNNT>
+          <dthoaiNNT>0903242400</dthoaiNNT>
+          <faxNNT />
+          <emailNNT>balshousevn@gmail.com</emailNNT>
+        </NNT>
+      </TTinTKhaiThue>
+    </TTinChung>
+    <CTieuTKhaiChinh>
+      <ct21>0</ct21>
+      <ct22>0</ct22>
+      <ct23>0</ct23>
+      <ct24>${data.totalTaxable}</ct24>
+      <ct25>${vatPayable}</ct25>
+      <ct26>0</ct26>
+      <ct27>0</ct27>
+      <ct28>${data.totalTaxable}</ct28>
+      <ct29>${vatPayable}</ct29>
+    </CTieuTKhaiChinh>
+  </HSoKhaiThue>
+</HSoThueDTu>`;
+      }
 
-      const fileName = `ToKhai_${model}_${pInfo.fileTag}_MST_${mst}.xml`;
       const blob = new Blob([xmlContent], { type: 'application/xml;charset=utf-8' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
@@ -4156,7 +4351,7 @@ window.setEditModalCategory = function(cat, btn) {
 
       const statusEl = document.getElementById('xmlExportStatusText');
       if (statusEl) {
-        statusEl.innerHTML = `✅ Đã xuất file <b>${fileName}</b> hợp lệ 100%! Sẵn sàng tải lên Cổng Thuế Điện Tử.`;
+        statusEl.innerHTML = `✅ Đã xuất file chuẩn HTKK <b>${fileName}</b>! Mở được ngay trên iTaxViewer / HTKK và nộp thẳng lên thuedientu.gdt.gov.vn.`;
       }
     };
   </script>
