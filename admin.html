@@ -251,23 +251,36 @@
     <!-- KHUNG HIỆN THÔNG BÁO DỊCH VỤ DINE-IN -->
     <div id="serviceAlerts" class="service-alert-container no-print"></div>
 
-<!-- MODAL MÃ QR QUÉT CÀI ĐẶT 1-CHẠM CHO KHÁCH HÀNG, BÁC TÀI SHIPPER & QUẢN LÝ -->
+<!-- MODAL 3 MÃ QR QUÉT CÀI ĐẶT 1-CHẠM CHO KHÁCH HÀNG, BÁC TÀI SHIPPER & QUẢN LÝ -->
     <div id="installGuideModal" class="install-modal-overlay">
-      <div class="install-modal-box" style="max-width: 560px;">
+      <div class="install-modal-box" style="max-width: 680px;">
         <span style="position:absolute; top:14px; right:16px; font-size:1.4rem; cursor:pointer;" onclick="closeInstallGuideModal()">&times;</span>
-        <h3 style="color:var(--primary); font-size:1.2rem; margin-bottom:6px;">📲 Mã QR Quét Đưa App Ra Màn Hình Điện Thoại</h3>
-        <p style="font-size:0.82rem; color:#64748b; margin-bottom:12px;">Cho Khách hàng hoặc Bác tài dùng Camera / Zalo quét mã QR dưới đây — Điện thoại sẽ tự động bật hộp thoại hỏi đưa App ra màn hình chính:</p>
+        <h3 style="color:var(--primary); font-size:1.2rem; margin-bottom:6px;">📲 Bộ 3 Mã QR Cài Đặt App 1-Chạm (Ẩn Đường Link Web)</h3>
+        <p style="font-size:0.82rem; color:#64748b; margin-bottom:12px;">Đưa mã QR tương ứng cho Khách hàng, Bác tài hoặc Quản lý quét bằng Camera / Zalo — Điện thoại sẽ tự động bật hộp thoại hỏi cài App ra màn hình chính:</p>
         
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; text-align:center;">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-bottom:14px; text-align:center;">
+          <!-- QR 1: KHÁCH HÀNG -->
           <div style="background:#f0fdf4; border:2px solid #16a34a; border-radius:12px; padding:12px;">
-            <b style="color:#166534; font-size:0.85rem; display:block; margin-bottom:6px;">🥗 QR APP KHÁCH ĐẶT MÓN</b>
-            <img id="qrInstallCustomerImg" src="" alt="QR Khách" style="width:145px; height:145px; margin:0 auto 6px; border-radius:8px; background:#fff; padding:4px; border:1px solid #bbf7d0;">
-            <small style="color:#15803d; font-weight:700; display:block;">Quét là hỏi cài App Hy Chay</small>
+            <b style="color:#166534; font-size:0.82rem; display:block; margin-bottom:6px;">🥗 1. APP KHÁCH ĐẶT MÓN</b>
+            <img id="qrInstallCustomerImg" src="" alt="QR Khách" style="width:140px; height:140px; margin:0 auto 6px; border-radius:8px; background:#fff; padding:4px; border:1px solid #bbf7d0;">
+            <small style="color:#15803d; font-weight:700; display:block; margin-bottom:6px;">Quét là hỏi cài App Hy Chay</small>
+            <button type="button" onclick="window.open(document.getElementById('qrInstallCustomerImg').src, '_blank')" style="background:#16a34a; color:#fff; border:none; padding:5px 10px; border-radius:6px; font-size:0.74rem; font-weight:800; cursor:pointer; width:100%;">📥 Tải Ảnh QR Khách</button>
           </div>
+
+          <!-- QR 2: BÁC TÀI SHIPPER -->
           <div style="background:#eff6ff; border:2px solid #0284c7; border-radius:12px; padding:12px;">
-            <b style="color:#0369a1; font-size:0.85rem; display:block; margin-bottom:6px;">🛵 QR APP BÁC TÀI SHIPPER</b>
-            <img id="qrInstallShipperImg" src="" alt="QR Shipper" style="width:145px; height:145px; margin:0 auto 6px; border-radius:8px; background:#fff; padding:4px; border:1px solid #bae6fd;">
-            <small style="color:#0369a1; font-weight:700; display:block;">Quét là cài Trạm Trực Đơn Ship</small>
+            <b style="color:#0369a1; font-size:0.82rem; display:block; margin-bottom:6px;">🛵 2. APP BÁC TÀI SHIP</b>
+            <img id="qrInstallShipperImg" src="" alt="QR Shipper" style="width:140px; height:140px; margin:0 auto 6px; border-radius:8px; background:#fff; padding:4px; border:1px solid #bae6fd;">
+            <small style="color:#0369a1; font-weight:700; display:block; margin-bottom:6px;">Quét là cài Trạm Nhận Đơn</small>
+            <button type="button" onclick="window.open(document.getElementById('qrInstallShipperImg').src, '_blank')" style="background:#0284c7; color:#fff; border:none; padding:5px 10px; border-radius:6px; font-size:0.74rem; font-weight:800; cursor:pointer; width:100%;">📥 Tải Ảnh QR Bác Tài</button>
+          </div>
+
+          <!-- QR 3: QUẢN LÝ / THU NGÂN POS -->
+          <div style="background:#fefce8; border:2px solid #d97706; border-radius:12px; padding:12px;">
+            <b style="color:#b45309; font-size:0.82rem; display:block; margin-bottom:6px;">🛡️ 3. APP QUẢN LÝ POS</b>
+            <img id="qrInstallAdminImg" src="" alt="QR Admin POS" style="width:140px; height:140px; margin:0 auto 6px; border-radius:8px; background:#fff; padding:4px; border:1px solid #fde68a;">
+            <small style="color:#b45309; font-weight:700; display:block; margin-bottom:6px;">Quét là cài Trung Tâm POS</small>
+            <button type="button" onclick="window.open(document.getElementById('qrInstallAdminImg').src, '_blank')" style="background:#d97706; color:#fff; border:none; padding:5px 10px; border-radius:6px; font-size:0.74rem; font-weight:800; cursor:pointer; width:100%;">📥 Tải Ảnh QR Quản Lý</button>
           </div>
         </div>
 
@@ -1190,7 +1203,7 @@
               artwork: [{ src: 'https://hychayfood.vercel.app/Logo%20nho.png', sizes: '192x192', type: 'image/png' }]
             });
             navigator.mediaSession.setActionHandler('play', () => silentCarrierAudio.play());
-            navigator.mediaSession.setActionHandler('pause', () => silentCarrierAudio.play());
+            navigator.mediaSession.setActionHandler('pause', () => { silentCarrierAudio.pause(); });
           }
         }).catch(() => {});
       } catch (e) {
@@ -1444,7 +1457,7 @@ function updatePiPCanvas() {
         pipVideoEl.playsInline = true;
         
         // ĐÂY LÀ CHÌA KHÓA: ÉP TRÌNH DUYỆT TỰ ĐỘNG BẬT PIP KHI THOÁT APP (Yêu cầu Chrome/Safari đời mới)
-        pipVideoEl.autoPictureInPicture = true; 
+        pipVideoEl.autoPictureInPicture = false; // Chỉ bật PiP khi bấm nút "📌 Cửa Sổ Nổi" để tránh văng app khi chuyển qua lại trên 1 máy
         
         pipVideoEl.style.position = 'fixed';
         pipVideoEl.style.bottom = '0';
@@ -3942,17 +3955,25 @@ window.setEditModalCategory = function(cat, btn) {
     //     KHỚP TUYỆT ĐỐI VỚI FILE HTKK MẪU 01/GTGT (842), 04/GTGT & 01/CNKD (688)
     // =========================================================
     // Tự động tạo ảnh QR cài App khi mở Modal Cài Icon
-    const origOpenInstallGuideV13 = window.openInstallGuideModal;
-    window.openInstallGuideModal = function() {
-      const baseUrl = window.location.origin;
-      const cusUrl = `${baseUrl}/index.html?install=1`;
-      const shpUrl = `${baseUrl}/index.html?shipper=hub&install=1`;
-      const qrCus = document.getElementById('qrInstallCustomerImg');
-      const qrShp = document.getElementById('qrInstallShipperImg');
-      if (qrCus) qrCus.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(cusUrl)}`;
-      if (qrShp) qrShp.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(shpUrl)}`;
-      origOpenInstallGuideV13();
-    };
+const origOpenInstallGuideV13 = window.openInstallGuideModal;
+ window.openInstallGuideModal = function() {
+   const baseUrl = window.location.origin;
+   const cusUrl = `${baseUrl}/index.html?install=1`;
+   const shpUrl = `${baseUrl}/index.html?shipper=hub&install=1`;
+   const admUrl = `${baseUrl}/admin.html?install=1`;
+   const qrCus = document.getElementById('qrInstallCustomerImg');
+   const qrShp = document.getElementById('qrInstallShipperImg');
+   const qrAdm = document.getElementById('qrInstallAdminImg');
+   if (qrCus) qrCus.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(cusUrl)}`;
+   if (qrShp) qrShp.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(shpUrl)}`;
+   if (qrAdm) qrAdm.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(admUrl)}`;
+   origOpenInstallGuideV13();
+ };
+
+ // Tự động bật bảng hỏi cài đặt khi Quản lý quét mã QR ?install=1
+ if (new URLSearchParams(window.location.search).get('install') === '1') {
+   setTimeout(() => { window.openInstallGuideModal(); }, 600);
+ }
 
     function escapeXmlSafe(str) {
       return String(str || '')
