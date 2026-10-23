@@ -232,7 +232,7 @@
       <h2>TRUNG TÂM ĐIỀU HÀNH</h2>
       <p>CÔNG TY TNHH TMDV VÀ SẢN XUẤT BẢO ANH LÂM</p>
       <form id="adminLoginForm" onsubmit="handleAdminLogin(event)">
-        <input type="text" id="adminEmail" placeholder="Email hoặc Tên đăng nhập..." required autocomplete="username">
+        <input type="text" id="adminEmail" placeholder="Email hoặc Tên đăng nhập..." required autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
         <input type="password" id="adminPassword" placeholder="Mật khẩu..." required autocomplete="current-password">
         <button type="submit" id="btnLoginSubmit" class="btn-login-submit">VÀO HỆ THỐNG POS</button>
         <div id="loginStatusText" style="margin-top: 10px; font-size: 0.85rem; font-weight: bold; color: #1e5e3a; display: none;"></div>
@@ -1104,7 +1104,8 @@ const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platfor
      };
      const manifestBlob = new Blob([JSON.stringify(dynamicManifest)], { type: 'application/json' });
      manifestLink.href = URL.createObjectURL(manifestBlob);
-   }
+   } 
+ }
     setupDistinctAdminAppIdentity();
 
     // ==========================================
@@ -3480,45 +3481,58 @@ window.setEditModalCategory = function(cat, btn) {
       });
     };
 
-    // Cập nhật đăng nhập nhận diện đúng Role từ Firebase
-    const origHandleAdminLogin = window.handleAdminLogin;
-    window.handleAdminLogin = function(e) {
-      e.preventDefault();
-      const rawUser = document.getElementById('adminEmail').value.trim();
-      const pass = document.getElementById('adminPassword').value;
-      const btn = document.getElementById('btnLoginSubmit');
-      const errBox = document.getElementById('loginErrorMsg');
-      errBox.style.display = 'none';
-      btn.innerText = "ĐANG XÁC THỰC..."; btn.disabled = true;
+// Cập nhật đăng nhập nhận diện đúng Role (Không phân biệt chữ Hoa/Thường ở tên đăng nhập & Không bị kẹt nút)
+ const origHandleAdminLogin = window.handleAdminLogin;
+ window.handleAdminLogin = function(e) {
+   e.preventDefault();
+   const rawUser = (document.getElementById('adminEmail').value || '').trim();
+   const lowerUser = rawUser.toLowerCase();
+   const pass = (document.getElementById('adminPassword').value || '').trim();
+   const btn = document.getElementById('btnLoginSubmit');
+   const errBox = document.getElementById('loginErrorMsg');
+   errBox.style.display = 'none';
+   btn.innerText = "ĐANG XÁC THỰC...";
+   btn.disabled = true;
 
-      if ((rawUser === "balshousevn@gmail.com" && pass === "hychayfood") || (rawUser === "admin" && pass === "baochay2026")) {
-        localStorage.setItem('hy_chay_active_user', rawUser);
-        localStorage.setItem('hy_chay_active_role', 'root');
-        enforceGranularRolePermissions();
-        window.forceUnlockBackgroundAudio(false);
-        document.getElementById('adminLoginOverlay').style.display = 'none';
-        document.getElementById('mainAppWrapper').style.display = 'block';
-        btn.innerText = "VÀO HỆ THỐNG POS"; btn.disabled = false;
-        return;
-      }
+   // Cho phép đăng nhập tài khoản Chủ quán bất kể điện thoại tự viết hoa chữ cái đầu
+   if ((lowerUser === "balshousevn@gmail.com" && pass === "hychayfood") || (lowerUser === "admin" && pass === "baochay2026")) {
+     localStorage.setItem('hy_chay_active_user', lowerUser);
+     localStorage.setItem('hy_chay_active_role', 'root');
+     enforceGranularRolePermissions();
+     window.forceUnlockBackgroundAudio(false);
+     document.getElementById('adminLoginOverlay').style.display = 'none';
+     document.getElementById('mainAppWrapper').style.display = 'block';
+     btn.innerText = "VÀO HỆ THỐNG POS";
+     btn.disabled = false;
+     return;
+   }
 
-      const safeUser = rawUser.replace(/\./g, '_').replace(/[#$\[\]\/]/g, '-');
-      get(ref(db, 'admin_users/' + safeUser)).then((snap) => {
-        if (snap.exists() && String(snap.val().password) === String(pass)) {
-          const assignedRole = snap.val().role || 'cashier';
-          localStorage.setItem('hy_chay_active_user', rawUser);
-          localStorage.setItem('hy_chay_active_role', assignedRole);
-          enforceGranularRolePermissions();
-          window.forceUnlockBackgroundAudio(false);
-          document.getElementById('adminLoginOverlay').style.display = 'none';
-          document.getElementById('mainAppWrapper').style.display = 'block';
-          btn.innerText = "VÀO HỆ THỐNG POS"; btn.disabled = false;
-        } else {
-          errBox.style.display = 'block'; errBox.innerText = "Sai tên đăng nhập hoặc mật khẩu!";
-          btn.innerText = "VÀO HỆ THỐNG POS"; btn.disabled = false;
-        }
-      });
-    };
+   const safeUser = lowerUser.replace(/\./g, '_').replace(/[#$\[\]\/]/g, '-');
+   get(ref(db, 'admin_users/' + safeUser)).then((snap) => {
+     // Hỗ trợ kiểm tra cả key chữ thường lẫn key nguyên bản
+     if (snap.exists() && String(snap.val().password).trim() === String(pass)) {
+       const assignedRole = snap.val().role || 'cashier';
+       localStorage.setItem('hy_chay_active_user', rawUser);
+       localStorage.setItem('hy_chay_active_role', assignedRole);
+       enforceGranularRolePermissions();
+       window.forceUnlockBackgroundAudio(false);
+       document.getElementById('adminLoginOverlay').style.display = 'none';
+       document.getElementById('mainAppWrapper').style.display = 'block';
+       btn.innerText = "VÀO HỆ THỐNG POS";
+       btn.disabled = false;
+     } else {
+       errBox.style.display = 'block';
+       errBox.innerText = "Sai tên đăng nhập hoặc mật khẩu!";
+       btn.innerText = "VÀO HỆ THỐNG POS";
+       btn.disabled = false;
+     }
+   }).catch((err) => {
+     errBox.style.display = 'block';
+     errBox.innerText = "Lỗi kết nối máy chủ: " + (err.message || "Vui lòng kiểm tra mạng!");
+     btn.innerText = "VÀO HỆ THỐNG POS";
+     btn.disabled = false;
+   });
+ };
 
     onValue(ref(db, 'admin_users'), (snap) => {
       const users = snap.val() || {}; let html = '';
