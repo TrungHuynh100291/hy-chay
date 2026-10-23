@@ -2632,9 +2632,9 @@ window.addToCart = function(id, name, p) {
             <button type="button" onclick="triggerNativeInstall()" style="width:100%; padding:14px; background:#16a34a; color:#ffffff; border:none; border-radius:12px; font-weight:900; font-size:0.98rem; cursor:pointer; margin-bottom:10px; box-shadow:0 4px 12px rgba(22,163,74,0.3);">
               ⚡ 1. CÀI ĐẶT TRỰC TIẾP 1-CHẠM (KHUYÊN DÙNG)
             </button>
-            <a href="${apkFileName}" download style="display:block; width:100%; padding:12px; background:#0284c7; color:#ffffff; border-radius:12px; font-weight:800; font-size:0.9rem; text-decoration:none; margin-bottom:10px;">
+            <button type="button" onclick="downloadApkWithFallback('${apkFileName}')" style="width:100%; padding:12px; background:#0284c7; color:#ffffff; border:none; border-radius:12px; font-weight:800; font-size:0.9rem; cursor:pointer; margin-bottom:10px;">
               📦 2. TẢI FILE CÀI ĐẶT ANDROID (.APK)
-            </a>
+            </button>
             <button type="button" onclick="closeSmartInstallOverlay()" style="width:100%; padding:10px; background:#f1f5f9; color:#64748b; border:none; border-radius:10px; font-weight:700; font-size:0.88rem; cursor:pointer;">
               Đóng Cửa Sổ
             </button>
@@ -2659,6 +2659,21 @@ window.addToCart = function(id, name, p) {
       }
     };
 
+    window.downloadApkWithFallback = async function(apkPath) {
+      try {
+        const res = await fetch(apkPath, { method: 'HEAD' });
+        const contentType = res.headers.get('content-type') || '';
+        if (res.ok && !contentType.includes('text/html')) {
+          const a = document.createElement('a');
+          a.href = apkPath;
+          a.download = apkPath.replace('/', '');
+          a.click();
+          return;
+        }
+      } catch (_) {}
+      // Nếu chưa up file .apk lên hosting thì tự động kích hoạt cài đặt trực tiếp
+      window.triggerNativeInstall();
+    };
     if (urlParams.get('install') === '1' && !isRunningStandalone()) {
       setTimeout(() => window.openSmartInstallPrompt(shipperOrderIdParam ? 'shipper' : 'customer'), 600);
     }
