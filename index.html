@@ -495,7 +495,27 @@
             </div>
             <textarea id="cusAddress" rows="2" required placeholder="Gõ địa chỉ hoặc bấm nút Định vị Bản Đồ phía trên..." onblur="calcDistance(this.value)" style="border:2px solid #1e5e3a; background:#f8fafc; font-weight:600;"></textarea>
           </div>
-
+        
+      <!-- KHUNG CHỌN THỜI GIAN GIAO HÀNG (GIAO NGAY HOẶC HẸN GIỜ GIAO) -->
+          <div class="form-group" style="background:#f0fdf4; border:1.5px solid #86efac; padding:12px; border-radius:12px; margin-bottom:14px;">
+            <label style="color:var(--primary); font-weight:800; margin-bottom:8px;">⏰ Thời gian bạn muốn nhận món (*)</label>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+              <label id="lblModeNow" style="display:flex; align-items:center; gap:6px; background:#1e5e3a; color:#fff; padding:9px 12px; border-radius:8px; cursor:pointer; font-weight:700; font-size:0.86rem; margin:0;">
+                <input type="radio" name="deliveryTimeMode" value="immediate" checked onchange="onDeliveryTimeModeChange()" style="width:auto;"> ⚡ Giao ngay (~30p)
+              </label>
+              <label id="lblModeSched" style="display:flex; align-items:center; gap:6px; background:#fff; color:#1e5e3a; border:1px solid #cbd5e1; padding:9px 12px; border-radius:8px; cursor:pointer; font-weight:700; font-size:0.86rem; margin:0;">
+                <input type="radio" name="deliveryTimeMode" value="scheduled" onchange="onDeliveryTimeModeChange()" style="width:auto;"> 🕒 Hẹn giờ giao
+              </label>
+            </div>
+            <div id="scheduledTimePickerWrap" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed #86efac;">
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                <span style="font-size:0.84rem; font-weight:700; color:#166534;">Chọn giờ giao hôm nay (07:00 - 20:15):</span>
+                <select id="cusScheduledTime" onchange="updateCalc()" style="width:140px; padding:8px; border:2px solid #16a34a; border-radius:8px; font-weight:800; color:#1e5e3a; background:#fff;"></select>
+              </div>
+              <small style="display:block; color:#0369a1; font-weight:600; margin-top:4px;">💡 Bếp Hy Chay sẽ canh giờ nấu sát giờ hẹn để món ăn đến tay bạn luôn nóng hổi!</small>
+            </div>
+          </div>
+        
           <div id="birthdayDiscountBadge" class="birthday-badge">🎂 CHÚC MỪNG SINH NHẬT! Tặng Bạn Giảm 5% Toàn Bộ Món Ăn</div>
 
           <div class="shipping-calculator-box" id="shippingBox">
@@ -2027,10 +2047,50 @@ window.addToCart = function(id, name, p) {
       }
     }
 
+// Tạo danh sách các mốc giờ hẹn giao cách nhau 15 phút (từ sau thời점 hiện tại 30 phút đến 20:15)
+    function populateScheduledTimeOptions() {
+      const sel = document.getElementById('cusScheduledTime');
+      if (!sel) return;
+      const now = new Date();
+      const minTargetMins = now.getHours() * 60 + now.getMinutes() + 30;
+      const startMins = Math.max(7 * 60, Math.ceil(minTargetMins / 15) * 15);
+      const closeMins = 20 * 60 + 15;
+      let html = '';
+      for (let m = startMins; m <= closeMins; m += 15) {
+        const hh = String(Math.floor(m / 60)).padStart(2, '0');
+        const mm = String(m % 60).padStart(2, '0');
+        const isPeakSlot = (m >= 11 * 60 && m <= 13 * 60) || (m >= 17 * 60 && m <= 19 * 60);
+        html += `<option value="${hh}:${mm}">${hh}:${mm}${isPeakSlot ? ' (Cao điểm)' : ''}</option>`;
+      }
+      if (!html) {
+        html = `<option value="11:00">11:00 (Ngày mai)</option><option value="12:00">12:00 (Ngày mai)</option>`;
+      }
+      sel.innerHTML = html;
+    }
+
+    window.onDeliveryTimeModeChange = function() {
+      const mode = document.querySelector('input[name="deliveryTimeMode"]:checked')?.value || 'immediate';
+      const wrap = document.getElementById('scheduledTimePickerWrap');
+      const lblNow = document.getElementById('lblModeNow');
+      const lblSched = document.getElementById('lblModeSched');
+      if (mode === 'scheduled') {
+        populateScheduledTimeOptions();
+        if (wrap) wrap.style.display = 'block';
+        if (lblSched) { lblSched.style.background = '#1e5e3a'; lblSched.style.color = '#fff'; }
+        if (lblNow) { lblNow.style.background = '#fff'; lblNow.style.color = '#1e5e3a'; lblNow.style.border = '1px solid #cbd5e1'; }
+      } else {
+        if (wrap) wrap.style.display = 'none';
+        if (lblNow) { lblNow.style.background = '#1e5e3a'; lblNow.style.color = '#fff'; }
+        if (lblSched) { lblSched.style.background = '#fff'; lblSched.style.color = '#1e5e3a'; lblSched.style.border = '1px solid #cbd5e1'; }
+      }
+      window.updateCalc();
+    };
+
     window.openCheckoutModal = function() {
       currentPaymentCode = "HC" + Math.floor(1000 + Math.random() * 9000);
       autoFillCheckoutNow();
       checkOperatingHours();
+      populateScheduledTimeOptions();
       window.renderCartItems();
       window.updateCalc();
       document.getElementById('checkoutModal').classList.add('active');
@@ -2098,8 +2158,15 @@ window.addToCart = function(id, name, p) {
         document.getElementById('birthdayDiscountRow').style.display = 'none';
       }
 
-      // GIỜ CAO ĐIỂM BUỔI TRƯA (11:00 - 13:00) VÀ BUỔI CHIỀU (17:00 - 19:00)
-      const h = new Date().getHours(), m = new Date().getMinutes(), mins = h * 60 + m;
+      // KIỂM TRA GIỜ CAO ĐIỂM THEO ĐÚNG GIỜ GIAO HÀNG (NẾU KHÁCH HẸN 11:00 THÌ TÍNH THEO KHUNG 11:00)
+      const delivMode = document.querySelector('input[name="deliveryTimeMode"]:checked')?.value || 'immediate';
+      const schedVal = document.getElementById('cusScheduledTime')?.value || '';
+      let mins = new Date().getHours() * 60 + new Date().getMinutes();
+      if (delivMode === 'scheduled' && schedVal.includes(':')) {
+        const parts = schedVal.split(':');
+        mins = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+      }
+
       const peak = (mins >= 11 * 60 && mins <= 13 * 60) || (mins >= 17 * 60 && mins <= 19 * 60);
       const extraKm = Math.max(0, calculatedKm - 2);
 
@@ -2115,13 +2182,13 @@ window.addToCart = function(id, name, p) {
       } else if (sub >= 100000) {
         const rawFee30 = peak ? (13000 + extraKm * 3500) : (10000 + extraKm * 3500);
         shippingFee = Math.round(rawFee30 / 1000) * 1000;
-        document.getElementById('shipTimeSlotText').innerHTML = peak ? '<span style="color:#ea580c; font-weight:bold;">⚡ Cao điểm (17h-19h) - Trợ giá 30%</span>' : '<span style="color:#0284c7; font-weight:bold;">Trợ giá 30%</span>';
+        document.getElementById('shipTimeSlotText').innerHTML = peak ? '<span style="color:#ea580c; font-weight:bold;">⚡ Khung giờ cao điểm - Trợ giá 30%</span>' : '<span style="color:#0284c7; font-weight:bold;">Trợ giá 30%</span>';
         if (subsidyBadge) subsidyBadge.style.display = 'block';
         if (freeshipBadge) freeshipBadge.style.display = 'none';
       } else {
         const rawFee20 = peak ? (15000 + extraKm * 4000) : (12000 + extraKm * 4000);
         shippingFee = Math.round(rawFee20 / 1000) * 1000;
-        document.getElementById('shipTimeSlotText').innerHTML = peak ? '<span style="color:#ea580c; font-weight:bold;">⚡ Cao điểm (17h-19h) - Giảm 20%</span>' : 'Tiêu chuẩn (Giảm 20% sàn)';
+        document.getElementById('shipTimeSlotText').innerHTML = peak ? '<span style="color:#ea580c; font-weight:bold;">⚡ Khung giờ cao điểm - Giảm 20%</span>' : 'Tiêu chuẩn (Giảm 20% sàn)';
         if (subsidyBadge) subsidyBadge.style.display = 'none';
         if (freeshipBadge) freeshipBadge.style.display = 'none';
       }
@@ -2178,7 +2245,7 @@ window.addToCart = function(id, name, p) {
     };
 
     // ==========================================
-    // 7. GỬI ĐƠN HÀNG & LẮNG NGHE TRẠNG THÁI TRỰC TIẾP TRÊN MÀN HÌNH KHÁCH
+    // 7. GỬI ĐƠN HÀNG (HỖ TRỢ ĐƠN HẸN GIỜ GIAO) & LẮNG NGHE TRẠNG THÁI TRỰC TIẾP
     // ==========================================
     window.submitOrder = function(e) {
       e.preventDefault();
@@ -2193,6 +2260,10 @@ window.addToCart = function(id, name, p) {
       const addr = document.getElementById('cusAddress').value.trim();
       const ward = document.getElementById('cusWard')?.value || 'Phường Phan Thiết';
       const house = document.getElementById('cusHouse')?.value || '';
+      const delivMode = document.querySelector('input[name="deliveryTimeMode"]:checked')?.value || 'immediate';
+      const scheduledTimeVal = delivMode === 'scheduled' ? (document.getElementById('cusScheduledTime')?.value || null) : null;
+      const rawNote = document.getElementById('cusNote').value.trim();
+      const finalNote = scheduledTimeVal ? `[⏰ HẸN GIAO LÚC ${scheduledTimeVal}] ${rawNote}`.trim() : rawNote;
 
       window.saveCheckoutDraft();
       if (!localStorage.getItem('hyChayUserProfile')) {
@@ -2208,7 +2279,9 @@ window.addToCart = function(id, name, p) {
         province: 'Lâm Đồng',
         address: addr,
         deliveryKm: calculatedKm,
-        note: document.getElementById('cusNote').value.trim(),
+        deliveryTimeMode: delivMode,
+        scheduledTime: scheduledTimeVal,
+        note: finalNote,
         items: cart,
         rawSubtotal: sub,
         subtotal: Math.max(0, sub - birthdayDiscountAmt),
@@ -2229,7 +2302,8 @@ window.addToCart = function(id, name, p) {
       push(ref(db, 'orders'), orderData).then((nRef) => {
         localStorage.setItem('last_hy_chay_order_id', nRef.key);
         listenActiveOrderForCustomer(nRef.key);
-        alert(`🎉 Gửi đơn thành công! Trạng thái tài xế và thời gian giao sẽ hiển thị trực tiếp ngay trên màn hình của bạn.`);
+        const schedMsg = scheduledTimeVal ? `\n⏰ Lịch hẹn giao lúc ${scheduledTimeVal} đã được ghi nhận! Bếp sẽ canh nấu sát giờ hẹn để món ăn luôn nóng hổi.` : '';
+        alert(`🎉 Gửi đơn thành công!${schedMsg}`);
         cart = {}; saveCartLocal(); updateCartUI(); window.closeCheckoutModal();
         document.getElementById('cusNote').value = '';
       });
