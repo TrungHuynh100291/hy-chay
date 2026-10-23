@@ -3747,11 +3747,44 @@ window.setEditModalCategory = function(cat, btn) {
       }
     };
 
-    window.downloadIOSProfile = function(mode = 'admin') {
-      const appUrl = window.location.origin + (mode === 'admin' ? '/admin.html' : '/index.html');
-      const appTitle = mode === 'admin' ? 'POS Hy Chay' : 'Hy Chay';
+// Hàm chuyển đổi ảnh Logo quán sang chuẩn Base64 nhúng thẳng vào trong file cài đặt iOS (.mobileconfig)
+    async function getLogoBase64ForIOS() {
+      try {
+        const res = await fetch('https://hychayfood.vercel.app/Logo%20nho.png');
+        const blob = await res.blob();
+        return await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const base64Raw = (reader.result || '').split(',')[1] || '';
+            resolve(base64Raw);
+          };
+          reader.readAsDataURL(blob);
+        });
+      } catch (e) {
+        return '';
+      }
+    }
+
+    // Hàm xuất file .mobileconfig kích hoạt trực tiếp trình cài đặt gốc của iOS (Full màn hình + Có sẵn Logo)
+    window.downloadIOSProfile = async function(mode = 'admin') {
+      const originUrl = window.location.origin;
+      let appUrl = originUrl + '/index.html';
+      let appTitle = 'Hy Chay';
+
+      if (mode === 'admin') {
+        appUrl = originUrl + '/admin.html';
+        appTitle = 'POS Hy Chay';
+      } else if (mode === 'shipper') {
+        appUrl = originUrl + '/index.html?shipper=hub';
+        appTitle = 'Ship Hy Chay';
+      }
+
+      const iconBase64 = await getLogoBase64ForIOS();
+      const iconXmlTag = iconBase64 ? `<key>Icon</key><data>${iconBase64}</data>` : '';
+
       const uuid1 = '11111111-2222-3333-4444-' + Date.now().toString().slice(-12);
       const uuid2 = '99999999-8888-7777-6666-' + Date.now().toString().slice(-12);
+
       const mobileConfigXml = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -3761,8 +3794,9 @@ window.setEditModalCategory = function(cat, btn) {
     <dict>
       <key>FullScreen</key><true/>
       <key>IsRemovable</key><true/>
+      ${iconXmlTag}
       <key>Label</key><string>${appTitle}</string>
-      <key>PayloadDescription</key><string>Cài đặt biểu tượng ${appTitle} lên màn hình chính iOS</string>
+      <key>PayloadDescription</key><string>Cài đặt biểu tượng ${appTitle} Full Màn Hình</string>
       <key>PayloadDisplayName</key><string>${appTitle}</string>
       <key>PayloadIdentifier</key><string>com.baoanhlam.webclip.${mode}</string>
       <key>PayloadType</key><string>com.apple.webClip.managed</string>
@@ -3780,12 +3814,18 @@ window.setEditModalCategory = function(cat, btn) {
   <key>PayloadVersion</key><integer>1</integer>
 </dict>
 </plist>`;
-      const blob = new Blob([mobileConfigXml], { type: 'application/x-apple-aspen-config' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = mode === 'admin' ? 'HyChay_POS_iOS.mobileconfig' : 'HyChay_App_iOS.mobileconfig';
-      a.click();
+
+      // Chuyển sang Data URI chuẩn của Apple để Safari bật thẳng hộp thoại "Cho phép tải hồ sơ cấu hình"
+      const base64Config = btoa(unescape(encodeURIComponent(mobileConfigXml)));
+      window.location.href = 'data:application/x-apple-aspen-config;base64,' + base64Config;
     };
+
+    // Đồng bộ tên hàm gọi ở trang khách hàng index.html
+    window.downloadCustomerIOSProfile = function(roleMode = 'customer') {
+      const mode = (roleMode === 'shipper' || window.location.search.includes('shipper=')) ? 'shipper' : 'customer';
+      window.downloadIOSProfile(mode);
+    };
+      
     // =========================================================
     // 17. HỆ THỐNG ĐIỀU HÀNH ĐƠN HẸN GIỜ GIAO (9H ĐẶT - 11H GIAO)
     //     & TỰ ĐỘNG ĐÁNH THỨC BẾP BẰNG GIỌNG NÓI TRƯỚC 30 PHÚT
