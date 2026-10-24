@@ -1282,23 +1282,68 @@ const dynamicManifest = {
       } catch (e) {}
     }
 
-    // Phát giọng đọc Tiếng Việt: Bất chấp máy chính hay máy phụ, đảm bảo 100% ra tiếng Việt rõ ràng
-    function playOnlineVietnameseTTS(text) {
-      try {
-        const ttsUrl = `https://translate.googleapis.com/translate_tts?client=gtx&ie=UTF-8&tl=vi&dt=t&q=${encodeURIComponent(text)}`;
-        ttsAudioPlayer.src = ttsUrl;
-        ttsAudioPlayer.volume = 1.0;
-        return ttsAudioPlayer.play();
-      } catch (e) {
-        return Promise.reject(e);
+// Hàng đợi phát giọng nói Tiếng Việt (Giúp đọc danh sách nhiều món dài không bị ngắt chữ hoặc đè câu)
+    let voiceSpeechQueue = [];
+    let isPlayingVoiceQueue = false;
+
+    function splitTextIntoVoiceChunks(text, maxLen = 165) {
+      const clean = String(text || '').replace(/\s+/g, ' ').trim();
+      if (clean.length <= maxLen) return [clean];
+      const parts = clean.split(/(?<=[.,;!?])\s+/);
+      const chunks = [];
+      let current = '';
+      parts.forEach(p => {
+        if ((current + ' ' + p).trim().length <= maxLen) {
+          current = (current + ' ' + p).trim();
+        } else {
+          if (current) chunks.push(current);
+          current = p;
+        }
+      });
+      if (current) chunks.push(current);
+      return chunks.length > 0 ? chunks : [clean.slice(0, maxLen)];
+    }
+
+    function processNextVoiceChunk() {
+      if (!isAudioActive || voiceSpeechQueue.length === 0) {
+        isPlayingVoiceQueue = false;
+        return;
       }
+      isPlayingVoiceQueue = true;
+      const nextChunk = voiceSpeechQueue.shift();
+      const ttsUrl = `https://translate.googleapis.com/translate_tts?client=gtx&ie=UTF-8&tl=vi&dt=t&q=${encodeURIComponent(nextChunk)}`;
+      ttsAudioPlayer.src = ttsUrl;
+      ttsAudioPlayer.volume = 1.0;
+      ttsAudioPlayer.onended = () => setTimeout(processNextVoiceChunk, 120);
+      ttsAudioPlayer.onerror = () => {
+        if ('speechSynthesis' in window) {
+          const msg = new SpeechSynthesisUtterance(nextChunk);
+          const vnVoice = cachedVietnameseVoice || findVietnameseVoice();
+          if (vnVoice) msg.voice = vnVoice;
+          msg.lang = 'vi-VN'; msg.volume = 1.0; msg.rate = 0.95;
+          msg.onend = () => processNextVoiceChunk();
+          msg.onerror = () => processNextVoiceChunk();
+          window.speechSynthesis.speak(msg);
+        } else {
+          processNextVoiceChunk();
+        }
+      };
+      ttsAudioPlayer.play().catch(() => ttsAudioPlayer.onerror());
+    }
+
+    function playOnlineVietnameseTTS(text) {
+      const chunks = splitTextIntoVoiceChunks(text);
+      chunks.forEach(c => voiceSpeechQueue.push(c));
+      if (!isPlayingVoiceQueue) {
+        processNextVoiceChunk();
+      }
+      return Promise.resolve();
     }
 
     function speakAlert(text, broadcastToOtherDevices = false) {
       if (!isAudioActive) return;
       playHardwareBeep();
 
-      // Nếu cần đồng bộ cho cả máy chính và toàn bộ máy phụ cùng đọc
       if (broadcastToOtherDevices) {
         set(ref(db, 'voice_sync/latest'), {
           text: text,
@@ -1306,6 +1351,20 @@ const dynamicManifest = {
           sender: localStorage.getItem('hy_chay_active_user') || 'system'
         }).catch(() => {});
       }
+
+      playOnlineVietnameseTTS(text);
+
+      if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
+        try {
+          new Notification('🔔 HY CHAY POS', {
+            body: text,
+            icon: 'https://hychayfood.vercel.app/Logo%20nho.png',
+            tag: 'hychay-order-alert',
+            renotify: true
+          });
+        } catch (_) {}
+      }
+    }
 
       // Ưu tiên phát luồng Audio Tiếng Việt chuẩn của Google GTX (no-referrer) để cả máy không có bộ giọng Việt vẫn nói Tiếng Việt 100%
       playOnlineVietnameseTTS(text).catch(() => {
@@ -1996,11 +2055,51 @@ window.deleteDishFromMenu = function(id, name) {
       document.getElementById('posCartTotal').innerText = total.toLocaleString() + 'đ';
     }
 
-    window.submitDineInOrder = function() {
+window.submitDineInOrder = function() {
       if (Object.keys(posCart).length === 0) return alert("Vui lòng chọn ít nhất 1 món!");
-      let sub = 0; for (let k in posCart) sub += posCart[k].price * posCart[k].qty;
-      const orderData = { orderType: 'dine_in', table: selectedTable, customerName: selectedTable, phone: 'Tại quán', address: '280 Trần Hưng Đạo', note: document.getElementById('posOrderNote').value, items: posCart, rawSubtotal: sub, subtotal: sub, shippingFee: 0, discount: 0, grandTotal: sub, paymentMethod: 'COD', paymentStatus: 'Thu tại bàn', status: 'Đang chế biến', createdAt: new Date().toISOString(), archived: false };
-      push(ref(db, 'orders'), orderData).then((res) => { window.printKitchenTicket(res.key, orderData); alert(`Đã gửi đơn ${selectedTable} xuống bếp thành công!`); posCart = {}; document.getElementById('posOrderNote').value = ''; renderPosCartUI(); document.querySelectorAll('.tab-btn')[0].click(); });
+      let sub = 0;
+      let spokenDishes = [];
+      for (let k in posCart) {
+        sub += posCart[k].price * posCart[k].qty;
+        spokenDishes.push(`${posCart[k].qty} ${posCart[k].name}`);
+      }
+      const noteVal = (document.getElementById('posOrderNote').value || '').trim();
+      const orderData = {
+        orderType: 'dine_in',
+        table: selectedTable,
+        customerName: selectedTable,
+        phone: 'Tại quán',
+        address: '280 Trần Hưng Đạo',
+        note: noteVal,
+        items: posCart,
+        rawSubtotal: sub,
+        subtotal: sub,
+        shippingFee: 0,
+        discount: 0,
+        grandTotal: sub,
+        paymentMethod: 'COD',
+        paymentStatus: 'Thu tại bàn',
+        status: 'Đang chế biến',
+        createdAt: new Date().toISOString(),
+        archived: false
+      };
+      push(ref(db, 'orders'), orderData).then((res) => {
+        // Đánh dấu đã đọc đơn này để không bị đọc trùng 2 lần trên cùng 1 máy
+        if (typeof announcedNewOrderIds !== 'undefined') announcedNewOrderIds[res.key] = true;
+        if (typeof orderLastVoiceReminderAt !== 'undefined') orderLastVoiceReminderAt[res.key] = Date.now();
+
+        // Phát âm thanh đọc to Bàn số mấy + Món gì + Ghi chú bếp
+        window.forceUnlockBackgroundAudio(true);
+        const voiceOrderText = `Order mới ${selectedTable} gồm: ${spokenDishes.join(', ')}.${noteVal ? ' Lưu ý bếp: ' + noteVal : ''}`;
+        speakAlert(voiceOrderText, true);
+
+        window.printKitchenTicket(res.key, orderData);
+        alert(`✅ Đã gửi đơn ${selectedTable} xuống bếp & phát loa đọc món!`);
+        posCart = {};
+        document.getElementById('posOrderNote').value = '';
+        renderPosCartUI();
+        document.querySelectorAll('.tab-btn')[0].click();
+      });
     };
 
     // ==========================================
@@ -2207,10 +2306,128 @@ window.deleteDishFromMenu = function(id, name) {
       renderOrders();
     };
 
+// Bộ nhớ theo dõi đơn mới & mốc thời gian nhắc bếp 5 phút/lần cho từng bàn
+    let announcedNewOrderIds = {};
+    let isFirstOrdersLoad = true;
+    let orderLastVoiceReminderAt = {};
+    const KITCHEN_REMIND_INTERVAL_MS = 5 * 60 * 1000; // Chu kỳ 5 phút (300.000 ms)
+
+    // Hàm bóc tách danh sách món của 1 đơn (Lấy tất cả món HOẶC chỉ lấy những món CHƯA TÍCH CHỌN làm)
+    function getOrderDishesVoiceInfo(order, onlyUncooked = false) {
+      if (!order || !order.items) return { label: 'Đơn hàng', list: [], total: 0, uncooked: 0 };
+      const isDineIn = order.orderType === 'dine_in';
+      const seqText = order.dailySeq ? `số ${String(order.dailySeq).padStart(2, '0')}` : '';
+      const label = isDineIn ? (order.table || 'Tại bàn') : `Đơn giao đi ${seqText} của khách ${order.customerName || ''}`;
+      const checkedMap = order.checkedItems || {};
+      let list = [];
+      let total = 0;
+      let uncooked = 0;
+
+      for (let k in order.items) {
+        total++;
+        const cleanK = safeItemKey(k);
+        const isChecked = !!(checkedMap[cleanK] || checkedMap[k]);
+        if (!isChecked) uncooked++;
+        if (onlyUncooked && isChecked) continue; // Bỏ qua những món đã tích chọn làm rồi
+        list.push(`${order.items[k].qty} ${order.items[k].name}`);
+      }
+      return { label, list, total, uncooked };
+    }
+
+    // Khi Bếp / Thu ngân chạm vào món ăn để tích chọn Đã Làm (☑️) hoặc bỏ tích (⬜)
     window.toggleDishCooked = function(orderId, itemKey, currentState) {
       const cleanK = safeItemKey(itemKey);
-      update(ref(db, `orders/${orderId}/checkedItems`), { [cleanK]: !currentState });
+      const nextState = !currentState;
+      update(ref(db, `orders/${orderId}/checkedItems`), { [cleanK]: nextState }).then(() => {
+        const o = ordersCache[orderId];
+        if (!o) return;
+        const info = getOrderDishesVoiceInfo(o, true);
+        // Nếu vừa tích chọn xong món cuối cùng của bàn đó -> Báo hoàn thành & ngắt bộ đếm nhắc 5 phút
+        if (nextState && info.uncooked === 0 && info.total > 0) {
+          delete orderLastVoiceReminderAt[orderId];
+          if (isAudioActive) {
+            speakAlert(`Đã làm xong đủ tất cả các món của ${info.label}!`, false);
+          }
+        }
+      });
     };
+
+    // Tự động đọc chi tiết Bàn & Món khi có thiết bị khác vừa bấm Order hoặc Khách vừa đặt đơn mới
+    onValue(ref(db, 'orders'), (snap) => {
+      const all = snap.val() || {};
+      if (isFirstOrdersLoad) {
+        Object.keys(all).forEach(id => {
+          announcedNewOrderIds[id] = true;
+          if (all[id] && all[id].createdAt) {
+            orderLastVoiceReminderAt[id] = new Date(all[id].createdAt).getTime();
+          }
+        });
+        isFirstOrdersLoad = false;
+        return;
+      }
+
+      Object.keys(all).forEach(id => {
+        const o = all[id];
+        if (!o || o.archived) return;
+        if (!announcedNewOrderIds[id]) {
+          announcedNewOrderIds[id] = true;
+          orderLastVoiceReminderAt[id] = Date.now();
+          const createdAgeMs = Date.now() - new Date(o.createdAt).getTime();
+          // Chỉ đọc đơn mới phát sinh trong vòng 60 giây gần nhất
+          if (createdAgeMs < 60000 && isAudioActive) {
+            const info = getOrderDishesVoiceInfo(o, false);
+            if (info.list.length > 0) {
+              const notePart = o.note ? `. Lưu ý: ${o.note}` : '';
+              speakAlert(`Order mới ${info.label} gồm: ${info.list.join(', ')}${notePart}`, false);
+            }
+          }
+        }
+      });
+    });
+
+    // BỘ ĐẾM THỜI GIAN THỰC: CỨ ĐÚNG 5 PHÚT NHẮC LẠI CÁC MÓN CHƯA TÍCH CHỌN CỦA TỪNG BÀN
+    function checkAndRemindUncookedDishesEvery5Mins() {
+      if (!isAudioActive) return;
+      const now = Date.now();
+
+      Object.keys(ordersCache).forEach(id => {
+        const o = ordersCache[id];
+        if (!o || o.archived) return;
+        // Chỉ kiểm tra các đơn đang chờ làm hoặc bếp đang chế biến (chưa hoàn tất, chưa giao đi, chưa hủy)
+        const isCookingOrWaiting = (o.status === 'Đang chế biến' || o.status === 'Chờ xác nhận' || o.status === 'Tài xế đang đến quán');
+        if (!isCookingOrWaiting) {
+          delete orderLastVoiceReminderAt[id];
+          return;
+        }
+
+        // Nếu là đơn khách hẹn giờ giao xa (còn hơn 30 phút mới tới giờ giao) thì chưa nhắc
+        if (o.scheduledTime && typeof getMinutesUntilScheduled === 'function') {
+          const minsLeft = getMinutesUntilScheduled(o.scheduledTime);
+          if (minsLeft !== null && minsLeft > 30) return;
+        }
+
+        // Lọc ra những món CHƯA TÍCH CHỌN LÀM (những món đã tích ☑️ sẽ được bỏ qua)
+        const info = getOrderDishesVoiceInfo(o, true);
+        if (info.uncooked === 0 || info.list.length === 0) {
+          return; // Tất cả các món của bàn này đã được tích chọn làm xong!
+        }
+
+        const createdTime = new Date(o.createdAt).getTime();
+        if (isNaN(createdTime)) return;
+        const baseCheckTime = orderLastVoiceReminderAt[id] || createdTime;
+
+        // Nếu đã trôi qua đủ 5 phút (300.000 ms) mà các món này vẫn chưa được tích chọn
+        if (now - baseCheckTime >= KITCHEN_REMIND_INTERVAL_MS) {
+          orderLastVoiceReminderAt[id] = now;
+          const totalWaitMins = Math.max(5, Math.floor((now - createdTime) / 60000));
+          const reminderText = `Nhắc bếp chú ý! ${info.label} đã chờ ${totalWaitMins} phút, còn ${info.uncooked} món chưa làm là: ${info.list.join(', ')}. Bếp tranh thủ làm cho khách tránh thiếu món!`;
+          speakAlert(reminderText, true);
+        }
+      });
+    }
+
+    // Quét kiểm tra định kỳ mỗi 15 giây để bắt chính xác mốc 5 phút của từng bàn
+    setInterval(checkAndRemindUncookedDishesEvery5Mins, 15000);
 
 // LOA ĐỌC SỐ TIỀN KHI NHẬN CHUYỂN KHOẢN QR & TỰ ĐỘNG KHỚP WEBHOOK NGÂN HÀNG
     let announcedPaidOrdersMap = {};
