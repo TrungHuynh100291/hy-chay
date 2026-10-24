@@ -314,9 +314,10 @@
         <div class="stat-card"><div class="stat-info"><span>Tiền Ship Thu Hộ (Hôm Nay)</span><h2 id="kpiShippingRev" style="color: #2563eb;">0đ</h2></div></div>
       </section>
 
-      <div class="tabs-bar">
+<div class="tabs-bar">
         <button class="tab-btn active" onclick="switchMainTab('orders', event)">📦 Màn Hình Đơn Hàng <span class="tab-badge badge-danger" id="badgePending">0</span></button>
-        <button class="tab-btn" onclick="switchMainTab('posOrder', event)">➕ Order Tại Bàn</button>
+        <button class="tab-btn" id="tabBtnPosDineIn" onclick="openPosInMode('dine_in', event)">➕ Order Tại Bàn</button>
+        <button class="tab-btn" id="tabBtnPosDelivery" onclick="openPosInMode('delivery', event)" style="color:#0284c7; font-weight:800;">🛵 Đặt Ship Hộ Khách (Gọi Điện)</button>
         <button class="tab-btn" onclick="switchMainTab('menuStock', event)">🍽️ Quản Lý Món Ăn</button>
         <button class="tab-btn" onclick="switchMainTab('bankConfig', event)">⚙️ Cấu Hình VietQR</button>
         <button class="tab-btn" id="tabShiftReport" onclick="switchMainTab('shiftReport', event)">📊 Báo Cáo Kế Toán</button>
@@ -326,7 +327,7 @@
         <button class="btn-end-shift" onclick="endShiftAndClearScreen()">🛑 KẾT CA & XÓA MÀN HÌNH</button>
       </div>
 
-<!-- VIEW 1: ĐƠN HÀNG & BÁO BẾP THU GỌN -->
+      <!-- VIEW 1: ĐƠN HÀNG & BÁO BẾP THU GỌN -->
       <div id="viewOrders">
         <div class="kds-filter-bar">
           <button class="kds-filter-btn active" onclick="setOrderStatusFilter('active_only', this)">🔥 Cần Xử Lý Tại Quán (<span id="cntActiveOnly">0</span>)</button>
@@ -345,19 +346,88 @@
         <div id="ordersContainer" class="orders-grid"></div>
       </div>
 
-<!-- VIEW 2: POS TẠI BÀN (CÓ QUẢN LÝ THÊM/XÓA BÀN, TOPPING & CHIA NHỎ ĐỒ UỐNG) -->
+      <!-- VIEW 2: POS ORDER TẠI BÀN & ĐẶT ĐƠN SHIP HỘ KHÁCH QUEN / CÔ CHÚ LỚN TUỔI -->
       <div id="viewPosOrder" style="display: none;">
+        <!-- THANH CHUYỂN ĐỔI 2 CHẾ ĐỘ: ĂN TẠI BÀN vs ĐẶT SHIP HỘ KHÁCH -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">
+          <button type="button" id="btnSwitchModeDineIn" onclick="setPosOrderMode('dine_in')" style="padding:12px; border-radius:12px; border:2px solid var(--primary); background:var(--primary); color:#fff; font-weight:800; font-size:0.92rem; cursor:pointer;">
+            🪑 1. KHÁCH ĂN TẠI BÀN / MANG VỀ
+          </button>
+          <button type="button" id="btnSwitchModeDelivery" onclick="setPosOrderMode('delivery')" style="padding:12px; border-radius:12px; border:2px solid #0284c7; background:#f0f9ff; color:#0369a1; font-weight:800; font-size:0.92rem; cursor:pointer;">
+            🛵 2. QUÁN ĐẶT ĐƠN SHIP HỘ KHÁCH (KHÁCH QUEN / GỌI ĐIỆN)
+          </button>
+        </div>
+
         <div class="pos-layout">
           <div class="pos-menu-panel">
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
-              <label style="font-weight:800; font-size:0.85rem; color:var(--primary);">🪑 VỊ TRÍ BÀN ĂN (ĐỒNG BỘ THỜI GIAN THỰC):</label>
-              <div id="tableAdminControls" style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
-                <input type="text" id="newTableNameInput" placeholder="Tên bàn mới (VD: Bàn 9, VIP 1)..." style="padding:5px 10px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.78rem; width:175px;">
-                <button type="button" onclick="addNewTable()" style="background:var(--primary); color:#fff; border:none; padding:5px 10px; border-radius:8px; font-weight:800; font-size:0.76rem; cursor:pointer;">+ Thêm Bàn</button>
-                <button type="button" id="btnToggleDeleteTable" onclick="toggleTableDeleteMode()" style="background:#fee2e2; color:#b91c1c; border:1px solid #fecaca; padding:5px 10px; border-radius:8px; font-weight:800; font-size:0.76rem; cursor:pointer;">🗑️ Xóa Bàn</button>
+            <!-- KHUNG A: CHỌN BÀN (HIỆN KHI Ở CHẾ ĐỘ TẠI BÀN) -->
+            <div id="posDineInTableSection">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+                <label style="font-weight:800; font-size:0.85rem; color:var(--primary);">🪑 VỊ TRÍ BÀN ĂN (ĐỒNG BỘ THỜI GIAN THỰC):</label>
+                <div id="tableAdminControls" style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                  <input type="text" id="newTableNameInput" placeholder="Tên bàn mới (VD: Bàn 9, VIP 1)..." style="padding:5px 10px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.78rem; width:175px;">
+                  <button type="button" onclick="addNewTable()" style="background:var(--primary); color:#fff; border:none; padding:5px 10px; border-radius:8px; font-weight:800; font-size:0.76rem; cursor:pointer;">+ Thêm Bàn</button>
+                  <button type="button" id="btnToggleDeleteTable" onclick="toggleTableDeleteMode()" style="background:#fee2e2; color:#b91c1c; border:1px solid #fecaca; padding:5px 10px; border-radius:8px; font-weight:800; font-size:0.76rem; cursor:pointer;">🗑️ Xóa Bàn</button>
+                </div>
+              </div>
+              <div class="table-pills" id="dynamicTablePills"></div>
+            </div>
+
+            <!-- KHUNG B: DANH BẠ KHÁCH QUEN & ĐỊA CHỈ SHIP (HIỆN KHI Ở CHẾ ĐỘ ĐẶT SHIP HỘ KHÁCH) -->
+            <div id="posDeliveryCustomerSection" style="display:none; background:#f0f9ff; border:2px solid #0284c7; border-radius:12px; padding:12px; margin-bottom:14px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+                <b style="color:#0369a1; font-size:0.9rem;">👵 TÌM NHANH KHÁCH QUEN / CÔ CHÚ LỚN TUỔI (GÕ TÊN, SĐT HOẶC ĐỊA CHỈ):</b>
+                <button type="button" onclick="clearPosDeliveryCustomerForm()" style="background:#fff; color:#475569; border:1px solid #cbd5e1; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:700; cursor:pointer;">🔄 Nhập Khách Mới</button>
+              </div>
+
+              <!-- Ô tìm kiếm tổng hợp Tên / SĐT / Địa chỉ -->
+              <div style="position:relative; margin-bottom:10px;">
+                <input type="text" id="posCrmQuickSearch" placeholder="🔍 Bấm vào đây hoặc gõ Tên, SĐT, Đường (VD: Cô Tư, 0903, Nguyễn Hội)..." oninput="renderPosCrmSuggestions(this.value)" onfocus="renderPosCrmSuggestions(this.value)" style="width:100%; padding:9px 12px; border:2px solid #0284c7; border-radius:8px; font-weight:700; font-size:0.86rem; background:#fff;">
+                <div id="posCrmSuggestDropdown" style="display:none; max-height:210px; overflow-y:auto; background:#ffffff; border:2px solid #0284c7; border-radius:8px; margin-top:4px; box-shadow:0 10px 25px rgba(0,0,0,0.15);"></div>
+              </div>
+
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+                <div>
+                  <label style="font-size:0.75rem; font-weight:800; color:#0f172a;">Họ tên khách hàng (*):</label>
+                  <input type="text" id="posShipCusName" placeholder="VD: Cô Bảy, Chú Tư..." oninput="onPosCustomerFieldInput(this.value)" style="width:100%; padding:8px; border:1px solid #94a3b8; border-radius:6px; font-weight:700;">
+                </div>
+                <div>
+                  <label style="font-size:0.75rem; font-weight:800; color:#0f172a;">Số điện thoại liên hệ (*):</label>
+                  <input type="tel" id="posShipCusPhone" placeholder="VD: 0918xxxxxx..." oninput="onPosCustomerFieldInput(this.value)" style="width:100%; padding:8px; border:1px solid #94a3b8; border-radius:6px; font-weight:700;">
+                </div>
+              </div>
+
+              <div style="display:grid; grid-template-columns:1.2fr 0.8fr 0.8fr; gap:8px; margin-bottom:8px;">
+                <div>
+                  <label style="font-size:0.75rem; font-weight:800; color:#0f172a;">Phường / Khu vực (Lâm Đồng):</label>
+                  <select id="posShipCusWard" onchange="onPosShipWardChange()" style="width:100%; padding:8px; border:1px solid #94a3b8; border-radius:6px; font-weight:700; background:#fff;">
+                    <option value="Phường Phan Thiết" selected>Phường Phan Thiết (~1.8km)</option>
+                    <option value="Phú Thủy">Phú Thủy (~2.5km)</option>
+                    <option value="Bình Thuận">Bình Thuận (~3.5km)</option>
+                    <option value="Hàm Thắng">Hàm Thắng (~4.2km)</option>
+                    <option value="Tiến Thành">Tiến Thành (~9.5km)</option>
+                    <option value="Mũi Né">Mũi Né (~18km)</option>
+                    <option value="La Gi">La Gi (~45km)</option>
+                  </select>
+                </div>
+                <div>
+                  <label style="font-size:0.75rem; font-weight:800; color:#0f172a;">Khoảng cách (Km):</label>
+                  <input type="number" id="posShipKmInput" value="1.8" step="0.1" min="0.5" oninput="recalcPosDeliveryTotals()" style="width:100%; padding:8px; border:1px solid #94a3b8; border-radius:6px; font-weight:800; color:var(--primary);">
+                </div>
+                <div>
+                  <label style="font-size:0.75rem; font-weight:800; color:#0f172a;">Thanh toán:</label>
+                  <select id="posShipPayMethod" style="width:100%; padding:8px; border:1px solid #94a3b8; border-radius:6px; font-weight:700; background:#fff;">
+                    <option value="COD">💵 Tiền mặt (COD)</option>
+                    <option value="VIETQR">💳 Chuyển khoản QR</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label style="font-size:0.75rem; font-weight:800; color:#0f172a;">Số nhà, Tên đường / Địa chỉ giao hàng chi tiết (*):</label>
+                <input type="text" id="posShipCusAddress" placeholder="VD: 125 Nguyễn Hội, Phường Phan Thiết, Tỉnh Lâm Đồng" oninput="onPosCustomerFieldInput(this.value)" style="width:100%; padding:8px; border:1px solid #94a3b8; border-radius:6px; font-weight:700;">
               </div>
             </div>
-            <div class="table-pills" id="dynamicTablePills"></div>
 
             <label style="font-weight:700; font-size:0.85rem; color:#64748b; display:block; margin-bottom:6px;">CHỌN HẠNG MỤC & MÓN ĂN:</label>
             <input type="text" id="posSearchInput" placeholder="🔍 Tìm nhanh tên món ăn, nước uống, topping..." style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:8px; font-size:0.85rem;" oninput="renderPosDishGrid()">
@@ -394,18 +464,37 @@
               <button type="button" onclick="document.getElementById('posDrinkSubCatBar').scrollBy({left:200,behavior:'smooth'})" style="border:1px solid #93c5fd; background:#fff; border-radius:50%; width:26px; height:26px; font-weight:900; cursor:pointer; flex-shrink:0;">❯</button>
             </div>
 
-            <!-- KHÔI PHỤC LƯỚI HIỂN THỊ MÓN ĂN ORDER TẠI BÀN -->
             <div class="pos-dish-grid" id="posDishGrid"></div>
           </div>
 
           <div class="pos-cart-panel">
-            <h3 style="margin-bottom:10px;">Order: <span id="currentSelectedTable" style="color:#d97706;">Bàn 1</span></h3>
+            <h3 style="margin-bottom:10px;"><span id="posOrderHeaderPrefix">Order:</span> <span id="currentSelectedTable" style="color:#d97706;">Bàn 1</span></h3>
             <div class="pos-cart-items" id="posCartItemsList"><p style="color:#94a3b8; text-align:center; padding:40px 0;">Chưa có món nào.</p></div>
-            <input type="text" id="posOrderNote" placeholder="Ghi chú cho bếp (VD: Không hành, thêm tô giấy...)" style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:10px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-weight:700;">
-              <span>Tổng tiền:</span><span id="posCartTotal" style="font-size:1.3rem; color:#dc2626;">0đ</span>
+            <input type="text" id="posOrderNote" placeholder="Ghi chú cho bếp (VD: Không hành, ít cay, thêm tô giấy...)" style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:10px;">
+            
+            <!-- BẢNG TÍNH PHÍ SHIP TỰ ĐỘNG (CHỈ HIỆN KHI Ở CHẾ ĐỘ ĐẶT SHIP HỘ KHÁCH) -->
+            <div id="posDeliveryFeeBox" style="display:none; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; margin-bottom:10px; font-size:0.84rem;">
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <span>Tiền món ăn:</span>
+                <b id="posShipSubtotalText">0đ</b>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <span>Phí Ship (<small id="posShipPolicyLabel" style="color:#0284c7; font-weight:700;">Tự động</small>):</span>
+                <div style="display:flex; align-items:center; gap:4px;">
+                  <input type="number" id="posShipFeeInput" value="12000" step="1000" min="0" oninput="onManualPosShipFeeChange()" style="width:85px; padding:4px 6px; border:1px solid #0284c7; border-radius:6px; text-align:right; font-weight:800; color:#dc2626;">
+                  <span style="font-weight:700;">đ</span>
+                </div>
+              </div>
+              <label style="display:flex; align-items:center; gap:6px; background:#dcfce7; color:#166534; padding:6px 8px; border-radius:6px; font-weight:800; font-size:0.78rem; cursor:pointer;">
+                <input type="checkbox" id="posAutoDispatchCheck" checked style="width:16px; height:16px;">
+                🔔 Tự động bắn đơn & hú còi gọi Shipper đi giao ngay
+              </label>
             </div>
-            <button class="pos-submit-btn" onclick="submitDineInOrder()">⚡ GỬI BẾP & IN BÁO BẾP</button>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-weight:700;">
+              <span>Tổng thanh toán:</span><span id="posCartTotal" style="font-size:1.3rem; color:#dc2626;">0đ</span>
+            </div>
+            <button id="btnSubmitPosOrderMain" class="pos-submit-btn" onclick="submitDineInOrder()">⚡ GỬI BẾP & IN BÁO BẾP</button>
           </div>
         </div>
       </div>
@@ -2028,8 +2117,326 @@ window.deleteDishFromMenu = function(id, name) {
       document.getElementById('posCartTotal').innerText = total.toLocaleString() + 'đ';
     }
 
-window.submitDineInOrder = function() {
-      if (Object.keys(posCart).length === 0) return alert("Vui lòng chọn ít nhất 1 món!");
+// =========================================================
+    // HỆ THỐNG QUÁN TỰ ĐẶT ĐƠN SHIP HỘ KHÁCH QUEN / CÔ CHÚ LỚN TUỔI
+    // TỰ ĐỘNG LƯU & GỢI Ý KHÁCH CŨ THEO TÊN / SĐT / ĐỊA CHỈ + BẮN SHIPPER NGAY
+    // =========================================================
+    let currentPosOrderMode = 'dine_in'; // 'dine_in' hoặc 'delivery'
+    let manualPosShipFeeOverride = false;
+    let posCrmCustomersCache = {};
+    let appUsersCacheForPos = {};
+
+    const POS_WARD_KM_MAP = {
+      "Phường Phan Thiết": 1.8,
+      "Phú Thủy": 2.5,
+      "Bình Thuận": 3.5,
+      "Hàm Thắng": 4.2,
+      "Tiến Thành": 9.5,
+      "Mũi Né": 18.0,
+      "La Gi": 45.0
+    };
+
+    // Đồng bộ danh bạ khách quen từ cả 3 nguồn: pos_customers, users (App khách) và lịch sử orders
+    onValue(ref(db, 'pos_customers'), (snap) => { posCrmCustomersCache = snap.val() || {}; });
+    onValue(ref(db, 'users'), (snap) => { appUsersCacheForPos = snap.val() || {}; });
+
+    // Gom toàn bộ khách hàng thành 1 danh sách thông minh không trùng lặp
+    function getMergedCustomerDirectory() {
+      const map = {};
+
+      // 1. Quét từ lịch sử đơn hàng giao tận nơi trước đó
+      Object.keys(ordersCache).forEach(oid => {
+        const o = ordersCache[oid];
+        if (!o || o.orderType === 'dine_in' || !o.phone || o.phone === 'Tại quán') return;
+        const p = normalizeShipperPhone(o.phone);
+        if (!p || p.length < 8) return;
+        if (!map[p] || new Date(o.createdAt) > new Date(map[p].updatedAt || 0)) {
+          map[p] = {
+            phone: p,
+            name: o.customerName || 'Khách quen',
+            ward: o.ward || 'Phường Phan Thiết',
+            address: o.address || '',
+            km: Number(o.deliveryKm) || POS_WARD_KM_MAP[o.ward] || 1.8,
+            note: (o.note || '').replace(/\[.*?\]/g, '').trim(),
+            lastItems: o.items || null,
+            updatedAt: o.createdAt
+          };
+        }
+      });
+
+      // 2. Quét từ danh sách tài khoản App khách hàng
+      Object.keys(appUsersCacheForPos).forEach(uid => {
+        const u = appUsersCacheForPos[uid];
+        if (!u) return;
+        const p = normalizeShipperPhone(u.phone || uid);
+        if (!p || p.length < 8) return;
+        const existing = map[p] || {};
+        map[p] = {
+          phone: p,
+          name: u.name || existing.name || 'Khách quen',
+          ward: u.ward || existing.ward || 'Phường Phan Thiết',
+          address: u.fullAddress || u.address || existing.address || '',
+          km: Number(u.deliveryKm || existing.km || POS_WARD_KM_MAP[u.ward] || 1.8),
+          note: u.note || existing.note || '',
+          lastItems: existing.lastItems || null,
+          updatedAt: u.updatedAt || existing.updatedAt || ''
+        };
+      });
+
+      // 3. Ưu tiên cao nhất từ Sổ Khách Quen của Quán (pos_customers)
+      Object.keys(posCrmCustomersCache).forEach(key => {
+        const c = posCrmCustomersCache[key];
+        if (!c) return;
+        const p = normalizeShipperPhone(c.phone || key);
+        if (!p) return;
+        const existing = map[p] || {};
+        map[p] = {
+          phone: p,
+          name: c.name || existing.name || 'Khách quen',
+          ward: c.ward || existing.ward || 'Phường Phan Thiết',
+          address: c.address || existing.address || '',
+          km: Number(c.km || existing.km || POS_WARD_KM_MAP[c.ward] || 1.8),
+          note: c.note !== undefined ? c.note : (existing.note || ''),
+          lastItems: c.lastItems || existing.lastItems || null,
+          updatedAt: c.updatedAt || existing.updatedAt || ''
+        };
+      });
+
+      return Object.values(map).sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
+    }
+
+    window.openPosInMode = function(mode, ev) {
+      window.switchMainTab('posOrder', ev);
+      window.setPosOrderMode(mode);
+    };
+
+    window.setPosOrderMode = function(mode) {
+      currentPosOrderMode = mode;
+      const btnDine = document.getElementById('btnSwitchModeDineIn');
+      const btnDeliv = document.getElementById('btnSwitchModeDelivery');
+      const secDine = document.getElementById('posDineInTableSection');
+      const secDeliv = document.getElementById('posDeliveryCustomerSection');
+      const feeBox = document.getElementById('posDeliveryFeeBox');
+      const headerPrefix = document.getElementById('posOrderHeaderPrefix');
+      const headerTarget = document.getElementById('currentSelectedTable');
+      const submitBtn = document.getElementById('btnSubmitPosOrderMain');
+
+      if (mode === 'delivery') {
+        if (btnDeliv) { btnDeliv.style.background = '#0284c7'; btnDeliv.style.color = '#fff'; }
+        if (btnDine) { btnDine.style.background = '#f8fafc'; btnDine.style.color = 'var(--primary)'; }
+        if (secDine) secDine.style.display = 'none';
+        if (secDeliv) secDeliv.style.display = 'block';
+        if (feeBox) feeBox.style.display = 'block';
+        if (headerPrefix) headerPrefix.innerText = '🛵 Đơn Ship Hộ:';
+        const cusName = (document.getElementById('posShipCusName')?.value || '').trim();
+        if (headerTarget) headerTarget.innerText = cusName || 'Khách Gọi Điện';
+        if (submitBtn) {
+          submitBtn.style.background = '#0284c7';
+          submitBtn.innerText = '🚀 TẠO ĐƠN SHIP, BÁO BẾP & GỌI SHIPPER NGAY';
+        }
+        recalcPosDeliveryTotals();
+      } else {
+        if (btnDine) { btnDine.style.background = 'var(--primary)'; btnDine.style.color = '#fff'; }
+        if (btnDeliv) { btnDeliv.style.background = '#f0f9ff'; btnDeliv.style.color = '#0369a1'; }
+        if (secDine) secDine.style.display = 'block';
+        if (secDeliv) secDeliv.style.display = 'none';
+        if (feeBox) feeBox.style.display = 'none';
+        if (headerPrefix) headerPrefix.innerText = 'Order:';
+        if (headerTarget) headerTarget.innerText = selectedTable;
+        if (submitBtn) {
+          submitBtn.style.background = '#16a34a';
+          submitBtn.innerText = '⚡ GỬI BẾP & IN BÁO BẾP';
+        }
+        renderPosCartUI();
+      }
+    };
+
+    window.renderPosCrmSuggestions = function(keyword = '') {
+      const box = document.getElementById('posCrmSuggestDropdown');
+      if (!box) return;
+      const kw = (keyword || '').toLowerCase().trim();
+      const allCustomers = getMergedCustomerDirectory();
+      const matched = allCustomers.filter(c => {
+        if (!kw) return true;
+        return (c.name || '').toLowerCase().includes(kw) ||
+               (c.phone || '').includes(kw) ||
+               (c.address || '').toLowerCase().includes(kw);
+      }).slice(0, 12);
+
+      if (matched.length === 0) {
+        box.style.display = 'none';
+        return;
+      }
+
+      let html = '';
+      matched.forEach(c => {
+        const safePhone = (c.phone || '').replace(/'/g, "\\'");
+        let favDishes = [];
+        if (c.lastItems) {
+          for (let k in c.lastItems) favDishes.push(`${c.lastItems[k].qty}x ${c.lastItems[k].name}`);
+        }
+        const favText = favDishes.length > 0 ? `<br><small style="color:#15803d; font-weight:700;">🍲 Món vừa đặt: ${favDishes.join(', ')}</small>` : '';
+        html += `
+          <div style="padding:8px 10px; border-bottom:1px dashed #cbd5e1; display:flex; justify-content:space-between; align-items:center; gap:8px; background:#fff;">
+            <div style="flex:1; cursor:pointer; font-size:0.82rem;" onclick="selectPosCrmCustomer('${safePhone}', false)">
+              <b style="color:#0369a1; font-size:0.88rem;">👤 ${c.name}</b> — <b style="color:#dc2626;">📞 ${c.phone}</b>
+              <br><span style="color:#334155;">📍 ${c.address || c.ward} (${c.km}km)</span>
+              ${favText}
+            </div>
+            <div style="display:flex; flex-direction:column; gap:4px;">
+              <button type="button" onclick="selectPosCrmCustomer('${safePhone}', false)" style="background:#0284c7; color:#fff; border:none; padding:5px 8px; border-radius:6px; font-weight:800; font-size:0.74rem; cursor:pointer; white-space:nowrap;">✅ Chọn Khách</button>
+              ${favDishes.length > 0 ? `<button type="button" onclick="selectPosCrmCustomer('${safePhone}', true)" style="background:#16a34a; color:#fff; border:none; padding:5px 8px; border-radius:6px; font-weight:800; font-size:0.72rem; cursor:pointer; white-space:nowrap;">🍲 +Nạp Món Cũ</button>` : ''}
+            </div>
+          </div>`;
+      });
+      box.innerHTML = html;
+      box.style.display = 'block';
+    };
+
+    // Khi gõ vào ô Tên, SĐT hoặc Địa chỉ cũng tự động bật gợi ý khách quen
+    window.onPosCustomerFieldInput = function(val) {
+      const nameVal = (document.getElementById('posShipCusName')?.value || '').trim();
+      if (currentPosOrderMode === 'delivery' && document.getElementById('currentSelectedTable')) {
+        document.getElementById('currentSelectedTable').innerText = nameVal || 'Khách Gọi Điện';
+      }
+      if (val && val.trim().length >= 2) {
+        window.renderPosCrmSuggestions(val);
+      } else {
+        const box = document.getElementById('posCrmSuggestDropdown');
+        if (box) box.style.display = 'none';
+      }
+    };
+
+    window.selectPosCrmCustomer = function(phoneKey, alsoLoadItems = false) {
+      const allCustomers = getMergedCustomerDirectory();
+      const found = allCustomers.find(c => c.phone === phoneKey);
+      if (!found) return;
+
+      document.getElementById('posShipCusName').value = found.name || '';
+      document.getElementById('posShipCusPhone').value = found.phone || '';
+      if (found.ward && document.getElementById('posShipCusWard')) {
+        document.getElementById('posShipCusWard').value = found.ward;
+      }
+      document.getElementById('posShipKmInput').value = found.km || POS_WARD_KM_MAP[found.ward] || 1.8;
+      document.getElementById('posShipCusAddress').value = found.address || `${found.ward || 'Phường Phan Thiết'}, Tỉnh Lâm Đồng`;
+      if (found.note && document.getElementById('posOrderNote')) {
+        document.getElementById('posOrderNote').value = found.note;
+      }
+      if (document.getElementById('currentSelectedTable')) {
+        document.getElementById('currentSelectedTable').innerText = `${found.name} (${found.phone})`;
+      }
+      if (document.getElementById('posCrmQuickSearch')) {
+        document.getElementById('posCrmQuickSearch').value = `${found.name} - ${found.phone}`;
+      }
+      const box = document.getElementById('posCrmSuggestDropdown');
+      if (box) box.style.display = 'none';
+
+      if (alsoLoadItems && found.lastItems) {
+        posCart = {};
+        for (let k in found.lastItems) {
+          const it = found.lastItems[k];
+          const cleanK = safeItemKey(it.name || k);
+          posCart[cleanK] = { name: it.name, price: Number(it.price) || 0, qty: Number(it.qty) || 1, cat: it.cat || 'bun' };
+        }
+      }
+      manualPosShipFeeOverride = false;
+      renderPosCartUI();
+    };
+
+    window.clearPosDeliveryCustomerForm = function() {
+      if (document.getElementById('posCrmQuickSearch')) document.getElementById('posCrmQuickSearch').value = '';
+      if (document.getElementById('posShipCusName')) document.getElementById('posShipCusName').value = '';
+      if (document.getElementById('posShipCusPhone')) document.getElementById('posShipCusPhone').value = '';
+      if (document.getElementById('posShipCusWard')) document.getElementById('posShipCusWard').value = 'Phường Phan Thiết';
+      if (document.getElementById('posShipKmInput')) document.getElementById('posShipKmInput').value = '1.8';
+      if (document.getElementById('posShipCusAddress')) document.getElementById('posShipCusAddress').value = '';
+      if (document.getElementById('posCrmSuggestDropdown')) document.getElementById('posCrmSuggestDropdown').style.display = 'none';
+      manualPosShipFeeOverride = false;
+      recalcPosDeliveryTotals();
+    };
+
+    window.onPosShipWardChange = function() {
+      const ward = document.getElementById('posShipCusWard')?.value || 'Phường Phan Thiết';
+      const defaultKm = POS_WARD_KM_MAP[ward] || 2.0;
+      document.getElementById('posShipKmInput').value = defaultKm;
+      const addrInput = document.getElementById('posShipCusAddress');
+      if (addrInput && !addrInput.value.trim()) {
+        addrInput.value = `${ward}, Tỉnh Lâm Đồng`;
+      }
+      manualPosShipFeeOverride = false;
+      recalcPosDeliveryTotals();
+    };
+
+    window.onManualPosShipFeeChange = function() {
+      manualPosShipFeeOverride = true;
+      recalcPosDeliveryTotals();
+    };
+
+    // Tính toán tiền món + phí ship giống hệt công thức trên App Khách Hàng
+    window.recalcPosDeliveryTotals = function() {
+      let sub = 0;
+      for (let k in posCart) sub += posCart[k].price * posCart[k].qty;
+      if (document.getElementById('posShipSubtotalText')) {
+        document.getElementById('posShipSubtotalText').innerText = sub.toLocaleString() + 'đ';
+      }
+
+      const km = Math.max(0.5, parseFloat(document.getElementById('posShipKmInput')?.value || '1.8') || 1.8);
+      const extraKm = Math.max(0, km - 2);
+      const mins = new Date().getHours() * 60 + new Date().getMinutes();
+      const peak = (mins >= 11 * 60 && mins <= 13 * 60) || (mins >= 17 * 60 && mins <= 19 * 60);
+
+      let autoShipFee = 12000;
+      let policyText = peak ? 'Cao điểm' : 'Tiêu chuẩn';
+
+      if (sub >= 200000) {
+        const rawFee20 = peak ? (15000 + extraKm * 4000) : (12000 + extraKm * 4000);
+        autoShipFee = Math.max(0, Math.round((rawFee20 - 28000) / 1000) * 1000);
+        policyText = 'Freeship 5km (Đơn >=200k)';
+      } else if (sub >= 100000) {
+        const rawFee30 = peak ? (13000 + extraKm * 3500) : (10000 + extraKm * 3500);
+        autoShipFee = Math.round(rawFee30 / 1000) * 1000;
+        policyText = 'Trợ giá 30% (Đơn >=100k)';
+      } else {
+        const rawFee20 = peak ? (15000 + extraKm * 4000) : (12000 + extraKm * 4000);
+        autoShipFee = Math.round(rawFee20 / 1000) * 1000;
+      }
+
+      const shipFeeEl = document.getElementById('posShipFeeInput');
+      if (!manualPosShipFeeOverride && shipFeeEl) {
+        shipFeeEl.value = autoShipFee;
+      }
+      if (document.getElementById('posShipPolicyLabel')) {
+        document.getElementById('posShipPolicyLabel').innerText = manualPosShipFeeOverride ? 'Chỉnh tay' : policyText;
+      }
+
+      const finalShipFee = shipFeeEl ? (parseInt(shipFeeEl.value || '0') || 0) : autoShipFee;
+      const grand = (currentPosOrderMode === 'delivery') ? (sub + finalShipFee) : sub;
+      document.getElementById('posCartTotal').innerText = grand.toLocaleString() + 'đ';
+      return { sub, finalShipFee, grand, km };
+    };
+
+    function renderPosCartUI() {
+      const list = document.getElementById('posCartItemsList');
+      let total = 0, html = '';
+      for (let k in posCart) {
+        const it = posCart[k];
+        const st = it.price * it.qty;
+        total += st;
+        const safeK = k.replace(/'/g, "\\'");
+        html += `<div class="pos-cart-row"><div><b>${it.name}</b></div><div class="pos-qty-ctrl"><button class="pos-qty-btn" onclick="updatePosCartQty('${safeK}', -1)">-</button><span style="font-weight:bold; min-width:18px; text-align:center;">${it.qty}</span><button class="pos-qty-btn" onclick="updatePosCartQty('${safeK}', 1)">+</button><span style="font-weight:bold; width:65px; text-align:right;">${st.toLocaleString()}đ</span></div></div>`;
+      }
+      list.innerHTML = html || '<p style="color:#94a3b8; text-align:center; padding:40px 0;">Chưa có món nào.</p>';
+      if (currentPosOrderMode === 'delivery') {
+        recalcPosDeliveryTotals();
+      } else {
+        document.getElementById('posCartTotal').innerText = total.toLocaleString() + 'đ';
+      }
+    }
+
+    // XỬ LÝ CHUNG KHI BẤM NÚT GỬI ĐƠN (TỰ PHÂN NHÁNH TẠI BÀN HOẶC ĐẶT SHIP HỘ KHÁCH)
+    window.submitDineInOrder = function() {
+      if (Object.keys(posCart).length === 0) return alert("Vui lòng chọn ít nhất 1 món ăn!");
+
       let sub = 0;
       let spokenDishes = [];
       for (let k in posCart) {
@@ -2037,6 +2444,134 @@ window.submitDineInOrder = function() {
         spokenDishes.push(`${posCart[k].qty} ${posCart[k].name}`);
       }
       const noteVal = (document.getElementById('posOrderNote').value || '').trim();
+
+      // NHÁNH 1: NẾU ĐANG Ở CHẾ ĐỘ QUÁN TỰ ĐẶT ĐƠN SHIP HỘ KHÁCH QUEN / CÔ CHÚ LỚN TUỔI
+      if (currentPosOrderMode === 'delivery') {
+        const cusName = (document.getElementById('posShipCusName')?.value || '').trim();
+        const rawPhone = (document.getElementById('posShipCusPhone')?.value || '').trim();
+        const cleanPhone = normalizeShipperPhone(rawPhone);
+        const ward = document.getElementById('posShipCusWard')?.value || 'Phường Phan Thiết';
+        const rawAddr = (document.getElementById('posShipCusAddress')?.value || '').trim();
+        const fullAddr = rawAddr.includes(ward) ? rawAddr : (rawAddr ? `${rawAddr}, ${ward}, Tỉnh Lâm Đồng` : `${ward}, Tỉnh Lâm Đồng`);
+        const payMethod = document.getElementById('posShipPayMethod')?.value || 'COD';
+        const autoDispatch = document.getElementById('posAutoDispatchCheck')?.checked !== false;
+        const { finalShipFee, grand, km } = recalcPosDeliveryTotals();
+
+        if (!cusName || !cleanPhone) {
+          return alert("⚠️ Vui lòng nhập Tên khách hàng và Số điện thoại (hoặc bấm chọn từ danh sách Khách quen)!");
+        }
+        if (!rawAddr) {
+          return alert("⚠️ Vui lòng nhập Số nhà / Tên đường giao hàng của khách!");
+        }
+
+        // 1. Lưu / Cập nhật thông tin khách quen vào Firebase để lần sau chỉ cần gõ Tên/SĐT/Địa chỉ là hiện ra ngay
+        const customerRecord = {
+          name: cusName,
+          phone: cleanPhone,
+          ward: ward,
+          province: 'Lâm Đồng',
+          address: fullAddr,
+          fullAddress: fullAddr,
+          km: km,
+          deliveryKm: km,
+          note: noteVal,
+          lastItems: posCart,
+          updatedAt: new Date().toISOString()
+        };
+        update(ref(db, `pos_customers/${cleanPhone}`), customerRecord).catch(() => {});
+        update(ref(db, `users/${cleanPhone}`), customerRecord).catch(() => {});
+
+        // 2. Xếp hàng đợi Shipper tự động (Ưu tiên tài xế Online + dưới hạn mức 500k + đang rảnh + ít đơn)
+        const accMap = computeShipperAccountingMap();
+        let candidates = Object.keys(shippersCache).filter(p => {
+          const s = shippersCache[p];
+          return s && s.isActive !== false && s.isOnline === true;
+        });
+        candidates.sort((a, b) => {
+          const stA = accMap[a] || { codFoodHeld: 0, qrShipOwed: 0, busyOrderCode: null, todayOrders: 0 };
+          const stB = accMap[b] || { codFoodHeld: 0, qrShipOwed: 0, busyOrderCode: null, todayOrders: 0 };
+          const overA = (stA.codFoodHeld - stA.qrShipOwed) >= SHIPPER_CASH_LIMIT ? 1 : 0;
+          const overB = (stB.codFoodHeld - stB.qrShipOwed) >= SHIPPER_CASH_LIMIT ? 1 : 0;
+          if (overA !== overB) return overA - overB;
+          const busyA = stA.busyOrderCode ? 1 : 0;
+          const busyB = stB.busyOrderCode ? 1 : 0;
+          if (busyA !== busyB) return busyA - busyB;
+          return stA.todayOrders - stB.todayOrders;
+        });
+
+        const nowIso = new Date().toISOString();
+        const paymentCode = payMethod === 'VIETQR' ? ('HC' + Math.floor(1000 + Math.random() * 9000)) : null;
+
+        const deliveryOrderData = {
+          orderType: 'delivery',
+          createdByPosAdmin: true,
+          table: null,
+          customerName: cusName,
+          phone: cleanPhone,
+          ward: ward,
+          province: 'Lâm Đồng',
+          address: fullAddr,
+          deliveryKm: km,
+          deliveryTimeMode: 'immediate',
+          scheduledTime: null,
+          note: noteVal ? `[Quán đặt hộ khách] ${noteVal}` : '[Quán đặt hộ khách qua ĐT]',
+          items: posCart,
+          rawSubtotal: sub,
+          subtotal: sub,
+          shippingFee: finalShipFee,
+          discount: 0,
+          grandTotal: grand,
+          paymentMethod: payMethod,
+          paymentCode: paymentCode,
+          paymentStatus: payMethod === 'VIETQR' ? 'Chờ kiểm tra CK' : 'Thu tiền mặt (COD)',
+          paymentVerified: false,
+          status: 'Đang chế biến',
+          dispatchQueue: autoDispatch ? candidates : [],
+          dispatchResetAt: autoDispatch ? nowIso : null,
+          createdAt: nowIso,
+          archived: false
+        };
+
+        push(ref(db, 'orders'), deliveryOrderData).then((res) => {
+          const newOrderId = res.key;
+          if (typeof announcedNewOrderIds !== 'undefined') announcedNewOrderIds[newOrderId] = true;
+          if (typeof orderLastVoiceReminderAt !== 'undefined') orderLastVoiceReminderAt[newOrderId] = Date.now();
+
+          // Phát loa đọc to đơn Ship mới tại quán & bếp
+          window.forceUnlockBackgroundAudio(true);
+          const voiceShipText = `Đơn giao ship mới của khách ${cusName} gồm: ${spokenDishes.join(', ')}.${noteVal ? ' Lưu ý bếp: ' + noteVal : ''}`;
+          speakAlert(voiceShipText, true);
+
+          // In phiếu báo bếp
+          window.printKitchenTicket(newOrderId, deliveryOrderData);
+
+          // Nếu tích chọn Tự động bắn đơn cho Shipper -> Copy luôn mẫu tin nhắn Zalo kèm link nhận đơn
+          if (autoDispatch) {
+            const domain = window.location.host;
+            const protocol = window.location.protocol;
+            const payStr = payMethod === 'VIETQR'
+              ? `💳 Khách chuyển khoản QR`
+              : `💰 THU TIỀN MẶT KHÁCH (COD): ${grand.toLocaleString()}đ (Bác tài giữ ${finalShipFee.toLocaleString()}đ ship, nộp quán ${sub.toLocaleString()}đ tiền món)`;
+            const zaloText = `📦 ĐƠN SHIP MỚI (QUÁN ĐẶT HỘ KHÁCH)\n👤 Khách: ${cusName} (${cleanPhone})\n📍 Giao đến: ${fullAddr}\n${payStr}\n\n👉 BẤM VÀO LINK ĐỂ NHẬN ĐƠN NGAY:\n${protocol}//${domain}/index.html?shipper=${newOrderId}`;
+            navigator.clipboard.writeText(zaloText).catch(() => {});
+          }
+
+          alert(
+            `🎉 Đã tạo đơn Ship cho khách [${cusName} - ${cleanPhone}] thành công!\n` +
+            `• Đã lưu thông tin khách vào Danh Bạ Khách Quen cho lần sau.\n` +
+            (autoDispatch ? `• Đã tự động phát tín hiệu HÚ CÒI gọi ${candidates.length} bác tài đang ONLINE và copy sẵn tin nhắn Zalo!` : '')
+          );
+
+          posCart = {};
+          document.getElementById('posOrderNote').value = '';
+          window.clearPosDeliveryCustomerForm();
+          renderPosCartUI();
+          document.querySelectorAll('.tab-btn')[0].click();
+        });
+        return;
+      }
+
+      // NHÁNH 2: CHẾ ĐỘ KHÁCH ĂN TẠI BÀN / MANG VỀ (GIỮ NGUYÊN)
       const orderData = {
         orderType: 'dine_in',
         table: selectedTable,
@@ -2057,11 +2592,9 @@ window.submitDineInOrder = function() {
         archived: false
       };
       push(ref(db, 'orders'), orderData).then((res) => {
-        // Đánh dấu đã đọc đơn này để không bị đọc trùng 2 lần trên cùng 1 máy
         if (typeof announcedNewOrderIds !== 'undefined') announcedNewOrderIds[res.key] = true;
         if (typeof orderLastVoiceReminderAt !== 'undefined') orderLastVoiceReminderAt[res.key] = Date.now();
 
-        // Phát âm thanh đọc to Bàn số mấy + Món gì + Ghi chú bếp
         window.forceUnlockBackgroundAudio(true);
         const voiceOrderText = `Order mới ${selectedTable} gồm: ${spokenDishes.join(', ')}.${noteVal ? ' Lưu ý bếp: ' + noteVal : ''}`;
         speakAlert(voiceOrderText, true);
