@@ -3998,11 +3998,6 @@ window.downloadIOSProfile = function(mode = 'admin') {
       document.body.removeChild(a);
     };
 
-      // Chuyển sang Data URI chuẩn của Apple để Safari bật thẳng hộp thoại "Cho phép tải hồ sơ cấu hình"
-      const base64Config = btoa(unescape(encodeURIComponent(mobileConfigXml)));
-      window.location.href = 'data:application/x-apple-aspen-config;base64,' + base64Config;
-    };
-
     // Đồng bộ tên hàm gọi ở trang khách hàng index.html
     window.downloadCustomerIOSProfile = function(roleMode = 'customer') {
       const mode = (roleMode === 'shipper' || window.location.search.includes('shipper=')) ? 'shipper' : 'customer';
