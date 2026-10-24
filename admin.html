@@ -2136,15 +2136,23 @@ window.deleteDishFromMenu = function(id, name) {
       "La Gi": 45.0
     };
 
-    // Đồng bộ danh bạ khách quen từ cả 3 nguồn: pos_customers, users (App khách) và lịch sử orders
     onValue(ref(db, 'pos_customers'), (snap) => { posCrmCustomersCache = snap.val() || {}; });
     onValue(ref(db, 'users'), (snap) => { appUsersCacheForPos = snap.val() || {}; });
 
-    // Gom toàn bộ khách hàng thành 1 danh sách thông minh không trùng lặp
+    // Tự động đóng bảng gợi ý khách quen khi chạm ra ngoài
+    document.addEventListener('click', (ev) => {
+      const box = document.getElementById('posCrmSuggestDropdown');
+      const inp = document.getElementById('posCrmQuickSearch');
+      if (box && box.style.display === 'block') {
+        if (!box.contains(ev.target) && ev.target !== inp) {
+          box.style.display = 'none';
+        }
+      }
+    });
+
     function getMergedCustomerDirectory() {
       const map = {};
 
-      // 1. Quét từ lịch sử đơn hàng giao tận nơi trước đó
       Object.keys(ordersCache).forEach(oid => {
         const o = ordersCache[oid];
         if (!o || o.orderType === 'dine_in' || !o.phone || o.phone === 'Tại quán') return;
@@ -2164,7 +2172,6 @@ window.deleteDishFromMenu = function(id, name) {
         }
       });
 
-      // 2. Quét từ danh sách tài khoản App khách hàng
       Object.keys(appUsersCacheForPos).forEach(uid => {
         const u = appUsersCacheForPos[uid];
         if (!u) return;
@@ -2183,7 +2190,6 @@ window.deleteDishFromMenu = function(id, name) {
         };
       });
 
-      // 3. Ưu tiên cao nhất từ Sổ Khách Quen của Quán (pos_customers)
       Object.keys(posCrmCustomersCache).forEach(key => {
         const c = posCrmCustomersCache[key];
         if (!c) return;
@@ -2214,6 +2220,8 @@ window.deleteDishFromMenu = function(id, name) {
       currentPosOrderMode = mode;
       const btnDine = document.getElementById('btnSwitchModeDineIn');
       const btnDeliv = document.getElementById('btnSwitchModeDelivery');
+      const tabDine = document.getElementById('tabBtnPosDineIn');
+      const tabDeliv = document.getElementById('tabBtnPosDelivery');
       const secDine = document.getElementById('posDineInTableSection');
       const secDeliv = document.getElementById('posDeliveryCustomerSection');
       const feeBox = document.getElementById('posDeliveryFeeBox');
@@ -2224,6 +2232,8 @@ window.deleteDishFromMenu = function(id, name) {
       if (mode === 'delivery') {
         if (btnDeliv) { btnDeliv.style.background = '#0284c7'; btnDeliv.style.color = '#fff'; }
         if (btnDine) { btnDine.style.background = '#f8fafc'; btnDine.style.color = 'var(--primary)'; }
+        if (tabDeliv) tabDeliv.classList.add('active');
+        if (tabDine) tabDine.classList.remove('active');
         if (secDine) secDine.style.display = 'none';
         if (secDeliv) secDeliv.style.display = 'block';
         if (feeBox) feeBox.style.display = 'block';
@@ -2238,6 +2248,8 @@ window.deleteDishFromMenu = function(id, name) {
       } else {
         if (btnDine) { btnDine.style.background = 'var(--primary)'; btnDine.style.color = '#fff'; }
         if (btnDeliv) { btnDeliv.style.background = '#f0f9ff'; btnDeliv.style.color = '#0369a1'; }
+        if (tabDine) tabDine.classList.add('active');
+        if (tabDeliv) tabDeliv.classList.remove('active');
         if (secDine) secDine.style.display = 'block';
         if (secDeliv) secDeliv.style.display = 'none';
         if (feeBox) feeBox.style.display = 'none';
@@ -2268,7 +2280,11 @@ window.deleteDishFromMenu = function(id, name) {
         return;
       }
 
-      let html = '';
+      let html = `
+        <div style="background:#e0f2fe; padding:5px 10px; display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; font-weight:800; color:#0369a1; position:sticky; top:0;">
+          <span>📋 DANH SÁCH KHÁCH QUEN (${matched.length} khách phù hợp):</span>
+          <span style="cursor:pointer; color:#dc2626;" onclick="document.getElementById('posCrmSuggestDropdown').style.display='none'">✖ Đóng</span>
+        </div>`;
       matched.forEach(c => {
         const safePhone = (c.phone || '').replace(/'/g, "\\'");
         let favDishes = [];
@@ -2293,7 +2309,6 @@ window.deleteDishFromMenu = function(id, name) {
       box.style.display = 'block';
     };
 
-    // Khi gõ vào ô Tên, SĐT hoặc Địa chỉ cũng tự động bật gợi ý khách quen
     window.onPosCustomerFieldInput = function(val) {
       const nameVal = (document.getElementById('posShipCusName')?.value || '').trim();
       if (currentPosOrderMode === 'delivery' && document.getElementById('currentSelectedTable')) {
@@ -2372,7 +2387,6 @@ window.deleteDishFromMenu = function(id, name) {
       recalcPosDeliveryTotals();
     };
 
-    // Tính toán tiền món + phí ship giống hệt công thức trên App Khách Hàng
     window.recalcPosDeliveryTotals = function() {
       let sub = 0;
       for (let k in posCart) sub += posCart[k].price * posCart[k].qty;
@@ -2433,6 +2447,19 @@ window.deleteDishFromMenu = function(id, name) {
       }
     }
 
+    // Tính số thứ tự đơn hàng tiếp theo trong ngày (#01, #02...)
+    function getNextDailyOrderSequenceNumber() {
+      const todayVN = getVNDateStr();
+      let countToday = 0;
+      Object.keys(ordersCache).forEach(id => {
+        const o = ordersCache[id];
+        if (o && o.createdAt && getVNDateStr(o.createdAt) === todayVN) {
+          countToday++;
+        }
+      });
+      return countToday + 1;
+    }
+
     // XỬ LÝ CHUNG KHI BẤM NÚT GỬI ĐƠN (TỰ PHÂN NHÁNH TẠI BÀN HOẶC ĐẶT SHIP HỘ KHÁCH)
     window.submitDineInOrder = function() {
       if (Object.keys(posCart).length === 0) return alert("Vui lòng chọn ít nhất 1 món ăn!");
@@ -2444,8 +2471,10 @@ window.deleteDishFromMenu = function(id, name) {
         spokenDishes.push(`${posCart[k].qty} ${posCart[k].name}`);
       }
       const noteVal = (document.getElementById('posOrderNote').value || '').trim();
+      const nextSeq = getNextDailyOrderSequenceNumber();
+      const seqFormatted = String(nextSeq).padStart(2, '0');
 
-      // NHÁNH 1: NẾU ĐANG Ở CHẾ ĐỘ QUÁN TỰ ĐẶT ĐƠN SHIP HỘ KHÁCH QUEN / CÔ CHÚ LỚN TUỔI
+      // NHÁNH 1: CHẾ ĐỘ QUÁN TỰ ĐẶT ĐƠN SHIP HỘ KHÁCH QUEN / CÔ CHÚ LỚN TUỔI
       if (currentPosOrderMode === 'delivery') {
         const cusName = (document.getElementById('posShipCusName')?.value || '').trim();
         const rawPhone = (document.getElementById('posShipCusPhone')?.value || '').trim();
@@ -2464,7 +2493,6 @@ window.deleteDishFromMenu = function(id, name) {
           return alert("⚠️ Vui lòng nhập Số nhà / Tên đường giao hàng của khách!");
         }
 
-        // 1. Lưu / Cập nhật thông tin khách quen vào Firebase để lần sau chỉ cần gõ Tên/SĐT/Địa chỉ là hiện ra ngay
         const customerRecord = {
           name: cusName,
           phone: cleanPhone,
@@ -2481,7 +2509,6 @@ window.deleteDishFromMenu = function(id, name) {
         update(ref(db, `pos_customers/${cleanPhone}`), customerRecord).catch(() => {});
         update(ref(db, `users/${cleanPhone}`), customerRecord).catch(() => {});
 
-        // 2. Xếp hàng đợi Shipper tự động (Ưu tiên tài xế Online + dưới hạn mức 500k + đang rảnh + ít đơn)
         const accMap = computeShipperAccountingMap();
         let candidates = Object.keys(shippersCache).filter(p => {
           const s = shippersCache[p];
@@ -2505,6 +2532,7 @@ window.deleteDishFromMenu = function(id, name) {
         const deliveryOrderData = {
           orderType: 'delivery',
           createdByPosAdmin: true,
+          dailySeq: nextSeq,
           table: null,
           customerName: cusName,
           phone: cleanPhone,
@@ -2532,32 +2560,33 @@ window.deleteDishFromMenu = function(id, name) {
           archived: false
         };
 
-        push(ref(db, 'orders'), deliveryOrderData).then((res) => {
-          const newOrderId = res.key;
-          if (typeof announcedNewOrderIds !== 'undefined') announcedNewOrderIds[newOrderId] = true;
-          if (typeof orderLastVoiceReminderAt !== 'undefined') orderLastVoiceReminderAt[newOrderId] = Date.now();
+        // Tạo khóa đơn trước để chặn đọc loa trùng lặp
+        const newOrderRef = push(ref(db, 'orders'));
+        const newOrderId = newOrderRef.key;
+        if (typeof announcedNewOrderIds !== 'undefined') announcedNewOrderIds[newOrderId] = true;
+        if (typeof orderLastVoiceReminderAt !== 'undefined') orderLastVoiceReminderAt[newOrderId] = Date.now();
+        ordersCache[newOrderId] = deliveryOrderData;
+        dailyOrderSeqMap[newOrderId] = seqFormatted;
 
-          // Phát loa đọc to đơn Ship mới tại quán & bếp
+        set(newOrderRef, deliveryOrderData).then(() => {
           window.forceUnlockBackgroundAudio(true);
-          const voiceShipText = `Đơn giao ship mới của khách ${cusName} gồm: ${spokenDishes.join(', ')}.${noteVal ? ' Lưu ý bếp: ' + noteVal : ''}`;
+          const voiceShipText = `Đơn giao đi số ${seqFormatted} của khách ${cusName} gồm: ${spokenDishes.join(', ')}.${noteVal ? ' Lưu ý bếp: ' + noteVal : ''}`;
           speakAlert(voiceShipText, true);
 
-          // In phiếu báo bếp
           window.printKitchenTicket(newOrderId, deliveryOrderData);
 
-          // Nếu tích chọn Tự động bắn đơn cho Shipper -> Copy luôn mẫu tin nhắn Zalo kèm link nhận đơn
           if (autoDispatch) {
             const domain = window.location.host;
             const protocol = window.location.protocol;
             const payStr = payMethod === 'VIETQR'
               ? `💳 Khách chuyển khoản QR`
               : `💰 THU TIỀN MẶT KHÁCH (COD): ${grand.toLocaleString()}đ (Bác tài giữ ${finalShipFee.toLocaleString()}đ ship, nộp quán ${sub.toLocaleString()}đ tiền món)`;
-            const zaloText = `📦 ĐƠN SHIP MỚI (QUÁN ĐẶT HỘ KHÁCH)\n👤 Khách: ${cusName} (${cleanPhone})\n📍 Giao đến: ${fullAddr}\n${payStr}\n\n👉 BẤM VÀO LINK ĐỂ NHẬN ĐƠN NGAY:\n${protocol}//${domain}/index.html?shipper=${newOrderId}`;
+            const zaloText = `📦 ĐƠN SHIP MỚI #${seqFormatted} (QUÁN ĐẶT HỘ KHÁCH)\n👤 Khách: ${cusName} (${cleanPhone})\n📍 Giao đến: ${fullAddr}\n${payStr}\n\n👉 BẤM VÀO LINK ĐỂ NHẬN ĐƠN NGAY:\n${protocol}//${domain}/index.html?shipper=${newOrderId}`;
             navigator.clipboard.writeText(zaloText).catch(() => {});
           }
 
           alert(
-            `🎉 Đã tạo đơn Ship cho khách [${cusName} - ${cleanPhone}] thành công!\n` +
+            `🎉 Đã tạo đơn Ship #${seqFormatted} cho khách [${cusName} - ${cleanPhone}] thành công!\n` +
             `• Đã lưu thông tin khách vào Danh Bạ Khách Quen cho lần sau.\n` +
             (autoDispatch ? `• Đã tự động phát tín hiệu HÚ CÒI gọi ${candidates.length} bác tài đang ONLINE và copy sẵn tin nhắn Zalo!` : '')
           );
@@ -2571,9 +2600,10 @@ window.deleteDishFromMenu = function(id, name) {
         return;
       }
 
-      // NHÁNH 2: CHẾ ĐỘ KHÁCH ĂN TẠI BÀN / MANG VỀ (GIỮ NGUYÊN)
+      // NHÁNH 2: CHẾ ĐỘ KHÁCH ĂN TẠI BÀN / MANG VỀ
       const orderData = {
         orderType: 'dine_in',
+        dailySeq: nextSeq,
         table: selectedTable,
         customerName: selectedTable,
         phone: 'Tại quán',
@@ -2591,16 +2621,21 @@ window.deleteDishFromMenu = function(id, name) {
         createdAt: new Date().toISOString(),
         archived: false
       };
-      push(ref(db, 'orders'), orderData).then((res) => {
-        if (typeof announcedNewOrderIds !== 'undefined') announcedNewOrderIds[res.key] = true;
-        if (typeof orderLastVoiceReminderAt !== 'undefined') orderLastVoiceReminderAt[res.key] = Date.now();
 
+      const newOrderRef = push(ref(db, 'orders'));
+      const newOrderId = newOrderRef.key;
+      if (typeof announcedNewOrderIds !== 'undefined') announcedNewOrderIds[newOrderId] = true;
+      if (typeof orderLastVoiceReminderAt !== 'undefined') orderLastVoiceReminderAt[newOrderId] = Date.now();
+      ordersCache[newOrderId] = orderData;
+      dailyOrderSeqMap[newOrderId] = seqFormatted;
+
+      set(newOrderRef, orderData).then(() => {
         window.forceUnlockBackgroundAudio(true);
         const voiceOrderText = `Order mới ${selectedTable} gồm: ${spokenDishes.join(', ')}.${noteVal ? ' Lưu ý bếp: ' + noteVal : ''}`;
         speakAlert(voiceOrderText, true);
 
-        window.printKitchenTicket(res.key, orderData);
-        alert(`✅ Đã gửi đơn ${selectedTable} xuống bếp & phát loa đọc món!`);
+        window.printKitchenTicket(newOrderId, orderData);
+        alert(`✅ Đã gửi đơn ${selectedTable} (#${seqFormatted}) xuống bếp & phát loa đọc món!`);
         posCart = {};
         document.getElementById('posOrderNote').value = '';
         renderPosCartUI();
@@ -4301,41 +4336,72 @@ window.setEditModalCategory = function(cat, btn) {
       }).catch(() => {});
     }
 
+// Khôi phục đầy đủ bộ hàm Hủy Đơn Văn Minh
+    window.openCancelModal = function(id) {
+      targetCancelOrderId = id;
+      const seqBadge = typeof getOrderSeqBadgeText === 'function' ? getOrderSeqBadgeText(id) : '';
+      const txtEl = document.getElementById('cancelOrderIdText');
+      if (txtEl) txtEl.innerText = `${seqBadge} (#HC-${id.substring(id.length - 5).toUpperCase()})`;
+      const sugEl = document.getElementById('cancelSuggestionText');
+      if (sugEl) sugEl.value = '';
+      const modal = document.getElementById('cancelModal');
+      if (modal) modal.classList.add('active');
+    };
+
+    window.closeCancelModal = function() {
+      targetCancelOrderId = null;
+      const modal = document.getElementById('cancelModal');
+      if (modal) modal.classList.remove('active');
+    };
+
+    if (typeof window.confirmCancelOrderWithReason !== 'function') {
+      window.confirmCancelOrderWithReason = function() {
+        if (!targetCancelOrderId) return;
+        const reason = document.getElementById('cancelReasonSelect')?.value || 'Quán tạm hết nguyên liệu';
+        const suggestion = (document.getElementById('cancelSuggestionText')?.value || '').trim();
+        update(ref(db, 'orders/' + targetCancelOrderId), {
+          status: 'Đã hủy',
+          cancelReason: reason,
+          cancelSuggestion: suggestion || 'Mong quý khách thông cảm và chọn món khác giúp Hy Chay nhé!',
+          canceledAt: new Date().toISOString()
+        }).then(() => {
+          alert('✅ Đã hủy đơn hàng và gửi thông báo cho khách!');
+          window.closeCancelModal();
+        });
+      };
+    }
+
     function enforceGranularRolePermissions() {
       const user = localStorage.getItem('hy_chay_active_user') || '';
       const isRootUser = (user === "balshousevn@gmail.com" || user === "admin");
       const role = isRootUser ? 'root' : (localStorage.getItem('hy_chay_active_role') || 'root');
       const allTabBtns = document.querySelectorAll('.tabs-bar .tab-btn');
-      // Thứ tự các tab: 0:Đơn hàng, 1:Order tại bàn, 2:Quản lý món, 3:VietQR, 4:Báo cáo, 5:Máy in, 6:Đội tài xế, 7:Phân quyền
-      const tabMenuStock = allTabBtns[2];
-      const tabBankCfg = allTabBtns[3];
+      // Thứ tự 9 tab hiện tại:
+      // 0:Đơn hàng, 1:Order tại bàn, 2:Đặt Ship Hộ Khách, 3:Quản lý món, 4:VietQR, 5:Báo cáo, 6:Máy in, 7:Đội tài xế, 8:Phân quyền
+      const tabMenuStock = allTabBtns[3];
+      const tabBankCfg = allTabBtns[4];
       const tabReport = document.getElementById('tabShiftReport');
-      const tabPrinter = allTabBtns[5];
+      const tabPrinter = allTabBtns[6];
       const tabUsers = document.getElementById('tabUsers');
       const btnEndShift = document.querySelector('.btn-end-shift');
       const kpiTaxableBox = document.getElementById('kpiTaxableRev')?.closest('.stat-card');
       const kpiShipBox = document.getElementById('kpiShippingRev')?.closest('.stat-card');
 
-      // Mặc định hiển thị lại trước khi lọc theo role
       [tabMenuStock, tabBankCfg, tabReport, tabPrinter, tabUsers, btnEndShift, kpiTaxableBox, kpiShipBox].forEach(el => {
         if (el) el.style.display = '';
       });
 
       if (role === 'root') {
-        // Chủ quán có toàn quyền 100%
         if (tabUsers) tabUsers.style.display = 'inline-block';
       } else if (role === 'manager') {
-        // Quản lý: Khóa Cấu hình VietQR và Phân quyền (Không cho tự đổi STK ngân hàng hoặc xóa Audit Log)
         if (tabBankCfg) tabBankCfg.style.display = 'none';
         if (tabUsers) tabUsers.style.display = 'none';
       } else if (role === 'cashier') {
-        // Thu ngân: Khóa Quản lý món gốc, Khóa VietQR, Khóa Báo cáo thuế quý/tháng, Khóa Phân quyền
         if (tabMenuStock) tabMenuStock.style.display = 'none';
         if (tabBankCfg) tabBankCfg.style.display = 'none';
         if (tabReport) tabReport.style.display = 'none';
         if (tabUsers) tabUsers.style.display = 'none';
       } else if (role === 'staff') {
-        // Nhân viên / Bếp: Chỉ thấy Đơn hàng KDS, Order tại bàn và Đội tài xế. Ẩn toàn bộ tiền doanh thu
         if (tabMenuStock) tabMenuStock.style.display = 'none';
         if (tabBankCfg) tabBankCfg.style.display = 'none';
         if (tabReport) tabReport.style.display = 'none';
