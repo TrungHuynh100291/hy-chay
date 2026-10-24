@@ -1340,7 +1340,7 @@ const dynamicManifest = {
       return Promise.resolve();
     }
 
-    function speakAlert(text, broadcastToOtherDevices = false) {
+function speakAlert(text, broadcastToOtherDevices = false) {
       if (!isAudioActive) return;
       playHardwareBeep();
 
@@ -1354,33 +1354,6 @@ const dynamicManifest = {
 
       playOnlineVietnameseTTS(text);
 
-      if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
-        try {
-          new Notification('🔔 HY CHAY POS', {
-            body: text,
-            icon: 'https://hychayfood.vercel.app/Logo%20nho.png',
-            tag: 'hychay-order-alert',
-            renotify: true
-          });
-        } catch (_) {}
-      }
-    }
-
-      // Ưu tiên phát luồng Audio Tiếng Việt chuẩn của Google GTX (no-referrer) để cả máy không có bộ giọng Việt vẫn nói Tiếng Việt 100%
-      playOnlineVietnameseTTS(text).catch(() => {
-        if ('speechSynthesis' in window) {
-          window.speechSynthesis.cancel();
-          const msg = new SpeechSynthesisUtterance(text);
-          const vnVoice = cachedVietnameseVoice || findVietnameseVoice();
-          if (vnVoice) msg.voice = vnVoice;
-          msg.lang = 'vi-VN';
-          msg.volume = 1.0;
-          msg.rate = 0.95;
-          window.speechSynthesis.speak(msg);
-        }
-      });
-
-      // Bắn thông báo hệ thống trên thanh trạng thái điện thoại (nếu được cấp quyền)
       if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
         try {
           new Notification('🔔 HY CHAY POS', {
