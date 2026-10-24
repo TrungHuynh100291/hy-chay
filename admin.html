@@ -2106,17 +2106,6 @@ window.deleteDishFromMenu = function(id, name) {
       renderPosCartUI();
     };
 
-    function renderPosCartUI() {
-      const list = document.getElementById('posCartItemsList'); let total = 0, html = '';
-      for (let k in posCart) {
-        const it = posCart[k]; const st = it.price * it.qty; total += st;
-        const safeK = k.replace(/'/g, "\\'");
-        html += `<div class="pos-cart-row"><div><b>${it.name}</b></div><div class="pos-qty-ctrl"><button class="pos-qty-btn" onclick="updatePosCartQty('${safeK}', -1)">-</button><span style="font-weight:bold; min-width:18px; text-align:center;">${it.qty}</span><button class="pos-qty-btn" onclick="updatePosCartQty('${safeK}', 1)">+</button><span style="font-weight:bold; width:65px; text-align:right;">${st.toLocaleString()}đ</span></div></div>`;
-      }
-      list.innerHTML = html || '<p style="color:#94a3b8; text-align:center; padding:40px 0;">Chưa có món nào.</p>';
-      document.getElementById('posCartTotal').innerText = total.toLocaleString() + 'đ';
-    }
-
 // =========================================================
     // HỆ THỐNG QUÁN TỰ ĐẶT ĐƠN SHIP HỘ KHÁCH QUEN / CÔ CHÚ LỚN TUỔI
     // TỰ ĐỘNG LƯU & GỢI Ý KHÁCH CŨ THEO TÊN / SĐT / ĐỊA CHỈ + BẮN SHIPPER NGAY
@@ -4436,57 +4425,55 @@ window.setEditModalCategory = function(cat, btn) {
     };
 
 // Cập nhật đăng nhập nhận diện đúng Role (Không phân biệt chữ Hoa/Thường ở tên đăng nhập & Không bị kẹt nút)
- const origHandleAdminLogin = window.handleAdminLogin;
- window.handleAdminLogin = function(e) {
-   e.preventDefault();
-   const rawUser = (document.getElementById('adminEmail').value || '').trim();
-   const lowerUser = rawUser.toLowerCase();
-   const pass = (document.getElementById('adminPassword').value || '').trim();
-   const btn = document.getElementById('btnLoginSubmit');
-   const errBox = document.getElementById('loginErrorMsg');
-   errBox.style.display = 'none';
-   btn.innerText = "ĐANG XÁC THỰC...";
-   btn.disabled = true;
+const origHandleAdminLogin = window.handleAdminLogin;
+    window.handleAdminLogin = function(e) {
+      e.preventDefault();
+      const rawUser = (document.getElementById('adminEmail').value || '').trim();
+      const lowerUser = rawUser.toLowerCase();
+      const pass = (document.getElementById('adminPassword').value || '').trim();
+      const btn = document.getElementById('btnLoginSubmit');
+      const errBox = document.getElementById('loginErrorMsg');
+      errBox.style.display = 'none';
+      btn.innerText = "ĐANG XÁC THỰC...";
+      btn.disabled = true;
 
-   // Cho phép đăng nhập tài khoản Chủ quán bất kể điện thoại tự viết hoa chữ cái đầu
-   if ((lowerUser === "balshousevn@gmail.com" && pass === "hychayfood") || (lowerUser === "admin" && pass === "baochay2026")) {
-     localStorage.setItem('hy_chay_active_user', lowerUser);
-     localStorage.setItem('hy_chay_active_role', 'root');
-     enforceGranularRolePermissions();
-     window.forceUnlockBackgroundAudio(false);
-     document.getElementById('adminLoginOverlay').style.display = 'none';
-     document.getElementById('mainAppWrapper').style.display = 'block';
-     btn.innerText = "VÀO HỆ THỐNG POS";
-     btn.disabled = false;
-     return;
-   }
+      if ((lowerUser === "balshousevn@gmail.com" && pass === "hychayfood") || (lowerUser === "admin" && pass === "baochay2026")) {
+        localStorage.setItem('hy_chay_active_user', lowerUser);
+        localStorage.setItem('hy_chay_active_role', 'root');
+        document.getElementById('adminLoginOverlay').style.display = 'none';
+        document.getElementById('mainAppWrapper').style.display = 'block';
+        btn.innerText = "VÀO HỆ THỐNG POS";
+        btn.disabled = false;
+        try { enforceGranularRolePermissions(); } catch (_) {}
+        try { window.forceUnlockBackgroundAudio(false); } catch (_) {}
+        return;
+      }
 
-   const safeUser = lowerUser.replace(/\./g, '_').replace(/[#$\[\]\/]/g, '-');
-   get(ref(db, 'admin_users/' + safeUser)).then((snap) => {
-     // Hỗ trợ kiểm tra cả key chữ thường lẫn key nguyên bản
-     if (snap.exists() && String(snap.val().password).trim() === String(pass)) {
-       const assignedRole = snap.val().role || 'cashier';
-       localStorage.setItem('hy_chay_active_user', rawUser);
-       localStorage.setItem('hy_chay_active_role', assignedRole);
-       enforceGranularRolePermissions();
-       window.forceUnlockBackgroundAudio(false);
-       document.getElementById('adminLoginOverlay').style.display = 'none';
-       document.getElementById('mainAppWrapper').style.display = 'block';
-       btn.innerText = "VÀO HỆ THỐNG POS";
-       btn.disabled = false;
-     } else {
-       errBox.style.display = 'block';
-       errBox.innerText = "Sai tên đăng nhập hoặc mật khẩu!";
-       btn.innerText = "VÀO HỆ THỐNG POS";
-       btn.disabled = false;
-     }
-   }).catch((err) => {
-     errBox.style.display = 'block';
-     errBox.innerText = "Lỗi kết nối máy chủ: " + (err.message || "Vui lòng kiểm tra mạng!");
-     btn.innerText = "VÀO HỆ THỐNG POS";
-     btn.disabled = false;
-   });
- };
+      const safeUser = lowerUser.replace(/\./g, '_').replace(/[#$\[\]\/]/g, '-');
+      get(ref(db, 'admin_users/' + safeUser)).then((snap) => {
+        if (snap.exists() && String(snap.val().password).trim() === String(pass)) {
+          const assignedRole = snap.val().role || 'cashier';
+          localStorage.setItem('hy_chay_active_user', rawUser);
+          localStorage.setItem('hy_chay_active_role', assignedRole);
+          document.getElementById('adminLoginOverlay').style.display = 'none';
+          document.getElementById('mainAppWrapper').style.display = 'block';
+          btn.innerText = "VÀO HỆ THỐNG POS";
+          btn.disabled = false;
+          try { enforceGranularRolePermissions(); } catch (_) {}
+          try { window.forceUnlockBackgroundAudio(false); } catch (_) {}
+        } else {
+          errBox.style.display = 'block';
+          errBox.innerText = "Sai tên đăng nhập hoặc mật khẩu!";
+          btn.innerText = "VÀO HỆ THỐNG POS";
+          btn.disabled = false;
+        }
+      }).catch((err) => {
+        errBox.style.display = 'block';
+        errBox.innerText = "Lỗi kết nối máy chủ: " + (err.message || "Vui lòng kiểm tra mạng!");
+        btn.innerText = "VÀO HỆ THỐNG POS";
+        btn.disabled = false;
+      });
+    };
 
     onValue(ref(db, 'admin_users'), (snap) => {
       const users = snap.val() || {}; let html = '';
