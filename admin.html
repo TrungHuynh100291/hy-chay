@@ -5385,6 +5385,530 @@ window.openInstallGuideModal = function() {
         statusEl.innerHTML = `✅ Đã xuất file chuẩn HTKK <b>${fileName}</b>! Mở được ngay trên iTaxViewer / HTKK và nộp thẳng lên thuedientu.gdt.gov.vn.`;
       }
     };
+    // =========================================================
+    // 19. NÂNG CẤP CHIẾT KHẤU ƯU ĐÃI (%) ĐƠN HÀNG & LOA ĐỌC BÁO BẾP
+    //     KHI HỦY MÓN / ĐỔI MÓN / THÊM MÓN / HỦY ĐƠN TRÊN BÀN ĐÃ ORDER
+    // =========================================================
+    let v19_posDiscountPercent = 0;
+    let v19_editDiscountPercent = 0;
+
+    // 19.1. Hàm phát giọng nói & BẮT BUỘC truyền tín hiệu sang mọi máy (Quầy/Bếp) kể cả khi máy bấm đang tắt loa
+    function broadcastAndSpeakKitchenAlert(text) {
+      set(ref(db, 'voice_sync/latest'), {
+        text: text,
+        timestamp: Date.now(),
+        sender: localStorage.getItem('hy_chay_active_user') || 'pos_admin'
+      }).catch(() => {});
+
+      if (!isAudioActive) {
+        try { window.forceUnlockBackgroundAudio(true); } catch (_) {}
+      }
+      if (typeof speakAlert === 'function') {
+        speakAlert(text, false);
+      }
+    }
+
+    // 19.2. Tự động gắn giao diện Chọn % Chiết Khấu vào khung POS (Tại bàn/Ship hộ) & Modal Sửa Đơn
+    function injectV19DiscountUI() {
+      // A. Gắn vào khung POS Order Tại Bàn / Đặt Ship Hộ
+      const posTotalEl = document.getElementById('posCartTotal');
+      if (posTotalEl && !document.getElementById('v19PosDiscountBox')) {
+        const totalRow = posTotalEl.parentElement;
+        const discBox = document.createElement('div');
+        discBox.id = 'v19PosDiscountBox';
+        discBox.style.cssText = 'background:#f0fdf4; border:1.5px solid #86efac; border-radius:10px; padding:8px 10px; margin-bottom:10px; font-size:0.82rem;';
+        discBox.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:6px;">
+            <b style="color:#166534;">🏷️ Chiết khấu ưu đãi (%):</b>
+            <div style="display:flex; align-items:center; gap:4px;">
+              <input type="number" id="v19PosDiscountInput" value="0" min="0" max="100" step="1" oninput="window.setV19PosDiscount(this.value)" style="width:60px; padding:4px 6px; border:1.5px solid #16a34a; border-radius:6px; font-weight:900; color:#dc2626; text-align:right;">
+              <b style="color:#166534;">%</b>
+              <span id="v19PosDiscountAmtText" style="color:#dc2626; font-weight:800; min-width:65px; text-align:right;">-0đ</span>
+            </div>
+          </div>
+          <div style="display:flex; gap:4px; flex-wrap:wrap;">
+            ${[0, 5, 10, 15, 20, 30, 50, 100].map(p => `<button type="button" onclick="window.setV19PosDiscount(${p})" style="flex:1; min-width:36px; padding:4px 2px; border:1px solid #86efac; background:#fff; color:#166534; border-radius:6px; font-weight:800; font-size:0.74rem; cursor:pointer;">${p}%</button>`).join('')}
+          </div>
+        `;
+        totalRow.parentNode.insertBefore(discBox, totalRow);
+      }
+
+      // B. Gắn vào Modal Sửa Đơn Trực Tiếp (#editOrderModal)
+      const editTotalEl = document.getElementById('editModalNewGrandTotal');
+      if (editTotalEl && !document.getElementById('v19EditDiscountBox')) {
+        const footerBar = editTotalEl.closest('div[style*="justify-content:space-between"]');
+        if (footerBar) {
+          const editDiscBox = document.createElement('div');
+          editDiscBox.id = 'v19EditDiscountBox';
+          editDiscBox.style.cssText = 'background:#f0fdf4; border:1.5px solid #86efac; border-radius:8px; padding:8px 12px; margin-top:12px; font-size:0.84rem;';
+          editDiscBox.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+              <b style="color:#166534;">🏷️ Chiết khấu ưu đãi đơn này (%):</b>
+              <div style="display:flex; gap:4px; flex-wrap:wrap; align-items:center;">
+                ${[0, 5, 10, 15, 20, 30, 50, 100].map(p => `<button type="button" onclick="window.setV19EditDiscount(${p})" style="padding:4px 8px; border:1px solid #86efac; background:#fff; color:#166534; border-radius:6px; font-weight:800; font-size:0.75rem; cursor:pointer;">${p}%</button>`).join('')}
+                <input type="number" id="v19EditDiscountInput" value="0" min="0" max="100" step="1" oninput="window.setV19EditDiscount(this.value)" style="width:62px; padding:4px 6px; border:1.5px solid #16a34a; border-radius:6px; font-weight:900; color:#dc2626; text-align:right;">
+                <b style="color:#166534;">%</b>
+                <b id="v19EditDiscountAmtText" style="color:#dc2626; margin-left:4px;">(-0đ)</b>
+              </div>
+            </div>
+          `;
+          footerBar.parentNode.insertBefore(editDiscBox, footerBar);
+        }
+      }
+    }
+    injectV19DiscountUI();
+
+    // 19.3. Tính toán Chiết khấu trên màn hình POS (Order Tại Bàn & Đặt Ship Hộ)
+    function updateV19PosTotalsUI() {
+      injectV19DiscountUI();
+      let rawSub = 0;
+      for (let k in posCart) rawSub += posCart[k].price * posCart[k].qty;
+
+      const pct = Math.min(100, Math.max(0, parseFloat(v19_posDiscountPercent) || 0));
+      const discAmt = Math.round(rawSub * pct / 100);
+      const netSub = Math.max(0, rawSub - discAmt);
+
+      const discAmtEl = document.getElementById('v19PosDiscountAmtText');
+      if (discAmtEl) discAmtEl.innerText = `-${discAmt.toLocaleString()}đ`;
+      const discInp = document.getElementById('v19PosDiscountInput');
+      if (discInp && Number(discInp.value) !== pct) discInp.value = pct;
+
+      let shipFee = 0;
+      if (currentPosOrderMode === 'delivery') {
+        const shipFeeEl = document.getElementById('posShipFeeInput');
+        shipFee = shipFeeEl ? (parseInt(shipFeeEl.value || '0') || 0) : 0;
+      }
+      const grand = netSub + shipFee;
+      const totalEl = document.getElementById('posCartTotal');
+      if (totalEl) totalEl.innerText = grand.toLocaleString() + 'đ';
+      return { rawSub, pct, discAmt, netSub, shipFee, grand };
+    }
+
+    window.setV19PosDiscount = function(val) {
+      v19_posDiscountPercent = Math.min(100, Math.max(0, parseFloat(val) || 0));
+      updateV19PosTotalsUI();
+    };
+
+    const origAddToPosCartV19 = window.addToPosCart;
+    window.addToPosCart = function(name, price, cat = 'bun') {
+      origAddToPosCartV19(name, price, cat);
+      updateV19PosTotalsUI();
+    };
+
+    const origUpdatePosCartQtyV19 = window.updatePosCartQty;
+    window.updatePosCartQty = function(key, delta) {
+      origUpdatePosCartQtyV19(key, delta);
+      updateV19PosTotalsUI();
+    };
+
+    const origRecalcPosDeliveryV19 = window.recalcPosDeliveryTotals;
+    window.recalcPosDeliveryTotals = function() {
+      const res = origRecalcPosDeliveryV19();
+      const v19 = updateV19PosTotalsUI();
+      return { sub: v19.netSub, rawSub: v19.rawSub, discAmt: v19.discAmt, pct: v19.pct, finalShipFee: res.finalShipFee, grand: v19.netSub + res.finalShipFee, km: res.km };
+    };
+
+    // Ghi đè hàm Gửi đơn POS để lưu chính xác % chiết khấu & số tiền giảm
+    window.submitDineInOrder = function() {
+      if (Object.keys(posCart).length === 0) return alert("Vui lòng chọn ít nhất 1 món ăn!");
+
+      let spokenDishes = [];
+      for (let k in posCart) {
+        spokenDishes.push(`${posCart[k].qty} ${posCart[k].name}`);
+      }
+      const { rawSub, pct, discAmt, netSub, shipFee, grand } = updateV19PosTotalsUI();
+      const rawNote = (document.getElementById('posOrderNote').value || '').trim();
+      const discTag = pct > 0 ? `[Ưu đãi giảm ${pct}% (-${discAmt.toLocaleString()}đ)]` : '';
+      const noteVal = [discTag, rawNote].filter(Boolean).join(' ');
+      const nextSeq = getNextDailyOrderSequenceNumber();
+      const seqFormatted = String(nextSeq).padStart(2, '0');
+
+      if (currentPosOrderMode === 'delivery') {
+        const cusName = (document.getElementById('posShipCusName')?.value || '').trim();
+        const rawPhone = (document.getElementById('posShipCusPhone')?.value || '').trim();
+        const cleanPhone = normalizeShipperPhone(rawPhone);
+        const ward = document.getElementById('posShipCusWard')?.value || 'Phường Phan Thiết';
+        const rawAddr = (document.getElementById('posShipCusAddress')?.value || '').trim();
+        const fullAddr = rawAddr.includes(ward) ? rawAddr : (rawAddr ? `${rawAddr}, ${ward}, Tỉnh Lâm Đồng` : `${ward}, Tỉnh Lâm Đồng`);
+        const payMethod = document.getElementById('posShipPayMethod')?.value || 'COD';
+        const autoDispatch = document.getElementById('posAutoDispatchCheck')?.checked !== false;
+        const km = Math.max(0.5, parseFloat(document.getElementById('posShipKmInput')?.value || '1.8') || 1.8);
+
+        if (!cusName || !cleanPhone) return alert("⚠️ Vui lòng nhập Tên khách hàng và Số điện thoại!");
+        if (!rawAddr) return alert("⚠️ Vui lòng nhập Địa chỉ giao hàng của khách!");
+
+        const customerRecord = {
+          name: cusName, phone: cleanPhone, ward: ward, province: 'Lâm Đồng',
+          address: fullAddr, fullAddress: fullAddr, km: km, deliveryKm: km,
+          note: rawNote, lastItems: posCart, updatedAt: new Date().toISOString()
+        };
+        update(ref(db, `pos_customers/${cleanPhone}`), customerRecord).catch(() => {});
+        update(ref(db, `users/${cleanPhone}`), customerRecord).catch(() => {});
+
+        const accMap = computeShipperAccountingMap();
+        let candidates = Object.keys(shippersCache).filter(p => shippersCache[p] && shippersCache[p].isActive !== false && shippersCache[p].isOnline === true);
+        candidates.sort((a, b) => ((accMap[a]?.todayOrders || 0) - (accMap[b]?.todayOrders || 0)));
+
+        const nowIso = new Date().toISOString();
+        const paymentCode = payMethod === 'VIETQR' ? ('HC' + Math.floor(1000 + Math.random() * 9000)) : null;
+
+        const deliveryOrderData = {
+          orderType: 'delivery',
+          createdByPosAdmin: true,
+          dailySeq: nextSeq,
+          table: null,
+          customerName: cusName,
+          phone: cleanPhone,
+          ward: ward,
+          province: 'Lâm Đồng',
+          address: fullAddr,
+          deliveryKm: km,
+          deliveryTimeMode: 'immediate',
+          scheduledTime: null,
+          note: noteVal ? `[Quán đặt hộ khách] ${noteVal}` : '[Quán đặt hộ khách qua ĐT]',
+          items: posCart,
+          rawSubtotal: rawSub,
+          discountPercent: pct,
+          discount: discAmt,
+          subtotal: netSub,
+          shippingFee: shipFee,
+          grandTotal: grand,
+          paymentMethod: payMethod,
+          paymentCode: paymentCode,
+          paymentStatus: payMethod === 'VIETQR' ? 'Chờ kiểm tra CK' : 'Thu tiền mặt (COD)',
+          paymentVerified: false,
+          status: 'Đang chế biến',
+          dispatchQueue: autoDispatch ? candidates : [],
+          dispatchResetAt: autoDispatch ? nowIso : null,
+          createdAt: nowIso,
+          archived: false
+        };
+
+        const newOrderRef = push(ref(db, 'orders'));
+        const newOrderId = newOrderRef.key;
+        if (typeof announcedNewOrderIds !== 'undefined') announcedNewOrderIds[newOrderId] = true;
+        if (typeof orderLastVoiceReminderAt !== 'undefined') orderLastVoiceReminderAt[newOrderId] = Date.now();
+        ordersCache[newOrderId] = deliveryOrderData;
+        dailyOrderSeqMap[newOrderId] = seqFormatted;
+
+        set(newOrderRef, deliveryOrderData).then(() => {
+          const voiceShipText = `Đơn giao đi số ${seqFormatted} của khách ${cusName} gồm: ${spokenDishes.join(', ')}.${pct > 0 ? ' Ưu đãi giảm ' + pct + ' phần trăm.' : ''}${rawNote ? ' Lưu ý bếp: ' + rawNote : ''}`;
+          broadcastAndSpeakKitchenAlert(voiceShipText);
+          window.printKitchenTicket(newOrderId, deliveryOrderData);
+          posCart = {};
+          v19_posDiscountPercent = 0;
+          document.getElementById('posOrderNote').value = '';
+          window.clearPosDeliveryCustomerForm();
+          updateV19PosTotalsUI();
+          renderPosCartUI();
+          document.querySelectorAll('.tab-btn')[0].click();
+        });
+        return;
+      }
+
+      // Chế độ Ăn Tại Bàn / Mang Về
+      const orderData = {
+        orderType: 'dine_in',
+        dailySeq: nextSeq,
+        table: selectedTable,
+        customerName: selectedTable,
+        phone: 'Tại quán',
+        address: '280 Trần Hưng Đạo',
+        note: noteVal,
+        items: posCart,
+        rawSubtotal: rawSub,
+        discountPercent: pct,
+        discount: discAmt,
+        subtotal: netSub,
+        shippingFee: 0,
+        grandTotal: netSub,
+        paymentMethod: 'COD',
+        paymentStatus: 'Thu tại bàn',
+        status: 'Đang chế biến',
+        createdAt: new Date().toISOString(),
+        archived: false
+      };
+
+      const newOrderRef = push(ref(db, 'orders'));
+      const newOrderId = newOrderRef.key;
+      if (typeof announcedNewOrderIds !== 'undefined') announcedNewOrderIds[newOrderId] = true;
+      if (typeof orderLastVoiceReminderAt !== 'undefined') orderLastVoiceReminderAt[newOrderId] = Date.now();
+      ordersCache[newOrderId] = orderData;
+      dailyOrderSeqMap[newOrderId] = seqFormatted;
+
+      set(newOrderRef, orderData).then(() => {
+        const voiceOrderText = `Order mới ${selectedTable} gồm: ${spokenDishes.join(', ')}.${pct > 0 ? ' Ưu đãi giảm ' + pct + ' phần trăm.' : ''}${rawNote ? ' Lưu ý bếp: ' + rawNote : ''}`;
+        broadcastAndSpeakKitchenAlert(voiceOrderText);
+        window.printKitchenTicket(newOrderId, orderData);
+        alert(`✅ Đã gửi đơn ${selectedTable} (#${seqFormatted}) xuống bếp${pct > 0 ? ` (Đã chiết khấu ${pct}%)` : ''}!`);
+        posCart = {};
+        v19_posDiscountPercent = 0;
+        document.getElementById('posOrderNote').value = '';
+        updateV19PosTotalsUI();
+        renderPosCartUI();
+        document.querySelectorAll('.tab-btn')[0].click();
+      });
+    };
+
+    // 19.4. CẬP NHẬT MODAL SỬA ĐƠN: TÍNH CHIẾT KHẤU % & PHÁT LOA KHI ĐỔI MÓN / HỦY MÓN / THÊM MÓN
+    function updateV19EditModalTotalsUI() {
+      injectV19DiscountUI();
+      const o = ordersCache[editingOrderId] || {};
+      let rawSub = 0;
+      for (let k in editingItemsTemp) {
+        rawSub += editingItemsTemp[k].price * editingItemsTemp[k].qty;
+      }
+      const pct = Math.min(100, Math.max(0, parseFloat(v19_editDiscountPercent) || 0));
+      const newDiscount = Math.round(rawSub * pct / 100);
+      const netSub = Math.max(0, rawSub - newDiscount);
+      const shipFee = o.orderType === 'dine_in' ? 0 : (o.shippingFee || 0);
+      const grandTotal = netSub + shipFee;
+
+      const inp = document.getElementById('v19EditDiscountInput');
+      if (inp && Number(inp.value) !== pct) inp.value = pct;
+      const amtEl = document.getElementById('v19EditDiscountAmtText');
+      if (amtEl) amtEl.innerText = `(-${newDiscount.toLocaleString()}đ)`;
+      const totalEl = document.getElementById('editModalNewGrandTotal');
+      if (totalEl) totalEl.innerText = grandTotal.toLocaleString() + 'đ';
+
+      return { rawSub, pct, newDiscount, netSub, shipFee, grandTotal };
+    }
+
+    window.setV19EditDiscount = function(val) {
+      v19_editDiscountPercent = Math.min(100, Math.max(0, parseFloat(val) || 0));
+      updateV19EditModalTotalsUI();
+    };
+
+    const origOpenEditModalV19 = window.openEditOrderModal;
+    window.openEditOrderModal = function(orderId) {
+      origOpenEditModalV19(orderId);
+      const o = ordersCache[orderId] || {};
+      if (o.discountPercent !== undefined) {
+        v19_editDiscountPercent = Number(o.discountPercent) || 0;
+      } else if (o.discount > 0 && o.rawSubtotal > 0) {
+        v19_editDiscountPercent = Math.round((o.discount / o.rawSubtotal) * 100);
+      } else {
+        v19_editDiscountPercent = 0;
+      }
+      updateV19EditModalTotalsUI();
+    };
+
+    const origChangeEditQtyV19 = window.changeEditItemQty;
+    window.changeEditItemQty = function(key, delta) {
+      origChangeEditQtyV19(key, delta);
+      updateV19EditModalTotalsUI();
+    };
+
+    const origRemoveEditItemV19 = window.removeEditItem;
+    window.removeEditItem = function(key) {
+      origRemoveEditItemV19(key);
+      updateV19EditModalTotalsUI();
+    };
+
+    const origAddDishToEditV19 = window.addDishToEditOrder;
+    window.addDishToEditOrder = function(name, price, cat = null) {
+      origAddDishToEditV19(name, price, cat);
+      updateV19EditModalTotalsUI();
+    };
+
+    // Ghi đè hàm Lưu Sửa Đơn: So sánh chi tiết món hủy/thêm và PHÁT LOA BÁO BẾP NGAY LẬP TỨC
+    window.saveEditedOrderChanges = function() {
+      if (!editingOrderId) return;
+      const role = localStorage.getItem('hy_chay_active_role') || 'staff';
+      if (role === 'staff') return alert("⛔ Nhân viên không có quyền sửa đơn hàng!");
+
+      const o = ordersCache[editingOrderId];
+      if (!o) return;
+      const orderLabel = o.orderType === 'dine_in'
+        ? (o.table || 'Tại bàn')
+        : `Đơn số ${getOrderSeqBadgeText(editingOrderId).replace('#', '')} của khách ${o.customerName || ''}`;
+
+      // Nếu xóa sạch hết các món trong đơn -> Hỏi chuyển sang Hủy đơn & Báo bếp luôn
+      if (Object.keys(editingItemsTemp).length === 0) {
+        if (confirm(`⚠️ Bạn vừa xóa hết toàn bộ món của ${orderLabel}.\nBạn có muốn HỦY ĐƠN HÀNG NÀY và phát loa báo bếp ngưng làm món không?`)) {
+          const idToCancel = editingOrderId;
+          window.closeEditOrderModal();
+          window.openCancelModal(idToCancel);
+        }
+        return;
+      }
+
+      const totals = updateV19EditModalTotalsUI();
+      const oldSub = o.subtotal || 0;
+      const isBillPrinted = (o.billPrintedCount || 0) > 0;
+      const isMoneyReduced = totals.netSub < oldSub;
+
+      // Kiểm tra phân quyền chống gian lận nếu Thu ngân tự giảm tiền hoặc sửa sau in bill
+      if ((isBillPrinted || isMoneyReduced) && role === 'cashier') {
+        const managerPin = prompt(`🔒 KHÓA CHỐNG GIAN LẬN:\nĐơn này ${isBillPrinted ? 'ĐÃ IN BILL TÍNH TIỀN' : 'đang được giảm tiền'} (${oldSub.toLocaleString()}đ -> ${totals.netSub.toLocaleString()}đ).\nVui lòng nhập Mật khẩu Chủ quán để xác nhận:`);
+        if (managerPin !== "hychayfood" && managerPin !== "baochay2026") {
+          writeAuditLog("THU NGÂN TỰ Ý GIẢM MÓN/CHIẾT KHẤU BỊ CHẶN", `${orderLabel}: Định giảm từ ${oldSub.toLocaleString()}đ xuống ${totals.netSub.toLocaleString()}đ`, "DANGER");
+          return alert("❌ Mật khẩu Chủ quán không đúng!");
+        }
+      }
+
+      // So sánh chi tiết món cũ vs món mới để đọc loa báo bếp chính xác
+      const oldItems = o.items || {};
+      const canceledOrReducedSpeech = [];
+      const addedOrIncreasedSpeech = [];
+
+      Object.keys(oldItems).forEach(k => {
+        const oldIt = oldItems[k];
+        const cleanK = safeItemKey(k);
+        const newIt = editingItemsTemp[cleanK] || editingItemsTemp[k];
+        if (!newIt) {
+          canceledOrReducedSpeech.push(`hủy ${oldIt.qty} ${oldIt.name}`);
+        } else if (newIt.qty < oldIt.qty) {
+          const diff = oldIt.qty - newIt.qty;
+          canceledOrReducedSpeech.push(`giảm ${diff} ${oldIt.name} còn ${newIt.qty}`);
+        }
+      });
+
+      Object.keys(editingItemsTemp).forEach(k => {
+        const newIt = editingItemsTemp[k];
+        const oldIt = oldItems[k] || Object.values(oldItems).find(x => x.name === newIt.name);
+        if (!oldIt) {
+          addedOrIncreasedSpeech.push(`thêm mới ${newIt.qty} ${newIt.name}`);
+        } else if (newIt.qty > oldIt.qty) {
+          const diff = newIt.qty - oldIt.qty;
+          addedOrIncreasedSpeech.push(`thêm ${diff} ${newIt.name} thành ${newIt.qty}`);
+        }
+      });
+
+      const oldPct = Number(o.discountPercent) || 0;
+      const discountSpeech = (totals.pct !== oldPct)
+        ? (totals.pct > 0 ? `ưu đãi chiết khấu ${totals.pct} phần trăm` : `bỏ chiết khấu`)
+        : '';
+
+      const timeInp = document.getElementById('editModalScheduledTime');
+      const newSched = timeInp ? timeInp.value.trim() : (o.scheduledTime || '');
+
+      let baseNote = (o.note || '').replace(/\[Ưu đãi giảm.*?\]/g, '').replace(/\[Đã sửa đơn.*?\]/g, '').trim();
+      const discNote = totals.pct > 0 ? `[Ưu đãi giảm ${totals.pct}% (-${totals.newDiscount.toLocaleString()}đ)]` : '';
+      const editStamp = `[Đã sửa đơn lúc ${new Date().toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'})}]`;
+      const updatedNote = [discNote, baseNote, editStamp].filter(Boolean).join(' ');
+
+      const targetOrderId = editingOrderId;
+      update(ref(db, `orders/${targetOrderId}`), {
+        items: editingItemsTemp,
+        rawSubtotal: totals.rawSub,
+        discountPercent: totals.pct,
+        discount: totals.newDiscount,
+        subtotal: totals.netSub,
+        grandTotal: totals.grandTotal,
+        scheduledTime: newSched || null,
+        deliveryTimeMode: newSched ? 'scheduled' : 'immediate',
+        note: updatedNote,
+        editedByAdminAt: new Date().toISOString()
+      }).then(() => {
+        // Đặt lại mốc thời gian nhắc bếp 5 phút cho đơn vừa sửa
+        if (typeof orderLastVoiceReminderAt !== 'undefined') {
+          orderLastVoiceReminderAt[targetOrderId] = Date.now();
+        }
+
+        // Phát loa thông báo rõ ràng món hủy / món thêm / chiết khấu
+        const allChanges = [...canceledOrReducedSpeech, ...addedOrIncreasedSpeech, discountSpeech].filter(Boolean);
+        if (allChanges.length > 0) {
+          const voiceDiffText = `Chú ý bếp! ${orderLabel} vừa cập nhật đổi món: ${allChanges.join(', ')}.`;
+          broadcastAndSpeakKitchenAlert(voiceDiffText);
+        } else {
+          broadcastAndSpeakKitchenAlert(`Chú ý! Đã cập nhật thông tin ${orderLabel}.`);
+        }
+
+        if (isBillPrinted || isMoneyReduced) {
+          writeAuditLog(
+            "CẬP NHẬT MÓN / CHIẾT KHẤU ĐƠN HÀNG",
+            `${orderLabel} | Cũ: ${oldSub.toLocaleString()}đ ➡️ Mới: ${totals.netSub.toLocaleString()}đ (CK: ${totals.pct}%) | Thay đổi: ${allChanges.join(', ') || 'Giữ nguyên món'}`,
+            isBillPrinted ? "DANGER" : "WARN"
+          );
+        }
+
+        alert(`✅ Đã lưu cập nhật ${orderLabel} và phát loa thông báo cho Bếp!`);
+        window.closeEditOrderModal();
+      }).catch(err => alert("❌ Lỗi khi lưu đơn: " + err.message));
+    };
+
+    // 19.5. PHÁT LOA BÁO BẾP NGAY KHI HỦY TOÀN BỘ ĐƠN HÀNG / HỦY BÀN
+    const origConfirmCancelV19 = window.confirmCancelOrderWithReason;
+    window.confirmCancelOrderWithReason = function() {
+      if (!targetCancelOrderId) return;
+      const o = ordersCache[targetCancelOrderId];
+      const cancelLabel = o
+        ? (o.orderType === 'dine_in' ? (o.table || 'Tại bàn') : `Đơn số ${getOrderSeqBadgeText(targetCancelOrderId).replace('#', '')} của khách ${o.customerName || ''}`)
+        : 'Đơn hàng';
+      const reason = document.getElementById('cancelReasonSelect')?.value || '';
+
+      origConfirmCancelV19();
+
+      // Nếu đơn đã chuyển trạng thái hủy thành công -> Phát loa báo bếp ngưng làm ngay
+      setTimeout(() => {
+        const checkOrd = ordersCache[targetCancelOrderId];
+        if (!checkOrd || checkOrd.status === 'Đã hủy') {
+          broadcastAndSpeakKitchenAlert(`Chú ý bếp! Đã hủy toàn bộ ${cancelLabel}. Bếp ngưng làm món đơn này! Lý do: ${reason}.`);
+        }
+      }, 250);
+    };
+
+    // 19.6. HIỂN THỊ DÒNG CHIẾT KHẤU (%) TRÊN THẺ ĐƠN KDS, HÓA ĐƠN IN NHIỆT & BÁO CÁO THUẾ 5610/5630
+    function decorateOrderCardsWithDiscountRow() {
+      const container = document.getElementById('ordersContainer');
+      if (!container) return;
+      const cards = container.querySelectorAll('.order-card');
+      cards.forEach(card => {
+        const idSpan = card.querySelector('.order-id');
+        if (!idSpan) return;
+        const match = idSpan.innerText.match(/#HC-([A-Z0-9]+)/);
+        if (!match) return;
+        const shortCode = match[1];
+        const foundId = Object.keys(ordersCache).find(k => k.substring(k.length - 5).toUpperCase() === shortCode);
+        if (!foundId) return;
+        const o = ordersCache[foundId];
+        if (!o) return;
+
+        const finBox = card.querySelector('.financial-split-box');
+        if (finBox && (o.discount > 0 || o.discountPercent > 0) && !finBox.querySelector('.v19-disc-row')) {
+          const pctLabel = o.discountPercent ? `-${o.discountPercent}%` : 'Ưu đãi';
+          const rawSub = o.rawSubtotal || ((o.subtotal || 0) + (o.discount || 0));
+          const discRow = document.createElement('div');
+          discRow.className = 'fin-row v19-disc-row';
+          discRow.style.cssText = 'color:#dc2626; font-weight:800; background:#fef2f2; padding:2px 4px; border-radius:4px; margin:2px 0;';
+          discRow.innerHTML = `<span>🏷️ Giá gốc ${rawSub.toLocaleString()}đ (${pctLabel}):</span><span>-${(o.discount || 0).toLocaleString()}đ</span>`;
+          finBox.insertBefore(discRow, finBox.firstChild);
+        }
+      });
+    }
+
+    onValue(ref(db, 'orders'), () => {
+      setTimeout(decorateOrderCardsWithDiscountRow, 100);
+    });
+    const origSetFilterV19 = window.setOrderStatusFilter;
+    window.setOrderStatusFilter = function(filterVal, btn) {
+      origSetFilterV19(filterVal, btn);
+      setTimeout(decorateOrderCardsWithDiscountRow, 60);
+    };
+
+    // Cập nhật Hóa Đơn In Nhiệt (In rõ Giá gốc, % Chiết khấu ưu đãi và Tiền sau chiết khấu)
+    const origPrintCustomerBillV19 = window.printCustomerBill;
+    window.printCustomerBill = function(id) {
+      origPrintCustomerBillV19(id);
+      const o = ordersCache[id];
+      if (o && (o.discount > 0 || o.discountPercent > 0)) {
+        const pa = document.getElementById('printArea');
+        if (pa) {
+          const rawSub = o.rawSubtotal || ((o.subtotal || 0) + (o.discount || 0));
+          const pctText = o.discountPercent ? ` (-${o.discountPercent}%)` : '';
+          const discHtml = `
+            <div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>Tiền món gốc:</span><span>${rawSub.toLocaleString()}đ</span></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>Chiết khấu ưu đãi${pctText}:</span><span>-${(o.discount || 0).toLocaleString()}đ</span></div>
+          `;
+          pa.innerHTML = pa.innerHTML.replace(
+            '<span>1. Tiền món (Tại quán):</span>',
+            discHtml + '<span>1. Tiền món (Sau CK):</span>'
+          );
+          window.print();
+        }
+      }
+    };
   </script>
 </body>
 </html>
