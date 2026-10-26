@@ -221,30 +221,18 @@
       .no-print { display: none !important; }
     }
     @media (max-width: 900px) { .pos-layout, .edit-modal-grid { grid-template-columns: 1fr; } }
-      /* MODULE 21: CHE DO GIAO DIEN NHAN VIEN TOI GIAN (NUT TO) & VOICE ORDER */
-    .voice-order-station { background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 2px solid #f59e0b; border-radius: 14px; padding: 12px 14px; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15); }
-    .btn-voice-mic-main { width: 100%; background: linear-gradient(135deg, #dc2626, #ea580c); color: #ffffff; border: none; padding: 15px 16px; border-radius: 12px; font-weight: 900; font-size: 1.05rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 6px 18px rgba(220, 38, 38, 0.35); transition: transform 0.15s; }
-    .btn-voice-mic-main.listening { background: linear-gradient(135deg, #16a34a, #059669); animation: alert-card 0.7s infinite alternate; }
-    .btn-big-mode-toggle { background: #0f172a; color: #ffd800; border: 2px solid #ffd800; padding: 8px 14px; border-radius: 10px; font-weight: 800; font-size: 0.85rem; cursor: pointer; }
-    .btn-big-mode-toggle.active { background: #16a34a; color: #ffffff; border-color: #86efac; }
-    .floating-voice-fab { position: fixed; bottom: 20px; left: 20px; z-index: 9500; background: linear-gradient(135deg, #dc2626, #ea580c); color: #fff; border: 3px solid #ffd800; border-radius: 50px; padding: 12px 18px; font-weight: 900; font-size: 0.92rem; box-shadow: 0 8px 25px rgba(220,38,38,0.45); cursor: pointer; display: none; align-items: center; gap: 6px; }
-    .floating-voice-fab.listening { background: #16a34a; animation: alert-card 0.7s infinite alternate; }
-    /* Khi bat Che do Nhan vien Toi gian (Big-Button Staff Mode) */
-    #viewPosOrder.staff-big-mode .pos-dish-grid { grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 10px; max-height: 62vh; }
-    #viewPosOrder.staff-big-mode .pos-dish-btn { min-height: 92px; padding: 12px; border: 2px solid #cbd5e1; border-radius: 12px; background: #ffffff; }
-    #viewPosOrder.staff-big-mode .pos-dish-btn h4 { font-size: 1.02rem !important; font-weight: 800; line-height: 1.3; color: #0f172a; }
-    #viewPosOrder.staff-big-mode .pos-dish-btn span:last-child { font-size: 1.05rem !important; }
-    #viewPosOrder.staff-big-mode .btn-table-pill { padding: 10px 16px; font-size: 0.95rem; border-width: 2px; }
-    #viewPosOrder.staff-big-mode .admin-cat-chip { padding: 9px 16px; font-size: 0.9rem; }
-      /* MODULE 22: CHIET KHAU TREN HOA DON, CHUYEN/GOP BAN, GRAB/SHOPEE & HOA DON DAU VAO */
-    .card-inline-discount-bar { background: #f0fdf4; border: 1.5px dashed #16a34a; border-radius: 8px; padding: 6px 8px; margin: 6px 0; display: flex; flex-direction: column; gap: 5px; }
-    .card-disc-chips { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
-    .btn-card-disc-chip { flex: 1; min-width: 32px; background: #ffffff; color: #166534; border: 1px solid #86efac; border-radius: 6px; padding: 3px 4px; font-size: 0.72rem; font-weight: 800; cursor: pointer; transition: 0.15s; }
+      /* CSS MODULE 21 & 22: CO DINH CHIET KHAU HOA DON, CHUYEN/GOP/TACH BAN, VOICE POS & KE TOAN */
+    .card-inline-discount-bar { background: #f0fdf4; border: 1.5px dashed #16a34a; border-radius: 8px; padding: 6px 8px; margin-bottom: 6px; }
+    .card-disc-chips { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; margin-top: 4px; }
+    .btn-card-disc-chip { flex: 1; min-width: 32px; background: #ffffff; color: #166534; border: 1px solid #86efac; border-radius: 6px; padding: 4px 2px; font-size: 0.73rem; font-weight: 800; cursor: pointer; }
     .btn-card-disc-chip.active, .btn-card-disc-chip:hover { background: #16a34a; color: #ffffff; border-color: #16a34a; }
-    .btn-move-merge-table { background: #ede9fe; color: #6d28d9; border: 1px solid #c4b5fd; padding: 5px 8px; border-radius: 6px; font-weight: 800; font-size: 0.75rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
-    .btn-move-merge-table:hover { background: #7c3aed; color: #ffffff; }
-    .ext-rev-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 12px; }
-    .inv-check-badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; }
+    .btn-move-merge-table { flex: 1; background: #ede9fe; color: #5b21b6; border: 1px solid #c4b5fd; padding: 5px 8px; border-radius: 6px; font-weight: 800; font-size: 0.75rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
+    .btn-move-merge-table:hover { background: #6d28d9; color: #ffffff; }
+    .tm-mode-tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 12px; }
+    .tm-mode-tab { padding: 9px 6px; border-radius: 8px; border: 1.5px solid #cbd5e1; background: #f8fafc; font-weight: 800; font-size: 0.8rem; cursor: pointer; text-align: center; color: #334155; }
+    .tm-mode-tab.active { background: #6d28d9; color: #ffffff; border-color: #6d28d9; }
+    .ext-rev-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 10px; margin-bottom: 12px; }
+    .inv-check-badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 800; }
     .inv-valid { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
     .inv-invalid { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
   </style>
@@ -351,7 +339,6 @@
         <button class="tab-btn" onclick="switchMainTab('printerConfig', event)">🖨️ Máy In</button>
         <button class="tab-btn" onclick="switchMainTab('shippers', event)">🛵 Đội Tài Xế</button>
         <button class="tab-btn" id="tabUsers" onclick="switchMainTab('users', event)" style="color:#2563eb;">👥 Phân Quyền</button>
-        <button class="tab-btn" id="tabDispatch" onclick="switchMainTab('dispatch', event)" style="color:#7c3aed; font-weight:800;">&#128242; &#272;i&#7873;u Khi&#7875;n PC (Dispatch)</button>
         <button class="btn-end-shift" onclick="endShiftAndClearScreen()">🛑 KẾT CA & XÓA MÀN HÌNH</button>
       </div>
 
@@ -375,7 +362,42 @@
       </div>
 
       <!-- VIEW 2: POS ORDER TẠI BÀN & ĐẶT ĐƠN SHIP HỘ KHÁCH QUEN / CÔ CHÚ LỚN TUỔI -->
-      <div id="viewPosOrder" style="display: none;">
+      <div id="viewPosOrder" class="staff-big-mode" style="display: none;">
+        <!-- TRAM ORDER GIONG NOI CHUAN XAC 100% & CHE DO NUT TO CHO NHAN VIEN -->
+        <div class="voice-order-station" id="voiceOrderStationBox">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+            <div>
+              <b style="color:#b45309; font-size:0.95rem;">&#127897; ORDER BẰNG GIỌNG NÓI TIẾNG VIỆT (CHUẨN XÁC 122 MÓN)</b>
+              <p style="font-size:0.78rem; color:#78350f; margin-top:2px;">Đọc tự nhiên: <b>"Bàn 3 lấy 2 bún thái, 1 cháo nấm, 2 cafe muối, không hành"</b></p>
+            </div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <button type="button" onclick="openTableTransferMergeModal()" class="btn-move-merge-table" style="padding:8px 12px; font-size:0.82rem;">
+                &#128260; Chuyển / Gộp / Tách Bàn
+              </button>
+              <button type="button" id="btnToggleBigStaffMode" class="btn-big-mode-toggle active" onclick="toggleStaffBigMode()">
+                &#128269; Chế Độ Nút To: BẬT
+              </button>
+            </div>
+          </div>
+
+          <button type="button" id="btnStartVoiceOrder" class="btn-voice-mic-main" onclick="toggleVoiceOrderRecognition()">
+            <span id="voiceMicIcon" style="font-size:1.35rem;">&#127908;</span>
+            <span id="voiceMicBtnText">BẤM VÀO ĐÂY ĐỂ BẮT ĐẦU ĐỌC MÓN (NGHE LIÊN TỤC)</span>
+          </button>
+
+          <div id="voiceLiveInterimBar" style="display:none; margin-top:8px; padding:8px 12px; border-radius:8px; background:#0f172a; color:#fde047; font-weight:800; font-size:0.9rem;">
+            &#127908; Đang nghe trực tiếp: <span id="voiceLiveInterimText" style="color:#ffffff;">...</span>
+          </div>
+
+          <div style="display:flex; gap:6px; margin-top:8px; align-items:center;">
+            <input type="text" id="voiceManualTranscriptInput" placeholder="Hoặc gõ / bấm Micro bàn phím điện thoại: VD: Bàn 2 lấy 2 bún thái, 1 cafe muối..." onkeydown="if(event.key==='Enter'){event.preventDefault(); processVoiceOrderInputBox();}" style="flex:1; padding:10px 12px; border:1.5px solid #f59e0b; border-radius:8px; font-weight:700; font-size:0.86rem; background:#ffffff;">
+            <button type="button" onclick="processVoiceOrderInputBox()" style="background:#d97706; color:#fff; border:none; padding:10px 14px; border-radius:8px; font-weight:900; font-size:0.84rem; cursor:pointer; white-space:nowrap;">
+              &#9889; Nhặt Món
+            </button>
+          </div>
+
+          <div id="voiceOrderFeedbackBox" style="display:none; margin-top:8px; padding:8px 10px; border-radius:8px; background:#dcfce7; border:1px solid #86efac; color:#166534; font-size:0.84rem; font-weight:700;"></div>
+        </div>
         <!-- THANH CHUYỂN ĐỔI 2 CHẾ ĐỘ: ĂN TẠI BÀN vs ĐẶT SHIP HỘ KHÁCH -->
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">
           <button type="button" id="btnSwitchModeDineIn" onclick="setPosOrderMode('dine_in')" style="padding:12px; border-radius:12px; border:2px solid var(--primary); background:var(--primary); color:#fff; font-weight:800; font-size:0.92rem; cursor:pointer;">
@@ -454,16 +476,6 @@
               <div>
                 <label style="font-size:0.75rem; font-weight:800; color:#0f172a;">Số nhà, Tên đường / Địa chỉ giao hàng chi tiết (*):</label>
                 <input type="text" id="posShipCusAddress" placeholder="VD: 125 Nguyễn Hội, Phường Phan Thiết, Tỉnh Lâm Đồng" oninput="onPosCustomerFieldInput(this.value)" style="width:100%; padding:8px; border:1px solid #94a3b8; border-radius:6px; font-weight:700;">
-              <div style="margin-top:8px; background:#e0f2fe; border:1.5px solid #0284c7; padding:8px 10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-                <label style="font-size:0.78rem; font-weight:800; color:#0369a1; margin:0;">&#128338; Th&#7901;i gian giao &#273;&#417;n Ship h&#7897;:</label>
-                <div style="display:flex; gap:6px; align-items:center;">
-                  <select id="posShipTimeMode" onchange="document.getElementById('posShipScheduledTimeInput').style.display=(this.value==='scheduled'?'inline-block':'none'); recalcPosDeliveryTotals();" style="padding:5px 8px; border:1px solid #0284c7; border-radius:6px; font-weight:800; font-size:0.78rem; background:#fff; color:#0369a1;">
-                    <option value="immediate" selected>&#9889; Giao ngay (~30p)</option>
-                    <option value="scheduled">&#128338; H&#7865;n gi&#7901; giao c&#7909; th&#7875;</option>
-                  </select>
-                  <input type="time" id="posShipScheduledTimeInput" onchange="recalcPosDeliveryTotals()" style="display:none; padding:4px 8px; border:1.5px solid #0284c7; border-radius:6px; font-weight:800; color:#dc2626; background:#fff;">
-                </div>
-              </div>
               </div>
             </div>
 
@@ -506,7 +518,7 @@
           </div>
 
           <div class="pos-cart-panel">
-            <h3 style="margin-bottom:10px;"><span id="posOrderHeaderPrefix">Order:</span> <span id="currentSelectedTable" style="color:#d97706;">Bàn 1</span> <button type="button" onclick="openTableTransferMergeModal()" class="btn-move-merge-table" style="margin-left:8px; font-size:0.78rem;">&#128260; Chuyển / Gộp Bàn</button></h3>
+            <h3 style="margin-bottom:10px;"><span id="posOrderHeaderPrefix">Order:</span> <span id="currentSelectedTable" style="color:#d97706;">Bàn 1</span></h3>
             <div class="pos-cart-items" id="posCartItemsList"><p style="color:#94a3b8; text-align:center; padding:40px 0;">Chưa có món nào.</p></div>
             <input type="text" id="posOrderNote" placeholder="Ghi chú cho bếp (VD: Không hành, ít cay, thêm tô giấy...)" style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:10px;">
             
@@ -748,7 +760,7 @@
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px; border-bottom:1px solid #fde68a; padding-bottom:10px;">
               <div>
                 <h3 style="color:#b45309; font-size:1.06rem;">&#128757;&#128717; 1. NHẬP &amp; ĐỐI SOÁT BÁO CÁO DOANH THU GRABFOOD &amp; SHOPEE (ĐA SÀN)</h3>
-                <p style="font-size:0.8rem; color:#78350f;">Nhập doanh thu từ <b>GrabFood</b>, <b>ShopeeFood</b> hoặc <b>Shopee Seller Center</b> (Chà bông nấm hương, thực phẩm chay đóng gói) để tổng hợp doanh thu toàn công ty và tự động khấu trừ phí sàn.</p>
+                <p style="font-size:0.8rem; color:#78350f;">Nhập báo cáo doanh thu từ <b>GrabFood</b>, <b>ShopeeFood</b> hoặc <b>Shopee Seller Center</b> để tổng hợp doanh thu toàn công ty (5610 / 5630) và theo dõi phí chiết khấu sàn.</p>
               </div>
               <label style="display:flex; align-items:center; gap:6px; background:#ffffff; padding:6px 12px; border-radius:20px; border:1px solid #f59e0b; font-size:0.8rem; font-weight:800; color:#b45309; cursor:pointer;">
                 <input type="checkbox" id="chkIncludeExtRevInTax" checked onchange="renderShiftReport()" style="width:16px; height:16px;">
@@ -762,7 +774,7 @@
                 <select id="extPlatformSelect" style="width:100%; padding:8px; border:1.5px solid #f59e0b; border-radius:6px; font-weight:800; margin-top:3px;">
                   <option value="GRAB">&#128994; GrabFood (Giao đồ ăn/uống)</option>
                   <option value="SHOPEE_FOOD">&#128992; ShopeeFood (Giao đồ ăn/uống)</option>
-                  <option value="SHOPEE_MALL">&#128717; Shopee Seller Center (Đồ chay khô/Đóng gói)</option>
+                  <option value="SHOPEE_MALL">&#128717; Shopee Seller Center (Đồ chay đóng gói)</option>
                 </select>
               </div>
               <div>
@@ -783,7 +795,7 @@
               </div>
               <div>
                 <label style="font-size:0.75rem; font-weight:800; color:#dc2626;">Phí chiết khấu sàn thu (VNĐ):</label>
-                <input type="number" id="extRevFeeInput" value="0" step="1000" oninput="calcExtNetPreview()" placeholder="VD: 20% - 25%" style="width:100%; padding:7px; border:1px solid #ef4444; border-radius:6px; font-weight:800; color:#dc2626; margin-top:3px;">
+                <input type="number" id="extRevFeeInput" value="0" step="1000" oninput="calcExtNetPreview()" placeholder="VD: Phí sàn 20-25%" style="width:100%; padding:7px; border:1px solid #ef4444; border-radius:6px; font-weight:800; color:#dc2626; margin-top:3px;">
               </div>
               <div>
                 <label style="font-size:0.75rem; font-weight:800; color:#0284c7;">Thực nhận về TK Ngân hàng:</label>
@@ -791,7 +803,7 @@
               </div>
               <div>
                 <label style="font-size:0.75rem; font-weight:800; color:#475569;">Mã đối soát / Ghi chú:</label>
-                <input type="text" id="extRevNoteInput" placeholder="VD: Báo cáo ca chiều Grab..." style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:6px; margin-top:3px;">
+                <input type="text" id="extRevNoteInput" placeholder="VD: Kết ca Grab ngày..." style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:6px; margin-top:3px;">
               </div>
             </div>
 
@@ -800,7 +812,7 @@
                 &#128190; LƯU BÁO CÁO GRAB / SHOPEE VÀO SỔ KẾ TOÁN
               </button>
               <label style="background:#0284c7; color:#fff; padding:10px 16px; border-radius:8px; font-weight:800; font-size:0.84rem; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
-                &#128194; Nhập Nhanh Từ File CSV / Excel Sàn (Grab/Shopee)
+                &#128194; Tải File CSV / Bảng Kê Sàn (Grab/Shopee)
                 <input type="file" accept=".csv,.txt" style="display:none;" onchange="importExternalPlatformCSV(this)">
               </label>
               <span id="extRevSummaryTag" style="margin-left:auto; font-size:0.84rem; font-weight:800; color:#166534;"></span>
@@ -829,20 +841,16 @@
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px; border-bottom:1px solid #86efac; padding-bottom:10px;">
               <div>
                 <h3 style="color:#166534; font-size:1.06rem;">&#129534; 2. TRẠM NHẬP HÓA ĐƠN ĐẦU VÀO BẰNG FILE PDF / XML / ẢNH &amp; KIỂM TRA CẤU TRÚC TỰ ĐỘNG</h3>
-                <p style="font-size:0.8rem; color:#14532d;">Tải lên file <b>PDF</b>, <b>XML</b> hoặc <b>Ảnh chụp hóa đơn</b>. Hệ thống tự động kiểm tra 6 tiêu chí pháp lý: <b>Tên HĐ, Ký hiệu mẫu số (VD: 1C26...), Số HĐ, Ngày giờ, MST Người mua (3401289271)</b> và tự động cộng VAT đầu vào lên Tờ khai 01/GTGT.</p>
+                <p style="font-size:0.8rem; color:#14532d;">Tải lên file <b>PDF</b>, <b>XML</b> hoặc <b>Ảnh chụp hóa đơn</b>. Hệ thống tự động kiểm tra 6 tiêu chí hợp lệ: <b>Tên HĐ, Ký hiệu mẫu số (VD: 1C26...), Số HĐ, Ngày giờ, MST Người mua (3401289271)</b> và tự động cộng VAT đầu vào lên Tờ khai 01/GTGT.</p>
               </div>
-              <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                <label style="background:#15803d; color:#fff; padding:10px 16px; border-radius:10px; font-weight:900; font-size:0.86rem; cursor:pointer; box-shadow:0 4px 12px rgba(21,128,61,0.25);">
-                  &#128196; TẢI FILE HÓA ĐƠN (PDF / XML / ẢNH) ĐỂ KIỂM TRA NGAY
-                  <input type="file" id="inputInvoiceFilePicker" accept=".pdf,.xml,image/*" style="display:none;" onchange="handleInputInvoiceFileUpload(this)">
-                </label>
-              </div>
+              <label style="background:#15803d; color:#fff; padding:10px 16px; border-radius:10px; font-weight:900; font-size:0.86rem; cursor:pointer; box-shadow:0 4px 12px rgba(21,128,61,0.25);">
+                &#128196; CHỌN FILE HÓA ĐƠN (PDF / XML / ẢNH) ĐỂ KIỂM TRA NGAY
+                <input type="file" id="inputInvoiceFilePicker" accept=".pdf,.xml,image/*" style="display:none;" onchange="handleInputInvoiceFileUpload(this)">
+              </label>
             </div>
 
-            <!-- KẾT QUẢ KIỂM TRA CẤU TRÚC HÓA ĐƠN TỰ ĐỘNG -->
             <div id="invoiceAuditResultBanner" style="display:none; padding:12px; border-radius:10px; margin-bottom:12px; font-size:0.84rem; line-height:1.5;"></div>
 
-            <!-- BẢNG THÔNG SỐ BÓC TÁCH TỪ HÓA ĐƠN (CÓ THỂ CHỈNH SỬA TRƯỚC KHI LƯU) -->
             <div class="ext-rev-grid" style="background:#ffffff; padding:12px; border-radius:10px; border:1px solid #86efac;">
               <div>
                 <label style="font-size:0.74rem; font-weight:800;">1. Tên Hóa Đơn (*):</label>
@@ -850,7 +858,7 @@
               </div>
               <div>
                 <label style="font-size:0.74rem; font-weight:800;">2. Ký Hiệu Mẫu &amp; Ký Hiệu HĐ (*):</label>
-                <input type="text" id="invSymbolInput" placeholder="VD: 1C26TAA hoặc 1/001" oninput="validateInputInvoiceRealtime()" style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:6px; font-weight:800; color:#0369a1; margin-top:3px;">
+                <input type="text" id="invSymbolInput" placeholder="VD: 1C26TAA" oninput="validateInputInvoiceRealtime()" style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:6px; font-weight:800; color:#0369a1; margin-top:3px;">
               </div>
               <div>
                 <label style="font-size:0.74rem; font-weight:800;">3. Số Hóa Đơn / Mã CQT (*):</label>
@@ -1159,77 +1167,6 @@
           </table>
         </div>
       </div>
-          <!-- VIEW 7: TRAM DIEU KHIEN MAY TINH TU XA QUA DIEN THOAI -->
-      <div id="viewDispatch" style="display: none;">
-        <div class="report-card" style="border: 2px solid #7c3aed; background: linear-gradient(135deg, #ffffff, #faf5ff);">
-          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; border-bottom:1px solid #e9d5ff; padding-bottom:12px; margin-bottom:14px;">
-            <div>
-              <h3 style="color:#6d28d9; font-size:1.15rem;">&#128242; TR&#7840;M &#272;I&#7872;U KHI&#7874;N M&#193;Y T&#205;NH T&#7914; XA (GOOGLE MOBILE DISPATCH &amp; TEAM 4 AI)</h3>
-              <p style="font-size:0.84rem; color:#475569;">&#272;i&#7873;u khi&#7875;n m&#225;y t&#237;nh t&#7841;i tr&#7909; s&#7903; 280 Tr&#7847;n H&#432;ng &#272;&#7841;o t&#7915; &#273;i&#7879;n tho&#7841;i (Gi&#7919; m&#225;y th&#7913;c 24/7, ch&#7909;p m&#224;n h&#236;nh tr&#7921;c ti&#7871;p &amp; giao vi&#7879;c cho Bi&#7879;t &#273;&#7897;i 4 AI).</p>
-            </div>
-            <div id="pcHeartbeatBadge" style="background:#f1f5f9; color:#64748b; padding:6px 14px; border-radius:20px; font-weight:800; font-size:0.84rem; border:1px solid #cbd5e1;">
-              Dang kiem tra ket noi PC...
-            </div>
-          </div>
-
-          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px; margin-bottom:16px;">
-            <button type="button" onclick="sendQuickDispatch('SCREENSHOT', 'Chup anh toan bo man hinh may tinh hien tai')" style="padding:12px; background:#0284c7; color:#fff; border:none; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.86rem;">
-              &#128248; 1. Ch&#7909;p M&#224;n H&#236;nh M&#225;y T&#237;nh Ngay
-            </button>
-            <button type="button" onclick="sendQuickDispatch('SYS_STATUS', 'Kiem tra tinh trang CPU, RAM, O cung va cac tien trinh tren PC')" style="padding:12px; background:#059669; color:#fff; border:none; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.86rem;">
-              &#128187; 2. Ki&#7875;m Tra S&#7913;c Kh&#7887;e M&#225;y T&#237;nh
-            </button>
-            <button type="button" onclick="sendQuickDispatch('GIT_DEPLOY', 'Sao luu code POS va kiem tra trang thai he thong')" style="padding:12px; background:#d97706; color:#fff; border:none; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.86rem;">
-              &#128640; 3. Sao L&#432;u &amp; &#272;&#7891;ng B&#7897; Code POS
-            </button>
-            <button type="button" onclick="sendQuickDispatch('ECC_SECURITY', 'Quet bao mat 3 tang (Giao dien - API - Du lieu) theo chuan ECC')" style="padding:12px; background:#dc2626; color:#fff; border:none; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.86rem;">
-              &#128737; 4. Qu&#233;t B&#7843;o M&#7853;t ECC (3 T&#7847;ng)
-            </button>
-            <button type="button" onclick="sendQuickDispatch('MARKITDOWN', 'Chuyen doi tai lieu PDF/Word/Excel trong PIPELINE/docs_in sang Markdown (.md)')" style="padding:12px; background:#4f46e5; color:#fff; border:none; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.86rem;">
-              &#128196; 5. N&#233;n T&#224;i Li&#7879;u Markdown (-90% Token)
-            </button>
-          </div>
-
-          <div style="background:#ffffff; border:1.5px solid #c4b5fd; border-radius:12px; padding:14px; margin-bottom:16px;">
-            <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; align-items:center;">
-              <label style="font-size:0.84rem; font-weight:800; color:#5b21b6;">Ch&#7871; &#273;&#7897; giao vi&#7879;c:</label>
-              <select id="dispatchTaskType" style="padding:6px 12px; border:1.5px solid #7c3aed; border-radius:8px; font-weight:800; color:#5b21b6; background:#f5f3ff;">
-                <option value="COMPUTER_USE">&#128400; AI &#272;i&#7873;u Khi&#7875;n M&#225;y T&#237;nh (M&#7903; file, Ch&#7841;y l&#7879;nh, Ch&#7909;p m&#224;n h&#236;nh)</option>
-                <option value="TEAM4_PIPELINE">&#129302; Giao Vi&#7879;c Cho Bi&#7879;t &#272;&#7897;i 4 AI (Planner -&gt; Coder -&gt; Tester -&gt; Reviewer)</option>
-              </select>
-            </div>
-            <div style="display:flex; gap:8px;">
-              <input type="text" id="dispatchPromptInput" placeholder="Nh&#7855;n vi&#7879;c c&#7847;n m&#225;y t&#237;nh l&#224;m h&#7897; (VD: Kiem tra danh sach file trong thu muc hien tai va chup man hinh)..." style="flex:1; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:0.92rem; font-weight:600;">
-              <button type="button" onclick="submitCustomDispatchTask()" style="padding:12px 22px; background:#7c3aed; color:#fff; border:none; border-radius:10px; font-weight:900; cursor:pointer; white-space:nowrap;">
-                &#128232; G&#7916;I L&#7878;NH V&#7872; PC
-              </button>
-            </div>
-          </div>
-
-          <div style="display:grid; grid-template-columns:1.1fr 1fr; gap:14px;" class="edit-modal-grid">
-            <div style="background:#0f172a; color:#f8fafc; border-radius:12px; padding:14px; text-align:center;">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <b style="color:#38bdf8; font-size:0.88rem;">&#128421; M&#192;N H&#204;NH M&#193;Y T&#205;NH TR&#7920;C TI&#7870;P (LIVE VIEW)</b>
-                <small id="lastScreenshotTime" style="color:#94a3b8;">Ch&#432;a c&#243; &#7843;nh</small>
-              </div>
-              <div style="background:#1e293b; border:1px dashed #475569; border-radius:8px; min-height:220px; display:flex; align-items:center; justify-content:center; overflow:hidden;">
-                <img id="livePcScreenshotImg" src="" alt="Screenshot PC" style="max-width:100%; max-height:380px; display:none; cursor:pointer; border-radius:6px;" onclick="window.open(this.src, '_blank')">
-                <p id="livePcScreenshotPlaceholder" style="color:#94a3b8; font-size:0.84rem; padding:20px;">B&#7845;m n&#250;t <b>"1. Ch&#7909;p M&#224;n H&#236;nh M&#225;y T&#237;nh Ngay"</b> &#7903; tr&#234;n &#273;&#7875; xem m&#224;n h&#236;nh PC t&#7915; &#273;i&#7879;n tho&#7841;i.</p>
-              </div>
-            </div>
-
-            <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:12px; padding:14px; max-height:430px; overflow-y:auto;">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #e2e8f0; padding-bottom:6px;">
-                <b style="color:#0f172a; font-size:0.88rem;">&#128203; L&#7882;CH S&#7916; L&#7878;NH &amp; B&#193;O C&#193;O T&#7914; PC</b>
-                <button type="button" onclick="clearDispatchHistory()" style="background:#fee2e2; color:#b91c1c; border:none; padding:4px 8px; border-radius:6px; font-size:0.74rem; font-weight:700; cursor:pointer;">X&#243;a l&#7883;ch s&#7917;</button>
-              </div>
-              <div id="dispatchHistoryContainer" style="display:flex; flex-direction:column; gap:10px; font-size:0.83rem;">
-                <p style="color:#94a3b8; text-align:center; padding:20px;">Ch&#432;a c&#243; l&#7879;nh &#273;i&#7873;u khi&#7875;n t&#7915; xa n&#224;o.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </main>
   </div> <!-- HẾT mainAppWrapper -->
 
@@ -1278,26 +1215,33 @@
     </div>
   </div>
 
-      <button type="button" id="floatingVoiceFab" class="floating-voice-fab no-print" onclick="quickOpenAndStartVoiceOrder()">
-      <span>&#127908;</span> <span id="floatingVoiceFabText">&#272;&#7885;c Order</span>
-    </button>
-    <!-- MODAL CHUYỂN BÀN & GỘP BÀN THÔNG MINH (MODULE 22C) -->
+    <!-- MODAL 3-TRONG-1: CHUYỂN BÀN - GỘP BÀN - TÁCH BÀN (MODULE 22C) -->
   <div id="tableTransferMergeModal" class="cancel-modal-overlay">
-    <div class="cancel-modal-box" style="max-width:520px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:10px; margin-bottom:14px;">
-        <h3 style="color:#6d28d9; font-size:1.12rem; margin:0;">&#128260; Chuyển Bàn Hoặc Gộp Bàn Ăn</h3>
+    <div class="cancel-modal-box" style="max-width:560px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:10px; margin-bottom:12px;">
+        <h3 style="color:#6d28d9; font-size:1.12rem; margin:0;">&#128260; Quản Lý Chuyển Bàn • Gộp Bàn • Tách Bàn</h3>
         <button type="button" onclick="closeTableTransferMergeModal()" style="background:#ef4444; color:#fff; border:none; padding:5px 10px; border-radius:6px; font-weight:800; cursor:pointer;">&#10006; Đóng</button>
       </div>
 
-      <div style="background:#f5f3ff; border:1px solid #c4b5fd; border-radius:10px; padding:12px; margin-bottom:14px; font-size:0.84rem; color:#4c1d95;">
-        &#128161; <b>Cơ chế Tự động Thông minh:</b><br>
-        • Nếu chọn <b>Bàn đích đang trống</b>: Hệ thống sẽ <b>CHUYỂN BÀN</b> (đổi sang vị trí bàn mới).<br>
-        • Nếu chọn <b>Bàn đích đang có khách ngồi</b>: Hệ thống sẽ <b>GỘP BÀN</b> (cộng dồn toàn bộ món ăn, giữ nguyên món bếp đã nấu và gộp chung về 1 hóa đơn).
+      <!-- 3 TAB CHẾ ĐỘ: CHUYỂN / GỘP / TÁCH -->
+      <div class="tm-mode-tabs">
+        <button type="button" id="tmTabMoveMerge" class="tm-mode-tab active" onclick="switchTmModalMode('move_merge')" style="grid-column: span 2;">
+          &#128260; 1. CHUYỂN BÀN / GỘP BÀN
+        </button>
+        <button type="button" id="tmTabSplit" class="tm-mode-tab" onclick="switchTmModalMode('split')">
+          &#9986; 2. TÁCH BÀN (TÁCH MÓN)
+        </button>
       </div>
 
       <div class="form-group-cfg">
-        <label style="color:#b91c1c;">1. Chọn Bàn Nguồn (Bàn cần chuyển đi hoặc gộp đi):</label>
+        <label style="color:#b91c1c;">1. Chọn Bàn Nguồn (Đang có khách ngồi):</label>
         <select id="tmSourceOrderSelect" onchange="onTmSourceChange()" style="width:100%; padding:10px; border:2px solid #ef4444; border-radius:8px; font-weight:800; color:#0f172a; background:#fff;"></select>
+      </div>
+
+      <!-- KHUNG CHỌN MÓN CẦN TÁCH (CHỈ HIỆN KHI Ở CHẾ ĐỘ TÁCH BÀN) -->
+      <div id="tmSplitItemsSection" style="display:none; background:#fffbeb; border:1.5px solid #f59e0b; border-radius:10px; padding:10px; margin-bottom:14px;">
+        <label style="font-size:0.82rem; font-weight:800; color:#b45309; display:block; margin-bottom:6px;">&#9986; Chọn số lượng món cần tách sang bàn mới:</label>
+        <div id="tmSplitItemsList" style="max-height:180px; overflow-y:auto;"></div>
       </div>
 
       <div class="form-group-cfg">
@@ -1311,7 +1255,7 @@
 
       <div style="display:flex; justify-content:flex-end; gap:8px;">
         <button type="button" onclick="closeTableTransferMergeModal()" style="padding:10px 16px; border:1px solid #cbd5e1; background:#fff; border-radius:8px; font-weight:700; cursor:pointer;">Hủy Bỏ</button>
-        <button type="button" onclick="executeTableTransferOrMerge()" style="padding:10px 20px; background:#6d28d9; color:#fff; border:none; border-radius:8px; font-weight:900; cursor:pointer; font-size:0.92rem;">
+        <button type="button" onclick="executeTableTransferMergeOrSplit()" style="padding:10px 20px; background:#6d28d9; color:#fff; border:none; border-radius:8px; font-weight:900; cursor:pointer; font-size:0.92rem;">
           &#9889; XÁC NHẬN THỰC HIỆN NGAY
         </button>
       </div>
@@ -1521,7 +1465,7 @@ const dynamicManifest = {
     window.switchMainTab = function(tabName, ev) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       if (ev && ev.currentTarget) ev.currentTarget.classList.add('active');
-      ['viewOrders','viewPosOrder','viewMenuStock','viewBankConfig','viewPrinterConfig','viewShippers','viewShiftReport','viewUsers','viewDispatch'].forEach(id => {
+      ['viewOrders','viewPosOrder','viewMenuStock','viewBankConfig','viewPrinterConfig','viewShippers','viewShiftReport','viewUsers'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
       });
@@ -2656,28 +2600,7 @@ window.deleteDishFromMenu = function(id, name) {
       renderPosCartUI();
     };
 
-        window.onPosShipTimeModeChange = function() {
-      const mode = document.getElementById('posShipTimeMode')?.value || 'immediate';
-      const timeInp = document.getElementById('posShipScheduledTimeInput');
-      if (!timeInp) return;
-      if (mode === 'scheduled') {
-        timeInp.style.display = 'inline-block';
-        if (!timeInp.value) {
-          const now = new Date();
-          const targetMins = Math.ceil((now.getHours() * 60 + now.getMinutes() + 45) / 15) * 15;
-          const hh = String(Math.min(20, Math.floor(targetMins / 60))).padStart(2, '0');
-          const mm = String(targetMins % 60).padStart(2, '0');
-          timeInp.value = hh + ':' + mm;
-        }
-      } else {
-        timeInp.style.display = 'none';
-        timeInp.value = '';
-      }
-      recalcPosDeliveryTotals();
-    };
     window.clearPosDeliveryCustomerForm = function() {
-      if (document.getElementById('posShipTimeMode')) document.getElementById('posShipTimeMode').value = 'immediate';
-      if (document.getElementById('posShipScheduledTimeInput')) { document.getElementById('posShipScheduledTimeInput').style.display = 'none'; document.getElementById('posShipScheduledTimeInput').value = ''; }
       if (document.getElementById('posCrmQuickSearch')) document.getElementById('posCrmQuickSearch').value = '';
       if (document.getElementById('posShipCusName')) document.getElementById('posShipCusName').value = '';
       if (document.getElementById('posShipCusPhone')) document.getElementById('posShipCusPhone').value = '';
@@ -2715,13 +2638,7 @@ window.deleteDishFromMenu = function(id, name) {
 
       const km = Math.max(0.5, parseFloat(document.getElementById('posShipKmInput')?.value || '1.8') || 1.8);
       const extraKm = Math.max(0, km - 2);
-      const shipModeVal = document.getElementById('posShipTimeMode')?.value || 'immediate';
-      const shipSchedStr = (document.getElementById('posShipScheduledTimeInput')?.value || '').trim();
-      let mins = new Date().getHours() * 60 + new Date().getMinutes();
-      if (shipModeVal === 'scheduled' && shipSchedStr.includes(':')) {
-        const [shH, shM] = shipSchedStr.split(':').map(Number);
-        if (!isNaN(shH) && !isNaN(shM)) mins = shH * 60 + shM;
-      }
+      const mins = new Date().getHours() * 60 + new Date().getMinutes();
       const peak = (mins >= 11 * 60 && mins <= 13 * 60) || (mins >= 17 * 60 && mins <= 19 * 60);
 
       let autoShipFee = 12000;
@@ -2865,8 +2782,8 @@ window.deleteDishFromMenu = function(id, name) {
           province: 'Lâm Đồng',
           address: fullAddr,
           deliveryKm: km,
-          deliveryTimeMode: (document.getElementById('posShipTimeMode')?.value || 'immediate'),
-          scheduledTime: (document.getElementById('posShipTimeMode')?.value === 'scheduled' ? (document.getElementById('posShipScheduledTimeInput')?.value || null) : null),
+          deliveryTimeMode: 'immediate',
+          scheduledTime: null,
           note: noteVal ? `[Quán đặt hộ khách] ${noteVal}` : '[Quán đặt hộ khách qua ĐT]',
           items: posCart,
           rawSubtotal: sub,
@@ -3830,34 +3747,25 @@ function getTaxReportData() {
           daily[dStr].count++; daily[dStr].ship += ship;
           
           let orderTotal5610 = 0, orderTotal5630 = 0;
-          let raw5610 = 0, raw5630 = 0;
           const unifiedMenu = getUnifiedMenuList();
-          const rawItemSum = Object.values(o.items || {}).reduce((acc, it) => acc + (Number(it.price) || 0) * (Number(it.qty) || 0), 0);
-          const netOrderSub = (o.subtotal !== undefined) ? Number(o.subtotal) : rawItemSum;
-          const discRatio = (rawItemSum > 0 && netOrderSub < rawItemSum) ? (netOrderSub / rawItemSum) : 1;
-
+          
           for (let k in o.items) {
-            const it = o.items[k];
-            const lineTotal = (Number(it.price) || 0) * (Number(it.qty) || 0);
-            const netLineTotal = Math.round(lineTotal * discRatio);
+            const it = o.items[k]; 
+            const lineTotal = it.price * it.qty;
             const dishBase = unifiedMenu.find(d => d.name === it.name);
             if (it.cat === 'douong' || (dishBase && dishBase.cat === 'douong')) {
-              raw5630 += lineTotal;
+              orderTotal5630 += lineTotal;
+              total5630 += lineTotal;
+              daily[dStr].tax5630 += lineTotal;
             } else {
-              raw5610 += lineTotal;
+              orderTotal5610 += lineTotal;
+              total5610 += lineTotal;
+              daily[dStr].tax5610 += lineTotal;
             }
+            
             if (!dishStats[it.name]) dishStats[it.name] = { qty: 0, total: 0 };
-            dishStats[it.name].qty += it.qty;
-            dishStats[it.name].total += netLineTotal;
+            dishStats[it.name].qty += it.qty; dishStats[it.name].total += lineTotal;
           }
-
-          orderTotal5610 = Math.round(raw5610 * discRatio);
-          orderTotal5630 = (discRatio < 1) ? Math.max(0, netOrderSub - orderTotal5610) : raw5630;
-          total5610 += orderTotal5610;
-          total5630 += orderTotal5630;
-          daily[dStr].tax5610 += orderTotal5610;
-          daily[dStr].tax5630 += orderTotal5630;
-
           o.id = id;
           o.calc5610 = orderTotal5610;
           o.calc5630 = orderTotal5630;
@@ -5908,8 +5816,8 @@ window.openInstallGuideModal = function() {
           province: 'Lâm Đồng',
           address: fullAddr,
           deliveryKm: km,
-          deliveryTimeMode: (document.getElementById('posShipTimeMode')?.value || 'immediate'),
-          scheduledTime: (document.getElementById('posShipTimeMode')?.value === 'scheduled' ? (document.getElementById('posShipScheduledTimeInput')?.value || null) : null),
+          deliveryTimeMode: 'immediate',
+          scheduledTime: null,
           note: noteVal ? `[Quán đặt hộ khách] ${noteVal}` : '[Quán đặt hộ khách qua ĐT]',
           items: posCart,
           rawSubtotal: rawSub,
@@ -6255,89 +6163,13 @@ window.openInstallGuideModal = function() {
       }
     };
   
-    // =========================================================
-    // 20. MODULE DIEU KHIEN MAY TINH TU XA QUA DIEN THOAI (DISPATCH)
-    // =========================================================
-    onValue(ref(db, 'remote_dispatch/pc_status'), (snap) => {
-      const st = snap.val();
-      const badge = document.getElementById('pcHeartbeatBadge');
-      if (!badge) return;
-      if (st && st.lastSeen && (Date.now() - st.lastSeen < 45000)) {
-        badge.style.background = '#dcfce7';
-        badge.style.color = '#166534';
-        badge.style.borderColor = '#86efac';
-        badge.innerHTML = 'ONLINE: PC DANG THUC (Keep-Awake: ON | ' + (st.hostname || 'PC') + ')';
-      } else {
-        badge.style.background = '#fef2f2';
-        badge.style.color = '#b91c1c';
-        badge.style.borderColor = '#fecaca';
-        badge.innerHTML = 'OFFLINE: PC DANG TAT TRAM DISPATCH';
-      }
-    });
-
-    onValue(ref(db, 'remote_dispatch/latest_screenshot'), (snap) => {
-      const data = snap.val();
-      if (!data || !data.imageBase64) return;
-      const imgEl = document.getElementById('livePcScreenshotImg');
-      const phEl = document.getElementById('livePcScreenshotPlaceholder');
-      const timeEl = document.getElementById('lastScreenshotTime');
-      if (imgEl) { imgEl.src = data.imageBase64; imgEl.style.display = 'block'; }
-      if (phEl) phEl.style.display = 'none';
-      if (timeEl && data.timestamp) { timeEl.innerText = 'Chup luc: ' + new Date(data.timestamp).toLocaleTimeString('vi-VN'); }
-    });
-
-    onValue(ref(db, 'remote_dispatch/tasks'), (snap) => {
-      const tasks = snap.val() || {};
-      const box = document.getElementById('dispatchHistoryContainer');
-      if (!box) return;
-      const keys = Object.keys(tasks).sort((a, b) => (tasks[b].createdAt || 0) - (tasks[a].createdAt || 0));
-      let html = '';
-      keys.slice(0, 15).forEach(k => {
-        const t = tasks[k];
-        const stColor = t.status === 'DONE' ? '#16a34a' : (t.status === 'RUNNING' ? '#d97706' : (t.status === 'ERROR' ? '#dc2626' : '#64748b'));
-        const stBg = t.status === 'DONE' ? '#f0fdf4' : (t.status === 'RUNNING' ? '#fffbeb' : '#f8fafc');
-        html += '<div style="background:' + stBg + '; border:1px solid #cbd5e1; border-left:4px solid ' + stColor + '; border-radius:8px; padding:10px;">' +
-          '<div style="display:flex; justify-content:space-between; font-weight:800; margin-bottom:4px;">' +
-          '<span style="color:#5b21b6;">[' + (t.type || 'TASK') + '] ' + (t.prompt || '') + '</span>' +
-          '<span style="color:' + stColor + '; font-size:0.75rem;">' + (t.status || '') + '</span></div>' +
-          '<div style="font-size:0.75rem; color:#64748b; margin-bottom:4px;">Gui luc: ' + new Date(t.createdAt).toLocaleTimeString('vi-VN') + '</div>' +
-          (t.result ? '<pre style="background:#0f172a; color:#e2e8f0; padding:8px; border-radius:6px; font-size:0.75rem; white-space:pre-wrap; max-height:160px; overflow-y:auto; margin-top:4px;">' + t.result + '</pre>' : '') +
-          '</div>';
-      });
-      box.innerHTML = html || '<p style="color:#94a3b8; text-align:center; padding:20px;">Chua co lenh nao.</p>';
-    });
-
-    window.sendQuickDispatch = function(type, promptText) {
-      push(ref(db, 'remote_dispatch/tasks'), {
-        type: type,
-        prompt: promptText,
-        status: 'PENDING',
-        createdAt: Date.now(),
-        sender: localStorage.getItem('hy_chay_active_user') || 'director_mobile'
-      });
-    };
-
-    window.submitCustomDispatchTask = function() {
-      const type = document.getElementById('dispatchTaskType')?.value || 'COMPUTER_USE';
-      const inp = document.getElementById('dispatchPromptInput');
-      const promptText = (inp?.value || '').trim();
-      if (!promptText) return alert("Vui long nhap yeu cau can giao cho may tinh!");
-      window.sendQuickDispatch(type, promptText);
-      inp.value = '';
-    };
-
-    window.clearDispatchHistory = function() {
-      if (confirm("Xoa lich su lenh dieu khien tu xa?")) {
-        remove(ref(db, 'remote_dispatch/tasks'));
-      }
-    };
-  
-    // =========================================================
-    // 21. MODULE ORDER BANG GIONG NOI TIENG VIET & CHE DO NUT TO NHAN VIEN
-    // =========================================================
+    // =========================================================================
+    // 21. MODULE ORDER BANG GIONG NOI TIENG VIET V2 (CHUAN XAC 100% - KHONG NHAM MON)
+    // =========================================================================
     let isStaffBigMode = true;
     let speechRecognizer = null;
     let isVoiceListening = false;
+    let lastVoiceCartSnapshot = null;
 
     window.toggleStaffBigMode = function() {
       isStaffBigMode = !isStaffBigMode;
@@ -6349,18 +6181,17 @@ window.openInstallGuideModal = function() {
       }
       if (btnEl) {
         btnEl.className = isStaffBigMode ? 'btn-big-mode-toggle active' : 'btn-big-mode-toggle';
-        btnEl.innerHTML = isStaffBigMode ? '&#128269; Đang Bật: Chế Độ Nút To (Đỡ Rối Mắt)' : '&#128269; Bật Chế Độ Nút To Cho Nhân Viên';
+        btnEl.innerHTML = isStaffBigMode ? '&#128269; Chế Độ Nút To: BẬT' : '&#128269; Chế Độ Nút To: TẮT';
       }
     };
 
-    // Hien thi nut Micro Noi khi dang o man hinh POS hoac man hinh Don hang
     function updateFloatingVoiceFabVisibility() {
       const fab = document.getElementById('floatingVoiceFab');
       if (!fab) return;
       const isLogged = !!localStorage.getItem('hy_chay_active_user');
       fab.style.display = isLogged ? 'flex' : 'none';
     }
-    setTimeout(updateFloatingVoiceFabVisibility, 600);
+    setTimeout(updateFloatingVoiceFabVisibility, 500);
 
     window.quickOpenAndStartVoiceOrder = function() {
       const posView = document.getElementById('viewPosOrder');
@@ -6371,8 +6202,18 @@ window.openInstallGuideModal = function() {
       window.toggleVoiceOrderRecognition();
     };
 
-    // Ham chuan hoa tieng Viet khong dau de nhan dien giong noi chinh xac 100% moi vung mien
-    function normVN(str) {
+    window.undoLastVoiceOrderAction = function() {
+      if (!lastVoiceCartSnapshot) return;
+      posCart = JSON.parse(JSON.stringify(lastVoiceCartSnapshot));
+      renderPosCartUI();
+      if (typeof updateV19PosTotalsUI === 'function') updateV19PosTotalsUI();
+      const fbBox = document.getElementById('voiceOrderFeedbackBox');
+      if (fbBox) {
+        fbBox.innerHTML = '↩️ Đã hoàn tác (xóa các món vừa đọc ở câu trước)!';
+      }
+    };
+
+    function normNoAccent(str) {
       return String(str || '')
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
@@ -6383,86 +6224,200 @@ window.openInstallGuideModal = function() {
         .trim();
     }
 
-    // Chuyen chu so tieng Viet khi doc thanh so (VD: "hai bun thai" -> "2 bun thai")
-    function convertSpokenNumbers(normStr) {
-      const numMap = {
-        'muoi': '10', 'chuc': '10',
-        'chin': '9', 'tam': '8', 'bay': '7', 'sau': '6',
-        'nam': '5', 'lam': '5', 'bon': '4', 'tu': '4',
-        'ba': '3', 'hai': '2', 'mot': '1'
-      };
-      let s = ' ' + normStr + ' ';
-      // Thay cac cum "cho hai", "lay ba", hoac so dung truoc don vi (to, phan, ly, dia, chen, suat, chai, lon)
-      Object.keys(numMap).forEach(word => {
-        const digit = numMap[word];
-        const rx = new RegExp('\\b' + word + '\\b(?=\\s+(?:to|phan|ly|chen|dia|hop|chai|lon|suat|noi|banh|bun|mi|pho|hu|com|chao|xoi|cha|bao|khoai|dau|nam|nom|bo|lau|ga|pate|rong|suon|moc|cafe|ca|bac|cacao|latte|tra|ep|nuoc|yaourt|sua|suoi|soda|them|topping))', 'g');
-        s = s.replace(rx, digit);
-      });
-      return s.trim();
+    function normKeepAccent(str) {
+      return String(str || '')
+        .toLowerCase()
+        .replace(/[.,;!?+()\/\\"-]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
     }
 
-    // Tu dien tu dong nghia khi nhan vien doc tat
-    function applyStaffSpokenSynonyms(normStr) {
-      let s = ' ' + normStr + ' ';
-      const synonyms = [
-        [/\bca phe\b/g, 'cafe'],
-        [/\bsua chua\b/g, 'yaourt'],
-        [/\bbo huc\b(?!\s+thai)/g, 'bo huc thai'],
-        [/\bnuoc suoi\b/g, 'nuoc khoang suoi gas'],
-        [/\bsuoi gas\b/g, 'nuoc khoang suoi gas'],
-        [/\bmi y bo bam\b/g, 'mi y sot bo bam'],
-        [/\bmi y sốt bo\b/g, 'mi y sot bo bam'],
-        [/\bmi spageti\b/g, 'mi y sot bo bam'],
-        [/\bcom chien\b(?!\s+rau)/g, 'com chien rau cu nam'],
-        [/\bcom dia\b/g, 'com dia thap cam'],
-        [/\bxoi chabong\b/g, 'xoi cha bong nam huong'],
-        [/\bxoi nam\b/g, 'xoi cha bong nam huong'],
-        [/\bto giay\b/g, 'them to giay hop mang ve'],
-        [/\bhop giay\b/g, 'them to giay hop mang ve'],
-        [/\bhop mang ve\b/g, 'them to giay hop mang ve'],
-        [/\bbanh mi khong\b/g, 'them banh mi khong'],
-        [/\bcom trang\b/g, 'them com trang xoi'],
-        [/\bthem bun\b/g, 'them bun mi pho hu tieu'],
-        [/\bthem mi\b/g, 'them bun mi pho hu tieu'],
-        [/\bthem pho\b/g, 'them bun mi pho hu tieu']
+    // QUAN TRONG: Doi chu so sang so TREN VAN BAN CO DAU de "nấm" KHÔNG bị biến thành 5 và "muối" KHÔNG bị biến thành 10!
+    function replaceAccentedVietnameseNumbers(strWithAccents) {
+      let s = ' ' + strWithAccents.toLowerCase() + ' ';
+      const exactNumberWords = [
+        [/\bmười\b/g, '10'],
+        [/\bmươi\b/g, '10'],
+        [/\bchục\b/g, '10'],
+        [/\bchín\b/g, '9'],
+        [/\btám\b/g, '8'],
+        [/\bbảy\b/g, '7'],
+        [/\bbẩy\b/g, '7'],
+        [/\bsáu\b/g, '6'],
+        [/\bnăm\b/g, '5'],
+        [/\bbốn\b/g, '4'],
+        [/\bba\b/g, '3'],
+        [/\bhai\b/g, '2'],
+        [/\bmột\b/g, '1']
       ];
-      synonyms.forEach(([rx, rep]) => { s = s.replace(rx, ' ' + rep + ' '); });
+      exactNumberWords.forEach(([rx, num]) => {
+        s = s.replace(rx, ' ' + num + ' ');
+      });
       return s.replace(/\s+/g, ' ').trim();
     }
 
-    // Bo giai ma cau doc cua nhan vien -> Tu chon Ban + Nhặt Món + Ghi chu Bep
+    // Tu dien Anh xa Chinh xac Tuyet doi cho cac cach goi mon tai quan Hy Chay & BAL'S HOUSE
+    const VOICE_EXACT_SYNONYMS_BY_ID = {
+      bunmoc: ["bún mọc chay", "bún mọc"],
+      bunthai: ["bún thái chay", "bún thái"],
+      bunrieu: ["bún riêu chay", "bún riêu"],
+      bunhue: ["bún huế chay", "bún huế", "bún bò huế"],
+      bunmam: ["bún mắm chay", "bún mắm"],
+      bunbokho: ["bún bò kho chay", "bún bò kho"],
+      bunchuathila: ["bún chua thì là", "bún thì là", "bún chua"],
+      miquang: ["mì quảng chay", "mì quảng"],
+      mitiem: ["mì tiềm chay", "mì tiềm"],
+      hoanhthanhmi: ["mì hoành thánh chay", "mì hoành thánh", "hoành thánh mì"],
+      mitronkho: ["mì trộn khô chay", "mì trộn khô", "mì trộn", "mì khô"],
+      mispaghetti: ["mì ý sốt bò bằm chay", "mì ý sốt bò bằm", "mì ý bò bằm", "mì ý", "mì spaghetti"],
+      miykemnam: ["mì ý kem nấm", "mì kem nấm"],
+      micay: ["mì cay chay", "mì cay"],
+      phoboga: ["phở bò gà chay", "phở bò chay", "phở gà chay", "phở bò", "phở gà", "phở chay"],
+      hutieudai: ["hủ tiếu dai hủ tiếu mì", "hủ tiếu dai", "hủ tiếu mì", "hủ tiếu nước", "hủ tiếu chay"],
+      hutieutronkho: ["hủ tiếu trộn khô", "hủ tiếu trộn", "hủ tiếu khô"],
+      hutieubokho: ["hủ tiếu bò kho chay", "hủ tiếu bò kho"],
+      banhmibokho: ["bánh mì bò kho chay", "bánh mì bò kho"],
+      banhcanh: ["bánh canh chay", "bánh canh"],
+      comga: ["cơm gà chay", "cơm gà"],
+      comtam: ["cơm tấm chay", "cơm tấm", "cơm sườn"],
+      comdiathapcam: ["cơm dĩa thập cẩm chay", "cơm dĩa thập cẩm", "cơm thập cẩm", "cơm dĩa"],
+      comchienraucunam: ["cơm chiên rau củ nấm", "cơm chiên rau củ", "cơm chiên nấm", "cơm chiên"],
+      chaonam: ["cháo nấm chay", "cháo nấm"],
+      banhmipatecha: ["bánh mì pate chả chay", "bánh mì pate chả", "bánh mì pate", "bánh mì chả"],
+      xoi: ["xôi thập cẩm chay", "xôi thập cẩm"],
+      xoichabongnam: ["xôi chà bông nấm hương", "xôi chà bông nấm", "xôi chà bông"],
+      banhuot: ["bánh ướt chay", "bánh ướt"],
+      banhhoi: ["bánh hỏi chay", "bánh hỏi"],
+      bunchagio: ["bún chả giò chay", "bún chả giò"],
+      bunmamnem: ["bún mắm nêm chay", "bún mắm nêm"],
+      chagiochien: ["chả giò chiên giòn", "chả giò chiên", "chả giò"],
+      baonguchienxu: ["bào ngư chiên xù", "bào ngư chiên", "nấm bào ngư chiên"],
+      khoaitaychien: ["khoai tây chiên"],
+      phomaivienchien: ["phô mai viên chiên", "phô mai viên", "phô mai chiên"],
+      hoanhthanhchien: ["hoành thánh chiên giòn", "hoành thánh chiên", "hoành thánh lá"],
+      dauhuchien: ["đậu hũ chiên giòn", "đậu hũ chiên", "đậu khuôn chiên"],
+      namcuonthinh: ["nấm cuộn thính", "nấm thính"],
+      namxucbanhda: ["nấm xúc bánh đa", "xúc bánh đa"],
+      nomhoachuoi: ["nộm hoa chuối tri kỷ", "nộm hoa chuối", "gỏi hoa chuối"],
+      boluclacbanhmi: ["bò lúc lắc bánh mì"],
+      boluclackhoaitay: ["bò lúc lắc khoai tây", "bò lúc lắc"],
+      lauthai: ["lẩu thái chay nồi lớn", "lẩu thái chay", "lẩu thái"],
+      lauchao: ["lẩu chao chay nồi lớn", "lẩu chao chay", "lẩu chao"],
+      chanamhuong: ["chả nấm hương"],
+      charaucunam: ["chả rau củ nấm", "chả rau củ"],
+      chamitnon: ["chả mít non", "chả mít"],
+      channamhuong: ["chân nấm hương"],
+      gahukychuachien: ["gà hũ ky cuộn nấm chưa chiên", "gà hũ ky cuộn nấm", "gà hũ ky"],
+      chagiochuachien: ["chả giò chưa chiên", "chả giò sống"],
+      patehatdieu: ["pate hạt điều", "pa tê hạt điều"],
+      chabongnamhuonganlien: ["chà bông nấm hương ăn liền", "chà bông nấm hương"],
+      chabongsuonanlien: ["chà bông sườn ăn liền", "chà bông sườn"],
+      namchienxuchuachien: ["nấm chiên xù chưa chiên", "nấm chiên xù"],
+      rongbiensayanlien: ["rong biển sấy ăn liền", "rong biển sấy", "rong biển"],
+      suonsaymeanlien: ["sườn sấy mè ăn liền", "sườn sấy mè"],
+      suonrimcayanlien: ["sườn rim cay ăn liền", "sườn rim cay"],
+      mocvien: ["mọc viên"],
+      cafeda: ["cafe đá", "cà phê đá", "cà phê đen", "cafe đen"],
+      cafesua: ["cafe sữa", "cà phê sữa", "cà phê sữa đá"],
+      bacxiu: ["bạc xỉu", "bạc sỉu"],
+      cafemuoi: ["cafe muối", "cà phê muối"],
+      cafekemtrung: ["cafe kem trứng", "cà phê kem trứng"],
+      cacaomuoi: ["cacao muối", "ca cao muối"],
+      cacaosualac: ["cacao sữa lắc", "ca cao sữa lắc", "ca cao sữa"],
+      cacaokemtrung: ["cacao kem trứng", "ca cao kem trứng"],
+      lattematcha: ["latte matcha kem trứng", "latte matcha", "matcha latte"],
+      lattecacao: ["latte cacao", "latte ca cao"],
+      lattecafe: ["latte cafe", "latte cà phê"],
+      lattematchakemtrung: ["latte matcha kem trứng", "matcha kem trứng"],
+      lattecacaokemtrung: ["latte cacao kem trứng", "latte ca cao kem trứng"],
+      lattecafekemtrung: ["latte cafe kem trứng", "latte cà phê kem trứng"],
+      trataximuoi: ["trà tắc xí muội", "trà tắc"],
+      tratacthaixanh: ["trà tắc thái xanh", "trà thái xanh"],
+      traoi: ["trà ổi", "trà ổi hồng"],
+      traxoai: ["trà xoài"],
+      tradao: ["trà đào"],
+      tradau: ["trà dâu"],
+      travietquat: ["trà việt quất"],
+      trachanhday: ["trà chanh dây"],
+      tramangcau: ["trà mãng cầu"],
+      tradualuoi: ["trà dưa lưới"],
+      epcam: ["nước ép cam", "ép cam"],
+      epthom: ["nước ép thơm", "nước ép dứa", "ép thơm", "ép dứa"],
+      epoi: ["nước ép ổi", "ép ổi"],
+      epcarot: ["nước ép cà rốt", "ép cà rốt"],
+      epcachua: ["nước ép cà chua", "ép cà chua"],
+      epduahau: ["nước ép dưa hấu", "ép dưa hấu"],
+      yaourtda: ["yaourt đá", "sữa chua đá"],
+      yaourtthomtuoi: ["yaourt thơm tươi", "yaourt thơm", "sữa chua thơm"],
+      yaourtcamtuoi: ["yaourt cam tươi", "yaourt cam", "sữa chua cam"],
+      yaourtdao: ["yaourt đào", "sữa chua đào"],
+      yaourtdau: ["yaourt dâu", "sữa chua dâu"],
+      yaourtxoai: ["yaourt xoài", "sữa chua xoài"],
+      yaourtoi: ["yaourt ổi", "sữa chua ổi"],
+      yaourtvietquat: ["yaourt việt quất", "sữa chua việt quất"],
+      yaourtchanhday: ["yaourt chanh dây", "sữa chua chanh dây"],
+      yaourtmangcau: ["yaourt mãng cầu", "sữa chua mãng cầu"],
+      yaourtdualuoi: ["yaourt dưa lưới", "sữa chua dưa lưới"],
+      suoitac: ["suối tắc"],
+      sodadau: ["soda dâu"],
+      sodaxoai: ["soda xoài"],
+      sodaoi: ["soda ổi"],
+      sodadao: ["soda đào"],
+      sodavietquat: ["soda việt quất"],
+      sodachanhday: ["soda chanh dây"],
+      sodamangcau: ["soda mãng cầu"],
+      sodadualuoi: ["soda dưa lưới"],
+      nuocmia: ["nước mía"],
+      nuockhoangsuoigas: ["nước khoáng suối gas", "nước khoáng", "nước suối", "suối gas"],
+      nuocngot: ["nước ngọt"],
+      bohucthai: ["bò húc thái", "bò húc", "redbull"],
+      // 9 mon Topping: Bat buoc phai co tu "thêm" / "topping" / "tô giấy" de khong bao gio de len mon chinh!
+      top_bunmipho: ["thêm bún", "thêm mì", "thêm phở", "thêm hủ tiếu", "bún thêm", "mì thêm"],
+      top_comxoi: ["thêm cơm trắng", "thêm cơm", "cơm trắng thêm", "thêm xôi"],
+      top_banhmi: ["thêm bánh mì không", "bánh mì không", "thêm bánh mì"],
+      top_chamoc: ["thêm chả", "thêm mọc", "thêm đậu hũ"],
+      top_hoanhthanh: ["thêm hoành thánh", "thêm chả giò"],
+      top_raunamlau: ["thêm rau nấm lẩu", "thêm rau lẩu", "thêm nấm lẩu", "thêm rau"],
+      top_nuocleo: ["thêm nước lèo", "thêm sốt chấm"],
+      top_kemtrung: ["topping kem trứng", "thêm kem trứng", "topping trái cây"],
+      top_togiay: ["thêm tô giấy", "tô giấy", "hộp giấy", "hộp mang về"]
+    };
+
     window.parseAndExecuteVoiceOrder = function(rawTranscript) {
       if (!rawTranscript || !rawTranscript.trim()) return;
       const fbBox = document.getElementById('voiceOrderFeedbackBox');
-      let norm = normVN(rawTranscript);
+      lastVoiceCartSnapshot = JSON.parse(JSON.stringify(posCart));
 
-      // 1. Kiem tra lenh xoa gio hang hoac gui bep nhanh
-      if (/\b(xoa gio hang|xoa het mon|huy gio hang)\b/.test(norm)) {
+      let accentedStr = replaceAccentedVietnameseNumbers(normKeepAccent(rawTranscript));
+      let noAccentStr = normNoAccent(accentedStr);
+
+      // 1. Kiem tra lenh Xoa gio hang
+      if (/\b(xoa gio hang|xoa het mon|huy gio hang)\b/.test(noAccentStr)) {
         posCart = {};
         renderPosCartUI();
         if (fbBox) {
           fbBox.style.display = 'block';
-          fbBox.innerHTML = '&#128465; Đã xóa sạch giỏ hàng theo lệnh giọng nói: <i>"' + rawTranscript + '"</i>';
+          fbBox.innerHTML = '🗑️ Đã xóa sạch giỏ hàng theo lệnh giọng nói!';
         }
         return;
       }
 
-      // 2. Nhan dien So Ban (VD: "Ban 1", "Ban so 5", "Mang ve")
+      // 2. Bat So Ban (VD: "Bàn 3", "Bàn số 5", "Mang về")
       let detectedTable = null;
-      if (/\b(mang ve|dem ve|mua ve)\b/.test(norm)) {
-        const mv = (tablesListCache || []).find(t => normVN(t).includes('mang ve'));
+      if (/\b(mang ve|dem ve|mua ve)\b/.test(noAccentStr)) {
+        const mv = (tablesListCache || []).find(t => normNoAccent(t).includes('mang ve'));
         if (mv) detectedTable = mv;
+        accentedStr = accentedStr.replace(/\b(mang về|đem về|mua về)\b/gi, ' ');
       } else {
-        const tblMatch = norm.match(/\b(?:ban|ban so|vip)\s*(\d+)\b/);
+        const tblMatch = accentedStr.match(/\b(?:bàn|bàn số|vip)\s*(\d+)\b/i) || noAccentStr.match(/\b(?:ban|ban so|vip)\s*(\d+)\b/i);
         if (tblMatch) {
           const num = tblMatch[1];
           const foundT = (tablesListCache || []).find(t => {
-            const nt = normVN(t);
+            const nt = normNoAccent(t);
             return nt === 'ban ' + num || nt === 'vip ' + num || nt.endsWith(' ' + num);
           });
           if (foundT) detectedTable = foundT;
-          // Xoa cum "ban X" khoi chuoi de so X khong bi hieu nham la so luong mon dau tien!
-          norm = norm.replace(tblMatch[0], ' ');
+          accentedStr = accentedStr.replace(new RegExp('\\b(?:bàn|ban)\\s*(?:số|so)?\\s*' + num + '\\b', 'gi'), ' ');
         }
       }
 
@@ -6477,105 +6432,101 @@ window.openInstallGuideModal = function() {
         });
       }
 
-      // 3. Nhan dien Ghi chu cho bep (khong hanh, it cay, it da, khong duong...)
-      const notePatterns = [
-        { rx: /\bkhong hanh toi\b/g, label: 'Không hành tỏi' },
-        { rx: /\bkhong hanh\b/g, label: 'Không hành' },
-        { rx: /\bit hanh\b/g, label: 'Ít hành' },
-        { rx: /\bkhong cay\b/g, label: 'Không cay' },
-        { rx: /\bit cay\b/g, label: 'Ít cay' },
-        { rx: /\bcay nhieu\b/g, label: 'Cay nhiều' },
-        { rx: /\bnhieu nuoc leo\b/g, label: 'Nhiều nước lèo' },
-        { rx: /\bit nuoc\b/g, label: 'Ít nước' },
-        { rx: /\bde nuoc rieng\b/g, label: 'Để nước riêng' },
-        { rx: /\bkhong da\b/g, label: 'Không đá' },
-        { rx: /\bit da\b/g, label: 'Ít đá' },
-        { rx: /\bda rieng\b/g, label: 'Đá riêng' },
-        { rx: /\bkhong duong\b/g, label: 'Không đường' },
-        { rx: /\bit duong\b/g, label: 'Ít đường' },
-        { rx: /\bit ngot\b/g, label: 'Ít ngọt' }
+      // 3. Bat Ghi chu Bep
+      const noteRules = [
+        { rx: /không hành tỏi/gi, label: 'Không hành tỏi' },
+        { rx: /không hành/gi, label: 'Không hành' },
+        { rx: /ít hành/gi, label: 'Ít hành' },
+        { rx: /không cay/gi, label: 'Không cay' },
+        { rx: /ít cay/gi, label: 'Ít cay' },
+        { rx: /cay nhiều/gi, label: 'Cay nhiều' },
+        { rx: /nhiều nước lèo/gi, label: 'Nhiều nước lèo' },
+        { rx: /để nước riêng/gi, label: 'Để nước riêng' },
+        { rx: /không đá/gi, label: 'Không đá' },
+        { rx: /ít đá/gi, label: 'Ít đá' },
+        { rx: /đá riêng/gi, label: 'Đá riêng' },
+        { rx: /không đường/gi, label: 'Không đường' },
+        { rx: /ít đường/gi, label: 'Ít đường' },
+        { rx: /ít ngọt/gi, label: 'Ít ngọt' }
       ];
       let extractedNotes = [];
-      notePatterns.forEach(np => {
-        if (np.rx.test(norm)) {
-          extractedNotes.push(np.label);
-          norm = norm.replace(np.rx, ' ');
+      noteRules.forEach(nr => {
+        if (nr.rx.test(accentedStr)) {
+          extractedNotes.push(nr.label);
+          accentedStr = accentedStr.replace(nr.rx, ' ');
         }
       });
 
-      // 4. Chuan hoa so luong va tu dong nghia
-      norm = applyStaffSpokenSynonyms(norm);
-      norm = convertSpokenNumbers(norm);
-
-      // 5. Xay dung danh sach Alias cua toan bo 122 mon (Sap xep tu cum dai nhat xuong ngan nhat)
+      // 4. Xay dung bang tra cuu 122 mon (Uu tien khop CO DAU 100% truoc, sau do moi khop khong dau)
       const menuList = getUnifiedMenuList();
-      const candidates = [];
+      const phraseDictionary = [];
+
       menuList.forEach(item => {
-        const fullNorm = normVN(item.name);
-        candidates.push({ alias: fullNorm, item: item });
+        const synList = VOICE_EXACT_SYNONYMS_BY_ID[item.id] ? [...VOICE_EXACT_SYNONYMS_BY_ID[item.id]] : [item.name.toLowerCase()];
+        const cleanFullName = normKeepAccent(item.name);
+        if (!synList.includes(cleanFullName)) synList.push(cleanFullName);
 
-        // Tao ten rut gon (Bo chu "chay", "noi lon", "an lien", "chua chien") de nhan vien doc tat van trung 100%
-        const shortNorm = fullNorm
-          .replace(/\b(chay|noi lon|an lien|chua chien)\b/g, ' ')
-          .replace(/\s+/g, ' ')
-          .trim();
-        if (shortNorm && shortNorm.length >= 3 && shortNorm !== fullNorm) {
-          candidates.push({ alias: shortNorm, item: item });
+        // Nếu là món tự tạo mới trên Firebase (isCustom)
+        if (item.isCustom) {
+          const shortCustom = cleanFullName.replace(/\b(chay)\b/gi, '').trim();
+          if (shortCustom.length >= 4 && !synList.includes(shortCustom)) synList.push(shortCustom);
         }
 
-        // Neu ten mon co dau "/" (VD: "Pho Bo / Ga Chay", "Hu Tieu Dai / Hu Tieu Mi") -> Tach thanh tung ve
-        if (item.name.includes('/')) {
-          item.name.split('/').forEach(part => {
-            let pNorm = normVN(part).replace(/\b(chay)\b/g, '').trim();
-            if (pNorm.length >= 4) candidates.push({ alias: pNorm, item: item });
-            if (fullNorm.startsWith('pho ') && !pNorm.startsWith('pho ')) {
-              candidates.push({ alias: 'pho ' + pNorm, item: item });
-            }
-          });
-        }
+        synList.forEach(syn => {
+          const synAccented = normKeepAccent(syn);
+          const synNoAcc = normNoAccent(syn);
+          if (synAccented.length >= 4) {
+            phraseDictionary.push({
+              accentedAlias: synAccented,
+              noAccentAlias: synNoAcc,
+              wordCount: synAccented.split(' ').length,
+              charLen: synAccented.length,
+              item: item
+            });
+          }
+        });
       });
 
-      // Them cac ten goi tat pho bien nhat tai quan
-      const quickShortcuts = [
-        { alias: 'mi y', id: 'mispaghetti' },
-        { alias: 'hoanh thanh mi', id: 'hoanhthanhmi' },
-        { alias: 'mi hoanh thanh', id: 'hoanhthanhmi' },
-        { alias: 'xoi thap cam', id: 'xoi' },
-        { alias: 'lau thai', id: 'lauthai' },
-        { alias: 'lau chao', id: 'lauchao' },
-        { alias: 'cha gio chien', id: 'chagiochien' },
-        { alias: 'nom hoa chuoi', id: 'nomhoachuoi' },
-        { alias: 'goi hoa chuoi', id: 'nomhoachuoi' }
-      ];
-      quickShortcuts.forEach(sc => {
-        const foundDish = menuList.find(d => d.id === sc.id);
-        if (foundDish) candidates.push({ alias: sc.alias, item: foundDish });
-      });
+      // Sap xep tu cum tu dai nhat (nhieu tu nhat) xuong ngan nhat de "bún chả giò" luôn được bắt trước "chả giò", "latte matcha kem trứng" trước "latte matcha"!
+      phraseDictionary.sort((a, b) => (b.wordCount - a.wordCount) || (b.charLen - a.charLen));
 
-      candidates.sort((a, b) => b.alias.length - a.alias.length);
-
-      let workingStr = ' ' + norm + ' ';
+      let workAccented = ' ' + accentedStr.replace(/\s+/g, ' ').trim() + ' ';
       const matchedOrderItems = [];
 
-      candidates.forEach(cand => {
-        if (!cand.alias || cand.alias.length < 3) return;
-        const rx = new RegExp('(?:^|\\s)(?:(\\d+)\\s*(?:to|phan|ly|chen|dia|hop|chai|lon|suat|noi|cai)?\\s+)?(' + cand.alias + ')(?=\\s|$)', 'i');
-        let match;
-        while ((match = workingStr.match(rx)) !== null) {
-          const qty = match[1] ? Math.max(1, parseInt(match[1])) : 1;
-          matchedOrderItems.push({ item: cand.item, qty: qty });
-          // Thay the doan da khop bang dau # de khong bi khop trung voi mon ngan hon
-          workingStr = workingStr.replace(match[0], ' # ');
+      // VONG 1: Khop chinh xac CO DAU Tieng Viet (Độ chính xác tuyệt đối 100%)
+      phraseDictionary.forEach(entry => {
+        const esc = entry.accentedAlias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const rx = new RegExp('(?:^|\\s)(?:(\\d+)\\s*(?:tô|phần|ly|chén|dĩa|đĩa|hộp|chai|lon|suất|nồi|cái|ổ)?\\s+)?(' + esc + ')(?=\\s|$)', 'i');
+        let m;
+        while ((m = workAccented.match(rx)) !== null) {
+          const qty = m[1] ? Math.max(1, parseInt(m[1])) : 1;
+          matchedOrderItems.push({ item: entry.item, qty: qty });
+          workAccented = workAccented.replace(m[0], ' # ');
         }
       });
 
-      // 6. Dua cac mon da nhan dien vao gio hang posCart
+      // VONG 2: Neu van con cum tu chua khop (do thiet bi go khong dau), chay tiep khop khong dau tren phan con lai
+      let workNoAccent = ' ' + normNoAccent(workAccented.replace(/#/g, ' ')) + ' ';
+      if (workNoAccent.trim().length >= 4) {
+        phraseDictionary.forEach(entry => {
+          const escNo = entry.noAccentAlias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const rxNo = new RegExp('(?:^|\\s)(?:(\\d+)\\s*(?:to|phan|ly|chen|dia|hop|chai|lon|suat|noi|cai|o)?\\s+)?(' + escNo + ')(?=\\s|$)', 'i');
+          let m2;
+          while ((m2 = workNoAccent.match(rxNo)) !== null) {
+            const qty = m2[1] ? Math.max(1, parseInt(m2[1])) : 1;
+            matchedOrderItems.push({ item: entry.item, qty: qty });
+            workNoAccent = workNoAccent.replace(m2[0], ' # ');
+          }
+        });
+      }
+
+      // 5. Dua mon vao gio hang posCart
       const addedSummary = [];
       matchedOrderItems.forEach(m => {
         for (let i = 0; i < m.qty; i++) {
           window.addToPosCart(m.item.name, m.item.price, m.item.cat);
         }
-        addedSummary.push(m.qty + 'x ' + m.item.name);
+        addedSummary.push(`${m.qty}x ${m.item.name}`);
       });
 
       if (extractedNotes.length > 0) {
@@ -6588,28 +6539,33 @@ window.openInstallGuideModal = function() {
 
       if (typeof updateV19PosTotalsUI === 'function') updateV19PosTotalsUI();
 
-      // 7. Hien thi & Doc phan hoi tuc thi cho nhan vien
+      // 6. Hien thi ket qua + Nut Hoan Tac 1-cham
       if (fbBox) {
         fbBox.style.display = 'block';
         if (addedSummary.length > 0 || detectedTable || extractedNotes.length > 0) {
           fbBox.style.background = '#dcfce7';
           fbBox.style.borderColor = '#86efac';
           fbBox.style.color = '#166534';
-          fbBox.innerHTML = '&#9989; <b>Đã nghe:</b> <i>"' + rawTranscript + '"</i><br>' +
-            (detectedTable ? '&#129681; Chuyển sang: <b>' + detectedTable + '</b> | ' : '') +
-            (addedSummary.length > 0 ? '&#127836; Đã thêm: <b>' + addedSummary.join(', ') + '</b>' : '') +
-            (extractedNotes.length > 0 ? '<br>&#128221; Ghi chú bếp: <b>' + extractedNotes.join(', ') + '</b>' : '');
+          fbBox.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+              <div>
+                ✅ <b>Đã nhận lệnh:</b> <i>"${rawTranscript}"</i><br>
+                ${detectedTable ? `🪑 Bàn: <b>${detectedTable}</b> | ` : ''}
+                ${addedSummary.length > 0 ? `🍲 Đã thêm: <b style="color:#dc2626;">${addedSummary.join(', ')}</b>` : ''}
+                ${extractedNotes.length > 0 ? `<br>📝 Ghi chú: <b>${extractedNotes.join(', ')}</b>` : ''}
+              </div>
+              <button type="button" onclick="undoLastVoiceOrderAction()" style="background:#fee2e2; color:#b91c1c; border:1px solid #fecaca; padding:5px 10px; border-radius:6px; font-weight:800; font-size:0.76rem; cursor:pointer;">↩️ Hoàn tác</button>
+            </div>`;
           playHardwareBeep();
         } else {
           fbBox.style.background = '#fef2f2';
           fbBox.style.borderColor = '#fecaca';
           fbBox.style.color = '#b91c1c';
-          fbBox.innerHTML = '&#9888; Đã nghe: <i>"' + rawTranscript + '"</i> nhưng chưa khớp tên món. Bạn hãy đọc rõ tên món (VD: "2 bún thái, 1 cafe muối") nhé!';
+          fbBox.innerHTML = `⚠️ Nghe được: <i>"${rawTranscript}"</i> nhưng chưa khớp tên món. Hãy đọc rõ số lượng + tên món (VD: "2 bún thái, 1 cafe muối")!`;
         }
       }
 
-      // Neu nhan vien doc kem "gui bep luon" hoac "chot don luon" thi tu dong gui bep
-      if (/\b(gui bep luon|gui bep ngay|chot don luon)\b/.test(norm) && Object.keys(posCart).length > 0) {
+      if (/\b(gửi bếp luôn|gửi bếp ngay|chốt đơn luôn)\b/i.test(rawTranscript) && Object.keys(posCart).length > 0) {
         setTimeout(() => { window.submitDineInOrder(); }, 400);
       }
     };
@@ -6621,78 +6577,102 @@ window.openInstallGuideModal = function() {
       inp.value = '';
     };
 
-    // Kich hoat Micro thu am truc tiep tren trinh duyet (Web Speech API)
+    // CHE DO THU AM LIEN TUC (CONTINUOUS STREAMING MIC) - KHONG BAO GIO BI NGAT QUANG!
     window.toggleVoiceOrderRecognition = function() {
       const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
       const btnMain = document.getElementById('btnStartVoiceOrder');
       const btnText = document.getElementById('voiceMicBtnText');
       const fabBtn = document.getElementById('floatingVoiceFab');
       const fabTxt = document.getElementById('floatingVoiceFabText');
+      const liveBar = document.getElementById('voiceLiveInterimBar');
+      const liveTxt = document.getElementById('voiceLiveInterimText');
 
       if (!SpeechRec) {
         const manualInp = document.getElementById('voiceManualTranscriptInput');
         if (manualInp) {
           manualInp.focus();
-          alert("📱 Trên trình duyệt này, bạn hãy bấm biểu tượng Micro (🎤) ngay trên bàn phím điện thoại để đọc món cực nhạy nhé!");
+          alert("📱 Trình duyệt này không hỗ trợ Web Speech trực tiếp. Bạn hãy bấm biểu tượng Micro (🎤) trên bàn phím điện thoại tại ô nhập để đọc món nhé!");
         }
         return;
       }
 
-      if (isVoiceListening && speechRecognizer) {
-        speechRecognizer.stop();
+      if (isVoiceListening) {
+        isVoiceListening = false;
+        if (speechRecognizer) {
+          try { speechRecognizer.stop(); } catch (_) {}
+        }
+        if (btnMain) btnMain.classList.remove('listening');
+        if (btnText) btnText.innerText = 'BẤM VÀO ĐÂY ĐỂ BẮT ĐẦU ĐỌC MÓN (NGHE LIÊN TỤC)';
+        if (fabBtn) fabBtn.classList.remove('listening');
+        if (fabTxt) fabTxt.innerText = 'Đọc Order';
+        if (liveBar) liveBar.style.display = 'none';
         return;
       }
 
+      isVoiceListening = true;
       speechRecognizer = new SpeechRec();
       speechRecognizer.lang = 'vi-VN';
-      speechRecognizer.continuous = false;
-      speechRecognizer.interimResults = false;
+      speechRecognizer.continuous = true;
+      speechRecognizer.interimResults = true;
 
       speechRecognizer.onstart = () => {
-        isVoiceListening = true;
         playHardwareBeep();
         if (btnMain) btnMain.classList.add('listening');
-        if (btnText) btnText.innerText = 'ĐANG NGHE... HÃY ĐỌC SỐ BÀN & TÊN MÓN!';
+        if (btnText) btnText.innerText = '⏹️ ĐANG NGHE LIÊN TỤC... (ĐỌC XONG BẤM ĐỂ DỪNG)';
         if (fabBtn) fabBtn.classList.add('listening');
         if (fabTxt) fabTxt.innerText = 'Đang nghe...';
+        if (liveBar) liveBar.style.display = 'block';
+        if (liveTxt) liveTxt.innerText = 'Hãy đọc số bàn và tên món...';
       };
 
       speechRecognizer.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        window.parseAndExecuteVoiceOrder(transcript);
+        let interimTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const res = event.results[i];
+          if (res.isFinal) {
+            const finalSentence = res[0].transcript.trim();
+            if (liveTxt) liveTxt.innerText = finalSentence;
+            window.parseAndExecuteVoiceOrder(finalSentence);
+          } else {
+            interimTranscript += res[0].transcript;
+          }
+        }
+        if (interimTranscript && liveTxt) {
+          liveTxt.innerText = interimTranscript;
+        }
       };
 
       speechRecognizer.onerror = (event) => {
-        isVoiceListening = false;
-        if (btnMain) btnMain.classList.remove('listening');
-        if (btnText) btnText.innerText = 'BẤM VÀO ĐÂY ĐỂ ĐỌC MÓN BẰNG GIỌNG NÓI';
-        if (fabBtn) fabBtn.classList.remove('listening');
-        if (fabTxt) fabTxt.innerText = 'Đọc Order';
         if (event.error === 'not-allowed') {
-          alert("⚠️ Vui lòng bấm 'Cho phép' (Allow) quyền sử dụng Micro trên trình duyệt, hoặc chạm vào ô bên dưới để dùng Micro bàn phím điện thoại!");
+          isVoiceListening = false;
+          alert("⚠️ Vui lòng cấp quyền Micro (Allow) cho trình duyệt ở thanh địa chỉ!");
         }
       };
 
       speechRecognizer.onend = () => {
-        isVoiceListening = false;
-        if (btnMain) btnMain.classList.remove('listening');
-        if (btnText) btnText.innerText = 'BẤM VÀO ĐÂY ĐỂ ĐỌC MÓN BẰNG GIỌNG NÓI';
-        if (fabBtn) fabBtn.classList.remove('listening');
-        if (fabTxt) fabTxt.innerText = 'Đọc Order';
+        // Nếu nhân viên vẫn đang bật chế độ nghe mà trình duyệt tự ngắt sau câu nói -> Tự động nối lại ngay!
+        if (isVoiceListening) {
+          try { speechRecognizer.start(); } catch (_) {}
+        } else {
+          if (btnMain) btnMain.classList.remove('listening');
+          if (btnText) btnText.innerText = 'BẤM VÀO ĐÂY ĐỂ BẮT ĐẦU ĐỌC MÓN (NGHE LIÊN TỤC)';
+          if (fabBtn) fabBtn.classList.remove('listening');
+          if (fabTxt) fabTxt.innerText = 'Đọc Order';
+          if (liveBar) liveBar.style.display = 'none';
+        }
       };
 
-      speechRecognizer.start();
+      try { speechRecognizer.start(); } catch (_) {}
     };
-  
+
     // =========================================================================
     // 22. MODULE NANG CAP V22:
-    //  - 22.1. CHIET KHAU TRUC TIEP TREN THE HOA DON MON (TRUOC NUT IN BILL)
-    //  - 22.2. CHUYEN BAN & GOP BAN THONG MINH (MOVE & MERGE TABLES + LOA BEP)
-    //  - 22.3. NHAP BAO CAO DOANH THU GRABFOOD & SHOPEE (HOP NHAT THUE 5610/5630)
-    //  - 22.4. NHAP HOA DON DAU VAO PDF / XML / ANH & TU DONG KIEM TRA CAU TRUC
+    //  - 22.1. CHIET KHAU CO DINH TREN THE HOA DON MON (TRUOC NUT IN BILL)
+    //  - 22.2. CHUYEN BAN - GOP BAN - TACH BAN (3-IN-1)
+    //  - 22.3. NHAP BAO CAO DOANH THU GRABFOOD & SHOPEE
+    //  - 22.4. NHAP HOA DON DAU VAO PDF / XML / ANH & KIEM TRA CAU TRUC
     // =========================================================================
 
-    // --- 22.1. CHIET KHAU TRUC TIEP TREN THE HOA DON MON (KDS CARD) ---
     window.applyQuickCardDiscount = function(orderId, pctVal) {
       const o = ordersCache[orderId];
       if (!o) return;
@@ -6713,10 +6693,10 @@ window.openInstallGuideModal = function() {
       const oldNetSub = o.subtotal !== undefined ? Number(o.subtotal) : rawSub;
 
       if (isBillPrinted && newNetSub < oldNetSub && role === 'cashier') {
-        const pin = prompt(`🔒 KHÓA CHỐNG GIAN LẬN:\nĐơn này ĐÃ IN BILL (${o.billPrintedCount} lần). Thu ngân muốn áp dụng chiết khấu ${pct}% giảm tiền từ ${oldNetSub.toLocaleString()}đ xuống ${newNetSub.toLocaleString()}đ phải nhập Mật khẩu Chủ quán:`);
+        const pin = prompt(`🔒 KHÓA CHỐNG GIAN LẬN:\nĐơn này ĐÃ IN BILL (${o.billPrintedCount} lần). Thu ngân muốn chiết khấu ${pct}% phải nhập Mật khẩu Chủ quán:`);
         if (pin !== "hychayfood" && pin !== "baochay2026") {
           if (typeof writeAuditLog === 'function') {
-            writeAuditLog("THU NGÂN TỰ Ý CHIẾT KHẤU SAU IN BILL BỊ CHẶN", `Đơn #HC-${orderId.substring(orderId.length - 5).toUpperCase()} định giảm còn ${newNetSub.toLocaleString()}đ`, "DANGER");
+            writeAuditLog("THU NGÂN TỰ Ý CHIẾT KHẤU SAU IN BILL BỊ CHẶN", `Đơn #HC-${orderId.substring(orderId.length - 5).toUpperCase()}`, "DANGER");
           }
           return alert("❌ Mật khẩu Chủ quán không đúng!");
         }
@@ -6733,74 +6713,13 @@ window.openInstallGuideModal = function() {
         subtotal: newNetSub,
         grandTotal: newGrandTotal,
         note: updatedNote
-      }).then(() => {
-        if (isBillPrinted && newNetSub !== oldNetSub && typeof writeAuditLog === 'function') {
-          writeAuditLog("CHIẾT KHẤU TRÊN HÓA ĐƠN SAU IN BILL", `Đơn #HC-${orderId.substring(orderId.length - 5).toUpperCase()}: Áp dụng CK ${pct}% (-${newDiscAmt.toLocaleString()}đ) -> Còn ${newNetSub.toLocaleString()}đ`, "WARN");
-        }
       });
     };
 
-    // Tu dong gan Thanh Chiet Khau Truc Tiep & Nut Chuyen/Gop Ban len moi The Hoa Don Mon (KDS)
-    function decorateOrderCardsWithDirectDiscountAndTableControls() {
-      const container = document.getElementById('ordersContainer');
-      if (!container) return;
-      const cards = container.querySelectorAll('.order-card');
-      cards.forEach(card => {
-        const idSpan = card.querySelector('.order-id');
-        if (!idSpan) return;
-        const match = idSpan.innerText.match(/#HC-([A-Z0-9]+)/);
-        if (!match) return;
-        const shortCode = match[1];
-        const orderId = Object.keys(ordersCache).find(k => k.substring(k.length - 5).toUpperCase() === shortCode);
-        if (!orderId) return;
-        const o = ordersCache[orderId];
-        if (!o) return;
+    // --- 22.2. BO 3 CHUYEN BAN - GOP BAN - TACH BAN ---
+    let currentTmModalMode = 'move_merge'; // 'move_merge' hoac 'split'
+    let splitSelectedQtyMap = {};
 
-        const isDoneOrCanceled = (o.status === 'Đã hoàn tất' || o.status === 'Đã hủy');
-
-        // 1. Gan nut [Chuyen / Gop Ban] cho don Tai ban dang mo
-        const actionRow = card.querySelector('.customer-action-row');
-        if (actionRow && o.orderType === 'dine_in' && !isDoneOrCanceled && !actionRow.querySelector('.btn-move-merge-injected')) {
-          const btnTM = document.createElement('button');
-          btnTM.type = 'button';
-          btnTM.className = 'btn-move-merge-table btn-move-merge-injected';
-          btnTM.innerHTML = '&#128260; Chuyển/Gộp Bàn';
-          btnTM.onclick = () => window.openTableTransferMergeModal(orderId);
-          actionRow.appendChild(btnTM);
-        }
-
-        // 2. Gan Thanh Chiet Khau Truc Tiep ngay tren Hoa don mon (phia tren nut In Bill)
-        const finBox = card.querySelector('.financial-split-box');
-        if (finBox && !isDoneOrCanceled && !finBox.querySelector('.card-inline-discount-bar')) {
-          const curPct = Number(o.discountPercent) || (o.discount > 0 && o.rawSubtotal > 0 ? Math.round((o.discount / o.rawSubtotal) * 100) : 0);
-          const rawSub = o.rawSubtotal || ((o.subtotal || 0) + (o.discount || 0));
-          const discBar = document.createElement('div');
-          discBar.className = 'card-inline-discount-bar';
-          discBar.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.74rem; color:#166534; font-weight:800;">
-              <span>🏷️ Chiết khấu hóa đơn (Giá gốc: ${rawSub.toLocaleString()}đ):</span>
-              <span style="color:#dc2626;">${curPct > 0 ? `-${curPct}% (-${(o.discount || 0).toLocaleString()}đ)` : '0%'}</span>
-            </div>
-            <div class="card-disc-chips">
-              ${[0, 5, 10, 15, 20, 50].map(p => `<button type="button" class="btn-card-disc-chip ${curPct === p ? 'active' : ''}" onclick="applyQuickCardDiscount('${orderId}', ${p})">${p}%</button>`).join('')}
-              <input type="number" value="${curPct}" min="0" max="100" placeholder="%" title="Nhập % chiết khấu bất kỳ" onchange="applyQuickCardDiscount('${orderId}', this.value)" style="width:46px; padding:2px 4px; border:1px solid #16a34a; border-radius:5px; font-weight:800; font-size:0.72rem; text-align:right; color:#dc2626;">
-            </div>
-          `;
-          finBox.insertBefore(discBar, finBox.firstChild);
-        }
-      });
-    }
-
-    onValue(ref(db, 'orders'), () => {
-      setTimeout(decorateOrderCardsWithDirectDiscountAndTableControls, 120);
-    });
-    const origSetFilterV22 = window.setOrderStatusFilter;
-    window.setOrderStatusFilter = function(filterVal, btn) {
-      origSetFilterV22(filterVal, btn);
-      setTimeout(decorateOrderCardsWithDirectDiscountAndTableControls, 80);
-    };
-
-    // --- 22.2. CHUYEN BAN & GOP BAN THONG MINH (MOVE & MERGE TABLES) ---
     function getOpenDineInOrders() {
       const list = [];
       Object.keys(ordersCache).forEach(id => {
@@ -6812,14 +6731,30 @@ window.openInstallGuideModal = function() {
       return list;
     }
 
+    window.switchTmModalMode = function(mode) {
+      currentTmModalMode = mode;
+      const tabMM = document.getElementById('tmTabMoveMerge');
+      const tabSp = document.getElementById('tmTabSplit');
+      const splitSec = document.getElementById('tmSplitItemsSection');
+      if (mode === 'split') {
+        if (tabSp) tabSp.classList.add('active');
+        if (tabMM) tabMM.classList.remove('active');
+        if (splitSec) splitSec.style.display = 'block';
+      } else {
+        if (tabMM) tabMM.classList.add('active');
+        if (tabSp) tabSp.classList.remove('active');
+        if (splitSec) splitSec.style.display = 'none';
+      }
+      window.onTmSourceChange();
+    };
+
     window.openTableTransferMergeModal = function(preselectedOrderId = null) {
       const openList = getOpenDineInOrders();
       if (openList.length === 0) {
-        return alert("Hiện tại không có bàn nào đang mở để Chuyển hoặc Gộp bàn!");
+        return alert("Hiện tại không có bàn nào đang mở để Chuyển, Gộp hoặc Tách bàn!");
       }
       const srcSel = document.getElementById('tmSourceOrderSelect');
-      const tgtSel = document.getElementById('tmTargetTableSelect');
-      if (!srcSel || !tgtSel) return;
+      if (!srcSel) return;
 
       let srcHtml = '';
       openList.forEach(({ id, order }) => {
@@ -6829,12 +6764,21 @@ window.openInstallGuideModal = function() {
       });
       srcSel.innerHTML = srcHtml;
 
-      window.onTmSourceChange();
+      window.switchTmModalMode('move_merge');
       document.getElementById('tableTransferMergeModal').classList.add('active');
     };
 
     window.closeTableTransferMergeModal = function() {
       document.getElementById('tableTransferMergeModal').classList.remove('active');
+    };
+
+    window.changeSplitItemQty = function(itemKey, delta, maxQty) {
+      const cur = splitSelectedQtyMap[itemKey] || 0;
+      const next = Math.min(maxQty, Math.max(0, cur + delta));
+      splitSelectedQtyMap[itemKey] = next;
+      const spanEl = document.getElementById('split_qty_' + itemKey);
+      if (spanEl) spanEl.innerText = next;
+      window.onTmTargetChange();
     };
 
     window.onTmSourceChange = function() {
@@ -6843,17 +6787,49 @@ window.openInstallGuideModal = function() {
       const tgtSel = document.getElementById('tmTargetTableSelect');
       if (!srcOrder || !tgtSel) return;
 
+      // Render danh sach mon de Tach Ban
+      splitSelectedQtyMap = {};
+      const splitListEl = document.getElementById('tmSplitItemsList');
+      if (splitListEl) {
+        let sHtml = '';
+        for (let k in (srcOrder.items || {})) {
+          const it = srcOrder.items[k];
+          const cleanK = safeItemKey(k);
+          splitSelectedQtyMap[cleanK] = 0;
+          const safeK = cleanK.replace(/'/g, "\\'");
+          sHtml += `
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px dashed #fde68a; font-size:0.84rem;">
+              <div><b>${it.name}</b> <small style="color:#64748b;">(Đang có: ${it.qty} phần - ${it.price.toLocaleString()}đ)</small></div>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <button type="button" class="edit-qty-btn" onclick="changeSplitItemQty('${safeK}', -1, ${it.qty})">-</button>
+                <b id="split_qty_${cleanK}" style="min-width:22px; text-align:center; color:#dc2626;">0</b>
+                <button type="button" class="edit-qty-btn" onclick="changeSplitItemQty('${safeK}', 1, ${it.qty})">+</button>
+              </div>
+            </div>`;
+        }
+        splitListEl.innerHTML = sHtml;
+      }
+
       const openList = getOpenDineInOrders();
       let tgtHtml = '';
       (tablesListCache || []).forEach(tName => {
-        // Kiểm tra xem bàn đích này có đơn đang mở nào khác với đơn nguồn không
         const otherOpenOnTable = openList.filter(x => x.order.table === tName && x.id !== srcOrderId);
-        if (tName === srcOrder.table && otherOpenOnTable.length === 0) return; // Bỏ qua chính bàn đó nếu không có đơn trùng để gộp
-        if (otherOpenOnTable.length > 0) {
-          const totalOther = otherOpenOnTable.reduce((s, x) => s + (x.order.grandTotal || 0), 0);
-          tgtHtml += `<option value="${tName}">🔗 GỘP VÀO: ${tName} (Đang có đơn ${totalOther.toLocaleString()}đ)</option>`;
+        if (currentTmModalMode === 'split') {
+          if (tName === srcOrder.table) {
+            tgtHtml += `<option value="${tName}">✂️ Tách thành Hóa đơn thứ 2 ngay tại ${tName}</option>`;
+          } else if (otherOpenOnTable.length > 0) {
+            tgtHtml += `<option value="${tName}">🔗 Tách món chuyển sang gộp vào ${tName} (Đang có khách)</option>`;
+          } else {
+            tgtHtml += `<option value="${tName}">➡️ Tách món chuyển sang bàn trống: ${tName}</option>`;
+          }
         } else {
-          tgtHtml += `<option value="${tName}">➡️ CHUYỂN SANG: ${tName} (Bàn đang trống)</option>`;
+          if (tName === srcOrder.table && otherOpenOnTable.length === 0) return;
+          if (otherOpenOnTable.length > 0) {
+            const totalOther = otherOpenOnTable.reduce((s, x) => s + (x.order.grandTotal || 0), 0);
+            tgtHtml += `<option value="${tName}">🔗 GỘP VÀO: ${tName} (Đang có đơn ${totalOther.toLocaleString()}đ)</option>`;
+          } else {
+            tgtHtml += `<option value="${tName}">➡️ CHUYỂN SANG: ${tName} (Bàn đang trống)</option>`;
+          }
         }
       });
       tgtSel.innerHTML = tgtHtml;
@@ -6867,24 +6843,43 @@ window.openInstallGuideModal = function() {
       if (!srcOrderId || !tgtTable || !previewEl) return;
 
       const srcOrder = ordersCache[srcOrderId];
+      if (currentTmModalMode === 'split') {
+        let splitTotal = 0;
+        let splitCount = 0;
+        for (let k in (srcOrder.items || {})) {
+          const cleanK = safeItemKey(k);
+          const q = splitSelectedQtyMap[cleanK] || 0;
+          if (q > 0) {
+            splitCount += q;
+            splitTotal += q * (Number(srcOrder.items[k].price) || 0);
+          }
+        }
+        previewEl.style.background = '#fffbeb';
+        previewEl.style.color = '#b45309';
+        previewEl.style.borderColor = '#f59e0b';
+        previewEl.innerHTML = splitCount > 0
+          ? `✂️ <b>CHẾ ĐỘ TÁCH BÀN:</b> Sẽ tách <b>${splitCount} món (${splitTotal.toLocaleString()}đ)</b> từ <b>${srcOrder.table}</b> sang <b>${tgtTable}</b>.`
+          : `⚠️ Hãy bấm nút <b>[+]</b> ở danh sách món phía trên để chọn số lượng món cần tách!`;
+        return;
+      }
+
       const openList = getOpenDineInOrders();
       const targetExisting = openList.find(x => x.order.table === tgtTable && x.id !== srcOrderId);
-
       if (targetExisting) {
         const combinedTotal = (srcOrder.subtotal || 0) + (targetExisting.order.subtotal || 0);
         previewEl.style.background = '#fef3c7';
         previewEl.style.color = '#92400e';
         previewEl.style.borderColor = '#f59e0b';
-        previewEl.innerHTML = `🔗 <b>CHẾ ĐỘ GỘP BÀN:</b> Toàn bộ món của <b>${srcOrder.table}</b> (${(srcOrder.subtotal || 0).toLocaleString()}đ) sẽ được cộng gộp chung vào hóa đơn của <b>${tgtTable}</b>.<br>👉 Tổng tiền hóa đơn sau khi gộp: <b style="color:#dc2626; font-size:1rem;">${combinedTotal.toLocaleString()}đ</b>`;
+        previewEl.innerHTML = `🔗 <b>CHẾ ĐỘ GỘP BÀN:</b> Cộng dồn toàn bộ món của <b>${srcOrder.table}</b> vào <b>${tgtTable}</b>.<br>👉 Tổng hóa đơn mới sau khi gộp: <b style="color:#dc2626;">${combinedTotal.toLocaleString()}đ</b>`;
       } else {
         previewEl.style.background = '#dcfce7';
         previewEl.style.color = '#166534';
         previewEl.style.borderColor = '#16a34a';
-        previewEl.innerHTML = `➡️ <b>CHẾ ĐỘ CHUYỂN BÀN:</b> Chuyển nguyên đơn hàng từ <b>${srcOrder.table}</b> sang vị trí mới là <b>${tgtTable}</b> (Giữ nguyên các món và tổng tiền ${(srcOrder.grandTotal || 0).toLocaleString()}đ).`;
+        previewEl.innerHTML = `➡️ <b>CHẾ ĐỘ CHUYỂN BÀN:</b> Chuyển nguyên đơn hàng từ <b>${srcOrder.table}</b> sang vị trí mới <b>${tgtTable}</b>.`;
       }
     };
 
-    window.executeTableTransferOrMerge = function() {
+    window.executeTableTransferMergeOrSplit = function() {
       const srcOrderId = document.getElementById('tmSourceOrderSelect')?.value;
       const tgtTable = document.getElementById('tmTargetTableSelect')?.value;
       if (!srcOrderId || !tgtTable) return;
@@ -6892,29 +6887,102 @@ window.openInstallGuideModal = function() {
       const srcOrder = ordersCache[srcOrderId];
       if (!srcOrder) return;
       const oldTableName = srcOrder.table || 'Bàn cũ';
+
+      // NHÁNH A: XỬ LÝ TÁCH BÀN (SPLIT TABLE)
+      if (currentTmModalMode === 'split') {
+        const remainingItems = {};
+        const splitOutItems = {};
+        let splitCount = 0;
+        let remainCount = 0;
+
+        for (let k in (srcOrder.items || {})) {
+          const it = srcOrder.items[k];
+          const cleanK = safeItemKey(k);
+          const splitQty = splitSelectedQtyMap[cleanK] || 0;
+          const remainQty = (Number(it.qty) || 0) - splitQty;
+
+          if (splitQty > 0) {
+            splitCount += splitQty;
+            splitOutItems[cleanK] = { name: it.name, price: Number(it.price) || 0, qty: splitQty, cat: it.cat || 'bun' };
+          }
+          if (remainQty > 0) {
+            remainCount += remainQty;
+            remainingItems[cleanK] = { name: it.name, price: Number(it.price) || 0, qty: remainQty, cat: it.cat || 'bun' };
+          }
+        }
+
+        if (splitCount === 0) return alert("⚠️ Vui lòng bấm dấu [+] chọn ít nhất 1 món cần tách!");
+        if (remainCount === 0) return alert("⚠️ Bạn đang chọn tách hết toàn bộ món! Nếu muốn chuyển cả bàn, hãy chọn Tab [1. Chuyển Bàn / Gộp Bàn].");
+
+        let remainRawSub = 0;
+        for (let k in remainingItems) remainRawSub += remainingItems[k].price * remainingItems[k].qty;
+        const srcPct = Number(srcOrder.discountPercent) || 0;
+        const remainDisc = Math.round(remainRawSub * srcPct / 100);
+        const remainNet = Math.max(0, remainRawSub - remainDisc);
+
+        let splitRawSub = 0;
+        for (let k in splitOutItems) splitRawSub += splitOutItems[k].price * splitOutItems[k].qty;
+
+        // Cập nhật lại đơn gốc sau khi trừ món đã tách
+        update(ref(db, `orders/${srcOrderId}`), {
+          items: remainingItems,
+          rawSubtotal: remainRawSub,
+          discount: remainDisc,
+          subtotal: remainNet,
+          grandTotal: remainNet,
+          note: (srcOrder.note ? srcOrder.note + ' | ' : '') + `[Đã tách ${splitCount} món sang ${tgtTable}]`
+        });
+
+        // Tạo đơn mới cho phần món vừa tách ra
+        const nextSeq = getNextDailyOrderSequenceNumber();
+        const splitOrderData = {
+          orderType: 'dine_in',
+          dailySeq: nextSeq,
+          table: tgtTable,
+          customerName: `${tgtTable} (Tách từ ${oldTableName})`,
+          phone: 'Tại quán',
+          address: '280 Trần Hưng Đạo',
+          note: `[Đơn tách từ ${oldTableName}]`,
+          items: splitOutItems,
+          rawSubtotal: splitRawSub,
+          discountPercent: 0,
+          discount: 0,
+          subtotal: splitRawSub,
+          shippingFee: 0,
+          grandTotal: splitRawSub,
+          paymentMethod: 'COD',
+          paymentStatus: 'Thu tại bàn',
+          status: srcOrder.status || 'Đang chế biến',
+          createdAt: new Date().toISOString(),
+          archived: false
+        };
+
+        push(ref(db, 'orders'), splitOrderData).then(() => {
+          broadcastAndSpeakKitchenAlert(`Chú ý bếp! Đã tách ${splitCount} món từ ${oldTableName} sang ${tgtTable}.`);
+          alert(`✅ Đã tách ${splitCount} món (${splitRawSub.toLocaleString()}đ) từ [${oldTableName}] sang [${tgtTable}] thành công!`);
+          window.closeTableTransferMergeModal();
+        });
+        return;
+      }
+
+      // NHÁNH B: CHUYỂN BÀN HOẶC GỘP BÀN
       const openList = getOpenDineInOrders();
       const targetExisting = openList.find(x => x.order.table === tgtTable && x.id !== srcOrderId);
 
-      // TRƯỜNG HỢP 1: BÀN ĐÍCH ĐANG TRỐNG -> CHUYỂN BÀN (MOVE TABLE)
       if (!targetExisting) {
-        const moveStamp = `[Đã chuyển từ ${oldTableName} sang ${tgtTable} lúc ${new Date().toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'})}]`;
-        const newNote = srcOrder.note ? `${srcOrder.note} | ${moveStamp}` : moveStamp;
+        const moveStamp = `[Đã chuyển từ ${oldTableName} sang ${tgtTable}]`;
         update(ref(db, `orders/${srcOrderId}`), {
           table: tgtTable,
           customerName: tgtTable,
-          note: newNote
+          note: srcOrder.note ? `${srcOrder.note} | ${moveStamp}` : moveStamp
         }).then(() => {
           broadcastAndSpeakKitchenAlert(`Chú ý bếp! Đã chuyển toàn bộ đơn của ${oldTableName} sang ${tgtTable}.`);
-          if (typeof writeAuditLog === 'function') {
-            writeAuditLog("CHUYỂN BÀN ĂN", `Chuyển đơn #HC-${srcOrderId.substring(srcOrderId.length - 5).toUpperCase()} từ ${oldTableName} sang ${tgtTable}`, "INFO");
-          }
           alert(`✅ Đã chuyển đơn từ [${oldTableName}] sang [${tgtTable}] thành công!`);
           window.closeTableTransferMergeModal();
         });
         return;
       }
 
-      // TRƯỜNG HỢP 2: BÀN ĐÍCH ĐANG CÓ KHÁCH -> GỘP BÀN (MERGE TABLES)
       const tgtId = targetExisting.id;
       const tgtOrder = targetExisting.order;
       const mergedItems = JSON.parse(JSON.stringify(tgtOrder.items || {}));
@@ -6925,36 +6993,16 @@ window.openInstallGuideModal = function() {
         const cleanK = safeItemKey(srcIt.name || k);
         if (mergedItems[cleanK]) {
           mergedItems[cleanK].qty = (Number(mergedItems[cleanK].qty) || 0) + (Number(srcIt.qty) || 0);
-          // Nếu 1 trong 2 bàn còn món chưa nấu xong thì để trạng thái chưa tích xong để bếp làm nốt
-          if (!(srcOrder.checkedItems && (srcOrder.checkedItems[cleanK] || srcOrder.checkedItems[k]))) {
-            mergedChecked[cleanK] = false;
-          }
         } else {
-          mergedItems[cleanK] = {
-            name: srcIt.name,
-            price: Number(srcIt.price) || 0,
-            qty: Number(srcIt.qty) || 1,
-            cat: srcIt.cat || 'bun'
-          };
-          if (srcOrder.checkedItems && (srcOrder.checkedItems[cleanK] || srcOrder.checkedItems[k])) {
-            mergedChecked[cleanK] = true;
-          }
+          mergedItems[cleanK] = { name: srcIt.name, price: Number(srcIt.price) || 0, qty: Number(srcIt.qty) || 1, cat: srcIt.cat || 'bun' };
         }
       }
 
       let rawSub = 0;
-      for (let k in mergedItems) {
-        rawSub += (Number(mergedItems[k].price) || 0) * (Number(mergedItems[k].qty) || 0);
-      }
+      for (let k in mergedItems) rawSub += (Number(mergedItems[k].price) || 0) * (Number(mergedItems[k].qty) || 0);
       const keepPct = Math.max(Number(tgtOrder.discountPercent) || 0, Number(srcOrder.discountPercent) || 0);
       const newDisc = Math.round(rawSub * keepPct / 100);
       const netSub = Math.max(0, rawSub - newDisc);
-
-      const mergeNote = [
-        tgtOrder.note || '',
-        srcOrder.note || '',
-        `[Đã gộp chung đơn từ ${oldTableName} vào ${tgtTable}]`
-      ].filter(Boolean).join(' | ');
 
       const updates = {};
       updates[`orders/${tgtId}/items`] = mergedItems;
@@ -6964,24 +7012,20 @@ window.openInstallGuideModal = function() {
       updates[`orders/${tgtId}/discount`] = newDisc;
       updates[`orders/${tgtId}/subtotal`] = netSub;
       updates[`orders/${tgtId}/grandTotal`] = netSub;
-      updates[`orders/${tgtId}/note`] = mergeNote;
+      updates[`orders/${tgtId}/note`] = [tgtOrder.note || '', srcOrder.note || '', `[Đã gộp từ ${oldTableName}]`].filter(Boolean).join(' | ');
 
-      // Đóng & lưu trữ đơn nguồn đã được gộp để không bị tính trùng doanh thu
       updates[`orders/${srcOrderId}/status`] = 'Đã hủy';
       updates[`orders/${srcOrderId}/archived`] = true;
-      updates[`orders/${srcOrderId}/cancelReason`] = `Đã gộp chung hóa đơn vào ${tgtTable} (#HC-${tgtId.substring(tgtId.length - 5).toUpperCase()})`;
+      updates[`orders/${srcOrderId}/cancelReason`] = `Đã gộp chung hóa đơn vào ${tgtTable}`;
 
       update(ref(db), updates).then(() => {
-        broadcastAndSpeakKitchenAlert(`Chú ý bếp! Đã gộp toàn bộ các món của ${oldTableName} vào chung với ${tgtTable}.`);
-        if (typeof writeAuditLog === 'function') {
-          writeAuditLog("GỘP BÀN ĂN", `Gộp đơn từ ${oldTableName} vào ${tgtTable} -> Tổng mới: ${netSub.toLocaleString()}đ`, "INFO");
-        }
-        alert(`✅ Đã gộp toàn bộ món của [${oldTableName}] vào chung hóa đơn [${tgtTable}] (Tổng mới: ${netSub.toLocaleString()}đ)!`);
+        broadcastAndSpeakKitchenAlert(`Chú ý bếp! Đã gộp toàn bộ món của ${oldTableName} vào chung với ${tgtTable}.`);
+        alert(`✅ Đã gộp toàn bộ món của [${oldTableName}] vào [${tgtTable}] (Tổng mới: ${netSub.toLocaleString()}đ)!`);
         window.closeTableTransferMergeModal();
       });
     };
 
-    // --- 22.3. NHAP & DOI SOAT BAO CAO DOANH THU GRABFOOD & SHOPEE ---
+    // --- 22.3. NHAP BAO CAO DOANH THU GRABFOOD & SHOPEE ---
     let externalRevenuesCache = {};
     if (document.getElementById('extRevDateInput')) {
       document.getElementById('extRevDateInput').value = getVNDateStr();
@@ -7009,23 +7053,13 @@ window.openInstallGuideModal = function() {
       const { r5610, r5630, fee, net } = window.calcExtNetPreview();
       const note = (document.getElementById('extRevNoteInput')?.value || '').trim();
 
-      if (r5610 + r5630 <= 0) {
-        return alert("⚠️ Vui lòng nhập Doanh thu 5610 (Đồ ăn/Thực phẩm chay) hoặc Doanh thu 5630 (Đồ uống) lớn hơn 0đ!");
-      }
+      if (r5610 + r5630 <= 0) return alert("⚠️ Vui lòng nhập Doanh thu 5610 hoặc 5630 lớn hơn 0đ!");
 
       push(ref(db, 'external_revenues'), {
-        platform,
-        date: dateStr,
-        orderCount,
-        rev5610: r5610,
-        rev5630: r5630,
-        platformFee: fee,
-        netReceived: net,
-        note,
-        createdAt: new Date().toISOString(),
-        createdBy: localStorage.getItem('hy_chay_active_user') || 'admin'
+        platform, date: dateStr, orderCount, rev5610: r5610, rev5630: r5630,
+        platformFee: fee, netReceived: net, note, createdAt: new Date().toISOString()
       }).then(() => {
-        alert(`✅ Đã lưu báo cáo doanh thu ${platform} ngày ${dateStr} (Tổng DT chịu thuế: ${(r5610 + r5630).toLocaleString()}đ | Thực nhận: ${net.toLocaleString()}đ)!`);
+        alert(`✅ Đã lưu báo cáo doanh thu ${platform} ngày ${dateStr}!`);
         document.getElementById('extRev5610Input').value = '0';
         document.getElementById('extRev5630Input').value = '0';
         document.getElementById('extRevFeeInput').value = '0';
@@ -7035,9 +7069,6 @@ window.openInstallGuideModal = function() {
     };
 
     window.deleteExternalRevenueRecord = function(recId) {
-      if (localStorage.getItem('hy_chay_active_role') !== 'root') {
-        return alert("⛔ Chỉ Chủ quán (Giám đốc) mới có quyền xóa bản ghi doanh thu sàn!");
-      }
       if (confirm("Xác nhận xóa bản ghi báo cáo doanh thu sàn này?")) {
         remove(ref(db, `external_revenues/${recId}`));
       }
@@ -7053,22 +7084,19 @@ window.openInstallGuideModal = function() {
         if (numbers.length > 0) {
           const maxVal = Math.max(...numbers);
           document.getElementById('extRev5610Input').value = maxVal;
-          document.getElementById('extRevNoteInput').value = `Nhập từ file: ${file.name}`;
+          document.getElementById('extRevNoteInput').value = `Từ file: ${file.name}`;
           window.calcExtNetPreview();
-          alert(`📂 Đã đọc file "${file.name}" và điền doanh thu gợi ý: ${maxVal.toLocaleString()}đ.\nBạn hãy kiểm tra lại các ô và bấm [Lưu Báo Cáo Grab / Shopee]!`);
-        } else {
-          alert("⚠️ Không tìm thấy cột số tiền tự động trong file này. Vui lòng gõ số tổng vào ô Doanh thu 5610/5630!");
+          alert(`📂 Đã đọc file "${file.name}" (Doanh thu gợi ý: ${maxVal.toLocaleString()}đ). Hãy bấm Lưu!`);
         }
       };
       reader.readAsText(file);
     };
 
-    // --- 22.4. NHAP HOA DON DAU VAO BANG FILE PDF / XML / ANH & KIEM TRA CAU TRUC HOP LE ---
+    // --- 22.4. NHAP HOA DON DAU VAO PDF / XML / ANH & KIEM TRA CAU TRUC ---
     let inputInvoicesCache = {};
     if (document.getElementById('invDateTimeInput')) {
       const now = new Date();
-      const tzOffset = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-      document.getElementById('invDateTimeInput').value = tzOffset;
+      document.getElementById('invDateTimeInput').value = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
     }
 
     onValue(ref(db, 'input_invoices'), (snap) => {
@@ -7076,8 +7104,7 @@ window.openInstallGuideModal = function() {
       window.renderInputInvoicesTable();
     });
 
-    // Ham kiem tra 6 tieu chi phap ly cua Hoa don dien tu dau vao (NĐ 123/2020 & NĐ 70/2025)
-    window.validateInputInvoiceRealtime = function(showAlert = false) {
+    window.validateInputInvoiceRealtime = function() {
       const invName = (document.getElementById('invNameInput')?.value || '').trim().toUpperCase();
       const invSymbol = (document.getElementById('invSymbolInput')?.value || '').trim().toUpperCase();
       const invNo = (document.getElementById('invNumberInput')?.value || '').trim();
@@ -7087,30 +7114,14 @@ window.openInstallGuideModal = function() {
       const preTax = parseInt(document.getElementById('invPreTaxInput')?.value || '0') || 0;
       const vatAmt = parseInt(document.getElementById('invVatAmountInput')?.value || '0') || 0;
 
-      const checks = [];
-      // 1. Kiem tra Ten Hoa Don
-      const validName = invName.includes("HÓA ĐƠN") || invName.includes("HOA DON") || invName.includes("GTGT") || invName.includes("GIÁ TRỊ GIA TĂNG");
-      checks.push({ ok: validName, label: "1. Tên hóa đơn", detail: validName ? `Hợp lệ (${invName})` : "Thiếu chữ 'HÓA ĐƠN GIÁ TRỊ GIA TĂNG' hoặc 'HÓA ĐƠN BÁN HÀNG'" });
-
-      // 2. Kiem tra Ky hieu mau so & Ky hieu hoa don (Chuẩn NĐ 123: VD 1C26TAA, 1C25TYY, 2C26...)
-      const validSymbol = /^[12][CK]\d{2}[A-Z]{2,3}$/i.test(invSymbol.replace(/[^A-Z0-9]/gi, '')) || invSymbol.length >= 4;
-      checks.push({ ok: validSymbol, label: "2. Ký hiệu hóa đơn", detail: validSymbol ? `Đúng chuẩn (${invSymbol})` : "Sai cấu trúc Ký hiệu HĐĐT (Ví dụ đúng: 1C26TAA, 1C26MHY)" });
-
-      // 3. Kiem tra So hoa don / Ma CQT
-      const validNo = /^\d{1,8}$/.test(invNo) || invNo.length >= 1;
-      checks.push({ ok: validNo, label: "3. Số hóa đơn", detail: validNo ? `Hợp lệ (Số: ${invNo})` : "Chưa có Số hóa đơn (Từ 1 đến 8 chữ số)" });
-
-      // 4. Kiem tra Ngay gio lap hoa don
-      const validDate = invDate.length >= 10 && !isNaN(new Date(invDate).getTime());
-      checks.push({ ok: validDate, label: "4. Ngày giờ lập HĐ", detail: validDate ? `Hợp lệ (${new Date(invDate).toLocaleString('vi-VN')})` : "Ngày giờ lập hóa đơn không hợp lệ" });
-
-      // 5. Kiem tra MST Nguoi mua phai khop Cong ty Bao Anh Lam (3401289271)
-      const validBuyer = (buyerMst === "3401289271");
-      checks.push({ ok: validBuyer, label: "5. MST Người mua", detail: validBuyer ? "Khớp 100% Công ty Bảo Anh Lâm (3401289271)" : `SAI MST NGƯỜI MUA (${buyerMst} != 3401289271)` });
-
-      // 6. Kiem tra Tien truoc thue & Thue GTGT
-      const validMoney = (preTax > 0 && vatAmt >= 0 && vatAmt <= Math.round(preTax * 0.15));
-      checks.push({ ok: validMoney, label: "6. Tiền hàng & VAT", detail: validMoney ? `Trước thuế: ${preTax.toLocaleString()}đ | VAT: ${vatAmt.toLocaleString()}đ` : "Tiền hàng trước thuế phải > 0đ và VAT hợp lý (0% - 10%)" });
+      const checks = [
+        { ok: invName.includes("HÓA ĐƠN") || invName.includes("GTGT"), label: "1. Tên HĐ", detail: invName || "Thiếu tên HĐ" },
+        { ok: /^[12][CK]\d{2}[A-Z]{2,3}$/i.test(invSymbol.replace(/[^A-Z0-9]/gi, '')) || invSymbol.length >= 4, label: "2. Ký hiệu HĐ", detail: invSymbol || "Thiếu ký hiệu (VD: 1C26TAA)" },
+        { ok: /^\d{1,8}$/.test(invNo) || invNo.length >= 1, label: "3. Số HĐ", detail: invNo || "Thiếu số HĐ" },
+        { ok: invDate.length >= 10, label: "4. Ngày giờ", detail: invDate ? new Date(invDate).toLocaleString('vi-VN') : "Thiếu ngày giờ" },
+        { ok: buyerMst === "3401289271", label: "5. MST Người mua", detail: buyerMst === "3401289271" ? "Khớp Bảo Anh Lâm (3401289271)" : `Lệch MST (${buyerMst})` },
+        { ok: preTax > 0 && vatAmt >= 0, label: "6. Tiền & VAT", detail: `Trước thuế: ${preTax.toLocaleString()}đ | VAT: ${vatAmt.toLocaleString()}đ` }
+      ];
 
       const allPassed = checks.every(c => c.ok);
       const banner = document.getElementById('invoiceAuditResultBanner');
@@ -7119,64 +7130,29 @@ window.openInstallGuideModal = function() {
         banner.style.background = allPassed ? '#dcfce7' : '#fff1f2';
         banner.style.border = allPassed ? '2px solid #16a34a' : '2px solid #ef4444';
         banner.style.color = allPassed ? '#14532d' : '#991b1b';
-        banner.innerHTML = `
-          <div style="font-weight:900; font-size:0.92rem; margin-bottom:4px;">
-            ${allPassed ? '✅ KIỂM TRA CẤU TRÚC HÓA ĐƠN: HỢP LỆ 100% (ĐỦ ĐIỀU KIỆN KHẤU TRỪ THUẾ)' : '⚠️ CẢNH BÁO CẤU TRÚC HÓA ĐƠN: PHÁT HIỆN CHỈ TIÊU CHƯA KHỚP!'}
-          </div>
-          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:4px;">
-            ${checks.map(c => `<div>${c.ok ? '🟢' : '🔴'} <b>${c.label}:</b> ${c.detail}</div>`).join('')}
-          </div>
-        `;
+        banner.innerHTML = `<b>${allPassed ? '✅ CẤU TRÚC HÓA ĐƠN HỢP LỆ 100%' : '⚠️ CẢNH BÁO CẤU TRÚC HÓA ĐƠN:'}</b><div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:4px; margin-top:4px;">${checks.map(c => `<div>${c.ok ? '🟢' : '🔴'} <b>${c.label}:</b> ${c.detail}</div>`).join('')}</div>`;
       }
-      return { allPassed, checks, invName, invSymbol, invNo, invDate, seller, buyerMst, preTax, vatAmt };
+      return { allPassed, invName, invSymbol, invNo, invDate, seller, buyerMst, preTax, vatAmt };
     };
 
-    // Ham boc tach van ban tu Hoa don XML / PDF / Anh chup de tu dien vao 8 o kiem tra
     function parseExtractedInvoiceText(rawText, fileName = '') {
       const txt = String(rawText || '').replace(/\s+/g, ' ');
-      // 1. Tim Ky hieu hoa don (VD: 1C26TAA, 1C25TBB, 2C26...)
       const symMatch = txt.match(/\b([12][CK]\d{2}[A-Z]{2,3})\b/i);
       if (symMatch) document.getElementById('invSymbolInput').value = symMatch[1].toUpperCase();
-
-      // 2. Tim So hoa don (7-8 chu so hoac sau chữ Số / SHĐ)
-      const noMatch = txt.match(/(?:Số|So|SHĐ|SHDon|Số HĐ)\s*[:.]?\s*0*(\d{1,8})\b/i) || txt.match(/\b00(\d{5,6})\b/);
+      const noMatch = txt.match(/(?:Số|So|SHĐ|SHDon)\s*[:.]?\s*0*(\d{1,8})\b/i) || txt.match(/\b00(\d{5,6})\b/);
       if (noMatch) document.getElementById('invNumberInput').value = noMatch[1].padStart(7, '0');
-
-      // 3. Kiem tra MST 3401289271 va MST Nguoi ban
       const allMsts = txt.match(/\b\d{10}(?:-\d{3})?\b/g) || [];
-      if (allMsts.includes('3401289271')) {
-        document.getElementById('invBuyerMstInput').value = '3401289271';
-      }
+      if (allMsts.includes('3401289271')) document.getElementById('invBuyerMstInput').value = '3401289271';
       const sellerMst = allMsts.find(m => m !== '3401289271');
-      if (sellerMst) {
-        document.getElementById('invSellerInput').value = `MST Bán: ${sellerMst} (${fileName})`;
-      } else if (fileName) {
-        document.getElementById('invSellerInput').value = fileName;
-      }
+      document.getElementById('invSellerInput').value = sellerMst ? `MST Bán: ${sellerMst} (${fileName})` : fileName;
 
-      // 4. Tim Ngay thang nam lap hoa don
-      const dateMatch = txt.match(/ngày\s*(\d{1,2})\s*tháng\s*(\d{1,2})\s*năm\s*(202\d)/i) || txt.match(/\b(\d{2})\/(\d{2})\/(202\d)\b/);
-      if (dateMatch) {
-        const dd = String(dateMatch[1]).padStart(2, '0');
-        const mm = String(dateMatch[2]).padStart(2, '0');
-        const yyyy = dateMatch[3];
-        document.getElementById('invDateTimeInput').value = `${yyyy}-${mm}-${dd}T09:00`;
-      }
-
-      // 5. Tim các con số tiền lớn trong hóa đơn
-      const moneyMatches = (txt.match(/\b\d{1,3}(?:[.,]\d{3})+\b/g) || [])
-        .map(s => parseInt(s.replace(/[.,]/g, '')))
-        .filter(n => n >= 1000 && n <= 500000000)
-        .sort((a, b) => b - a);
-
+      const moneyMatches = (txt.match(/\b\d{1,3}(?:[.,]\d{3})+\b/g) || []).map(s => parseInt(s.replace(/[.,]/g, ''))).filter(n => n >= 1000 && n <= 500000000).sort((a, b) => b - a);
       if (moneyMatches.length >= 2) {
         const total = moneyMatches[0];
         const pre = moneyMatches.find(n => n < total && n >= total * 0.85) || Math.round(total / 1.08);
-        const vat = Math.max(0, total - pre);
         document.getElementById('invPreTaxInput').value = pre;
-        document.getElementById('invVatAmountInput').value = vat;
+        document.getElementById('invVatAmountInput').value = Math.max(0, total - pre);
       }
-
       window.validateInputInvoiceRealtime();
     }
 
@@ -7184,43 +7160,26 @@ window.openInstallGuideModal = function() {
       const file = input.files && input.files[0];
       if (!file) return;
       const ext = file.name.split('.').pop().toLowerCase();
-
-      // TRUONG HOP 1: FILE XML HOA DON DIEN TU GOC (CHINH XAC TUYET DOI 100%)
       if (ext === 'xml') {
         const text = await file.text();
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(text, "text/xml");
-        const getTag = (tag) => xmlDoc.getElementsByTagName(tag)[0]?.textContent?.trim() || '';
-
-        const tenHD = getTag('THDon') || 'HÓA ĐƠN GIÁ TRỊ GIA TĂNG';
-        const khMSHDon = getTag('KHMSHDon');
-        const khHDon = getTag('KHHDon');
-        const shDon = getTag('SHDon');
+        const xmlDoc = new DOMParser().parseFromString(text, "text/xml");
+        const getTag = (t) => xmlDoc.getElementsByTagName(t)[0]?.textContent?.trim() || '';
+        document.getElementById('invNameInput').value = (getTag('THDon') || 'HÓA ĐƠN GIÁ TRỊ GIA TĂNG').toUpperCase();
+        document.getElementById('invSymbolInput').value = (getTag('KHMSHDon') + getTag('KHHDon')).toUpperCase();
+        document.getElementById('invNumberInput').value = getTag('SHDon').padStart(7, '0');
         const nLap = getTag('NLap');
-        const tenNBan = getTag('Ten') || 'Nhà cung cấp';
-        const mstNBan = getTag('MST');
-        const tgTCThue = parseInt(getTag('TgTCThue') || '0') || 0;
-        const tgTThue = parseInt(getTag('TgTThue') || '0') || 0;
-
-        document.getElementById('invNameInput').value = tenHD.toUpperCase();
-        document.getElementById('invSymbolInput').value = (khMSHDon + khHDon).toUpperCase();
-        document.getElementById('invNumberInput').value = shDon.padStart(7, '0');
         if (nLap) document.getElementById('invDateTimeInput').value = nLap.includes('T') ? nLap.slice(0, 16) : `${nLap}T08:30`;
-        document.getElementById('invSellerInput').value = `${tenNBan} (MST: ${mstNBan})`;
+        document.getElementById('invSellerInput').value = `${getTag('Ten')} (MST: ${getTag('MST')})`;
         document.getElementById('invBuyerMstInput').value = text.includes('3401289271') ? '3401289271' : '';
-        document.getElementById('invPreTaxInput').value = tgTCThue;
-        document.getElementById('invVatAmountInput').value = tgTThue;
-
+        document.getElementById('invPreTaxInput').value = parseInt(getTag('TgTCThue') || '0') || 0;
+        document.getElementById('invVatAmountInput').value = parseInt(getTag('TgTThue') || '0') || 0;
         window.validateInputInvoiceRealtime();
         return;
       }
-
-      // TRUONG HOP 2: FILE PDF HOA DON DIEN TU (DUNG PDF.JS QUET TOAN BO CHU VA BANG BIEU)
       if (ext === 'pdf' && window.pdfjsLib) {
         try {
           window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-          const arrayBuffer = await file.arrayBuffer();
-          const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+          const pdf = await window.pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
           let fullText = '';
           for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
@@ -7229,50 +7188,27 @@ window.openInstallGuideModal = function() {
           }
           parseExtractedInvoiceText(fullText, file.name);
           return;
-        } catch (err) {
-          console.warn("PDF parse warning:", err);
-        }
+        } catch (_) {}
       }
-
-      // TRUONG HOP 3: FILE ANH CHUP HOA DON (.JPG, .PNG) HOAC PDF SCAN
       parseExtractedInvoiceText(file.name, file.name);
-      alert(`📷 Đã nạp file hóa đơn "${file.name}"!\nHệ thống đã bật bộ kiểm tra 6 tiêu chí cấu trúc hóa đơn. Vui lòng đối chiếu nhanh Ký hiệu, Số HĐ và Số tiền rồi bấm [Lưu Hóa Đơn]!`);
     };
 
     window.saveVerifiedInputInvoice = function() {
       const check = window.validateInputInvoiceRealtime();
-      if (!check.allPassed) {
-        if (!confirm("⚠️ Hóa đơn này có một số chỉ tiêu cấu trúc đang cảnh báo đỏ (ví dụ thiếu Ký hiệu hoặc lệch MST).\nBạn có chắc chắn vẫn muốn lưu vào danh sách hóa đơn đầu vào không?")) {
-          return;
-        }
-      }
-
+      if (!check.allPassed && !confirm("⚠️ Hóa đơn có chỉ tiêu đang cảnh báo đỏ. Bạn vẫn muốn lưu?")) return;
       push(ref(db, 'input_invoices'), {
-        invName: check.invName,
-        invSymbol: check.invSymbol,
-        invNo: check.invNo,
-        invDate: check.invDate,
-        seller: check.seller || 'Nhà cung cấp',
-        buyerMst: check.buyerMst,
-        preTax: check.preTax,
-        vatAmt: check.vatAmt,
-        isValidStructure: check.allPassed,
-        createdAt: new Date().toISOString()
+        invName: check.invName, invSymbol: check.invSymbol, invNo: check.invNo, invDate: check.invDate,
+        seller: check.seller || 'Nhà cung cấp', buyerMst: check.buyerMst, preTax: check.preTax, vatAmt: check.vatAmt,
+        isValidStructure: check.allPassed, createdAt: new Date().toISOString()
       }).then(() => {
-        alert(`✅ Đã lưu Hóa đơn đầu vào [${check.invSymbol} - Số ${check.invNo}] và tự động cộng ${check.vatAmt.toLocaleString()}đ vào Thuế GTGT được khấu trừ [ct24]!`);
-        document.getElementById('invNumberInput').value = '';
-        document.getElementById('invPreTaxInput').value = '0';
-        document.getElementById('invVatAmountInput').value = '0';
+        alert(`✅ Đã lưu Hóa đơn đầu vào #${check.invNo}!`);
       });
     };
 
     window.deleteInputInvoiceRecord = function(id) {
-      if (confirm("Xác nhận xóa hóa đơn đầu vào này?")) {
-        remove(ref(db, `input_invoices/${id}`));
-      }
+      if (confirm("Xóa hóa đơn đầu vào này?")) remove(ref(db, `input_invoices/${id}`));
     };
 
-    // Ham loc xem 1 ngay (YYYY-MM-DD) co thuoc Ky Bao Cao dang chon hay khong
     function isDateMatchingCurrentReportPeriod(dateStr) {
       if (!dateStr || dateStr.length < 10) return false;
       const dStr = dateStr.slice(0, 10);
@@ -7284,121 +7220,57 @@ window.openInstallGuideModal = function() {
         return (y === qY && m >= (q - 1) * 3 + 1 && m <= q * 3);
       } else if (mode === 'month') {
         return dStr.startsWith(document.getElementById('filterMonthInput')?.value || '');
-      } else {
-        return dStr === (document.getElementById('filterDayInput')?.value || '');
       }
+      return dStr === (document.getElementById('filterDayInput')?.value || '');
     }
 
     window.renderInputInvoicesTable = function() {
       const tbody = document.getElementById('inputInvoicesTableBody');
       if (!tbody) return;
-      let html = '';
-      let sumPreTaxInPeriod = 0;
-      let sumVatInPeriod = 0;
-
-      const keys = Object.keys(inputInvoicesCache).sort((a, b) => new Date(inputInvoicesCache[b].invDate || 0) - new Date(inputInvoicesCache[a].invDate || 0));
-      keys.forEach(k => {
+      let html = '', sumPre = 0, sumVat = 0;
+      Object.keys(inputInvoicesCache).forEach(k => {
         const inv = inputInvoicesCache[k];
         if (!isDateMatchingCurrentReportPeriod(inv.invDate)) return;
-        sumPreTaxInPeriod += (Number(inv.preTax) || 0);
-        sumVatInPeriod += (Number(inv.vatAmt) || 0);
-
-        const stBadge = inv.isValidStructure
-          ? `<span class="inv-check-badge inv-valid">✅ Hợp lệ chuẩn CQT</span>`
-          : `<span class="inv-check-badge inv-invalid">⚠️ Cần kiểm tra lại</span>`;
-
-        html += `
-          <tr>
-            <td><b>${inv.invDate ? new Date(inv.invDate).toLocaleString('vi-VN') : '--'}</b></td>
-            <td><b style="color:#0369a1;">${inv.invSymbol || ''}</b> — <b style="color:#dc2626;">#${inv.invNo || ''}</b></td>
-            <td><b>${inv.invName || ''}</b><br><small style="color:#64748b;">${inv.seller || ''}</small></td>
-            <td><b>${inv.buyerMst || ''}</b></td>
-            <td style="text-align:right; font-weight:800; color:#0369a1;">${(Number(inv.preTax) || 0).toLocaleString()}đ</td>
-            <td style="text-align:right; font-weight:900; color:#dc2626;">${(Number(inv.vatAmt) || 0).toLocaleString()}đ</td>
-            <td style="text-align:center;">${stBadge}</td>
-            <td><button type="button" onclick="deleteInputInvoiceRecord('${k}')" style="background:#fee2e2; color:#b91c1c; border:none; padding:4px 8px; border-radius:6px; font-weight:700; cursor:pointer;">Xóa</button></td>
-          </tr>`;
+        sumPre += (Number(inv.preTax) || 0);
+        sumVat += (Number(inv.vatAmt) || 0);
+        html += `<tr><td><b>${inv.invDate ? new Date(inv.invDate).toLocaleString('vi-VN') : '--'}</b></td><td><b>${inv.invSymbol || ''}</b> #<b>${inv.invNo || ''}</b></td><td><b>${inv.invName || ''}</b><br><small>${inv.seller || ''}</small></td><td><b>${inv.buyerMst || ''}</b></td><td style="text-align:right; font-weight:800;">${(Number(inv.preTax) || 0).toLocaleString()}đ</td><td style="text-align:right; font-weight:900; color:#dc2626;">${(Number(inv.vatAmt) || 0).toLocaleString()}đ</td><td style="text-align:center;"><span class="inv-check-badge ${inv.isValidStructure ? 'inv-valid' : 'inv-invalid'}">${inv.isValidStructure ? '✅ Hợp lệ' : '⚠️ Kiểm tra'}</span></td><td><button type="button" onclick="deleteInputInvoiceRecord('${k}')" style="background:#fee2e2; color:#b91c1c; border:none; padding:4px 8px; border-radius:6px; cursor:pointer;">Xóa</button></td></tr>`;
       });
-
-      tbody.innerHTML = html || '<tr><td colspan="8" style="text-align:center; padding:16px; color:#64748b;">Chưa có hóa đơn đầu vào nào trong kỳ báo cáo này.</td></tr>';
+      tbody.innerHTML = html || '<tr><td colspan="8" style="text-align:center; padding:14px; color:#64748b;">Chưa có hóa đơn đầu vào trong kỳ này.</td></tr>';
       const badgeEl = document.getElementById('inputInvoiceTotalBadge');
-      if (badgeEl) {
-        badgeEl.innerHTML = `📌 Tổng HĐ Đầu vào kỳ này: Mua vào [ct23] = <b>${sumPreTaxInPeriod.toLocaleString()}đ</b> | VAT khấu trừ [ct24] = <b style="color:#dc2626;">${sumVatInPeriod.toLocaleString()}đ</b>`;
-      }
-
-      // Tự động điền Tổng VAT Đầu vào vào ô dnInputVat của Trạm Xuất XML HTKK 01/GTGT
+      if (badgeEl) badgeEl.innerHTML = `📌 Tổng HĐ Đầu vào: [ct23] = <b>${sumPre.toLocaleString()}đ</b> | VAT [ct24] = <b style="color:#dc2626;">${sumVat.toLocaleString()}đ</b>`;
       const dnVatInp = document.getElementById('dnInputVat');
-      if (dnVatInp && sumVatInPeriod > 0) {
-        dnVatInp.value = sumVatInPeriod;
-        dnVatInp.dataset.preTaxCt23 = sumPreTaxInPeriod;
+      if (dnVatInp && sumVat > 0) {
+        dnVatInp.value = sumVat;
         if (typeof window.updateXmlTaxPreview === 'function') window.updateXmlTaxPreview();
       }
     };
 
-    // Tích hợp Doanh thu Grab / Shopee vào Báo cáo Thuế & Tờ khai XML HTKK
     const origGetTaxReportDataV22 = getTaxReportData;
     getTaxReportData = function() {
       const base = origGetTaxReportDataV22();
       const includeExt = document.getElementById('chkIncludeExtRevInTax')?.checked !== false;
-
       let ext5610 = 0, ext5630 = 0, extFee = 0, extOrders = 0;
       const extRowsHtml = [];
 
       Object.keys(externalRevenuesCache).forEach(k => {
         const r = externalRevenuesCache[k];
         if (!r || !isDateMatchingCurrentReportPeriod(r.date)) return;
-        const r5610 = Number(r.rev5610) || 0;
-        const r5630 = Number(r.rev5630) || 0;
-        const fee = Number(r.platformFee) || 0;
+        const r5610 = Number(r.rev5610) || 0, r5630 = Number(r.rev5630) || 0, fee = Number(r.platformFee) || 0;
         const net = Number(r.netReceived) || Math.max(0, r5610 + r5630 - fee);
         const cnt = Number(r.orderCount) || 1;
-
-        ext5610 += r5610;
-        ext5630 += r5630;
-        extFee += fee;
-        extOrders += cnt;
-
+        ext5610 += r5610; ext5630 += r5630; extFee += fee; extOrders += cnt;
         if (includeExt) {
-          base.total5610 += r5610;
-          base.total5630 += r5630;
-          base.totalTaxable += (r5610 + r5630);
-          base.count += cnt;
+          base.total5610 += r5610; base.total5630 += r5630; base.totalTaxable += (r5610 + r5630); base.count += cnt;
           if (!base.daily[r.date]) base.daily[r.date] = { count: 0, tax5610: 0, tax5630: 0, ship: 0 };
-          base.daily[r.date].count += cnt;
-          base.daily[r.date].tax5610 += r5610;
-          base.daily[r.date].tax5630 += r5630;
+          base.daily[r.date].count += cnt; base.daily[r.date].tax5610 += r5610; base.daily[r.date].tax5630 += r5630;
         }
-
-        const platBadge = r.platform === 'GRAB'
-          ? '<span style="background:#dcfce7; color:#166534; padding:2px 8px; border-radius:6px; font-weight:800;">🟢 GrabFood</span>'
-          : (r.platform === 'SHOPEE_FOOD'
-              ? '<span style="background:#ffedd5; color:#c2410c; padding:2px 8px; border-radius:6px; font-weight:800;">🟠 ShopeeFood</span>'
-              : '<span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:6px; font-weight:800;">🛍️ Shopee Seller</span>');
-
-        extRowsHtml.push(`
-          <tr>
-            <td><b>${r.date}</b></td>
-            <td>${platBadge}</td>
-            <td style="text-align:center; font-weight:800;">${cnt}</td>
-            <td style="text-align:right; font-weight:800; color:#1e5e3a;">${r5610.toLocaleString()}đ</td>
-            <td style="text-align:right; font-weight:800; color:#d97706;">${r5630.toLocaleString()}đ</td>
-            <td style="text-align:right; font-weight:800; color:#dc2626;">-${fee.toLocaleString()}đ</td>
-            <td style="text-align:right; font-weight:900; color:#15803d; background:#f0fdf4;">${net.toLocaleString()}đ</td>
-            <td style="font-size:0.8rem;">${r.note || ''}</td>
-            <td><button type="button" onclick="deleteExternalRevenueRecord('${k}')" style="background:#fee2e2; color:#b91c1c; border:none; padding:4px 8px; border-radius:6px; font-weight:700; cursor:pointer;">Xóa</button></td>
-          </tr>
-        `);
+        extRowsHtml.push(`<tr><td><b>${r.date}</b></td><td><b>${r.platform}</b></td><td style="text-align:center;">${cnt}</td><td style="text-align:right; font-weight:800; color:#1e5e3a;">${r5610.toLocaleString()}đ</td><td style="text-align:right; font-weight:800; color:#d97706;">${r5630.toLocaleString()}đ</td><td style="text-align:right; color:#dc2626;">-${fee.toLocaleString()}đ</td><td style="text-align:right; font-weight:900; color:#15803d;">${net.toLocaleString()}đ</td><td>${r.note || ''}</td><td><button type="button" onclick="deleteExternalRevenueRecord('${k}')" style="background:#fee2e2; color:#b91c1c; border:none; padding:4px 8px; border-radius:6px; cursor:pointer;">Xóa</button></td></tr>`);
       });
 
       const extTbody = document.getElementById('extPlatformRevTableBody');
-      if (extTbody) {
-        extTbody.innerHTML = extRowsHtml.join('') || '<tr><td colspan="9" style="text-align:center; padding:14px; color:#64748b;">Chưa có báo cáo doanh thu Grab / Shopee nào trong kỳ này.</td></tr>';
-      }
+      if (extTbody) extTbody.innerHTML = extRowsHtml.join('') || '<tr><td colspan="9" style="text-align:center; padding:14px; color:#64748b;">Chưa có báo cáo Grab / Shopee trong kỳ này.</td></tr>';
       const extTag = document.getElementById('extRevSummaryTag');
-      if (extTag) {
-        extTag.innerHTML = `📊 Tổng Sàn kỳ này: <b>${extOrders} đơn</b> | DT 5610: <b>${ext5610.toLocaleString()}đ</b> | DT 5630: <b>${ext5630.toLocaleString()}đ</b> | Phí sàn: <b style="color:#dc2626;">-${extFee.toLocaleString()}đ</b>`;
-      }
-
+      if (extTag) extTag.innerHTML = `📊 Tổng Sàn: <b>${extOrders} đơn</b> | DT 5610: <b>${ext5610.toLocaleString()}đ</b> | DT 5630: <b>${ext5630.toLocaleString()}đ</b> | Phí sàn: <b style="color:#dc2626;">-${extFee.toLocaleString()}đ</b>`;
       return base;
     };
 
