@@ -838,10 +838,27 @@
                 </div>
               </div>
 
-              <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
-                <span style="font-size:0.75rem; font-weight:800; color:#0f172a;">Link Web App Google Apps Script (Tự động 24/7):</span>
-                <input type="text" id="cfgGmailAppsScriptUrl" placeholder="Dán URL Web App Google Apps Script (https://script.google.com/macros/s/.../exec) vào đây để đồng bộ 1-chạm..." style="flex:1; min-width:240px; padding:6px 10px; border:1px solid #93c5fd; border-radius:6px; font-size:0.78rem; background:#fff;">
-                <button type="button" onclick="saveGmailAppsScriptUrl()" style="background:#0f172a; color:#ffd800; border:none; padding:6px 12px; border-radius:6px; font-weight:800; font-size:0.75rem; cursor:pointer;">💾 Lưu Link</button>
+              <div style="background:#ffffff; border:1px solid #bae6fd; border-radius:8px; padding:10px; margin-bottom:8px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+                  <span style="font-size:0.78rem; font-weight:800; color:#0369a1;">🔗 CẤU HÌNH KẾT NỐI ĐỒNG THỜI 2 NICK GMAIL CỦA QUÁN:</span>
+                  <button type="button" onclick="copyDualGmailAppsScriptCode()" style="background:#0f172a; color:#ffd800; border:1px solid #ffd800; padding:5px 12px; border-radius:6px; font-weight:900; font-size:0.76rem; cursor:pointer;">
+                    📋 Copy Mã Google Apps Script (Dùng Chung Cho Cả 2 Gmail)
+                  </button>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;" class="edit-modal-grid">
+                  <div>
+                    <label style="font-size:0.74rem; font-weight:800; color:#166534;">🟢 1. Gmail nhận Grab (long130381@gmail.com):</label>
+                    <input type="text" id="cfgGmailGrabScriptUrl" placeholder="Dán Link Web App từ nick long130381@gmail.com..." style="width:100%; padding:6px 8px; border:1px solid #86efac; border-radius:6px; font-size:0.76rem; margin-top:3px;">
+                  </div>
+                  <div>
+                    <label style="font-size:0.74rem; font-weight:800; color:#c2410c;">🟠 2. Gmail nhận Shopee (hoanghuynhhuybao@gmail.com):</label>
+                    <input type="text" id="cfgGmailShopeeScriptUrl" placeholder="Dán Link Web App từ nick hoanghuynhhuybao@gmail.com..." style="width:100%; padding:6px 8px; border:1px solid #fdba74; border-radius:6px; font-size:0.76rem; margin-top:3px;">
+                  </div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-top:8px;">
+                  <small style="color:#475569; font-size:0.74rem;">💡 <b>Mẹo nhanh:</b> Bạn cũng có thể vào Gmail <code>hoanghuynhhuybao@gmail.com</code> bật Chuyển tiếp tự động (Forward) thư Shopee sang <code>long130381@gmail.com</code> để chỉ cần dán 1 Link số 1!</small>
+                  <button type="button" onclick="saveDualGmailAppsScriptUrls()" style="background:#0284c7; color:#fff; border:none; padding:6px 14px; border-radius:6px; font-weight:800; font-size:0.76rem; cursor:pointer;">💾 Lưu Cả 2 Link Gmail</button>
+                </div>
               </div>
 
               <!-- Ô dán nhanh nội dung email Grab/Shopee để AI tự bóc tách số tiền -->
@@ -952,10 +969,27 @@
                 </div>
               </div>
 
-              <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
-                <span style="font-size:0.75rem; font-weight:800; color:#0f172a;">Link Web App Google Apps Script (Tự động 24/7):</span>
-                <input type="text" id="cfgGmailAppsScriptUrl" placeholder="Dán URL Web App Google Apps Script (https://script.google.com/macros/s/.../exec) vào đây để đồng bộ 1-chạm..." style="flex:1; min-width:240px; padding:6px 10px; border:1px solid #93c5fd; border-radius:6px; font-size:0.78rem; background:#fff;">
-                <button type="button" onclick="saveGmailAppsScriptUrl()" style="background:#0f172a; color:#ffd800; border:none; padding:6px 12px; border-radius:6px; font-weight:800; font-size:0.75rem; cursor:pointer;">💾 Lưu Link</button>
+              <div style="background:#ffffff; border:1px solid #bae6fd; border-radius:8px; padding:10px; margin-bottom:8px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+                  <span style="font-size:0.78rem; font-weight:800; color:#0369a1;">🔗 CẤU HÌNH KẾT NỐI ĐỒNG THỜI 2 NICK GMAIL CỦA QUÁN:</span>
+                  <button type="button" onclick="copyDualGmailAppsScriptCode()" style="background:#0f172a; color:#ffd800; border:1px solid #ffd800; padding:5px 12px; border-radius:6px; font-weight:900; font-size:0.76rem; cursor:pointer;">
+                    📋 Copy Mã Google Apps Script (Dùng Chung Cho Cả 2 Gmail)
+                  </button>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;" class="edit-modal-grid">
+                  <div>
+                    <label style="font-size:0.74rem; font-weight:800; color:#166534;">🟢 1. Gmail nhận Grab (long130381@gmail.com):</label>
+                    <input type="text" id="cfgGmailGrabScriptUrl" placeholder="Dán Link Web App từ nick long130381@gmail.com..." style="width:100%; padding:6px 8px; border:1px solid #86efac; border-radius:6px; font-size:0.76rem; margin-top:3px;">
+                  </div>
+                  <div>
+                    <label style="font-size:0.74rem; font-weight:800; color:#c2410c;">🟠 2. Gmail nhận Shopee (hoanghuynhhuybao@gmail.com):</label>
+                    <input type="text" id="cfgGmailShopeeScriptUrl" placeholder="Dán Link Web App từ nick hoanghuynhhuybao@gmail.com..." style="width:100%; padding:6px 8px; border:1px solid #fdba74; border-radius:6px; font-size:0.76rem; margin-top:3px;">
+                  </div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-top:8px;">
+                  <small style="color:#475569; font-size:0.74rem;">💡 <b>Mẹo nhanh:</b> Bạn cũng có thể vào Gmail <code>hoanghuynhhuybao@gmail.com</code> bật Chuyển tiếp tự động (Forward) thư Shopee sang <code>long130381@gmail.com</code> để chỉ cần dán 1 Link số 1!</small>
+                  <button type="button" onclick="saveDualGmailAppsScriptUrls()" style="background:#0284c7; color:#fff; border:none; padding:6px 14px; border-radius:6px; font-weight:800; font-size:0.76rem; cursor:pointer;">💾 Lưu Cả 2 Link Gmail</button>
+                </div>
               </div>
 
               <!-- Ô dán nhanh nội dung email Grab/Shopee để AI tự bóc tách số tiền -->
@@ -8032,6 +8066,375 @@ window.openInstallGuideModal = function() {
       update(ref(db), updates).then(() => {
         alert("✅ Đã đồng bộ thành công toàn bộ 7 Hóa đơn đầu vào (Tổng tiền trước thuế: 17.748.174đ | VAT khấu trừ: 1.026.654đ) và Doanh thu ShopeeFood (1.916.000đ) từ Bảng Kê Google Drive vào POS!");
       });
+    };
+  
+    // =========================================================================
+    // 25. BAN VA VOICE ENGINE V3: TRIET TIEU 100% LOI NHAM CHU RA SO LUNG TUNG
+    //     & BO PHUC HOI TU DONG AM TIENG VIET (4->BUN, 5->NAM, 8->TAM/TAC, 9->CHIEN)
+    // =========================================================================
+
+    // 1. Phuc hoi cac con so bi Google Speech-to-Text nghe nham tu ten mon an chay
+    function restoreMisheardFoodDigits(rawStr) {
+      let s = ' ' + String(rawStr || '').toLowerCase() + ' ';
+
+      // Khắc phục lỗi Google STT nghe chữ "bún" thành số "4" hoặc "bốn"
+      s = s.replace(/\b(?:4|bốn)\s+(mọc|thái|riêu|huế|mắm|bò\s*kho|chua|thì\s*là|chả\s*giò)/gi, ' bún $1 ');
+      // "bún 5" hoặc "4 5" -> "bún mắm"
+      s = s.replace(/\b(?:bún|bốn|4)\s+(?:5|năm)\s+nêm\b/gi, ' bún mắm nêm ');
+      s = s.replace(/\b(?:bún|bốn|4)\s+(?:5|năm)\b/gi, ' bún mắm ');
+
+      // Khắc phục lỗi Google STT nghe chữ "nấm" thành số "5" hoặc "năm"
+      s = s.replace(/\b(cháo|rau\s*củ|mì\s*ý\s*kem|kem|chả|chân|chà\s*bông|xôi\s*chà\s*bông|hũ\s*ky\s*cuộn)\s+(?:5|năm)\b/gi, ' $1 nấm ');
+      s = s.replace(/\b(?:5|năm)\s+(hương|cuộn\s*thính|xúc\s*bánh\s*đa|chiên\s*xù|bào\s*ngư)/gi, ' nấm $1 ');
+
+      // Khắc phục lỗi Google STT nghe chữ "chiên" thành số "9" hoặc "chín"
+      s = s.replace(/\b(chả\s*giò|bào\s*ngư|khoai\s*tây|phô\s*mai|phô\s*mai\s*viên|hoành\s*thánh|đậu\s*hũ|cơm|nấm)\s+(?:9|chín)\b/gi, ' $1 chiên ');
+
+      // Khắc phục lỗi Google STT nghe chữ "tấm" / "tắc" thành số "8" hoặc "tám"
+      s = s.replace(/\bcơm\s+(?:8|tám)\b/gi, ' cơm tấm ');
+      s = s.replace(/\b(trà|suối)\s+(?:8|tám)\b/gi, ' $1 tắc ');
+
+      // Khắc phục lỗi Google STT nghe chữ "muối" / "mì" thành số "10" hoặc "mười"
+      s = s.replace(/\b(cafe|cà\s*phê|cacao|ca\s*cao)\s+(?:10|mười)\b/gi, ' $1 muối ');
+      s = s.replace(/\b(?:10|mười)\s+(quảng|tiềm|hoành\s*thánh|trộn|ý|cay)/gi, ' mì $1 ');
+
+      // Khắc phục lỗi Google STT nghe chữ "sữa" thành số "6" hoặc "sáu"
+      s = s.replace(/\b(cafe|cà\s*phê|cacao|ca\s*cao)\s+(?:6|sáu)\b/gi, ' $1 sữa ');
+
+      // Khắc phục lỗi Google STT nghe chữ "mít" / "mía" thành số "1" hoặc "một"
+      s = s.replace(/\bchả\s+(?:1|một)\s+non\b/gi, ' chả mít non ');
+      s = s.replace(/\bnước\s+(?:1|một)\b/gi, ' nước mía ');
+
+      // Khắc phục lỗi Google STT nghe chữ "hỏi" / "hội" thành số "2"
+      s = s.replace(/\bbánh\s+(?:2|hai)\b/gi, ' bánh hỏi ');
+      s = s.replace(/\btrà\s+(?:7|bảy)\b/gi, ' trà ổi ');
+      s = s.replace(/\bnước\s*ép\s+(?:7|bảy)\b/gi, ' ép ổi ');
+      s = s.replace(/\b(?:3|ba)\s+xỉu\b/gi, ' bạc xỉu ');
+      s = s.replace(/\b(?:3|ba)\s+ngư\b/gi, ' bào ngư ');
+
+      return s.replace(/\s+/g, ' ').trim();
+    }
+
+    // 2. Ham chuyen chu so sang so AN TOAN TUYET DOI (Khong dung \b cua JS, chi doi khi dung truoc ten mon hoac don vi!)
+    function safeConvertSpokenQuantityWords(str) {
+      let s = ' ' + restoreMisheardFoodDigits(str) + ' ';
+      const wordToNum = {
+        'mười': '10', 'chục': '10', 'chín': '9', 'tám': '8', 'bảy': '7', 'bẩy': '7',
+        'sáu': '6', 'năm': '5', 'bốn': '4', 'tư': '4', 'ba': '3', 'hai': '2', 'một': '1'
+      };
+      const tokens = s.trim().split(/\s+/);
+      const unitAndFoodStarters = new Set([
+        'tô', 'phần', 'ly', 'chén', 'dĩa', 'đĩa', 'hộp', 'chai', 'lon', 'suất', 'nồi', 'cái', 'ổ',
+        'bún', 'mì', 'phở', 'hủ', 'bánh', 'cơm', 'cháo', 'xôi', 'chả', 'bào', 'khoai', 'phô',
+        'hoành', 'đậu', 'nấm', 'nộm', 'gỏi', 'bò', 'lẩu', 'chân', 'gà', 'pate', 'pa', 'rong',
+        'sườn', 'mọc', 'cafe', 'cà', 'bạc', 'cacao', 'ca', 'latte', 'matcha', 'trà', 'ép', 'nước',
+        'yaourt', 'sữa', 'suối', 'soda', 'thêm', 'topping', 'bàn', 'số', 'vip'
+      ]);
+
+      for (let i = 0; i < tokens.length; i++) {
+        const w = tokens[i];
+        const nextW = (tokens[i + 1] || '').replace(/[.,;!?]/g, '');
+        const prevW = (tokens[i - 1] || '').replace(/[.,;!?]/g, '');
+        if (wordToNum[w]) {
+          // Chi doi thanh so neu tu dung ngay sau "bàn/số" HOAC dung ngay truoc don vi / ten mon an!
+          if (prevW === 'bàn' || prevW === 'số' || prevW === 'vip' || unitAndFoodStarters.has(nextW)) {
+            tokens[i] = wordToNum[w];
+          }
+        }
+      }
+      return tokens.join(' ');
+    }
+
+    // Ghi de ham replaceAccentedVietnameseNumbers bang ban an toan tuyet doi V3
+    replaceAccentedVietnameseNumbers = function(strWithAccents) {
+      return safeConvertSpokenQuantityWords(strWithAccents);
+    };
+
+    // 3. Nang cap extractDishesFromVoiceSegment: Dung ranh gioi khoang trang (Khong dung \b) + Goi y mon gan dung
+    extractDishesFromVoiceSegment = function(segmentText) {
+      if (!segmentText || !segmentText.trim()) return [];
+      const segAcc = safeConvertSpokenQuantityWords(normKeepAccent(segmentText));
+      const menuList = getUnifiedMenuList();
+      const phraseDictionary = [];
+
+      menuList.forEach(item => {
+        const synList = VOICE_EXACT_SYNONYMS_BY_ID[item.id] ? [...VOICE_EXACT_SYNONYMS_BY_ID[item.id]] : [item.name.toLowerCase()];
+        const cleanFullName = normKeepAccent(item.name);
+        if (!synList.includes(cleanFullName)) synList.push(cleanFullName);
+        if (item.isCustom) {
+          const shortCustom = cleanFullName.replace(/\b(chay)\b/gi, '').trim();
+          if (shortCustom.length >= 4 && !synList.includes(shortCustom)) synList.push(shortCustom);
+        }
+        synList.forEach(syn => {
+          const synAccented = normKeepAccent(syn);
+          const synNoAcc = normNoAccent(syn);
+          if (synAccented.length >= 3) {
+            phraseDictionary.push({
+              accentedAlias: synAccented,
+              noAccentAlias: synNoAcc,
+              wordCount: synAccented.split(' ').length,
+              charLen: synAccented.length,
+              item: item
+            });
+          }
+        });
+      });
+
+      phraseDictionary.sort((a, b) => (b.wordCount - a.wordCount) || (b.charLen - a.charLen));
+
+      let workAcc = ' ' + segAcc.replace(/\s+/g, ' ').trim() + ' ';
+      const results = [];
+
+      // VONG 1: Khop co dau chinh xac
+      phraseDictionary.forEach(entry => {
+        const esc = entry.accentedAlias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const rx = new RegExp('(?:^|\\s)(?:(\\d+)\\s*(?:tô|phần|ly|chén|dĩa|đĩa|hộp|chai|lon|suất|nồi|cái|ổ)?\\s+)?(' + esc + ')(?=\\s|$)', 'i');
+        let m;
+        while ((m = workAcc.match(rx)) !== null) {
+          const qty = m[1] ? Math.min(50, Math.max(1, parseInt(m[1]))) : 1;
+          results.push({ item: entry.item, qty: qty });
+          workAcc = workAcc.replace(m[0], ' # ');
+        }
+      });
+
+      // VONG 2: Khop khong dau cho phan con lai
+      let workNoAcc = ' ' + normNoAccent(workAcc.replace(/#/g, ' ')) + ' ';
+      if (workNoAcc.trim().length >= 3) {
+        phraseDictionary.forEach(entry => {
+          const escNo = entry.noAccentAlias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const rxNo = new RegExp('(?:^|\\s)(?:(\\d+)\\s*(?:to|phan|ly|chen|dia|hop|chai|lon|suat|noi|cai|o)?\\s+)?(' + escNo + ')(?=\\s|$)', 'i');
+          let m2;
+          while ((m2 = workNoAcc.match(rxNo)) !== null) {
+            const qty = m2[1] ? Math.min(50, Math.max(1, parseInt(m2[1]))) : 1;
+            results.push({ item: entry.item, qty: qty });
+            workNoAcc = workNoAcc.replace(m2[0], ' # ');
+          }
+        });
+      }
+
+      return results;
+    };
+
+    // 4. Bo đệm Gom Câu Thông Minh (Smart Voice Debounce 1.1s): Chờ nhân viên đọc trọn câu mới xử lý 1 lần!
+    let voiceBufferTimer = null;
+    let voiceAccumulatedSentences = [];
+
+    window.toggleVoiceOrderRecognition = function() {
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const btnMain = document.getElementById('btnStartVoiceOrder');
+      const btnText = document.getElementById('voiceMicBtnText');
+      const fabBtn = document.getElementById('floatingVoiceFab');
+      const fabTxt = document.getElementById('floatingVoiceFabText');
+      const liveBar = document.getElementById('voiceLiveInterimBar');
+      const liveTxt = document.getElementById('voiceLiveInterimText');
+
+      if (!SpeechRec) {
+        const manualInp = document.getElementById('voiceManualTranscriptInput');
+        if (manualInp) {
+          manualInp.focus();
+          alert("📱 Hãy bấm biểu tượng Micro (🎤) trên bàn phím điện thoại tại ô nhập để đọc món!");
+        }
+        return;
+      }
+
+      if (isVoiceListening) {
+        isVoiceListening = false;
+        if (voiceBufferTimer) {
+          clearTimeout(voiceBufferTimer);
+          voiceBufferTimer = null;
+        }
+        if (voiceAccumulatedSentences.length > 0) {
+          const fullCmd = voiceAccumulatedSentences.join(' ');
+          voiceAccumulatedSentences = [];
+          window.parseAndExecuteVoiceOrder(fullCmd);
+        }
+        if (speechRecognizer) {
+          try { speechRecognizer.stop(); } catch (_) {}
+        }
+        if (btnMain) btnMain.classList.remove('listening');
+        if (btnText) btnText.innerText = 'BẤM VÀO ĐÂY ĐỂ BẮT ĐẦU ĐỌC MÓN (NGHE LIÊN TỤC)';
+        if (fabBtn) fabBtn.classList.remove('listening');
+        if (fabTxt) fabTxt.innerText = 'Đọc Order';
+        if (liveBar) liveBar.style.display = 'none';
+        return;
+      }
+
+      isVoiceListening = true;
+      voiceAccumulatedSentences = [];
+      speechRecognizer = new SpeechRec();
+      speechRecognizer.lang = 'vi-VN';
+      speechRecognizer.continuous = true;
+      speechRecognizer.interimResults = true;
+      speechRecognizer.maxAlternatives = 3;
+
+      speechRecognizer.onstart = () => {
+        playHardwareBeep();
+        if (btnMain) btnMain.classList.add('listening');
+        if (btnText) btnText.innerText = '⏹️ ĐANG NGHE... HÃY ĐỌC TỰ NHIÊN (BẤM ĐỂ DỪNG)';
+        if (fabBtn) fabBtn.classList.add('listening');
+        if (fabTxt) fabTxt.innerText = 'Đang nghe...';
+        if (liveBar) liveBar.style.display = 'block';
+        if (liveTxt) liveTxt.innerText = 'Hãy đọc tên bàn và tên món...';
+      };
+
+      speechRecognizer.onresult = (event) => {
+        let interimTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const res = event.results[i];
+          // Chọn phương án có nhiều chữ cái tên món nhất trong 3 alternatives của Google (Tránh phương án toàn số)
+          let bestTranscript = res[0].transcript;
+          for (let a = 0; a < res.length; a++) {
+            const cand = res[a].transcript;
+            const fixedCand = restoreMisheardFoodDigits(cand);
+            if (extractDishesFromVoiceSegment(fixedCand).length > extractDishesFromVoiceSegment(restoreMisheardFoodDigits(bestTranscript)).length) {
+              bestTranscript = cand;
+            }
+          }
+
+          if (res.isFinal) {
+            const repaired = restoreMisheardFoodDigits(bestTranscript.trim());
+            voiceAccumulatedSentences.push(repaired);
+            if (liveTxt) liveTxt.innerText = voiceAccumulatedSentences.join(' ');
+
+            if (voiceBufferTimer) clearTimeout(voiceBufferTimer);
+            voiceBufferTimer = setTimeout(() => {
+              if (voiceAccumulatedSentences.length > 0) {
+                const finalJoined = voiceAccumulatedSentences.join(' ');
+                voiceAccumulatedSentences = [];
+                window.parseAndExecuteVoiceOrder(finalJoined);
+              }
+            }, 950);
+          } else {
+            interimTranscript += restoreMisheardFoodDigits(bestTranscript);
+          }
+        }
+        if (interimTranscript && liveTxt) {
+          liveTxt.innerText = (voiceAccumulatedSentences.join(' ') + ' ' + interimTranscript).trim();
+        }
+      };
+
+      speechRecognizer.onerror = (event) => {
+        if (event.error === 'not-allowed') {
+          isVoiceListening = false;
+          alert("⚠️ Vui lòng cấp quyền Micro (Allow) cho trình duyệt!");
+        }
+      };
+
+      speechRecognizer.onend = () => {
+        if (isVoiceListening) {
+          try { speechRecognizer.start(); } catch (_) {}
+        } else {
+          if (btnMain) btnMain.classList.remove('listening');
+          if (btnText) btnText.innerText = 'BẤM VÀO ĐÂY ĐỂ BẮT ĐẦU ĐỌC MÓN (NGHE LIÊN TỤC)';
+          if (fabBtn) fabBtn.classList.remove('listening');
+          if (fabTxt) fabTxt.innerText = 'Đọc Order';
+          if (liveBar) liveBar.style.display = 'none';
+        }
+      };
+
+      try { speechRecognizer.start(); } catch (_) {}
+    };
+
+    // =========================================================================
+    // 26. QUAN LY DONG BO DONG THOI 2 NICK GMAIL:
+    //   - Nick 1: long130381@gmail.com (Nhan GrabMerchant)
+    //   - Nick 2: hoanghuynhhuybao@gmail.com (Nhan Shopee / ShopeeFood)
+    // =========================================================================
+    onValue(ref(db, 'restaurant_config/gmail_dual_sync'), (snap) => {
+      const cfg = snap.val() || {};
+      const grabInp = document.getElementById('cfgGmailGrabScriptUrl');
+      const shopeeInp = document.getElementById('cfgGmailShopeeScriptUrl');
+      if (grabInp && cfg.grabScriptUrl) grabInp.value = cfg.grabScriptUrl;
+      if (shopeeInp && cfg.shopeeScriptUrl) shopeeInp.value = cfg.shopeeScriptUrl;
+    });
+
+    window.saveDualGmailAppsScriptUrls = function() {
+      const grabUrl = (document.getElementById('cfgGmailGrabScriptUrl')?.value || '').trim();
+      const shopeeUrl = (document.getElementById('cfgGmailShopeeScriptUrl')?.value || '').trim();
+      set(ref(db, 'restaurant_config/gmail_dual_sync'), {
+        grabAccount: 'long130381@gmail.com',
+        grabScriptUrl: grabUrl,
+        shopeeAccount: 'hoanghuynhhuybao@gmail.com',
+        shopeeScriptUrl: shopeeUrl,
+        updatedAt: new Date().toISOString()
+      }).then(() => {
+        alert("✅ Đã lưu cấu hình kết nối cho cả 2 tài khoản Gmail:\n• Grab: long130381@gmail.com\n• Shopee: hoanghuynhhuybao@gmail.com");
+      });
+    };
+
+    window.copyDualGmailAppsScriptCode = function() {
+      const gasCode = [
+        '// ============================================================================',
+        '// TRAM DONG BO BAO CAO DOANH THU NGAY TU GMAIL -> FIREBASE HY CHAY POS',
+        '// Dung chung cho ca 2 nick: long130381@gmail.com (Grab) & hoanghuynhhuybao@gmail.com (Shopee)',
+        '// ============================================================================',
+        'const FIREBASE_DB_URL = "https://hy-chay-default-rtdb.asia-southeast1.firebasedatabase.app";',
+        '',
+        'function doGet(e) {',
+        '  const count = syncGrabAndShopeeDailyEmails();',
+        '  return ContentService.createTextOutput(JSON.stringify({ status: "OK", syncedCount: count })).setMimeType(ContentService.MimeType.JSON);',
+        '}',
+        '',
+        'function syncGrabAndShopeeDailyEmails() {',
+        '  const myEmail = (Session.getActiveUser().getEmail() || "").toLowerCase();',
+        '  const query = "(from:grab.com OR from:shopeefood.vn OR from:foody.vn OR from:shopee.vn) (doanh thu OR đối soát OR statement OR báo cáo OR thanh toán OR đơn hàng) newer_than:30d";',
+        '  const threads = GmailApp.search(query, 0, 35);',
+        '  let syncedCount = 0;',
+        '  threads.forEach(thread => {',
+        '    thread.getMessages().forEach(msg => {',
+        '      const msgId = msg.getId();',
+        '      const subject = msg.getSubject() || "";',
+        '      const from = (msg.getFrom() || "").toLowerCase();',
+        '      const body = msg.getPlainBody() || msg.getBody().replace(/<[^>]+>/g, " ");',
+        '      const fullText = (subject + " " + body).replace(/\\s+/g, " ");',
+        '      let platform = "GRAB";',
+        '      if (from.includes("shopeefood") || from.includes("foody") || fullText.toLowerCase().includes("shopeefood")) platform = "SHOPEE_FOOD";',
+        '      else if (from.includes("shopee") || myEmail.includes("hoanghuynhhuybao") || fullText.toLowerCase().includes("shopee")) platform = "SHOPEE_MALL";',
+        '      const msgDate = Utilities.formatDate(msg.getDate(), "GMT+7", "yyyy-MM-dd");',
+        '      const moneyMatches = (fullText.match(/\\b\\d{1,3}(?:[.,]\\d{3})+\\b/g) || []).map(s => parseInt(s.replace(/[.,]/g, ""), 10)).filter(n => n >= 10000 && n <= 200000000);',
+        '      if (moneyMatches.length === 0) return;',
+        '      const sorted = [...new Set(moneyMatches)].sort((a, b) => b - a);',
+        '      const grossRev = sorted[0];',
+        '      const netCandidate = sorted.find(n => n < grossRev && n >= grossRev * 0.65 && n <= grossRev * 0.92);',
+        '      const feeCandidate = sorted.find(n => n >= grossRev * 0.08 && n <= grossRev * 0.35);',
+        '      let netReceived = grossRev, platformFee = 0;',
+        '      if (netCandidate) { netReceived = netCandidate; platformFee = Math.max(0, grossRev - netReceived); }',
+        '      else if (feeCandidate) { platformFee = feeCandidate; netReceived = Math.max(0, grossRev - platformFee); }',
+        '      const ordMatch = fullText.match(/(?:số đơn|đơn hàng|tổng đơn|completed orders|orders)\\s*[:\\-]?\\s*(\\d{1,4})\\b/i);',
+        '      const orderCount = ordMatch ? Math.max(1, parseInt(ordMatch[1], 10)) : 1;',
+        '      const record = { platform, date: msgDate, orderCount, rev5610: grossRev, rev5630: 0, platformFee, netReceived, note: "[" + myEmail + "] " + subject, gmailMessageId: msgId, createdAt: new Date().toISOString() };',
+        '      UrlFetchApp.fetch(FIREBASE_DB_URL + "/external_revenues/gmail_" + msgId + ".json", { method: "put", contentType: "application/json", payload: JSON.stringify(record) });',
+        '      syncedCount++;',
+        '    });',
+        '  });',
+        '  return syncedCount;',
+        '}'
+      ].join('\n');
+
+      navigator.clipboard.writeText(gasCode).then(() => {
+        alert("✅ ĐÃ COPY MÃ GOOGLE APPS SCRIPT!\n\n👉 Cách gắn cho 2 nick (Chỉ làm 1 lần - 60 giây):\n1. Mở https://script.google.com trên nick [long130381@gmail.com] (Grab) VÀ trên nick [hoanghuynhhuybao@gmail.com] (Shopee).\n2. Dán đoạn code vừa copy vào -> Bấm nút [Chạy / Run] hàm syncGrabAndShopeeDailyEmails.\n3. Bấm biểu tượng Đồng hồ (Kích hoạt / Triggers) bên trái -> Chọn chạy tự động Mỗi giờ.\n4. Mọi báo cáo doanh thu ngày từ cả 2 nick Gmail sẽ tự động đổ thẳng vào bảng đối soát này!");
+      });
+    };
+
+    window.triggerGmailGrabShopeeSyncNow = async function() {
+      const grabUrl = (document.getElementById('cfgGmailGrabScriptUrl')?.value || '').trim();
+      const shopeeUrl = (document.getElementById('cfgGmailShopeeScriptUrl')?.value || '').trim();
+      let triggered = [];
+
+      if (grabUrl && grabUrl.startsWith('https://script.google.com')) {
+        fetch(grabUrl, { mode: 'no-cors' }).catch(() => {});
+        triggered.push('🟢 Grab (long130381@gmail.com)');
+      }
+      if (shopeeUrl && shopeeUrl.startsWith('https://script.google.com')) {
+        fetch(shopeeUrl, { mode: 'no-cors' }).catch(() => {});
+        triggered.push('🟠 Shopee (hoanghuynhhuybao@gmail.com)');
+      }
+
+      if (triggered.length > 0) {
+        alert(`📧 Đã gửi lệnh quét hộp thư tự động tới:\n${triggered.join('\n')}\n\nDữ liệu báo cáo doanh thu ngày mới nhất sẽ tự động cập nhật vào bảng bên dưới sau 3-5 giây!`);
+      } else {
+        window.copyDualGmailAppsScriptCode();
+      }
     };
   </script>
 </body>
