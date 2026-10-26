@@ -236,7 +236,19 @@
     #viewPosOrder.staff-big-mode .pos-dish-btn span:last-child { font-size: 1.05rem !important; }
     #viewPosOrder.staff-big-mode .btn-table-pill { padding: 10px 16px; font-size: 0.95rem; border-width: 2px; }
     #viewPosOrder.staff-big-mode .admin-cat-chip { padding: 9px 16px; font-size: 0.9rem; }
+      /* MODULE 22: CHIET KHAU TREN HOA DON, CHUYEN/GOP BAN, GRAB/SHOPEE & HOA DON DAU VAO */
+    .card-inline-discount-bar { background: #f0fdf4; border: 1.5px dashed #16a34a; border-radius: 8px; padding: 6px 8px; margin: 6px 0; display: flex; flex-direction: column; gap: 5px; }
+    .card-disc-chips { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+    .btn-card-disc-chip { flex: 1; min-width: 32px; background: #ffffff; color: #166534; border: 1px solid #86efac; border-radius: 6px; padding: 3px 4px; font-size: 0.72rem; font-weight: 800; cursor: pointer; transition: 0.15s; }
+    .btn-card-disc-chip.active, .btn-card-disc-chip:hover { background: #16a34a; color: #ffffff; border-color: #16a34a; }
+    .btn-move-merge-table { background: #ede9fe; color: #6d28d9; border: 1px solid #c4b5fd; padding: 5px 8px; border-radius: 6px; font-weight: 800; font-size: 0.75rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
+    .btn-move-merge-table:hover { background: #7c3aed; color: #ffffff; }
+    .ext-rev-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 12px; }
+    .inv-check-badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; }
+    .inv-valid { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+    .inv-invalid { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
 
@@ -494,7 +506,7 @@
           </div>
 
           <div class="pos-cart-panel">
-            <h3 style="margin-bottom:10px;"><span id="posOrderHeaderPrefix">Order:</span> <span id="currentSelectedTable" style="color:#d97706;">Bàn 1</span></h3>
+            <h3 style="margin-bottom:10px;"><span id="posOrderHeaderPrefix">Order:</span> <span id="currentSelectedTable" style="color:#d97706;">Bàn 1</span> <button type="button" onclick="openTableTransferMergeModal()" class="btn-move-merge-table" style="margin-left:8px; font-size:0.78rem;">&#128260; Chuyển / Gộp Bàn</button></h3>
             <div class="pos-cart-items" id="posCartItemsList"><p style="color:#94a3b8; text-align:center; padding:40px 0;">Chưa có món nào.</p></div>
             <input type="text" id="posOrderNote" placeholder="Ghi chú cho bếp (VD: Không hành, ít cay, thêm tô giấy...)" style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:10px;">
             
@@ -731,7 +743,168 @@
             </div>
           </div>
 
-<h3 style="font-size:1.05rem; color:#b91c1c; margin-bottom:8px;">🏆 BẢNG XẾP HẠNG ĐƠN HÀNG CÓ DOANH THU CAO NHẤT TRONG KỲ (CAO ➡️ THẤP)</h3>
+          <!-- MODULE 22A: TRẠM NHẬP & ĐỐI SOÁT DOANH THU SÀN GRABFOOD & SHOPEE -->
+          <div style="background:linear-gradient(135deg,#fffbeb,#fef3c7); border:2px solid #f59e0b; border-radius:14px; padding:18px; margin-bottom:22px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px; border-bottom:1px solid #fde68a; padding-bottom:10px;">
+              <div>
+                <h3 style="color:#b45309; font-size:1.06rem;">&#128757;&#128717; 1. NHẬP &amp; ĐỐI SOÁT BÁO CÁO DOANH THU GRABFOOD &amp; SHOPEE (ĐA SÀN)</h3>
+                <p style="font-size:0.8rem; color:#78350f;">Nhập doanh thu từ <b>GrabFood</b>, <b>ShopeeFood</b> hoặc <b>Shopee Seller Center</b> (Chà bông nấm hương, thực phẩm chay đóng gói) để tổng hợp doanh thu toàn công ty và tự động khấu trừ phí sàn.</p>
+              </div>
+              <label style="display:flex; align-items:center; gap:6px; background:#ffffff; padding:6px 12px; border-radius:20px; border:1px solid #f59e0b; font-size:0.8rem; font-weight:800; color:#b45309; cursor:pointer;">
+                <input type="checkbox" id="chkIncludeExtRevInTax" checked onchange="renderShiftReport()" style="width:16px; height:16px;">
+                Gộp Doanh thu Grab/Shopee vào Tờ khai Thuế XML (5610/5630)
+              </label>
+            </div>
+
+            <div class="ext-rev-grid" style="background:#ffffff; padding:12px; border-radius:10px; border:1px solid #fde68a;">
+              <div>
+                <label style="font-size:0.75rem; font-weight:800; color:#0f172a;">Chọn Sàn TMĐT / App (*):</label>
+                <select id="extPlatformSelect" style="width:100%; padding:8px; border:1.5px solid #f59e0b; border-radius:6px; font-weight:800; margin-top:3px;">
+                  <option value="GRAB">&#128994; GrabFood (Giao đồ ăn/uống)</option>
+                  <option value="SHOPEE_FOOD">&#128992; ShopeeFood (Giao đồ ăn/uống)</option>
+                  <option value="SHOPEE_MALL">&#128717; Shopee Seller Center (Đồ chay khô/Đóng gói)</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:0.75rem; font-weight:800; color:#0f172a;">Ngày Báo Cáo (*):</label>
+                <input type="date" id="extRevDateInput" style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:6px; font-weight:700; margin-top:3px;">
+              </div>
+              <div>
+                <label style="font-size:0.75rem; font-weight:800; color:#0f172a;">Số lượng đơn hoàn tất:</label>
+                <input type="number" id="extRevOrderCount" value="1" min="1" style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:6px; font-weight:700; margin-top:3px;">
+              </div>
+              <div>
+                <label style="font-size:0.75rem; font-weight:800; color:#1e5e3a;">Doanh thu 5610 (Đồ ăn/Thực phẩm chay):</label>
+                <input type="number" id="extRev5610Input" value="0" step="1000" oninput="calcExtNetPreview()" style="width:100%; padding:7px; border:1.5px solid #16a34a; border-radius:6px; font-weight:800; color:#1e5e3a; margin-top:3px;">
+              </div>
+              <div>
+                <label style="font-size:0.75rem; font-weight:800; color:#d97706;">Doanh thu 5630 (Đồ uống BAL'S HOUSE):</label>
+                <input type="number" id="extRev5630Input" value="0" step="1000" oninput="calcExtNetPreview()" style="width:100%; padding:7px; border:1.5px solid #d97706; border-radius:6px; font-weight:800; color:#d97706; margin-top:3px;">
+              </div>
+              <div>
+                <label style="font-size:0.75rem; font-weight:800; color:#dc2626;">Phí chiết khấu sàn thu (VNĐ):</label>
+                <input type="number" id="extRevFeeInput" value="0" step="1000" oninput="calcExtNetPreview()" placeholder="VD: 20% - 25%" style="width:100%; padding:7px; border:1px solid #ef4444; border-radius:6px; font-weight:800; color:#dc2626; margin-top:3px;">
+              </div>
+              <div>
+                <label style="font-size:0.75rem; font-weight:800; color:#0284c7;">Thực nhận về TK Ngân hàng:</label>
+                <input type="text" id="extRevNetPreview" value="0đ" readonly style="width:100%; padding:7px; border:1px solid #bae6fd; border-radius:6px; font-weight:900; color:#0369a1; background:#f0f9ff; margin-top:3px;">
+              </div>
+              <div>
+                <label style="font-size:0.75rem; font-weight:800; color:#475569;">Mã đối soát / Ghi chú:</label>
+                <input type="text" id="extRevNoteInput" placeholder="VD: Báo cáo ca chiều Grab..." style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:6px; margin-top:3px;">
+              </div>
+            </div>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:10px;">
+              <button type="button" onclick="saveExternalPlatformRevenue()" style="background:#d97706; color:#fff; border:none; padding:10px 18px; border-radius:8px; font-weight:800; cursor:pointer; font-size:0.88rem;">
+                &#128190; LƯU BÁO CÁO GRAB / SHOPEE VÀO SỔ KẾ TOÁN
+              </button>
+              <label style="background:#0284c7; color:#fff; padding:10px 16px; border-radius:8px; font-weight:800; font-size:0.84rem; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+                &#128194; Nhập Nhanh Từ File CSV / Excel Sàn (Grab/Shopee)
+                <input type="file" accept=".csv,.txt" style="display:none;" onchange="importExternalPlatformCSV(this)">
+              </label>
+              <span id="extRevSummaryTag" style="margin-left:auto; font-size:0.84rem; font-weight:800; color:#166534;"></span>
+            </div>
+
+            <table class="report-table" style="margin-top:12px; background:#fff; border-radius:8px; overflow:hidden;">
+              <thead>
+                <tr style="background:#fef3c7; color:#92400e;">
+                  <th>Ngày</th>
+                  <th>Kênh Bán</th>
+                  <th style="text-align:center;">Số Đơn</th>
+                  <th style="text-align:right;">DT 5610 (Đồ Chay)</th>
+                  <th style="text-align:right;">DT 5630 (Đồ Uống)</th>
+                  <th style="text-align:right; color:#dc2626;">Phí Sàn Khấu Trừ</th>
+                  <th style="text-align:right; color:#15803d;">Thực Nhận Về TK</th>
+                  <th>Ghi Chú</th>
+                  <th>Xóa</th>
+                </tr>
+              </thead>
+              <tbody id="extPlatformRevTableBody"></tbody>
+            </table>
+          </div>
+
+          <!-- MODULE 22B: TRẠM NHẬP HÓA ĐƠN ĐẦU VÀO BẰNG FILE PDF / XML / ẢNH & TỰ ĐỘNG KIỂM TRA CẤU TRÚC -->
+          <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7); border:2px solid #16a34a; border-radius:14px; padding:18px; margin-bottom:22px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px; border-bottom:1px solid #86efac; padding-bottom:10px;">
+              <div>
+                <h3 style="color:#166534; font-size:1.06rem;">&#129534; 2. TRẠM NHẬP HÓA ĐƠN ĐẦU VÀO BẰNG FILE PDF / XML / ẢNH &amp; KIỂM TRA CẤU TRÚC TỰ ĐỘNG</h3>
+                <p style="font-size:0.8rem; color:#14532d;">Tải lên file <b>PDF</b>, <b>XML</b> hoặc <b>Ảnh chụp hóa đơn</b>. Hệ thống tự động kiểm tra 6 tiêu chí pháp lý: <b>Tên HĐ, Ký hiệu mẫu số (VD: 1C26...), Số HĐ, Ngày giờ, MST Người mua (3401289271)</b> và tự động cộng VAT đầu vào lên Tờ khai 01/GTGT.</p>
+              </div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <label style="background:#15803d; color:#fff; padding:10px 16px; border-radius:10px; font-weight:900; font-size:0.86rem; cursor:pointer; box-shadow:0 4px 12px rgba(21,128,61,0.25);">
+                  &#128196; TẢI FILE HÓA ĐƠN (PDF / XML / ẢNH) ĐỂ KIỂM TRA NGAY
+                  <input type="file" id="inputInvoiceFilePicker" accept=".pdf,.xml,image/*" style="display:none;" onchange="handleInputInvoiceFileUpload(this)">
+                </label>
+              </div>
+            </div>
+
+            <!-- KẾT QUẢ KIỂM TRA CẤU TRÚC HÓA ĐƠN TỰ ĐỘNG -->
+            <div id="invoiceAuditResultBanner" style="display:none; padding:12px; border-radius:10px; margin-bottom:12px; font-size:0.84rem; line-height:1.5;"></div>
+
+            <!-- BẢNG THÔNG SỐ BÓC TÁCH TỪ HÓA ĐƠN (CÓ THỂ CHỈNH SỬA TRƯỚC KHI LƯU) -->
+            <div class="ext-rev-grid" style="background:#ffffff; padding:12px; border-radius:10px; border:1px solid #86efac;">
+              <div>
+                <label style="font-size:0.74rem; font-weight:800;">1. Tên Hóa Đơn (*):</label>
+                <input type="text" id="invNameInput" value="HÓA ĐƠN GIÁ TRỊ GIA TĂNG" oninput="validateInputInvoiceRealtime()" style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:6px; font-weight:700; margin-top:3px;">
+              </div>
+              <div>
+                <label style="font-size:0.74rem; font-weight:800;">2. Ký Hiệu Mẫu &amp; Ký Hiệu HĐ (*):</label>
+                <input type="text" id="invSymbolInput" placeholder="VD: 1C26TAA hoặc 1/001" oninput="validateInputInvoiceRealtime()" style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:6px; font-weight:800; color:#0369a1; margin-top:3px;">
+              </div>
+              <div>
+                <label style="font-size:0.74rem; font-weight:800;">3. Số Hóa Đơn / Mã CQT (*):</label>
+                <input type="text" id="invNumberInput" placeholder="VD: 00012458" oninput="validateInputInvoiceRealtime()" style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:6px; font-weight:800; color:#dc2626; margin-top:3px;">
+              </div>
+              <div>
+                <label style="font-size:0.74rem; font-weight:800;">4. Ngày Giờ Lập Hóa Đơn (*):</label>
+                <input type="datetime-local" id="invDateTimeInput" oninput="validateInputInvoiceRealtime()" style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:6px; font-weight:700; margin-top:3px;">
+              </div>
+              <div>
+                <label style="font-size:0.74rem; font-weight:800;">5. Tên &amp; MST Nhà Cung Cấp (Bán):</label>
+                <input type="text" id="invSellerInput" placeholder="VD: Công ty Điện Lực / MST: 030..." oninput="validateInputInvoiceRealtime()" style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:6px; font-weight:700; margin-top:3px;">
+              </div>
+              <div>
+                <label style="font-size:0.74rem; font-weight:800;">6. MST Người Mua (Bảo Anh Lâm):</label>
+                <input type="text" id="invBuyerMstInput" value="3401289271" oninput="validateInputInvoiceRealtime()" style="width:100%; padding:7px; border:1.5px solid #16a34a; border-radius:6px; font-weight:900; color:#15803d; margin-top:3px;">
+              </div>
+              <div>
+                <label style="font-size:0.74rem; font-weight:800; color:#0369a1;">7. Tiền Hàng Trước Thuế [ct23]:</label>
+                <input type="number" id="invPreTaxInput" value="0" step="1000" oninput="validateInputInvoiceRealtime()" style="width:100%; padding:7px; border:1.5px solid #0284c7; border-radius:6px; font-weight:800; color:#0369a1; margin-top:3px;">
+              </div>
+              <div>
+                <label style="font-size:0.74rem; font-weight:800; color:#dc2626;">8. Thuế GTGT Đầu Vào [ct24]:</label>
+                <input type="number" id="invVatAmountInput" value="0" step="500" oninput="validateInputInvoiceRealtime()" style="width:100%; padding:7px; border:1.5px solid #dc2626; border-radius:6px; font-weight:800; color:#dc2626; margin-top:3px;">
+              </div>
+            </div>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:10px;">
+              <button type="button" onclick="validateInputInvoiceRealtime(true)" style="background:#0284c7; color:#fff; border:none; padding:10px 16px; border-radius:8px; font-weight:800; cursor:pointer; font-size:0.85rem;">
+                &#128269; KIỂM TRA CẤU TRÚC HÓA ĐƠN
+              </button>
+              <button type="button" onclick="saveVerifiedInputInvoice()" style="background:#16a34a; color:#fff; border:none; padding:10px 20px; border-radius:8px; font-weight:900; cursor:pointer; font-size:0.88rem;">
+                &#9989; LƯU HÓA ĐƠN &amp; CỘNG VÀO KHẤU TRỪ THUẾ [ct23, ct24]
+              </button>
+              <span id="inputInvoiceTotalBadge" style="margin-left:auto; font-size:0.85rem; font-weight:900; color:#15803d;"></span>
+            </div>
+
+            <table class="report-table" style="margin-top:12px; background:#fff; border-radius:8px; overflow:hidden;">
+              <thead>
+                <tr style="background:#dcfce7; color:#166534;">
+                  <th>Ngày Giờ Lập</th>
+                  <th>Ký Hiệu &amp; Số HĐ</th>
+                  <th>Tên Hóa Đơn &amp; Nhà Cung Cấp</th>
+                  <th>MST Mua</th>
+                  <th style="text-align:right;">Tiền Trước Thuế [ct23]</th>
+                  <th style="text-align:right; color:#dc2626;">Thuế GTGT [ct24]</th>
+                  <th style="text-align:center;">Trạng Thái Cấu Trúc</th>
+                  <th>Xóa</th>
+                </tr>
+              </thead>
+              <tbody id="inputInvoicesTableBody"></tbody>
+            </table>
+          </div>
+          <h3 style="font-size:1.05rem; color:#b91c1c; margin-bottom:8px;">🏆 BẢNG XẾP HẠNG ĐƠN HÀNG CÓ DOANH THU CAO NHẤT TRONG KỲ (CAO ➡️ THẤP)</h3>
           <table class="report-table" style="margin-bottom:20px;">
             <thead>
               <tr style="background:#fef2f2; color:#991b1b; text-align:left;">
@@ -1108,6 +1281,42 @@
       <button type="button" id="floatingVoiceFab" class="floating-voice-fab no-print" onclick="quickOpenAndStartVoiceOrder()">
       <span>&#127908;</span> <span id="floatingVoiceFabText">&#272;&#7885;c Order</span>
     </button>
+    <!-- MODAL CHUYỂN BÀN & GỘP BÀN THÔNG MINH (MODULE 22C) -->
+  <div id="tableTransferMergeModal" class="cancel-modal-overlay">
+    <div class="cancel-modal-box" style="max-width:520px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:10px; margin-bottom:14px;">
+        <h3 style="color:#6d28d9; font-size:1.12rem; margin:0;">&#128260; Chuyển Bàn Hoặc Gộp Bàn Ăn</h3>
+        <button type="button" onclick="closeTableTransferMergeModal()" style="background:#ef4444; color:#fff; border:none; padding:5px 10px; border-radius:6px; font-weight:800; cursor:pointer;">&#10006; Đóng</button>
+      </div>
+
+      <div style="background:#f5f3ff; border:1px solid #c4b5fd; border-radius:10px; padding:12px; margin-bottom:14px; font-size:0.84rem; color:#4c1d95;">
+        &#128161; <b>Cơ chế Tự động Thông minh:</b><br>
+        • Nếu chọn <b>Bàn đích đang trống</b>: Hệ thống sẽ <b>CHUYỂN BÀN</b> (đổi sang vị trí bàn mới).<br>
+        • Nếu chọn <b>Bàn đích đang có khách ngồi</b>: Hệ thống sẽ <b>GỘP BÀN</b> (cộng dồn toàn bộ món ăn, giữ nguyên món bếp đã nấu và gộp chung về 1 hóa đơn).
+      </div>
+
+      <div class="form-group-cfg">
+        <label style="color:#b91c1c;">1. Chọn Bàn Nguồn (Bàn cần chuyển đi hoặc gộp đi):</label>
+        <select id="tmSourceOrderSelect" onchange="onTmSourceChange()" style="width:100%; padding:10px; border:2px solid #ef4444; border-radius:8px; font-weight:800; color:#0f172a; background:#fff;"></select>
+      </div>
+
+      <div class="form-group-cfg">
+        <label style="color:#15803d;">2. Chọn Bàn Đích (Chuyển tới bàn trống hoặc Gộp vào bàn đang có khách):</label>
+        <select id="tmTargetTableSelect" onchange="onTmTargetChange()" style="width:100%; padding:10px; border:2px solid #16a34a; border-radius:8px; font-weight:800; color:#15803d; background:#fff;"></select>
+      </div>
+
+      <div id="tmActionPreviewBox" style="background:#f8fafc; border:1px dashed #94a3b8; border-radius:8px; padding:10px; margin-bottom:14px; font-size:0.84rem; font-weight:700; text-align:center; color:#334155;">
+        Hãy chọn Bàn nguồn và Bàn đích ở trên.
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:8px;">
+        <button type="button" onclick="closeTableTransferMergeModal()" style="padding:10px 16px; border:1px solid #cbd5e1; background:#fff; border-radius:8px; font-weight:700; cursor:pointer;">Hủy Bỏ</button>
+        <button type="button" onclick="executeTableTransferOrMerge()" style="padding:10px 20px; background:#6d28d9; color:#fff; border:none; border-radius:8px; font-weight:900; cursor:pointer; font-size:0.92rem;">
+          &#9889; XÁC NHẬN THỰC HIỆN NGAY
+        </button>
+      </div>
+    </div>
+  </div>
   <div id="printArea"></div>
 
   <script type="module">
@@ -6473,6 +6682,730 @@ window.openInstallGuideModal = function() {
       };
 
       speechRecognizer.start();
+    };
+  
+    // =========================================================================
+    // 22. MODULE NANG CAP V22:
+    //  - 22.1. CHIET KHAU TRUC TIEP TREN THE HOA DON MON (TRUOC NUT IN BILL)
+    //  - 22.2. CHUYEN BAN & GOP BAN THONG MINH (MOVE & MERGE TABLES + LOA BEP)
+    //  - 22.3. NHAP BAO CAO DOANH THU GRABFOOD & SHOPEE (HOP NHAT THUE 5610/5630)
+    //  - 22.4. NHAP HOA DON DAU VAO PDF / XML / ANH & TU DONG KIEM TRA CAU TRUC
+    // =========================================================================
+
+    // --- 22.1. CHIET KHAU TRUC TIEP TREN THE HOA DON MON (KDS CARD) ---
+    window.applyQuickCardDiscount = function(orderId, pctVal) {
+      const o = ordersCache[orderId];
+      if (!o) return;
+      const role = localStorage.getItem('hy_chay_active_role') || 'staff';
+      if (role === 'staff') return alert("⛔ Nhân viên không có quyền chỉnh chiết khấu hóa đơn!");
+
+      const pct = Math.min(100, Math.max(0, parseFloat(pctVal) || 0));
+      let rawSub = 0;
+      for (let k in (o.items || {})) {
+        rawSub += (Number(o.items[k].price) || 0) * (Number(o.items[k].qty) || 0);
+      }
+      const newDiscAmt = Math.round(rawSub * pct / 100);
+      const newNetSub = Math.max(0, rawSub - newDiscAmt);
+      const shipFee = o.orderType === 'dine_in' ? 0 : (Number(o.shippingFee) || 0);
+      const newGrandTotal = newNetSub + shipFee;
+
+      const isBillPrinted = (o.billPrintedCount || 0) > 0;
+      const oldNetSub = o.subtotal !== undefined ? Number(o.subtotal) : rawSub;
+
+      if (isBillPrinted && newNetSub < oldNetSub && role === 'cashier') {
+        const pin = prompt(`🔒 KHÓA CHỐNG GIAN LẬN:\nĐơn này ĐÃ IN BILL (${o.billPrintedCount} lần). Thu ngân muốn áp dụng chiết khấu ${pct}% giảm tiền từ ${oldNetSub.toLocaleString()}đ xuống ${newNetSub.toLocaleString()}đ phải nhập Mật khẩu Chủ quán:`);
+        if (pin !== "hychayfood" && pin !== "baochay2026") {
+          if (typeof writeAuditLog === 'function') {
+            writeAuditLog("THU NGÂN TỰ Ý CHIẾT KHẤU SAU IN BILL BỊ CHẶN", `Đơn #HC-${orderId.substring(orderId.length - 5).toUpperCase()} định giảm còn ${newNetSub.toLocaleString()}đ`, "DANGER");
+          }
+          return alert("❌ Mật khẩu Chủ quán không đúng!");
+        }
+      }
+
+      let baseNote = (o.note || '').replace(/\[Ưu đãi giảm.*?\]/g, '').trim();
+      const discTag = pct > 0 ? `[Ưu đãi giảm ${pct}% (-${newDiscAmt.toLocaleString()}đ)]` : '';
+      const updatedNote = [discTag, baseNote].filter(Boolean).join(' ');
+
+      update(ref(db, `orders/${orderId}`), {
+        rawSubtotal: rawSub,
+        discountPercent: pct,
+        discount: newDiscAmt,
+        subtotal: newNetSub,
+        grandTotal: newGrandTotal,
+        note: updatedNote
+      }).then(() => {
+        if (isBillPrinted && newNetSub !== oldNetSub && typeof writeAuditLog === 'function') {
+          writeAuditLog("CHIẾT KHẤU TRÊN HÓA ĐƠN SAU IN BILL", `Đơn #HC-${orderId.substring(orderId.length - 5).toUpperCase()}: Áp dụng CK ${pct}% (-${newDiscAmt.toLocaleString()}đ) -> Còn ${newNetSub.toLocaleString()}đ`, "WARN");
+        }
+      });
+    };
+
+    // Tu dong gan Thanh Chiet Khau Truc Tiep & Nut Chuyen/Gop Ban len moi The Hoa Don Mon (KDS)
+    function decorateOrderCardsWithDirectDiscountAndTableControls() {
+      const container = document.getElementById('ordersContainer');
+      if (!container) return;
+      const cards = container.querySelectorAll('.order-card');
+      cards.forEach(card => {
+        const idSpan = card.querySelector('.order-id');
+        if (!idSpan) return;
+        const match = idSpan.innerText.match(/#HC-([A-Z0-9]+)/);
+        if (!match) return;
+        const shortCode = match[1];
+        const orderId = Object.keys(ordersCache).find(k => k.substring(k.length - 5).toUpperCase() === shortCode);
+        if (!orderId) return;
+        const o = ordersCache[orderId];
+        if (!o) return;
+
+        const isDoneOrCanceled = (o.status === 'Đã hoàn tất' || o.status === 'Đã hủy');
+
+        // 1. Gan nut [Chuyen / Gop Ban] cho don Tai ban dang mo
+        const actionRow = card.querySelector('.customer-action-row');
+        if (actionRow && o.orderType === 'dine_in' && !isDoneOrCanceled && !actionRow.querySelector('.btn-move-merge-injected')) {
+          const btnTM = document.createElement('button');
+          btnTM.type = 'button';
+          btnTM.className = 'btn-move-merge-table btn-move-merge-injected';
+          btnTM.innerHTML = '&#128260; Chuyển/Gộp Bàn';
+          btnTM.onclick = () => window.openTableTransferMergeModal(orderId);
+          actionRow.appendChild(btnTM);
+        }
+
+        // 2. Gan Thanh Chiet Khau Truc Tiep ngay tren Hoa don mon (phia tren nut In Bill)
+        const finBox = card.querySelector('.financial-split-box');
+        if (finBox && !isDoneOrCanceled && !finBox.querySelector('.card-inline-discount-bar')) {
+          const curPct = Number(o.discountPercent) || (o.discount > 0 && o.rawSubtotal > 0 ? Math.round((o.discount / o.rawSubtotal) * 100) : 0);
+          const rawSub = o.rawSubtotal || ((o.subtotal || 0) + (o.discount || 0));
+          const discBar = document.createElement('div');
+          discBar.className = 'card-inline-discount-bar';
+          discBar.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.74rem; color:#166534; font-weight:800;">
+              <span>🏷️ Chiết khấu hóa đơn (Giá gốc: ${rawSub.toLocaleString()}đ):</span>
+              <span style="color:#dc2626;">${curPct > 0 ? `-${curPct}% (-${(o.discount || 0).toLocaleString()}đ)` : '0%'}</span>
+            </div>
+            <div class="card-disc-chips">
+              ${[0, 5, 10, 15, 20, 50].map(p => `<button type="button" class="btn-card-disc-chip ${curPct === p ? 'active' : ''}" onclick="applyQuickCardDiscount('${orderId}', ${p})">${p}%</button>`).join('')}
+              <input type="number" value="${curPct}" min="0" max="100" placeholder="%" title="Nhập % chiết khấu bất kỳ" onchange="applyQuickCardDiscount('${orderId}', this.value)" style="width:46px; padding:2px 4px; border:1px solid #16a34a; border-radius:5px; font-weight:800; font-size:0.72rem; text-align:right; color:#dc2626;">
+            </div>
+          `;
+          finBox.insertBefore(discBar, finBox.firstChild);
+        }
+      });
+    }
+
+    onValue(ref(db, 'orders'), () => {
+      setTimeout(decorateOrderCardsWithDirectDiscountAndTableControls, 120);
+    });
+    const origSetFilterV22 = window.setOrderStatusFilter;
+    window.setOrderStatusFilter = function(filterVal, btn) {
+      origSetFilterV22(filterVal, btn);
+      setTimeout(decorateOrderCardsWithDirectDiscountAndTableControls, 80);
+    };
+
+    // --- 22.2. CHUYEN BAN & GOP BAN THONG MINH (MOVE & MERGE TABLES) ---
+    function getOpenDineInOrders() {
+      const list = [];
+      Object.keys(ordersCache).forEach(id => {
+        const o = ordersCache[id];
+        if (o && !o.archived && o.orderType === 'dine_in' && o.status !== 'Đã hoàn tất' && o.status !== 'Đã hủy') {
+          list.push({ id, order: o });
+        }
+      });
+      return list;
+    }
+
+    window.openTableTransferMergeModal = function(preselectedOrderId = null) {
+      const openList = getOpenDineInOrders();
+      if (openList.length === 0) {
+        return alert("Hiện tại không có bàn nào đang mở để Chuyển hoặc Gộp bàn!");
+      }
+      const srcSel = document.getElementById('tmSourceOrderSelect');
+      const tgtSel = document.getElementById('tmTargetTableSelect');
+      if (!srcSel || !tgtSel) return;
+
+      let srcHtml = '';
+      openList.forEach(({ id, order }) => {
+        const seq = getOrderSeqBadgeText(id);
+        const selAttr = (preselectedOrderId === id || (!preselectedOrderId && order.table === selectedTable)) ? 'selected' : '';
+        srcHtml += `<option value="${id}" ${selAttr}>🪑 ${order.table} — Đơn ${seq} (${(order.grandTotal || 0).toLocaleString()}đ)</option>`;
+      });
+      srcSel.innerHTML = srcHtml;
+
+      window.onTmSourceChange();
+      document.getElementById('tableTransferMergeModal').classList.add('active');
+    };
+
+    window.closeTableTransferMergeModal = function() {
+      document.getElementById('tableTransferMergeModal').classList.remove('active');
+    };
+
+    window.onTmSourceChange = function() {
+      const srcOrderId = document.getElementById('tmSourceOrderSelect')?.value;
+      const srcOrder = ordersCache[srcOrderId];
+      const tgtSel = document.getElementById('tmTargetTableSelect');
+      if (!srcOrder || !tgtSel) return;
+
+      const openList = getOpenDineInOrders();
+      let tgtHtml = '';
+      (tablesListCache || []).forEach(tName => {
+        // Kiểm tra xem bàn đích này có đơn đang mở nào khác với đơn nguồn không
+        const otherOpenOnTable = openList.filter(x => x.order.table === tName && x.id !== srcOrderId);
+        if (tName === srcOrder.table && otherOpenOnTable.length === 0) return; // Bỏ qua chính bàn đó nếu không có đơn trùng để gộp
+        if (otherOpenOnTable.length > 0) {
+          const totalOther = otherOpenOnTable.reduce((s, x) => s + (x.order.grandTotal || 0), 0);
+          tgtHtml += `<option value="${tName}">🔗 GỘP VÀO: ${tName} (Đang có đơn ${totalOther.toLocaleString()}đ)</option>`;
+        } else {
+          tgtHtml += `<option value="${tName}">➡️ CHUYỂN SANG: ${tName} (Bàn đang trống)</option>`;
+        }
+      });
+      tgtSel.innerHTML = tgtHtml;
+      window.onTmTargetChange();
+    };
+
+    window.onTmTargetChange = function() {
+      const srcOrderId = document.getElementById('tmSourceOrderSelect')?.value;
+      const tgtTable = document.getElementById('tmTargetTableSelect')?.value;
+      const previewEl = document.getElementById('tmActionPreviewBox');
+      if (!srcOrderId || !tgtTable || !previewEl) return;
+
+      const srcOrder = ordersCache[srcOrderId];
+      const openList = getOpenDineInOrders();
+      const targetExisting = openList.find(x => x.order.table === tgtTable && x.id !== srcOrderId);
+
+      if (targetExisting) {
+        const combinedTotal = (srcOrder.subtotal || 0) + (targetExisting.order.subtotal || 0);
+        previewEl.style.background = '#fef3c7';
+        previewEl.style.color = '#92400e';
+        previewEl.style.borderColor = '#f59e0b';
+        previewEl.innerHTML = `🔗 <b>CHẾ ĐỘ GỘP BÀN:</b> Toàn bộ món của <b>${srcOrder.table}</b> (${(srcOrder.subtotal || 0).toLocaleString()}đ) sẽ được cộng gộp chung vào hóa đơn của <b>${tgtTable}</b>.<br>👉 Tổng tiền hóa đơn sau khi gộp: <b style="color:#dc2626; font-size:1rem;">${combinedTotal.toLocaleString()}đ</b>`;
+      } else {
+        previewEl.style.background = '#dcfce7';
+        previewEl.style.color = '#166534';
+        previewEl.style.borderColor = '#16a34a';
+        previewEl.innerHTML = `➡️ <b>CHẾ ĐỘ CHUYỂN BÀN:</b> Chuyển nguyên đơn hàng từ <b>${srcOrder.table}</b> sang vị trí mới là <b>${tgtTable}</b> (Giữ nguyên các món và tổng tiền ${(srcOrder.grandTotal || 0).toLocaleString()}đ).`;
+      }
+    };
+
+    window.executeTableTransferOrMerge = function() {
+      const srcOrderId = document.getElementById('tmSourceOrderSelect')?.value;
+      const tgtTable = document.getElementById('tmTargetTableSelect')?.value;
+      if (!srcOrderId || !tgtTable) return;
+
+      const srcOrder = ordersCache[srcOrderId];
+      if (!srcOrder) return;
+      const oldTableName = srcOrder.table || 'Bàn cũ';
+      const openList = getOpenDineInOrders();
+      const targetExisting = openList.find(x => x.order.table === tgtTable && x.id !== srcOrderId);
+
+      // TRƯỜNG HỢP 1: BÀN ĐÍCH ĐANG TRỐNG -> CHUYỂN BÀN (MOVE TABLE)
+      if (!targetExisting) {
+        const moveStamp = `[Đã chuyển từ ${oldTableName} sang ${tgtTable} lúc ${new Date().toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'})}]`;
+        const newNote = srcOrder.note ? `${srcOrder.note} | ${moveStamp}` : moveStamp;
+        update(ref(db, `orders/${srcOrderId}`), {
+          table: tgtTable,
+          customerName: tgtTable,
+          note: newNote
+        }).then(() => {
+          broadcastAndSpeakKitchenAlert(`Chú ý bếp! Đã chuyển toàn bộ đơn của ${oldTableName} sang ${tgtTable}.`);
+          if (typeof writeAuditLog === 'function') {
+            writeAuditLog("CHUYỂN BÀN ĂN", `Chuyển đơn #HC-${srcOrderId.substring(srcOrderId.length - 5).toUpperCase()} từ ${oldTableName} sang ${tgtTable}`, "INFO");
+          }
+          alert(`✅ Đã chuyển đơn từ [${oldTableName}] sang [${tgtTable}] thành công!`);
+          window.closeTableTransferMergeModal();
+        });
+        return;
+      }
+
+      // TRƯỜNG HỢP 2: BÀN ĐÍCH ĐANG CÓ KHÁCH -> GỘP BÀN (MERGE TABLES)
+      const tgtId = targetExisting.id;
+      const tgtOrder = targetExisting.order;
+      const mergedItems = JSON.parse(JSON.stringify(tgtOrder.items || {}));
+      const mergedChecked = JSON.parse(JSON.stringify(tgtOrder.checkedItems || {}));
+
+      for (let k in (srcOrder.items || {})) {
+        const srcIt = srcOrder.items[k];
+        const cleanK = safeItemKey(srcIt.name || k);
+        if (mergedItems[cleanK]) {
+          mergedItems[cleanK].qty = (Number(mergedItems[cleanK].qty) || 0) + (Number(srcIt.qty) || 0);
+          // Nếu 1 trong 2 bàn còn món chưa nấu xong thì để trạng thái chưa tích xong để bếp làm nốt
+          if (!(srcOrder.checkedItems && (srcOrder.checkedItems[cleanK] || srcOrder.checkedItems[k]))) {
+            mergedChecked[cleanK] = false;
+          }
+        } else {
+          mergedItems[cleanK] = {
+            name: srcIt.name,
+            price: Number(srcIt.price) || 0,
+            qty: Number(srcIt.qty) || 1,
+            cat: srcIt.cat || 'bun'
+          };
+          if (srcOrder.checkedItems && (srcOrder.checkedItems[cleanK] || srcOrder.checkedItems[k])) {
+            mergedChecked[cleanK] = true;
+          }
+        }
+      }
+
+      let rawSub = 0;
+      for (let k in mergedItems) {
+        rawSub += (Number(mergedItems[k].price) || 0) * (Number(mergedItems[k].qty) || 0);
+      }
+      const keepPct = Math.max(Number(tgtOrder.discountPercent) || 0, Number(srcOrder.discountPercent) || 0);
+      const newDisc = Math.round(rawSub * keepPct / 100);
+      const netSub = Math.max(0, rawSub - newDisc);
+
+      const mergeNote = [
+        tgtOrder.note || '',
+        srcOrder.note || '',
+        `[Đã gộp chung đơn từ ${oldTableName} vào ${tgtTable}]`
+      ].filter(Boolean).join(' | ');
+
+      const updates = {};
+      updates[`orders/${tgtId}/items`] = mergedItems;
+      updates[`orders/${tgtId}/checkedItems`] = mergedChecked;
+      updates[`orders/${tgtId}/rawSubtotal`] = rawSub;
+      updates[`orders/${tgtId}/discountPercent`] = keepPct;
+      updates[`orders/${tgtId}/discount`] = newDisc;
+      updates[`orders/${tgtId}/subtotal`] = netSub;
+      updates[`orders/${tgtId}/grandTotal`] = netSub;
+      updates[`orders/${tgtId}/note`] = mergeNote;
+
+      // Đóng & lưu trữ đơn nguồn đã được gộp để không bị tính trùng doanh thu
+      updates[`orders/${srcOrderId}/status`] = 'Đã hủy';
+      updates[`orders/${srcOrderId}/archived`] = true;
+      updates[`orders/${srcOrderId}/cancelReason`] = `Đã gộp chung hóa đơn vào ${tgtTable} (#HC-${tgtId.substring(tgtId.length - 5).toUpperCase()})`;
+
+      update(ref(db), updates).then(() => {
+        broadcastAndSpeakKitchenAlert(`Chú ý bếp! Đã gộp toàn bộ các món của ${oldTableName} vào chung với ${tgtTable}.`);
+        if (typeof writeAuditLog === 'function') {
+          writeAuditLog("GỘP BÀN ĂN", `Gộp đơn từ ${oldTableName} vào ${tgtTable} -> Tổng mới: ${netSub.toLocaleString()}đ`, "INFO");
+        }
+        alert(`✅ Đã gộp toàn bộ món của [${oldTableName}] vào chung hóa đơn [${tgtTable}] (Tổng mới: ${netSub.toLocaleString()}đ)!`);
+        window.closeTableTransferMergeModal();
+      });
+    };
+
+    // --- 22.3. NHAP & DOI SOAT BAO CAO DOANH THU GRABFOOD & SHOPEE ---
+    let externalRevenuesCache = {};
+    if (document.getElementById('extRevDateInput')) {
+      document.getElementById('extRevDateInput').value = getVNDateStr();
+    }
+
+    onValue(ref(db, 'external_revenues'), (snap) => {
+      externalRevenuesCache = snap.val() || {};
+      window.renderShiftReport();
+    });
+
+    window.calcExtNetPreview = function() {
+      const r5610 = parseInt(document.getElementById('extRev5610Input')?.value || '0') || 0;
+      const r5630 = parseInt(document.getElementById('extRev5630Input')?.value || '0') || 0;
+      const fee = parseInt(document.getElementById('extRevFeeInput')?.value || '0') || 0;
+      const net = Math.max(0, r5610 + r5630 - fee);
+      const netEl = document.getElementById('extRevNetPreview');
+      if (netEl) netEl.value = net.toLocaleString() + 'đ';
+      return { r5610, r5630, fee, net };
+    };
+
+    window.saveExternalPlatformRevenue = function() {
+      const platform = document.getElementById('extPlatformSelect')?.value || 'GRAB';
+      const dateStr = document.getElementById('extRevDateInput')?.value || getVNDateStr();
+      const orderCount = Math.max(1, parseInt(document.getElementById('extRevOrderCount')?.value || '1') || 1);
+      const { r5610, r5630, fee, net } = window.calcExtNetPreview();
+      const note = (document.getElementById('extRevNoteInput')?.value || '').trim();
+
+      if (r5610 + r5630 <= 0) {
+        return alert("⚠️ Vui lòng nhập Doanh thu 5610 (Đồ ăn/Thực phẩm chay) hoặc Doanh thu 5630 (Đồ uống) lớn hơn 0đ!");
+      }
+
+      push(ref(db, 'external_revenues'), {
+        platform,
+        date: dateStr,
+        orderCount,
+        rev5610: r5610,
+        rev5630: r5630,
+        platformFee: fee,
+        netReceived: net,
+        note,
+        createdAt: new Date().toISOString(),
+        createdBy: localStorage.getItem('hy_chay_active_user') || 'admin'
+      }).then(() => {
+        alert(`✅ Đã lưu báo cáo doanh thu ${platform} ngày ${dateStr} (Tổng DT chịu thuế: ${(r5610 + r5630).toLocaleString()}đ | Thực nhận: ${net.toLocaleString()}đ)!`);
+        document.getElementById('extRev5610Input').value = '0';
+        document.getElementById('extRev5630Input').value = '0';
+        document.getElementById('extRevFeeInput').value = '0';
+        document.getElementById('extRevNoteInput').value = '';
+        window.calcExtNetPreview();
+      });
+    };
+
+    window.deleteExternalRevenueRecord = function(recId) {
+      if (localStorage.getItem('hy_chay_active_role') !== 'root') {
+        return alert("⛔ Chỉ Chủ quán (Giám đốc) mới có quyền xóa bản ghi doanh thu sàn!");
+      }
+      if (confirm("Xác nhận xóa bản ghi báo cáo doanh thu sàn này?")) {
+        remove(ref(db, `external_revenues/${recId}`));
+      }
+    };
+
+    window.importExternalPlatformCSV = function(input) {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target.result || '';
+        const numbers = (text.match(/\b\d{4,9}\b/g) || []).map(Number).filter(n => n >= 10000 && n <= 50000000);
+        if (numbers.length > 0) {
+          const maxVal = Math.max(...numbers);
+          document.getElementById('extRev5610Input').value = maxVal;
+          document.getElementById('extRevNoteInput').value = `Nhập từ file: ${file.name}`;
+          window.calcExtNetPreview();
+          alert(`📂 Đã đọc file "${file.name}" và điền doanh thu gợi ý: ${maxVal.toLocaleString()}đ.\nBạn hãy kiểm tra lại các ô và bấm [Lưu Báo Cáo Grab / Shopee]!`);
+        } else {
+          alert("⚠️ Không tìm thấy cột số tiền tự động trong file này. Vui lòng gõ số tổng vào ô Doanh thu 5610/5630!");
+        }
+      };
+      reader.readAsText(file);
+    };
+
+    // --- 22.4. NHAP HOA DON DAU VAO BANG FILE PDF / XML / ANH & KIEM TRA CAU TRUC HOP LE ---
+    let inputInvoicesCache = {};
+    if (document.getElementById('invDateTimeInput')) {
+      const now = new Date();
+      const tzOffset = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+      document.getElementById('invDateTimeInput').value = tzOffset;
+    }
+
+    onValue(ref(db, 'input_invoices'), (snap) => {
+      inputInvoicesCache = snap.val() || {};
+      window.renderInputInvoicesTable();
+    });
+
+    // Ham kiem tra 6 tieu chi phap ly cua Hoa don dien tu dau vao (NĐ 123/2020 & NĐ 70/2025)
+    window.validateInputInvoiceRealtime = function(showAlert = false) {
+      const invName = (document.getElementById('invNameInput')?.value || '').trim().toUpperCase();
+      const invSymbol = (document.getElementById('invSymbolInput')?.value || '').trim().toUpperCase();
+      const invNo = (document.getElementById('invNumberInput')?.value || '').trim();
+      const invDate = (document.getElementById('invDateTimeInput')?.value || '').trim();
+      const seller = (document.getElementById('invSellerInput')?.value || '').trim();
+      const buyerMst = (document.getElementById('invBuyerMstInput')?.value || '').trim();
+      const preTax = parseInt(document.getElementById('invPreTaxInput')?.value || '0') || 0;
+      const vatAmt = parseInt(document.getElementById('invVatAmountInput')?.value || '0') || 0;
+
+      const checks = [];
+      // 1. Kiem tra Ten Hoa Don
+      const validName = invName.includes("HÓA ĐƠN") || invName.includes("HOA DON") || invName.includes("GTGT") || invName.includes("GIÁ TRỊ GIA TĂNG");
+      checks.push({ ok: validName, label: "1. Tên hóa đơn", detail: validName ? `Hợp lệ (${invName})` : "Thiếu chữ 'HÓA ĐƠN GIÁ TRỊ GIA TĂNG' hoặc 'HÓA ĐƠN BÁN HÀNG'" });
+
+      // 2. Kiem tra Ky hieu mau so & Ky hieu hoa don (Chuẩn NĐ 123: VD 1C26TAA, 1C25TYY, 2C26...)
+      const validSymbol = /^[12][CK]\d{2}[A-Z]{2,3}$/i.test(invSymbol.replace(/[^A-Z0-9]/gi, '')) || invSymbol.length >= 4;
+      checks.push({ ok: validSymbol, label: "2. Ký hiệu hóa đơn", detail: validSymbol ? `Đúng chuẩn (${invSymbol})` : "Sai cấu trúc Ký hiệu HĐĐT (Ví dụ đúng: 1C26TAA, 1C26MHY)" });
+
+      // 3. Kiem tra So hoa don / Ma CQT
+      const validNo = /^\d{1,8}$/.test(invNo) || invNo.length >= 1;
+      checks.push({ ok: validNo, label: "3. Số hóa đơn", detail: validNo ? `Hợp lệ (Số: ${invNo})` : "Chưa có Số hóa đơn (Từ 1 đến 8 chữ số)" });
+
+      // 4. Kiem tra Ngay gio lap hoa don
+      const validDate = invDate.length >= 10 && !isNaN(new Date(invDate).getTime());
+      checks.push({ ok: validDate, label: "4. Ngày giờ lập HĐ", detail: validDate ? `Hợp lệ (${new Date(invDate).toLocaleString('vi-VN')})` : "Ngày giờ lập hóa đơn không hợp lệ" });
+
+      // 5. Kiem tra MST Nguoi mua phai khop Cong ty Bao Anh Lam (3401289271)
+      const validBuyer = (buyerMst === "3401289271");
+      checks.push({ ok: validBuyer, label: "5. MST Người mua", detail: validBuyer ? "Khớp 100% Công ty Bảo Anh Lâm (3401289271)" : `SAI MST NGƯỜI MUA (${buyerMst} != 3401289271)` });
+
+      // 6. Kiem tra Tien truoc thue & Thue GTGT
+      const validMoney = (preTax > 0 && vatAmt >= 0 && vatAmt <= Math.round(preTax * 0.15));
+      checks.push({ ok: validMoney, label: "6. Tiền hàng & VAT", detail: validMoney ? `Trước thuế: ${preTax.toLocaleString()}đ | VAT: ${vatAmt.toLocaleString()}đ` : "Tiền hàng trước thuế phải > 0đ và VAT hợp lý (0% - 10%)" });
+
+      const allPassed = checks.every(c => c.ok);
+      const banner = document.getElementById('invoiceAuditResultBanner');
+      if (banner) {
+        banner.style.display = 'block';
+        banner.style.background = allPassed ? '#dcfce7' : '#fff1f2';
+        banner.style.border = allPassed ? '2px solid #16a34a' : '2px solid #ef4444';
+        banner.style.color = allPassed ? '#14532d' : '#991b1b';
+        banner.innerHTML = `
+          <div style="font-weight:900; font-size:0.92rem; margin-bottom:4px;">
+            ${allPassed ? '✅ KIỂM TRA CẤU TRÚC HÓA ĐƠN: HỢP LỆ 100% (ĐỦ ĐIỀU KIỆN KHẤU TRỪ THUẾ)' : '⚠️ CẢNH BÁO CẤU TRÚC HÓA ĐƠN: PHÁT HIỆN CHỈ TIÊU CHƯA KHỚP!'}
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:4px;">
+            ${checks.map(c => `<div>${c.ok ? '🟢' : '🔴'} <b>${c.label}:</b> ${c.detail}</div>`).join('')}
+          </div>
+        `;
+      }
+      return { allPassed, checks, invName, invSymbol, invNo, invDate, seller, buyerMst, preTax, vatAmt };
+    };
+
+    // Ham boc tach van ban tu Hoa don XML / PDF / Anh chup de tu dien vao 8 o kiem tra
+    function parseExtractedInvoiceText(rawText, fileName = '') {
+      const txt = String(rawText || '').replace(/\s+/g, ' ');
+      // 1. Tim Ky hieu hoa don (VD: 1C26TAA, 1C25TBB, 2C26...)
+      const symMatch = txt.match(/\b([12][CK]\d{2}[A-Z]{2,3})\b/i);
+      if (symMatch) document.getElementById('invSymbolInput').value = symMatch[1].toUpperCase();
+
+      // 2. Tim So hoa don (7-8 chu so hoac sau chữ Số / SHĐ)
+      const noMatch = txt.match(/(?:Số|So|SHĐ|SHDon|Số HĐ)\s*[:.]?\s*0*(\d{1,8})\b/i) || txt.match(/\b00(\d{5,6})\b/);
+      if (noMatch) document.getElementById('invNumberInput').value = noMatch[1].padStart(7, '0');
+
+      // 3. Kiem tra MST 3401289271 va MST Nguoi ban
+      const allMsts = txt.match(/\b\d{10}(?:-\d{3})?\b/g) || [];
+      if (allMsts.includes('3401289271')) {
+        document.getElementById('invBuyerMstInput').value = '3401289271';
+      }
+      const sellerMst = allMsts.find(m => m !== '3401289271');
+      if (sellerMst) {
+        document.getElementById('invSellerInput').value = `MST Bán: ${sellerMst} (${fileName})`;
+      } else if (fileName) {
+        document.getElementById('invSellerInput').value = fileName;
+      }
+
+      // 4. Tim Ngay thang nam lap hoa don
+      const dateMatch = txt.match(/ngày\s*(\d{1,2})\s*tháng\s*(\d{1,2})\s*năm\s*(202\d)/i) || txt.match(/\b(\d{2})\/(\d{2})\/(202\d)\b/);
+      if (dateMatch) {
+        const dd = String(dateMatch[1]).padStart(2, '0');
+        const mm = String(dateMatch[2]).padStart(2, '0');
+        const yyyy = dateMatch[3];
+        document.getElementById('invDateTimeInput').value = `${yyyy}-${mm}-${dd}T09:00`;
+      }
+
+      // 5. Tim các con số tiền lớn trong hóa đơn
+      const moneyMatches = (txt.match(/\b\d{1,3}(?:[.,]\d{3})+\b/g) || [])
+        .map(s => parseInt(s.replace(/[.,]/g, '')))
+        .filter(n => n >= 1000 && n <= 500000000)
+        .sort((a, b) => b - a);
+
+      if (moneyMatches.length >= 2) {
+        const total = moneyMatches[0];
+        const pre = moneyMatches.find(n => n < total && n >= total * 0.85) || Math.round(total / 1.08);
+        const vat = Math.max(0, total - pre);
+        document.getElementById('invPreTaxInput').value = pre;
+        document.getElementById('invVatAmountInput').value = vat;
+      }
+
+      window.validateInputInvoiceRealtime();
+    }
+
+    window.handleInputInvoiceFileUpload = async function(input) {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      const ext = file.name.split('.').pop().toLowerCase();
+
+      // TRUONG HOP 1: FILE XML HOA DON DIEN TU GOC (CHINH XAC TUYET DOI 100%)
+      if (ext === 'xml') {
+        const text = await file.text();
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(text, "text/xml");
+        const getTag = (tag) => xmlDoc.getElementsByTagName(tag)[0]?.textContent?.trim() || '';
+
+        const tenHD = getTag('THDon') || 'HÓA ĐƠN GIÁ TRỊ GIA TĂNG';
+        const khMSHDon = getTag('KHMSHDon');
+        const khHDon = getTag('KHHDon');
+        const shDon = getTag('SHDon');
+        const nLap = getTag('NLap');
+        const tenNBan = getTag('Ten') || 'Nhà cung cấp';
+        const mstNBan = getTag('MST');
+        const tgTCThue = parseInt(getTag('TgTCThue') || '0') || 0;
+        const tgTThue = parseInt(getTag('TgTThue') || '0') || 0;
+
+        document.getElementById('invNameInput').value = tenHD.toUpperCase();
+        document.getElementById('invSymbolInput').value = (khMSHDon + khHDon).toUpperCase();
+        document.getElementById('invNumberInput').value = shDon.padStart(7, '0');
+        if (nLap) document.getElementById('invDateTimeInput').value = nLap.includes('T') ? nLap.slice(0, 16) : `${nLap}T08:30`;
+        document.getElementById('invSellerInput').value = `${tenNBan} (MST: ${mstNBan})`;
+        document.getElementById('invBuyerMstInput').value = text.includes('3401289271') ? '3401289271' : '';
+        document.getElementById('invPreTaxInput').value = tgTCThue;
+        document.getElementById('invVatAmountInput').value = tgTThue;
+
+        window.validateInputInvoiceRealtime();
+        return;
+      }
+
+      // TRUONG HOP 2: FILE PDF HOA DON DIEN TU (DUNG PDF.JS QUET TOAN BO CHU VA BANG BIEU)
+      if (ext === 'pdf' && window.pdfjsLib) {
+        try {
+          window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+          const arrayBuffer = await file.arrayBuffer();
+          const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+          let fullText = '';
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            fullText += content.items.map(it => it.str).join(' ') + ' ';
+          }
+          parseExtractedInvoiceText(fullText, file.name);
+          return;
+        } catch (err) {
+          console.warn("PDF parse warning:", err);
+        }
+      }
+
+      // TRUONG HOP 3: FILE ANH CHUP HOA DON (.JPG, .PNG) HOAC PDF SCAN
+      parseExtractedInvoiceText(file.name, file.name);
+      alert(`📷 Đã nạp file hóa đơn "${file.name}"!\nHệ thống đã bật bộ kiểm tra 6 tiêu chí cấu trúc hóa đơn. Vui lòng đối chiếu nhanh Ký hiệu, Số HĐ và Số tiền rồi bấm [Lưu Hóa Đơn]!`);
+    };
+
+    window.saveVerifiedInputInvoice = function() {
+      const check = window.validateInputInvoiceRealtime();
+      if (!check.allPassed) {
+        if (!confirm("⚠️ Hóa đơn này có một số chỉ tiêu cấu trúc đang cảnh báo đỏ (ví dụ thiếu Ký hiệu hoặc lệch MST).\nBạn có chắc chắn vẫn muốn lưu vào danh sách hóa đơn đầu vào không?")) {
+          return;
+        }
+      }
+
+      push(ref(db, 'input_invoices'), {
+        invName: check.invName,
+        invSymbol: check.invSymbol,
+        invNo: check.invNo,
+        invDate: check.invDate,
+        seller: check.seller || 'Nhà cung cấp',
+        buyerMst: check.buyerMst,
+        preTax: check.preTax,
+        vatAmt: check.vatAmt,
+        isValidStructure: check.allPassed,
+        createdAt: new Date().toISOString()
+      }).then(() => {
+        alert(`✅ Đã lưu Hóa đơn đầu vào [${check.invSymbol} - Số ${check.invNo}] và tự động cộng ${check.vatAmt.toLocaleString()}đ vào Thuế GTGT được khấu trừ [ct24]!`);
+        document.getElementById('invNumberInput').value = '';
+        document.getElementById('invPreTaxInput').value = '0';
+        document.getElementById('invVatAmountInput').value = '0';
+      });
+    };
+
+    window.deleteInputInvoiceRecord = function(id) {
+      if (confirm("Xác nhận xóa hóa đơn đầu vào này?")) {
+        remove(ref(db, `input_invoices/${id}`));
+      }
+    };
+
+    // Ham loc xem 1 ngay (YYYY-MM-DD) co thuoc Ky Bao Cao dang chon hay khong
+    function isDateMatchingCurrentReportPeriod(dateStr) {
+      if (!dateStr || dateStr.length < 10) return false;
+      const dStr = dateStr.slice(0, 10);
+      const mode = document.getElementById('filterMode')?.value || 'day';
+      const y = parseInt(dStr.slice(0, 4)), m = parseInt(dStr.slice(5, 7));
+      if (mode === 'quarter') {
+        const q = parseInt(document.getElementById('filterQuarter')?.value || '4');
+        const qY = parseInt(document.getElementById('filterQuarterYear')?.value || '2026');
+        return (y === qY && m >= (q - 1) * 3 + 1 && m <= q * 3);
+      } else if (mode === 'month') {
+        return dStr.startsWith(document.getElementById('filterMonthInput')?.value || '');
+      } else {
+        return dStr === (document.getElementById('filterDayInput')?.value || '');
+      }
+    }
+
+    window.renderInputInvoicesTable = function() {
+      const tbody = document.getElementById('inputInvoicesTableBody');
+      if (!tbody) return;
+      let html = '';
+      let sumPreTaxInPeriod = 0;
+      let sumVatInPeriod = 0;
+
+      const keys = Object.keys(inputInvoicesCache).sort((a, b) => new Date(inputInvoicesCache[b].invDate || 0) - new Date(inputInvoicesCache[a].invDate || 0));
+      keys.forEach(k => {
+        const inv = inputInvoicesCache[k];
+        if (!isDateMatchingCurrentReportPeriod(inv.invDate)) return;
+        sumPreTaxInPeriod += (Number(inv.preTax) || 0);
+        sumVatInPeriod += (Number(inv.vatAmt) || 0);
+
+        const stBadge = inv.isValidStructure
+          ? `<span class="inv-check-badge inv-valid">✅ Hợp lệ chuẩn CQT</span>`
+          : `<span class="inv-check-badge inv-invalid">⚠️ Cần kiểm tra lại</span>`;
+
+        html += `
+          <tr>
+            <td><b>${inv.invDate ? new Date(inv.invDate).toLocaleString('vi-VN') : '--'}</b></td>
+            <td><b style="color:#0369a1;">${inv.invSymbol || ''}</b> — <b style="color:#dc2626;">#${inv.invNo || ''}</b></td>
+            <td><b>${inv.invName || ''}</b><br><small style="color:#64748b;">${inv.seller || ''}</small></td>
+            <td><b>${inv.buyerMst || ''}</b></td>
+            <td style="text-align:right; font-weight:800; color:#0369a1;">${(Number(inv.preTax) || 0).toLocaleString()}đ</td>
+            <td style="text-align:right; font-weight:900; color:#dc2626;">${(Number(inv.vatAmt) || 0).toLocaleString()}đ</td>
+            <td style="text-align:center;">${stBadge}</td>
+            <td><button type="button" onclick="deleteInputInvoiceRecord('${k}')" style="background:#fee2e2; color:#b91c1c; border:none; padding:4px 8px; border-radius:6px; font-weight:700; cursor:pointer;">Xóa</button></td>
+          </tr>`;
+      });
+
+      tbody.innerHTML = html || '<tr><td colspan="8" style="text-align:center; padding:16px; color:#64748b;">Chưa có hóa đơn đầu vào nào trong kỳ báo cáo này.</td></tr>';
+      const badgeEl = document.getElementById('inputInvoiceTotalBadge');
+      if (badgeEl) {
+        badgeEl.innerHTML = `📌 Tổng HĐ Đầu vào kỳ này: Mua vào [ct23] = <b>${sumPreTaxInPeriod.toLocaleString()}đ</b> | VAT khấu trừ [ct24] = <b style="color:#dc2626;">${sumVatInPeriod.toLocaleString()}đ</b>`;
+      }
+
+      // Tự động điền Tổng VAT Đầu vào vào ô dnInputVat của Trạm Xuất XML HTKK 01/GTGT
+      const dnVatInp = document.getElementById('dnInputVat');
+      if (dnVatInp && sumVatInPeriod > 0) {
+        dnVatInp.value = sumVatInPeriod;
+        dnVatInp.dataset.preTaxCt23 = sumPreTaxInPeriod;
+        if (typeof window.updateXmlTaxPreview === 'function') window.updateXmlTaxPreview();
+      }
+    };
+
+    // Tích hợp Doanh thu Grab / Shopee vào Báo cáo Thuế & Tờ khai XML HTKK
+    const origGetTaxReportDataV22 = getTaxReportData;
+    getTaxReportData = function() {
+      const base = origGetTaxReportDataV22();
+      const includeExt = document.getElementById('chkIncludeExtRevInTax')?.checked !== false;
+
+      let ext5610 = 0, ext5630 = 0, extFee = 0, extOrders = 0;
+      const extRowsHtml = [];
+
+      Object.keys(externalRevenuesCache).forEach(k => {
+        const r = externalRevenuesCache[k];
+        if (!r || !isDateMatchingCurrentReportPeriod(r.date)) return;
+        const r5610 = Number(r.rev5610) || 0;
+        const r5630 = Number(r.rev5630) || 0;
+        const fee = Number(r.platformFee) || 0;
+        const net = Number(r.netReceived) || Math.max(0, r5610 + r5630 - fee);
+        const cnt = Number(r.orderCount) || 1;
+
+        ext5610 += r5610;
+        ext5630 += r5630;
+        extFee += fee;
+        extOrders += cnt;
+
+        if (includeExt) {
+          base.total5610 += r5610;
+          base.total5630 += r5630;
+          base.totalTaxable += (r5610 + r5630);
+          base.count += cnt;
+          if (!base.daily[r.date]) base.daily[r.date] = { count: 0, tax5610: 0, tax5630: 0, ship: 0 };
+          base.daily[r.date].count += cnt;
+          base.daily[r.date].tax5610 += r5610;
+          base.daily[r.date].tax5630 += r5630;
+        }
+
+        const platBadge = r.platform === 'GRAB'
+          ? '<span style="background:#dcfce7; color:#166534; padding:2px 8px; border-radius:6px; font-weight:800;">🟢 GrabFood</span>'
+          : (r.platform === 'SHOPEE_FOOD'
+              ? '<span style="background:#ffedd5; color:#c2410c; padding:2px 8px; border-radius:6px; font-weight:800;">🟠 ShopeeFood</span>'
+              : '<span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:6px; font-weight:800;">🛍️ Shopee Seller</span>');
+
+        extRowsHtml.push(`
+          <tr>
+            <td><b>${r.date}</b></td>
+            <td>${platBadge}</td>
+            <td style="text-align:center; font-weight:800;">${cnt}</td>
+            <td style="text-align:right; font-weight:800; color:#1e5e3a;">${r5610.toLocaleString()}đ</td>
+            <td style="text-align:right; font-weight:800; color:#d97706;">${r5630.toLocaleString()}đ</td>
+            <td style="text-align:right; font-weight:800; color:#dc2626;">-${fee.toLocaleString()}đ</td>
+            <td style="text-align:right; font-weight:900; color:#15803d; background:#f0fdf4;">${net.toLocaleString()}đ</td>
+            <td style="font-size:0.8rem;">${r.note || ''}</td>
+            <td><button type="button" onclick="deleteExternalRevenueRecord('${k}')" style="background:#fee2e2; color:#b91c1c; border:none; padding:4px 8px; border-radius:6px; font-weight:700; cursor:pointer;">Xóa</button></td>
+          </tr>
+        `);
+      });
+
+      const extTbody = document.getElementById('extPlatformRevTableBody');
+      if (extTbody) {
+        extTbody.innerHTML = extRowsHtml.join('') || '<tr><td colspan="9" style="text-align:center; padding:14px; color:#64748b;">Chưa có báo cáo doanh thu Grab / Shopee nào trong kỳ này.</td></tr>';
+      }
+      const extTag = document.getElementById('extRevSummaryTag');
+      if (extTag) {
+        extTag.innerHTML = `📊 Tổng Sàn kỳ này: <b>${extOrders} đơn</b> | DT 5610: <b>${ext5610.toLocaleString()}đ</b> | DT 5630: <b>${ext5630.toLocaleString()}đ</b> | Phí sàn: <b style="color:#dc2626;">-${extFee.toLocaleString()}đ</b>`;
+      }
+
+      return base;
+    };
+
+    const origRenderShiftReportV22 = window.renderShiftReport;
+    window.renderShiftReport = function() {
+      origRenderShiftReportV22();
+      if (typeof window.renderInputInvoicesTable === 'function') window.renderInputInvoicesTable();
     };
   </script>
 </body>
