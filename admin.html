@@ -221,6 +221,21 @@
       .no-print { display: none !important; }
     }
     @media (max-width: 900px) { .pos-layout, .edit-modal-grid { grid-template-columns: 1fr; } }
+      /* MODULE 21: CHE DO GIAO DIEN NHAN VIEN TOI GIAN (NUT TO) & VOICE ORDER */
+    .voice-order-station { background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 2px solid #f59e0b; border-radius: 14px; padding: 12px 14px; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15); }
+    .btn-voice-mic-main { width: 100%; background: linear-gradient(135deg, #dc2626, #ea580c); color: #ffffff; border: none; padding: 15px 16px; border-radius: 12px; font-weight: 900; font-size: 1.05rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 6px 18px rgba(220, 38, 38, 0.35); transition: transform 0.15s; }
+    .btn-voice-mic-main.listening { background: linear-gradient(135deg, #16a34a, #059669); animation: alert-card 0.7s infinite alternate; }
+    .btn-big-mode-toggle { background: #0f172a; color: #ffd800; border: 2px solid #ffd800; padding: 8px 14px; border-radius: 10px; font-weight: 800; font-size: 0.85rem; cursor: pointer; }
+    .btn-big-mode-toggle.active { background: #16a34a; color: #ffffff; border-color: #86efac; }
+    .floating-voice-fab { position: fixed; bottom: 20px; left: 20px; z-index: 9500; background: linear-gradient(135deg, #dc2626, #ea580c); color: #fff; border: 3px solid #ffd800; border-radius: 50px; padding: 12px 18px; font-weight: 900; font-size: 0.92rem; box-shadow: 0 8px 25px rgba(220,38,38,0.45); cursor: pointer; display: none; align-items: center; gap: 6px; }
+    .floating-voice-fab.listening { background: #16a34a; animation: alert-card 0.7s infinite alternate; }
+    /* Khi bat Che do Nhan vien Toi gian (Big-Button Staff Mode) */
+    #viewPosOrder.staff-big-mode .pos-dish-grid { grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 10px; max-height: 62vh; }
+    #viewPosOrder.staff-big-mode .pos-dish-btn { min-height: 92px; padding: 12px; border: 2px solid #cbd5e1; border-radius: 12px; background: #ffffff; }
+    #viewPosOrder.staff-big-mode .pos-dish-btn h4 { font-size: 1.02rem !important; font-weight: 800; line-height: 1.3; color: #0f172a; }
+    #viewPosOrder.staff-big-mode .pos-dish-btn span:last-child { font-size: 1.05rem !important; }
+    #viewPosOrder.staff-big-mode .btn-table-pill { padding: 10px 16px; font-size: 0.95rem; border-width: 2px; }
+    #viewPosOrder.staff-big-mode .admin-cat-chip { padding: 9px 16px; font-size: 0.9rem; }
   </style>
 </head>
 <body>
@@ -324,6 +339,7 @@
         <button class="tab-btn" onclick="switchMainTab('printerConfig', event)">🖨️ Máy In</button>
         <button class="tab-btn" onclick="switchMainTab('shippers', event)">🛵 Đội Tài Xế</button>
         <button class="tab-btn" id="tabUsers" onclick="switchMainTab('users', event)" style="color:#2563eb;">👥 Phân Quyền</button>
+        <button class="tab-btn" id="tabDispatch" onclick="switchMainTab('dispatch', event)" style="color:#7c3aed; font-weight:800;">&#128242; &#272;i&#7873;u Khi&#7875;n PC (Dispatch)</button>
         <button class="btn-end-shift" onclick="endShiftAndClearScreen()">🛑 KẾT CA & XÓA MÀN HÌNH</button>
       </div>
 
@@ -426,6 +442,16 @@
               <div>
                 <label style="font-size:0.75rem; font-weight:800; color:#0f172a;">Số nhà, Tên đường / Địa chỉ giao hàng chi tiết (*):</label>
                 <input type="text" id="posShipCusAddress" placeholder="VD: 125 Nguyễn Hội, Phường Phan Thiết, Tỉnh Lâm Đồng" oninput="onPosCustomerFieldInput(this.value)" style="width:100%; padding:8px; border:1px solid #94a3b8; border-radius:6px; font-weight:700;">
+              <div style="margin-top:8px; background:#e0f2fe; border:1.5px solid #0284c7; padding:8px 10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                <label style="font-size:0.78rem; font-weight:800; color:#0369a1; margin:0;">&#128338; Th&#7901;i gian giao &#273;&#417;n Ship h&#7897;:</label>
+                <div style="display:flex; gap:6px; align-items:center;">
+                  <select id="posShipTimeMode" onchange="document.getElementById('posShipScheduledTimeInput').style.display=(this.value==='scheduled'?'inline-block':'none'); recalcPosDeliveryTotals();" style="padding:5px 8px; border:1px solid #0284c7; border-radius:6px; font-weight:800; font-size:0.78rem; background:#fff; color:#0369a1;">
+                    <option value="immediate" selected>&#9889; Giao ngay (~30p)</option>
+                    <option value="scheduled">&#128338; H&#7865;n gi&#7901; giao c&#7909; th&#7875;</option>
+                  </select>
+                  <input type="time" id="posShipScheduledTimeInput" onchange="recalcPosDeliveryTotals()" style="display:none; padding:4px 8px; border:1.5px solid #0284c7; border-radius:6px; font-weight:800; color:#dc2626; background:#fff;">
+                </div>
+              </div>
               </div>
             </div>
 
@@ -960,6 +986,77 @@
           </table>
         </div>
       </div>
+          <!-- VIEW 7: TRAM DIEU KHIEN MAY TINH TU XA QUA DIEN THOAI -->
+      <div id="viewDispatch" style="display: none;">
+        <div class="report-card" style="border: 2px solid #7c3aed; background: linear-gradient(135deg, #ffffff, #faf5ff);">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; border-bottom:1px solid #e9d5ff; padding-bottom:12px; margin-bottom:14px;">
+            <div>
+              <h3 style="color:#6d28d9; font-size:1.15rem;">&#128242; TR&#7840;M &#272;I&#7872;U KHI&#7874;N M&#193;Y T&#205;NH T&#7914; XA (GOOGLE MOBILE DISPATCH &amp; TEAM 4 AI)</h3>
+              <p style="font-size:0.84rem; color:#475569;">&#272;i&#7873;u khi&#7875;n m&#225;y t&#237;nh t&#7841;i tr&#7909; s&#7903; 280 Tr&#7847;n H&#432;ng &#272;&#7841;o t&#7915; &#273;i&#7879;n tho&#7841;i (Gi&#7919; m&#225;y th&#7913;c 24/7, ch&#7909;p m&#224;n h&#236;nh tr&#7921;c ti&#7871;p &amp; giao vi&#7879;c cho Bi&#7879;t &#273;&#7897;i 4 AI).</p>
+            </div>
+            <div id="pcHeartbeatBadge" style="background:#f1f5f9; color:#64748b; padding:6px 14px; border-radius:20px; font-weight:800; font-size:0.84rem; border:1px solid #cbd5e1;">
+              Dang kiem tra ket noi PC...
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px; margin-bottom:16px;">
+            <button type="button" onclick="sendQuickDispatch('SCREENSHOT', 'Chup anh toan bo man hinh may tinh hien tai')" style="padding:12px; background:#0284c7; color:#fff; border:none; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.86rem;">
+              &#128248; 1. Ch&#7909;p M&#224;n H&#236;nh M&#225;y T&#237;nh Ngay
+            </button>
+            <button type="button" onclick="sendQuickDispatch('SYS_STATUS', 'Kiem tra tinh trang CPU, RAM, O cung va cac tien trinh tren PC')" style="padding:12px; background:#059669; color:#fff; border:none; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.86rem;">
+              &#128187; 2. Ki&#7875;m Tra S&#7913;c Kh&#7887;e M&#225;y T&#237;nh
+            </button>
+            <button type="button" onclick="sendQuickDispatch('GIT_DEPLOY', 'Sao luu code POS va kiem tra trang thai he thong')" style="padding:12px; background:#d97706; color:#fff; border:none; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.86rem;">
+              &#128640; 3. Sao L&#432;u &amp; &#272;&#7891;ng B&#7897; Code POS
+            </button>
+            <button type="button" onclick="sendQuickDispatch('ECC_SECURITY', 'Quet bao mat 3 tang (Giao dien - API - Du lieu) theo chuan ECC')" style="padding:12px; background:#dc2626; color:#fff; border:none; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.86rem;">
+              &#128737; 4. Qu&#233;t B&#7843;o M&#7853;t ECC (3 T&#7847;ng)
+            </button>
+            <button type="button" onclick="sendQuickDispatch('MARKITDOWN', 'Chuyen doi tai lieu PDF/Word/Excel trong PIPELINE/docs_in sang Markdown (.md)')" style="padding:12px; background:#4f46e5; color:#fff; border:none; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.86rem;">
+              &#128196; 5. N&#233;n T&#224;i Li&#7879;u Markdown (-90% Token)
+            </button>
+          </div>
+
+          <div style="background:#ffffff; border:1.5px solid #c4b5fd; border-radius:12px; padding:14px; margin-bottom:16px;">
+            <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; align-items:center;">
+              <label style="font-size:0.84rem; font-weight:800; color:#5b21b6;">Ch&#7871; &#273;&#7897; giao vi&#7879;c:</label>
+              <select id="dispatchTaskType" style="padding:6px 12px; border:1.5px solid #7c3aed; border-radius:8px; font-weight:800; color:#5b21b6; background:#f5f3ff;">
+                <option value="COMPUTER_USE">&#128400; AI &#272;i&#7873;u Khi&#7875;n M&#225;y T&#237;nh (M&#7903; file, Ch&#7841;y l&#7879;nh, Ch&#7909;p m&#224;n h&#236;nh)</option>
+                <option value="TEAM4_PIPELINE">&#129302; Giao Vi&#7879;c Cho Bi&#7879;t &#272;&#7897;i 4 AI (Planner -&gt; Coder -&gt; Tester -&gt; Reviewer)</option>
+              </select>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <input type="text" id="dispatchPromptInput" placeholder="Nh&#7855;n vi&#7879;c c&#7847;n m&#225;y t&#237;nh l&#224;m h&#7897; (VD: Kiem tra danh sach file trong thu muc hien tai va chup man hinh)..." style="flex:1; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:0.92rem; font-weight:600;">
+              <button type="button" onclick="submitCustomDispatchTask()" style="padding:12px 22px; background:#7c3aed; color:#fff; border:none; border-radius:10px; font-weight:900; cursor:pointer; white-space:nowrap;">
+                &#128232; G&#7916;I L&#7878;NH V&#7872; PC
+              </button>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1.1fr 1fr; gap:14px;" class="edit-modal-grid">
+            <div style="background:#0f172a; color:#f8fafc; border-radius:12px; padding:14px; text-align:center;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <b style="color:#38bdf8; font-size:0.88rem;">&#128421; M&#192;N H&#204;NH M&#193;Y T&#205;NH TR&#7920;C TI&#7870;P (LIVE VIEW)</b>
+                <small id="lastScreenshotTime" style="color:#94a3b8;">Ch&#432;a c&#243; &#7843;nh</small>
+              </div>
+              <div style="background:#1e293b; border:1px dashed #475569; border-radius:8px; min-height:220px; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                <img id="livePcScreenshotImg" src="" alt="Screenshot PC" style="max-width:100%; max-height:380px; display:none; cursor:pointer; border-radius:6px;" onclick="window.open(this.src, '_blank')">
+                <p id="livePcScreenshotPlaceholder" style="color:#94a3b8; font-size:0.84rem; padding:20px;">B&#7845;m n&#250;t <b>"1. Ch&#7909;p M&#224;n H&#236;nh M&#225;y T&#237;nh Ngay"</b> &#7903; tr&#234;n &#273;&#7875; xem m&#224;n h&#236;nh PC t&#7915; &#273;i&#7879;n tho&#7841;i.</p>
+              </div>
+            </div>
+
+            <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:12px; padding:14px; max-height:430px; overflow-y:auto;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #e2e8f0; padding-bottom:6px;">
+                <b style="color:#0f172a; font-size:0.88rem;">&#128203; L&#7882;CH S&#7916; L&#7878;NH &amp; B&#193;O C&#193;O T&#7914; PC</b>
+                <button type="button" onclick="clearDispatchHistory()" style="background:#fee2e2; color:#b91c1c; border:none; padding:4px 8px; border-radius:6px; font-size:0.74rem; font-weight:700; cursor:pointer;">X&#243;a l&#7883;ch s&#7917;</button>
+              </div>
+              <div id="dispatchHistoryContainer" style="display:flex; flex-direction:column; gap:10px; font-size:0.83rem;">
+                <p style="color:#94a3b8; text-align:center; padding:20px;">Ch&#432;a c&#243; l&#7879;nh &#273;i&#7873;u khi&#7875;n t&#7915; xa n&#224;o.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
   </div> <!-- HẾT mainAppWrapper -->
 
@@ -1008,6 +1105,9 @@
     </div>
   </div>
 
+      <button type="button" id="floatingVoiceFab" class="floating-voice-fab no-print" onclick="quickOpenAndStartVoiceOrder()">
+      <span>&#127908;</span> <span id="floatingVoiceFabText">&#272;&#7885;c Order</span>
+    </button>
   <div id="printArea"></div>
 
   <script type="module">
@@ -1212,7 +1312,7 @@ const dynamicManifest = {
     window.switchMainTab = function(tabName, ev) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       if (ev && ev.currentTarget) ev.currentTarget.classList.add('active');
-      ['viewOrders','viewPosOrder','viewMenuStock','viewBankConfig','viewPrinterConfig','viewShippers','viewShiftReport','viewUsers'].forEach(id => {
+      ['viewOrders','viewPosOrder','viewMenuStock','viewBankConfig','viewPrinterConfig','viewShippers','viewShiftReport','viewUsers','viewDispatch'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
       });
@@ -2347,7 +2447,28 @@ window.deleteDishFromMenu = function(id, name) {
       renderPosCartUI();
     };
 
+        window.onPosShipTimeModeChange = function() {
+      const mode = document.getElementById('posShipTimeMode')?.value || 'immediate';
+      const timeInp = document.getElementById('posShipScheduledTimeInput');
+      if (!timeInp) return;
+      if (mode === 'scheduled') {
+        timeInp.style.display = 'inline-block';
+        if (!timeInp.value) {
+          const now = new Date();
+          const targetMins = Math.ceil((now.getHours() * 60 + now.getMinutes() + 45) / 15) * 15;
+          const hh = String(Math.min(20, Math.floor(targetMins / 60))).padStart(2, '0');
+          const mm = String(targetMins % 60).padStart(2, '0');
+          timeInp.value = hh + ':' + mm;
+        }
+      } else {
+        timeInp.style.display = 'none';
+        timeInp.value = '';
+      }
+      recalcPosDeliveryTotals();
+    };
     window.clearPosDeliveryCustomerForm = function() {
+      if (document.getElementById('posShipTimeMode')) document.getElementById('posShipTimeMode').value = 'immediate';
+      if (document.getElementById('posShipScheduledTimeInput')) { document.getElementById('posShipScheduledTimeInput').style.display = 'none'; document.getElementById('posShipScheduledTimeInput').value = ''; }
       if (document.getElementById('posCrmQuickSearch')) document.getElementById('posCrmQuickSearch').value = '';
       if (document.getElementById('posShipCusName')) document.getElementById('posShipCusName').value = '';
       if (document.getElementById('posShipCusPhone')) document.getElementById('posShipCusPhone').value = '';
@@ -2385,7 +2506,13 @@ window.deleteDishFromMenu = function(id, name) {
 
       const km = Math.max(0.5, parseFloat(document.getElementById('posShipKmInput')?.value || '1.8') || 1.8);
       const extraKm = Math.max(0, km - 2);
-      const mins = new Date().getHours() * 60 + new Date().getMinutes();
+      const shipModeVal = document.getElementById('posShipTimeMode')?.value || 'immediate';
+      const shipSchedStr = (document.getElementById('posShipScheduledTimeInput')?.value || '').trim();
+      let mins = new Date().getHours() * 60 + new Date().getMinutes();
+      if (shipModeVal === 'scheduled' && shipSchedStr.includes(':')) {
+        const [shH, shM] = shipSchedStr.split(':').map(Number);
+        if (!isNaN(shH) && !isNaN(shM)) mins = shH * 60 + shM;
+      }
       const peak = (mins >= 11 * 60 && mins <= 13 * 60) || (mins >= 17 * 60 && mins <= 19 * 60);
 
       let autoShipFee = 12000;
@@ -2529,8 +2656,8 @@ window.deleteDishFromMenu = function(id, name) {
           province: 'Lâm Đồng',
           address: fullAddr,
           deliveryKm: km,
-          deliveryTimeMode: 'immediate',
-          scheduledTime: null,
+          deliveryTimeMode: (document.getElementById('posShipTimeMode')?.value || 'immediate'),
+          scheduledTime: (document.getElementById('posShipTimeMode')?.value === 'scheduled' ? (document.getElementById('posShipScheduledTimeInput')?.value || null) : null),
           note: noteVal ? `[Quán đặt hộ khách] ${noteVal}` : '[Quán đặt hộ khách qua ĐT]',
           items: posCart,
           rawSubtotal: sub,
@@ -3494,25 +3621,34 @@ function getTaxReportData() {
           daily[dStr].count++; daily[dStr].ship += ship;
           
           let orderTotal5610 = 0, orderTotal5630 = 0;
+          let raw5610 = 0, raw5630 = 0;
           const unifiedMenu = getUnifiedMenuList();
-          
+          const rawItemSum = Object.values(o.items || {}).reduce((acc, it) => acc + (Number(it.price) || 0) * (Number(it.qty) || 0), 0);
+          const netOrderSub = (o.subtotal !== undefined) ? Number(o.subtotal) : rawItemSum;
+          const discRatio = (rawItemSum > 0 && netOrderSub < rawItemSum) ? (netOrderSub / rawItemSum) : 1;
+
           for (let k in o.items) {
-            const it = o.items[k]; 
-            const lineTotal = it.price * it.qty;
+            const it = o.items[k];
+            const lineTotal = (Number(it.price) || 0) * (Number(it.qty) || 0);
+            const netLineTotal = Math.round(lineTotal * discRatio);
             const dishBase = unifiedMenu.find(d => d.name === it.name);
             if (it.cat === 'douong' || (dishBase && dishBase.cat === 'douong')) {
-              orderTotal5630 += lineTotal;
-              total5630 += lineTotal;
-              daily[dStr].tax5630 += lineTotal;
+              raw5630 += lineTotal;
             } else {
-              orderTotal5610 += lineTotal;
-              total5610 += lineTotal;
-              daily[dStr].tax5610 += lineTotal;
+              raw5610 += lineTotal;
             }
-            
             if (!dishStats[it.name]) dishStats[it.name] = { qty: 0, total: 0 };
-            dishStats[it.name].qty += it.qty; dishStats[it.name].total += lineTotal;
+            dishStats[it.name].qty += it.qty;
+            dishStats[it.name].total += netLineTotal;
           }
+
+          orderTotal5610 = Math.round(raw5610 * discRatio);
+          orderTotal5630 = (discRatio < 1) ? Math.max(0, netOrderSub - orderTotal5610) : raw5630;
+          total5610 += orderTotal5610;
+          total5630 += orderTotal5630;
+          daily[dStr].tax5610 += orderTotal5610;
+          daily[dStr].tax5630 += orderTotal5630;
+
           o.id = id;
           o.calc5610 = orderTotal5610;
           o.calc5630 = orderTotal5630;
@@ -5563,8 +5699,8 @@ window.openInstallGuideModal = function() {
           province: 'Lâm Đồng',
           address: fullAddr,
           deliveryKm: km,
-          deliveryTimeMode: 'immediate',
-          scheduledTime: null,
+          deliveryTimeMode: (document.getElementById('posShipTimeMode')?.value || 'immediate'),
+          scheduledTime: (document.getElementById('posShipTimeMode')?.value === 'scheduled' ? (document.getElementById('posShipScheduledTimeInput')?.value || null) : null),
           note: noteVal ? `[Quán đặt hộ khách] ${noteVal}` : '[Quán đặt hộ khách qua ĐT]',
           items: posCart,
           rawSubtotal: rawSub,
@@ -5908,6 +6044,435 @@ window.openInstallGuideModal = function() {
           window.print();
         }
       }
+    };
+  
+    // =========================================================
+    // 20. MODULE DIEU KHIEN MAY TINH TU XA QUA DIEN THOAI (DISPATCH)
+    // =========================================================
+    onValue(ref(db, 'remote_dispatch/pc_status'), (snap) => {
+      const st = snap.val();
+      const badge = document.getElementById('pcHeartbeatBadge');
+      if (!badge) return;
+      if (st && st.lastSeen && (Date.now() - st.lastSeen < 45000)) {
+        badge.style.background = '#dcfce7';
+        badge.style.color = '#166534';
+        badge.style.borderColor = '#86efac';
+        badge.innerHTML = 'ONLINE: PC DANG THUC (Keep-Awake: ON | ' + (st.hostname || 'PC') + ')';
+      } else {
+        badge.style.background = '#fef2f2';
+        badge.style.color = '#b91c1c';
+        badge.style.borderColor = '#fecaca';
+        badge.innerHTML = 'OFFLINE: PC DANG TAT TRAM DISPATCH';
+      }
+    });
+
+    onValue(ref(db, 'remote_dispatch/latest_screenshot'), (snap) => {
+      const data = snap.val();
+      if (!data || !data.imageBase64) return;
+      const imgEl = document.getElementById('livePcScreenshotImg');
+      const phEl = document.getElementById('livePcScreenshotPlaceholder');
+      const timeEl = document.getElementById('lastScreenshotTime');
+      if (imgEl) { imgEl.src = data.imageBase64; imgEl.style.display = 'block'; }
+      if (phEl) phEl.style.display = 'none';
+      if (timeEl && data.timestamp) { timeEl.innerText = 'Chup luc: ' + new Date(data.timestamp).toLocaleTimeString('vi-VN'); }
+    });
+
+    onValue(ref(db, 'remote_dispatch/tasks'), (snap) => {
+      const tasks = snap.val() || {};
+      const box = document.getElementById('dispatchHistoryContainer');
+      if (!box) return;
+      const keys = Object.keys(tasks).sort((a, b) => (tasks[b].createdAt || 0) - (tasks[a].createdAt || 0));
+      let html = '';
+      keys.slice(0, 15).forEach(k => {
+        const t = tasks[k];
+        const stColor = t.status === 'DONE' ? '#16a34a' : (t.status === 'RUNNING' ? '#d97706' : (t.status === 'ERROR' ? '#dc2626' : '#64748b'));
+        const stBg = t.status === 'DONE' ? '#f0fdf4' : (t.status === 'RUNNING' ? '#fffbeb' : '#f8fafc');
+        html += '<div style="background:' + stBg + '; border:1px solid #cbd5e1; border-left:4px solid ' + stColor + '; border-radius:8px; padding:10px;">' +
+          '<div style="display:flex; justify-content:space-between; font-weight:800; margin-bottom:4px;">' +
+          '<span style="color:#5b21b6;">[' + (t.type || 'TASK') + '] ' + (t.prompt || '') + '</span>' +
+          '<span style="color:' + stColor + '; font-size:0.75rem;">' + (t.status || '') + '</span></div>' +
+          '<div style="font-size:0.75rem; color:#64748b; margin-bottom:4px;">Gui luc: ' + new Date(t.createdAt).toLocaleTimeString('vi-VN') + '</div>' +
+          (t.result ? '<pre style="background:#0f172a; color:#e2e8f0; padding:8px; border-radius:6px; font-size:0.75rem; white-space:pre-wrap; max-height:160px; overflow-y:auto; margin-top:4px;">' + t.result + '</pre>' : '') +
+          '</div>';
+      });
+      box.innerHTML = html || '<p style="color:#94a3b8; text-align:center; padding:20px;">Chua co lenh nao.</p>';
+    });
+
+    window.sendQuickDispatch = function(type, promptText) {
+      push(ref(db, 'remote_dispatch/tasks'), {
+        type: type,
+        prompt: promptText,
+        status: 'PENDING',
+        createdAt: Date.now(),
+        sender: localStorage.getItem('hy_chay_active_user') || 'director_mobile'
+      });
+    };
+
+    window.submitCustomDispatchTask = function() {
+      const type = document.getElementById('dispatchTaskType')?.value || 'COMPUTER_USE';
+      const inp = document.getElementById('dispatchPromptInput');
+      const promptText = (inp?.value || '').trim();
+      if (!promptText) return alert("Vui long nhap yeu cau can giao cho may tinh!");
+      window.sendQuickDispatch(type, promptText);
+      inp.value = '';
+    };
+
+    window.clearDispatchHistory = function() {
+      if (confirm("Xoa lich su lenh dieu khien tu xa?")) {
+        remove(ref(db, 'remote_dispatch/tasks'));
+      }
+    };
+  
+    // =========================================================
+    // 21. MODULE ORDER BANG GIONG NOI TIENG VIET & CHE DO NUT TO NHAN VIEN
+    // =========================================================
+    let isStaffBigMode = true;
+    let speechRecognizer = null;
+    let isVoiceListening = false;
+
+    window.toggleStaffBigMode = function() {
+      isStaffBigMode = !isStaffBigMode;
+      const viewEl = document.getElementById('viewPosOrder');
+      const btnEl = document.getElementById('btnToggleBigStaffMode');
+      if (viewEl) {
+        if (isStaffBigMode) viewEl.classList.add('staff-big-mode');
+        else viewEl.classList.remove('staff-big-mode');
+      }
+      if (btnEl) {
+        btnEl.className = isStaffBigMode ? 'btn-big-mode-toggle active' : 'btn-big-mode-toggle';
+        btnEl.innerHTML = isStaffBigMode ? '&#128269; Đang Bật: Chế Độ Nút To (Đỡ Rối Mắt)' : '&#128269; Bật Chế Độ Nút To Cho Nhân Viên';
+      }
+    };
+
+    // Hien thi nut Micro Noi khi dang o man hinh POS hoac man hinh Don hang
+    function updateFloatingVoiceFabVisibility() {
+      const fab = document.getElementById('floatingVoiceFab');
+      if (!fab) return;
+      const isLogged = !!localStorage.getItem('hy_chay_active_user');
+      fab.style.display = isLogged ? 'flex' : 'none';
+    }
+    setTimeout(updateFloatingVoiceFabVisibility, 600);
+
+    window.quickOpenAndStartVoiceOrder = function() {
+      const posView = document.getElementById('viewPosOrder');
+      if (posView && posView.style.display === 'none') {
+        const tabBtn = document.getElementById('tabBtnPosDineIn');
+        window.openPosInMode('dine_in', { currentTarget: tabBtn });
+      }
+      window.toggleVoiceOrderRecognition();
+    };
+
+    // Ham chuan hoa tieng Viet khong dau de nhan dien giong noi chinh xac 100% moi vung mien
+    function normVN(str) {
+      return String(str || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\u0111/g, 'd').replace(/\u0110/g, 'D')
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    // Chuyen chu so tieng Viet khi doc thanh so (VD: "hai bun thai" -> "2 bun thai")
+    function convertSpokenNumbers(normStr) {
+      const numMap = {
+        'muoi': '10', 'chuc': '10',
+        'chin': '9', 'tam': '8', 'bay': '7', 'sau': '6',
+        'nam': '5', 'lam': '5', 'bon': '4', 'tu': '4',
+        'ba': '3', 'hai': '2', 'mot': '1'
+      };
+      let s = ' ' + normStr + ' ';
+      // Thay cac cum "cho hai", "lay ba", hoac so dung truoc don vi (to, phan, ly, dia, chen, suat, chai, lon)
+      Object.keys(numMap).forEach(word => {
+        const digit = numMap[word];
+        const rx = new RegExp('\\b' + word + '\\b(?=\\s+(?:to|phan|ly|chen|dia|hop|chai|lon|suat|noi|banh|bun|mi|pho|hu|com|chao|xoi|cha|bao|khoai|dau|nam|nom|bo|lau|ga|pate|rong|suon|moc|cafe|ca|bac|cacao|latte|tra|ep|nuoc|yaourt|sua|suoi|soda|them|topping))', 'g');
+        s = s.replace(rx, digit);
+      });
+      return s.trim();
+    }
+
+    // Tu dien tu dong nghia khi nhan vien doc tat
+    function applyStaffSpokenSynonyms(normStr) {
+      let s = ' ' + normStr + ' ';
+      const synonyms = [
+        [/\bca phe\b/g, 'cafe'],
+        [/\bsua chua\b/g, 'yaourt'],
+        [/\bbo huc\b(?!\s+thai)/g, 'bo huc thai'],
+        [/\bnuoc suoi\b/g, 'nuoc khoang suoi gas'],
+        [/\bsuoi gas\b/g, 'nuoc khoang suoi gas'],
+        [/\bmi y bo bam\b/g, 'mi y sot bo bam'],
+        [/\bmi y sốt bo\b/g, 'mi y sot bo bam'],
+        [/\bmi spageti\b/g, 'mi y sot bo bam'],
+        [/\bcom chien\b(?!\s+rau)/g, 'com chien rau cu nam'],
+        [/\bcom dia\b/g, 'com dia thap cam'],
+        [/\bxoi chabong\b/g, 'xoi cha bong nam huong'],
+        [/\bxoi nam\b/g, 'xoi cha bong nam huong'],
+        [/\bto giay\b/g, 'them to giay hop mang ve'],
+        [/\bhop giay\b/g, 'them to giay hop mang ve'],
+        [/\bhop mang ve\b/g, 'them to giay hop mang ve'],
+        [/\bbanh mi khong\b/g, 'them banh mi khong'],
+        [/\bcom trang\b/g, 'them com trang xoi'],
+        [/\bthem bun\b/g, 'them bun mi pho hu tieu'],
+        [/\bthem mi\b/g, 'them bun mi pho hu tieu'],
+        [/\bthem pho\b/g, 'them bun mi pho hu tieu']
+      ];
+      synonyms.forEach(([rx, rep]) => { s = s.replace(rx, ' ' + rep + ' '); });
+      return s.replace(/\s+/g, ' ').trim();
+    }
+
+    // Bo giai ma cau doc cua nhan vien -> Tu chon Ban + Nhặt Món + Ghi chu Bep
+    window.parseAndExecuteVoiceOrder = function(rawTranscript) {
+      if (!rawTranscript || !rawTranscript.trim()) return;
+      const fbBox = document.getElementById('voiceOrderFeedbackBox');
+      let norm = normVN(rawTranscript);
+
+      // 1. Kiem tra lenh xoa gio hang hoac gui bep nhanh
+      if (/\b(xoa gio hang|xoa het mon|huy gio hang)\b/.test(norm)) {
+        posCart = {};
+        renderPosCartUI();
+        if (fbBox) {
+          fbBox.style.display = 'block';
+          fbBox.innerHTML = '&#128465; Đã xóa sạch giỏ hàng theo lệnh giọng nói: <i>"' + rawTranscript + '"</i>';
+        }
+        return;
+      }
+
+      // 2. Nhan dien So Ban (VD: "Ban 1", "Ban so 5", "Mang ve")
+      let detectedTable = null;
+      if (/\b(mang ve|dem ve|mua ve)\b/.test(norm)) {
+        const mv = (tablesListCache || []).find(t => normVN(t).includes('mang ve'));
+        if (mv) detectedTable = mv;
+      } else {
+        const tblMatch = norm.match(/\b(?:ban|ban so|vip)\s*(\d+)\b/);
+        if (tblMatch) {
+          const num = tblMatch[1];
+          const foundT = (tablesListCache || []).find(t => {
+            const nt = normVN(t);
+            return nt === 'ban ' + num || nt === 'vip ' + num || nt.endsWith(' ' + num);
+          });
+          if (foundT) detectedTable = foundT;
+          // Xoa cum "ban X" khoi chuoi de so X khong bi hieu nham la so luong mon dau tien!
+          norm = norm.replace(tblMatch[0], ' ');
+        }
+      }
+
+      if (detectedTable) {
+        selectedTable = detectedTable;
+        if (document.getElementById('currentSelectedTable')) {
+          document.getElementById('currentSelectedTable').innerText = detectedTable;
+        }
+        document.querySelectorAll('.btn-table-pill').forEach(b => {
+          if (b.innerText.trim() === detectedTable) b.classList.add('active');
+          else b.classList.remove('active');
+        });
+      }
+
+      // 3. Nhan dien Ghi chu cho bep (khong hanh, it cay, it da, khong duong...)
+      const notePatterns = [
+        { rx: /\bkhong hanh toi\b/g, label: 'Không hành tỏi' },
+        { rx: /\bkhong hanh\b/g, label: 'Không hành' },
+        { rx: /\bit hanh\b/g, label: 'Ít hành' },
+        { rx: /\bkhong cay\b/g, label: 'Không cay' },
+        { rx: /\bit cay\b/g, label: 'Ít cay' },
+        { rx: /\bcay nhieu\b/g, label: 'Cay nhiều' },
+        { rx: /\bnhieu nuoc leo\b/g, label: 'Nhiều nước lèo' },
+        { rx: /\bit nuoc\b/g, label: 'Ít nước' },
+        { rx: /\bde nuoc rieng\b/g, label: 'Để nước riêng' },
+        { rx: /\bkhong da\b/g, label: 'Không đá' },
+        { rx: /\bit da\b/g, label: 'Ít đá' },
+        { rx: /\bda rieng\b/g, label: 'Đá riêng' },
+        { rx: /\bkhong duong\b/g, label: 'Không đường' },
+        { rx: /\bit duong\b/g, label: 'Ít đường' },
+        { rx: /\bit ngot\b/g, label: 'Ít ngọt' }
+      ];
+      let extractedNotes = [];
+      notePatterns.forEach(np => {
+        if (np.rx.test(norm)) {
+          extractedNotes.push(np.label);
+          norm = norm.replace(np.rx, ' ');
+        }
+      });
+
+      // 4. Chuan hoa so luong va tu dong nghia
+      norm = applyStaffSpokenSynonyms(norm);
+      norm = convertSpokenNumbers(norm);
+
+      // 5. Xay dung danh sach Alias cua toan bo 122 mon (Sap xep tu cum dai nhat xuong ngan nhat)
+      const menuList = getUnifiedMenuList();
+      const candidates = [];
+      menuList.forEach(item => {
+        const fullNorm = normVN(item.name);
+        candidates.push({ alias: fullNorm, item: item });
+
+        // Tao ten rut gon (Bo chu "chay", "noi lon", "an lien", "chua chien") de nhan vien doc tat van trung 100%
+        const shortNorm = fullNorm
+          .replace(/\b(chay|noi lon|an lien|chua chien)\b/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+        if (shortNorm && shortNorm.length >= 3 && shortNorm !== fullNorm) {
+          candidates.push({ alias: shortNorm, item: item });
+        }
+
+        // Neu ten mon co dau "/" (VD: "Pho Bo / Ga Chay", "Hu Tieu Dai / Hu Tieu Mi") -> Tach thanh tung ve
+        if (item.name.includes('/')) {
+          item.name.split('/').forEach(part => {
+            let pNorm = normVN(part).replace(/\b(chay)\b/g, '').trim();
+            if (pNorm.length >= 4) candidates.push({ alias: pNorm, item: item });
+            if (fullNorm.startsWith('pho ') && !pNorm.startsWith('pho ')) {
+              candidates.push({ alias: 'pho ' + pNorm, item: item });
+            }
+          });
+        }
+      });
+
+      // Them cac ten goi tat pho bien nhat tai quan
+      const quickShortcuts = [
+        { alias: 'mi y', id: 'mispaghetti' },
+        { alias: 'hoanh thanh mi', id: 'hoanhthanhmi' },
+        { alias: 'mi hoanh thanh', id: 'hoanhthanhmi' },
+        { alias: 'xoi thap cam', id: 'xoi' },
+        { alias: 'lau thai', id: 'lauthai' },
+        { alias: 'lau chao', id: 'lauchao' },
+        { alias: 'cha gio chien', id: 'chagiochien' },
+        { alias: 'nom hoa chuoi', id: 'nomhoachuoi' },
+        { alias: 'goi hoa chuoi', id: 'nomhoachuoi' }
+      ];
+      quickShortcuts.forEach(sc => {
+        const foundDish = menuList.find(d => d.id === sc.id);
+        if (foundDish) candidates.push({ alias: sc.alias, item: foundDish });
+      });
+
+      candidates.sort((a, b) => b.alias.length - a.alias.length);
+
+      let workingStr = ' ' + norm + ' ';
+      const matchedOrderItems = [];
+
+      candidates.forEach(cand => {
+        if (!cand.alias || cand.alias.length < 3) return;
+        const rx = new RegExp('(?:^|\\s)(?:(\\d+)\\s*(?:to|phan|ly|chen|dia|hop|chai|lon|suat|noi|cai)?\\s+)?(' + cand.alias + ')(?=\\s|$)', 'i');
+        let match;
+        while ((match = workingStr.match(rx)) !== null) {
+          const qty = match[1] ? Math.max(1, parseInt(match[1])) : 1;
+          matchedOrderItems.push({ item: cand.item, qty: qty });
+          // Thay the doan da khop bang dau # de khong bi khop trung voi mon ngan hon
+          workingStr = workingStr.replace(match[0], ' # ');
+        }
+      });
+
+      // 6. Dua cac mon da nhan dien vao gio hang posCart
+      const addedSummary = [];
+      matchedOrderItems.forEach(m => {
+        for (let i = 0; i < m.qty; i++) {
+          window.addToPosCart(m.item.name, m.item.price, m.item.cat);
+        }
+        addedSummary.push(m.qty + 'x ' + m.item.name);
+      });
+
+      if (extractedNotes.length > 0) {
+        const noteEl = document.getElementById('posOrderNote');
+        if (noteEl) {
+          const curNote = noteEl.value.trim();
+          noteEl.value = curNote ? (curNote + ', ' + extractedNotes.join(', ')) : extractedNotes.join(', ');
+        }
+      }
+
+      if (typeof updateV19PosTotalsUI === 'function') updateV19PosTotalsUI();
+
+      // 7. Hien thi & Doc phan hoi tuc thi cho nhan vien
+      if (fbBox) {
+        fbBox.style.display = 'block';
+        if (addedSummary.length > 0 || detectedTable || extractedNotes.length > 0) {
+          fbBox.style.background = '#dcfce7';
+          fbBox.style.borderColor = '#86efac';
+          fbBox.style.color = '#166534';
+          fbBox.innerHTML = '&#9989; <b>Đã nghe:</b> <i>"' + rawTranscript + '"</i><br>' +
+            (detectedTable ? '&#129681; Chuyển sang: <b>' + detectedTable + '</b> | ' : '') +
+            (addedSummary.length > 0 ? '&#127836; Đã thêm: <b>' + addedSummary.join(', ') + '</b>' : '') +
+            (extractedNotes.length > 0 ? '<br>&#128221; Ghi chú bếp: <b>' + extractedNotes.join(', ') + '</b>' : '');
+          playHardwareBeep();
+        } else {
+          fbBox.style.background = '#fef2f2';
+          fbBox.style.borderColor = '#fecaca';
+          fbBox.style.color = '#b91c1c';
+          fbBox.innerHTML = '&#9888; Đã nghe: <i>"' + rawTranscript + '"</i> nhưng chưa khớp tên món. Bạn hãy đọc rõ tên món (VD: "2 bún thái, 1 cafe muối") nhé!';
+        }
+      }
+
+      // Neu nhan vien doc kem "gui bep luon" hoac "chot don luon" thi tu dong gui bep
+      if (/\b(gui bep luon|gui bep ngay|chot don luon)\b/.test(norm) && Object.keys(posCart).length > 0) {
+        setTimeout(() => { window.submitDineInOrder(); }, 400);
+      }
+    };
+
+    window.processVoiceOrderInputBox = function() {
+      const inp = document.getElementById('voiceManualTranscriptInput');
+      if (!inp || !inp.value.trim()) return;
+      window.parseAndExecuteVoiceOrder(inp.value.trim());
+      inp.value = '';
+    };
+
+    // Kich hoat Micro thu am truc tiep tren trinh duyet (Web Speech API)
+    window.toggleVoiceOrderRecognition = function() {
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const btnMain = document.getElementById('btnStartVoiceOrder');
+      const btnText = document.getElementById('voiceMicBtnText');
+      const fabBtn = document.getElementById('floatingVoiceFab');
+      const fabTxt = document.getElementById('floatingVoiceFabText');
+
+      if (!SpeechRec) {
+        const manualInp = document.getElementById('voiceManualTranscriptInput');
+        if (manualInp) {
+          manualInp.focus();
+          alert("📱 Trên trình duyệt này, bạn hãy bấm biểu tượng Micro (🎤) ngay trên bàn phím điện thoại để đọc món cực nhạy nhé!");
+        }
+        return;
+      }
+
+      if (isVoiceListening && speechRecognizer) {
+        speechRecognizer.stop();
+        return;
+      }
+
+      speechRecognizer = new SpeechRec();
+      speechRecognizer.lang = 'vi-VN';
+      speechRecognizer.continuous = false;
+      speechRecognizer.interimResults = false;
+
+      speechRecognizer.onstart = () => {
+        isVoiceListening = true;
+        playHardwareBeep();
+        if (btnMain) btnMain.classList.add('listening');
+        if (btnText) btnText.innerText = 'ĐANG NGHE... HÃY ĐỌC SỐ BÀN & TÊN MÓN!';
+        if (fabBtn) fabBtn.classList.add('listening');
+        if (fabTxt) fabTxt.innerText = 'Đang nghe...';
+      };
+
+      speechRecognizer.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        window.parseAndExecuteVoiceOrder(transcript);
+      };
+
+      speechRecognizer.onerror = (event) => {
+        isVoiceListening = false;
+        if (btnMain) btnMain.classList.remove('listening');
+        if (btnText) btnText.innerText = 'BẤM VÀO ĐÂY ĐỂ ĐỌC MÓN BẰNG GIỌNG NÓI';
+        if (fabBtn) fabBtn.classList.remove('listening');
+        if (fabTxt) fabTxt.innerText = 'Đọc Order';
+        if (event.error === 'not-allowed') {
+          alert("⚠️ Vui lòng bấm 'Cho phép' (Allow) quyền sử dụng Micro trên trình duyệt, hoặc chạm vào ô bên dưới để dùng Micro bàn phím điện thoại!");
+        }
+      };
+
+      speechRecognizer.onend = () => {
+        isVoiceListening = false;
+        if (btnMain) btnMain.classList.remove('listening');
+        if (btnText) btnText.innerText = 'BẤM VÀO ĐÂY ĐỂ ĐỌC MÓN BẰNG GIỌNG NÓI';
+        if (fabBtn) fabBtn.classList.remove('listening');
+        if (fabTxt) fabTxt.innerText = 'Đọc Order';
+      };
+
+      speechRecognizer.start();
     };
   </script>
 </body>
