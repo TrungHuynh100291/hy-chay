@@ -235,8 +235,42 @@
     .inv-check-badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 800; }
     .inv-valid { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
     .inv-invalid { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+      /* MODULE 28: KHOA TRAN NGANG MAN HINH DIEN THOAI 100% & GIAO DIEN GON GANG */
+    html, body { max-width: 100vw !important; overflow-x: hidden !important; }
+    .dashboard-container { max-width: 100vw; overflow-x: hidden; padding: 0 10px; }
+    .tabs-bar { display: flex; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; gap: 4px; padding-bottom: 4px; max-width: 100%; }
+    .tabs-bar::-webkit-scrollbar { display: none; }
+    .tab-btn { white-space: nowrap; flex-shrink: 0; padding: 8px 10px; font-size: 0.82rem; }
+    .btn-end-shift { white-space: nowrap; flex-shrink: 0; padding: 7px 12px; font-size: 0.8rem; }
+    .kds-filter-bar { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; max-width: 100%; gap: 6px; padding: 8px 10px; }
+    .kds-filter-bar::-webkit-scrollbar { display: none; }
+    .kds-filter-btn { white-space: nowrap; flex-shrink: 0; padding: 5px 10px; font-size: 0.78rem; }
+    .report-card { overflow-x: auto; max-width: 100%; padding: 14px 12px; }
+    .report-table, .menu-mgmt-table { display: block; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    . floating-voice-fab { bottom: 14px; left: 12px; padding: 9px 14px; font-size: 0.82rem; border-width: 2px; }
+    @media (max-width: 768px) {
+      .topbar { padding: 8px 10px; gap: 6px; }
+      .brand-title h1 { font-size: 0.98rem; }
+      .brand-title p { font-size: 0.68rem; }
+      .top-actions { width: 100%; justify-content: space-between; gap: 4px; }
+      .top-actions button, .live-clock { padding: 5px 8px; font-size: 0.72rem; }
+      .stats-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .stat-card { padding: 8px 10px; }
+      .stat-info h2 { font-size: 1.2rem; }
+      .orders-grid { grid-template-columns: 1fr; gap: 10px; }
+      .pos-layout, .edit-modal-grid { grid-template-columns: 1fr !important; gap: 10px; }
+      .pos-menu-panel, .pos-cart-panel { padding: 10px; max-width: 100%; overflow-x: hidden; }
+      .pos-dish-grid, #viewPosOrder.staff-big-mode .pos-dish-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; max-height: 48vh; }
+      .pos-dish-btn, #viewPosOrder.staff-big-mode .pos-dish-btn { min-height: 68px !important; padding: 8px !important; }
+      .pos-dish-btn h4, #viewPosOrder.staff-big-mode .pos-dish-btn h4 { font-size: 0.85rem !important; }
+      .btn-table-pill, #viewPosOrder.staff-big-mode .btn-table-pill { padding: 6px 10px !important; font-size: 0.8rem !important; }
+      .admin-cat-chip, #viewPosOrder.staff-big-mode .admin-cat-chip { padding: 5px 10px !important; font-size: 0.76rem !important; }
+      .btn-voice-mic-main { padding: 10px 12px !important; font-size: 0.88rem !important; }
+    }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
 
@@ -1375,6 +1409,28 @@
       </div>
       <div id="globalVoiceHudContent" style="color:#e2e8f0; font-weight:700;">Đang lắng nghe câu lệnh của bạn...</div>
     </div>
+    <!-- MODAL BAN DO GOOGLE MAPS TIM QUAN / NHA HANG / GHIM VI TRI CHO DAT SHIP HO (MODULE 28) -->
+  <div id="adminPosMapModal" class="cancel-modal-overlay" style="z-index: 12000;">
+    <div class="cancel-modal-box" style="max-width: 620px; padding: 16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h3 style="color:var(--primary); font-size:1.05rem; margin:0;">&#128205; Tìm Quán / Nhà Hàng / Khách Sạn &amp; Ghim Google Maps</h3>
+        <button type="button" onclick="closeAdminPosMapModal()" style="background:#ef4444; color:#fff; border:none; padding:5px 10px; border-radius:6px; font-weight:800; cursor:pointer;">&#10006; Đóng</button>
+      </div>
+      <div style="display:flex; gap:6px; margin-bottom:8px;">
+        <input type="text" id="adminMapPlaceSearchInput" placeholder="Gõ tên Nhà hàng, Quán cà phê, Khách sạn, Đường tại Phan Thiết..." onkeydown="if(event.key==='Enter'){event.preventDefault(); searchPlaceOnAdminMap();}" style="flex:1; padding:9px 12px; border:2px solid #0284c7; border-radius:8px; font-weight:700; font-size:0.86rem;">
+        <button type="button" onclick="searchPlaceOnAdminMap()" style="background:#0284c7; color:#fff; border:none; padding:9px 14px; border-radius:8px; font-weight:800; cursor:pointer; white-space:nowrap;">&#128269; Tìm Ngay</button>
+      </div>
+      <div id="adminMapSearchResults" style="display:none; max-height:130px; overflow-y:auto; background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; margin-bottom:8px; font-size:0.8rem;"></div>
+      <div style="display:flex; gap:6px; margin-bottom:8px;">
+        <button type="button" onclick="switchAdminMapLayer('road')" style="flex:1; padding:6px; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; border-radius:6px; font-weight:800; font-size:0.76rem; cursor:pointer;">&#128506; Bản Đồ Đường Phố Google</button>
+        <button type="button" onclick="switchAdminMapLayer('sat')" style="flex:1; padding:6px; background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; border-radius:6px; font-weight:800; font-size:0.76rem; cursor:pointer;">&#128752; Bản Đồ Vệ Tinh (Rõ Nóc Nhà)</button>
+        <button type="button" onclick="centerAdminMapToStore()" style="padding:6px 10px; background:#fef3c7; color:#b45309; border:1px solid #fde68a; border-radius:6px; font-weight:800; font-size:0.76rem; cursor:pointer;">&#127968; Tâm Quán</button>
+      </div>
+      <div id="adminLeafletMap" style="height: 340px; width: 100%; border-radius: 10px; border: 2px solid #0284c7; margin-bottom: 10px; background: #e2e8f0;"></div>
+      <div id="adminMapPinInfoText" style="font-size:0.8rem; font-weight:700; color:#15803d; margin-bottom:10px; text-align:center;">Chạm vào bản đồ hoặc kéo ghim đỏ tới đúng quán/nhà khách hàng.</div>
+      <button type="button" onclick="confirmAdminPosMapPin()" style="width:100%; padding:12px; background:#16a34a; color:#fff; border:none; border-radius:10px; font-weight:900; font-size:0.95rem; cursor:pointer;">&#9989; XÁC NHẬN VỊ TRÍ NÀY &amp; TỰ TÍNH SỐ KM</button>
+    </div>
+  </div>
   <div id="printArea"></div>
 
   <script type="module">
@@ -8606,6 +8662,483 @@ window.openInstallGuideModal = function() {
         `🎉 KẾT LUẬN CỦA REVIEWER AGENT: Hệ thống đạt chuẩn 100% trên mọi thiết bị!`
       ];
       if (outBox) outBox.innerText = auditLines.join('\n');
+    };
+  
+    // =========================================================================
+    // 28. MODULE NANG CAP TOAN DIEN V28 (ADMIN POS):
+    //  - 28.1. DUA TRAM 11 PHONG BAN AO & AI STUDIO VAO TRONG TAB DIEU KHIEN PC
+    //  - 28.2. DAT HO KHACH: LUU KHACH MOI + TIM QUAN/GHIM GOOGLE MAPS + TU NHAY KM
+    //  - 28.3. GRAB CA NHAN (NOI BO) VS SHOPEE CONG TY (3401289271)
+    // =========================================================================
+
+    // --- 28.1. ĐẢM BẢO TRẠM 11 PHÒNG BAN ẢO & AI STUDIO NẰM TRONG #viewDispatch ---
+    function mountAiStudioInsideDispatchTab() {
+      const dispatchView = document.getElementById('viewDispatch');
+      if (!dispatchView) return;
+      const studioSelect = document.getElementById('aiStudioSkillSelect');
+      if (studioSelect) {
+        const studioCard = studioSelect.closest('div[style*="border:2px solid #0d9488"]');
+        if (studioCard && !dispatchView.contains(studioCard)) {
+          dispatchView.insertBefore(studioCard, dispatchView.firstChild);
+          studioCard.style.marginTop = '0';
+          studioCard.style.marginBottom = '16px';
+        }
+      }
+      // Dam bao tabDispatch luon hien thi
+      const tabD = document.getElementById('tabDispatch');
+      if (tabD) tabD.style.display = 'inline-block';
+    }
+    setTimeout(mountAiStudioInsideDispatchTab, 300);
+
+    // --- 28.2. NÂNG CẤP ĐẶT SHIP HỘ KHÁCH: LƯU KHÁCH MỚI + GHIM GOOGLE MAPS + TỰ NHẢY KM ---
+    let adminPosMap = null;
+    let adminPosMarker = null;
+    let adminMapRoadLayer = null;
+    let adminMapSatLayer = null;
+    let adminPinnedLat = null;
+    let adminPinnedLng = null;
+    let addressGeocodeTimer = null;
+
+    const PHAN_THIET_POI_AND_STREETS_KM = [
+      { keys: ["tran hung dao", "trần hưng đạo"], lat: 10.9320, lon: 108.1020, km: 1.2 },
+      { keys: ["coopmart", "co.opmart", "siêu thị coop"], lat: 10.9355, lon: 108.1032, km: 0.9 },
+      { keys: ["lotte", "lotte mart", "siêu thị lotte"], lat: 10.9462, lon: 108.1118, km: 2.3 },
+      { keys: ["nguyen hoi", "nguyễn hội"], lat: 10.9410, lon: 108.1015, km: 2.1 },
+      { keys: ["thu khoa huan", "thủ khoa huân"], lat: 10.9365, lon: 108.1095, km: 1.9 },
+      { keys: ["ton duc thang", "tôn đức thắng"], lat: 10.9425, lon: 108.1080, km: 2.0 },
+      { keys: ["le hong phong", "lê hồng phong"], lat: 10.9340, lon: 108.0980, km: 1.4 },
+      { keys: ["vo van kiet", "võ văn kiệt"], lat: 10.9440, lon: 108.1060, km: 2.2 },
+      { keys: ["hung vuong", "hùng vương"], lat: 10.9435, lon: 108.1165, km: 2.8 },
+      { keys: ["doi duong", "đồi dương", "khách sạn đồi dương", "bãi biển đồi dương"], lat: 10.9295, lon: 108.1135, km: 2.1 },
+      { keys: ["ga phan thiet", "ga phan thiết", "bến xe phan thiết"], lat: 10.9480, lon: 108.0910, km: 2.9 },
+      { keys: ["cảng phú hài", "phu hai", "phú hài"], lat: 10.9450, lon: 108.1480, km: 5.5 },
+      { keys: ["hàm tiến", "ham tien", "nguyễn đình chiểu", "nguyen dinh chieu"], lat: 10.9510, lon: 108.2050, km: 12.5 },
+      { keys: ["bệnh viện đa khoa", "benh vien tinh", "bệnh viện an phước"], lat: 10.9385, lon: 108.0975, km: 1.7 },
+      { keys: ["chợ phan thiết", "cho phan thiet", "chợ lớn"], lat: 10.9255, lon: 108.0995, km: 1.4 },
+      { keys: ["chợ phú thủy", "cho phu thuy"], lat: 10.9390, lon: 108.1150, km: 2.2 }
+    ];
+
+    function calcRoadKmAdmin(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+      const straightKm = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return Math.max(0.5, Math.round(straightKm * 1.25 * 10) / 10);
+    }
+
+    // Gan them nut [Luu Khach Moi], [Tim Ten Quan / Ghim Ban Do] va Tu nhay Km vao #posDeliveryCustomerSection
+    function enhancePosDeliveryCustomerSectionUI() {
+      const sec = document.getElementById('posDeliveryCustomerSection');
+      if (!sec || document.getElementById('btnSaveNewPosCustomerNow')) return;
+
+      // 1. Them nut "💾 Lưu Khách Mới Vào Danh Bạ" canh nut "🔄 Nhập Khách Mới"
+      const clearBtn = sec.querySelector('button[onclick*="clearPosDeliveryCustomerForm"]');
+      if (clearBtn) {
+        const saveCusBtn = document.createElement('button');
+        saveCusBtn.type = 'button';
+        saveCusBtn.id = 'btnSaveNewPosCustomerNow';
+        saveCusBtn.style.cssText = 'background:#16a34a; color:#fff; border:none; padding:5px 10px; border-radius:6px; font-size:0.76rem; font-weight:800; cursor:pointer; margin-right:6px;';
+        saveCusBtn.innerHTML = '💾 Lưu Khách Mới Vào Danh Bạ';
+        saveCusBtn.onclick = window.saveNewPosCustomerDirectly;
+        clearBtn.parentNode.insertBefore(saveCusBtn, clearBtn);
+      }
+
+      // 2. Them thanh [📍 Ghim Bản Đồ / Tìm Tên Quán, Nhà Hàng, Khách Sạn] ngay tren o nhap Dia chi
+      const addrInp = document.getElementById('posShipCusAddress');
+      if (addrInp) {
+        const addrToolbar = document.createElement('div');
+        addrToolbar.style.cssText = 'display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:5px; margin-top:4px;';
+        addrToolbar.innerHTML = `
+          <span id="posAutoKmStatusTag" style="font-size:0.74rem; font-weight:800; color:#15803d;">💡 Gõ địa chỉ hoặc tên quán/khách sạn -> Số Km tự nhảy!</span>
+          <div style="display:flex; gap:5px;">
+            <button type="button" onclick="openAdminPosMapModal()" style="background:#0284c7; color:#fff; border:none; padding:5px 10px; border-radius:6px; font-weight:800; font-size:0.75rem; cursor:pointer;">
+              📍 Tìm Tên Quán / Ghim Bản Đồ Google Maps
+            </button>
+            <button type="button" onclick="autoComputePosAddressDistance(document.getElementById('posShipCusAddress').value, true)" style="background:#f59e0b; color:#0f172a; border:none; padding:5px 9px; border-radius:6px; font-weight:800; font-size:0.74rem; cursor:pointer;">
+              🔄 Tính Km Ngay
+            </button>
+          </div>
+        `;
+        addrInp.parentNode.insertBefore(addrToolbar, addrInp);
+
+        // Gan su kien tu dong nhay Km ngay khi go hoac roi o dia chi
+        addrInp.addEventListener('input', (e) => {
+          const val = e.target.value;
+          if (addressGeocodeTimer) clearTimeout(addressGeocodeTimer);
+          addressGeocodeTimer = setTimeout(() => {
+            window.autoComputePosAddressDistance(val, false);
+          }, 550);
+        });
+        addrInp.addEventListener('change', (e) => {
+          window.autoComputePosAddressDistance(e.target.value, true);
+        });
+      }
+    }
+    setTimeout(enhancePosDeliveryCustomerSectionUI, 400);
+
+    // Ham Luu Khach Moi truc tiep vao Danh ba khach quen (pos_customers & users)
+    window.saveNewPosCustomerDirectly = function() {
+      const name = (document.getElementById('posShipCusName')?.value || '').trim();
+      const rawPhone = (document.getElementById('posShipCusPhone')?.value || '').trim();
+      const cleanPhone = normalizeShipperPhone(rawPhone);
+      const ward = document.getElementById('posShipCusWard')?.value || 'Phường Phan Thiết';
+      const addr = (document.getElementById('posShipCusAddress')?.value || '').trim() || `${ward}, Tỉnh Lâm Đồng`;
+      const km = Math.max(0.5, parseFloat(document.getElementById('posShipKmInput')?.value || '1.8') || 1.8);
+      const note = (document.getElementById('posOrderNote')?.value || '').trim();
+
+      if (!name || !cleanPhone) {
+        return alert("⚠️ Vui lòng nhập Họ tên khách mới và Số điện thoại trước khi bấm Lưu!");
+      }
+      const rec = {
+        name: name,
+        phone: cleanPhone,
+        ward: ward,
+        province: 'Lâm Đồng',
+        address: addr,
+        fullAddress: addr,
+        km: km,
+        deliveryKm: km,
+        deliveryLat: adminPinnedLat || null,
+        deliveryLng: adminPinnedLng || null,
+        note: note,
+        updatedAt: new Date().toISOString()
+      };
+      update(ref(db, `pos_customers/${cleanPhone}`), rec);
+      update(ref(db, `users/${cleanPhone}`), rec).then(() => {
+        alert(`✅ Đã lưu khách hàng mới [${name} - ${cleanPhone}] (${addr} - ${km}km) vào Danh bạ Khách quen thành công!`);
+      });
+    };
+
+    // Ham Tu Dong Tinh Khoang Cach Km khi nhap So nha / Ten duong / Ten Nha hang / Toa do
+    window.autoComputePosAddressDistance = function(rawAddr, forceOnlineLookup = false) {
+      if (!rawAddr || rawAddr.trim().length < 3) return;
+      const txt = rawAddr.trim();
+      const lower = txt.toLowerCase();
+      const statusTag = document.getElementById('posAutoKmStatusTag');
+      const kmInp = document.getElementById('posShipKmInput');
+
+      // 1. Kiem tra neu chuoi chua Toa do GPS (VD: 10.9328, 108.1025)
+      const coordMatch = txt.match(/(\d{1,2}\.\d{3,8})\s*,\s*(\d{2,3}\.\d{3,8})/);
+      if (coordMatch) {
+        const lat = parseFloat(coordMatch[1]), lng = parseFloat(coordMatch[2]);
+        adminPinnedLat = lat; adminPinnedLng = lng;
+        const km = calcRoadKmAdmin(10.9328, 108.1025, lat, lng);
+        if (kmInp) kmInp.value = km;
+        manualPosShipFeeOverride = false;
+        recalcPosDeliveryTotals();
+        if (statusTag) statusTag.innerHTML = `📍 Đã tính từ tọa độ ghim: <b style="color:#dc2626;">${km} km</b>`;
+        return;
+      }
+
+      // 2. Kiem tra trong Tu dien Duong & Dia diem / Quan an / Khach san tai Phan Thiet
+      for (const poi of PHAN_THIET_POI_AND_STREETS_KM) {
+        if (poi.keys.some(k => lower.includes(k))) {
+          adminPinnedLat = poi.lat; adminPinnedLng = poi.lon;
+          // Tinh them sai so nho theo so nha (neu co so nha > 150 thi cong them 0.4km)
+          const houseNumMatch = lower.match(/^(\d{1,4})\b/);
+          let calcKm = poi.km;
+          if (houseNumMatch) {
+            const hNum = parseInt(houseNumMatch[1]);
+            if (hNum > 200) calcKm = Math.round((calcKm + 0.5) * 10) / 10;
+          }
+          if (kmInp) kmInp.value = calcKm;
+          manualPosShipFeeOverride = false;
+          recalcPosDeliveryTotals();
+          if (statusTag) statusTag.innerHTML = `✅ Đã tự động nhảy khoảng cách: <b style="color:#dc2626;">${calcKm} km</b>`;
+          if (!forceOnlineLookup) return;
+        }
+      }
+
+      // 3. Tra cuu truc tuyen Nominatim / OpenStreetMap cho cac ten Quan / Nha hang / Duong bat ky
+      const ward = document.getElementById('posShipCusWard')?.value || 'Phan Thiết';
+      const queryStr = txt.toLowerCase().includes('phan thiết') || txt.toLowerCase().includes('lâm đồng')
+        ? txt
+        : `${txt}, ${ward}, Phan Thiết`;
+
+      if (statusTag) statusTag.innerHTML = `⏳ Đang dò khoảng cách cho "${txt}"...`;
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=3&q=${encodeURIComponent(queryStr)}`)
+        .then(r => r.json())
+        .then(list => {
+          if (list && list.length > 0) {
+            const best = list[0];
+            const lat = parseFloat(best.lat), lon = parseFloat(best.lon);
+            adminPinnedLat = lat; adminPinnedLng = lon;
+            const km = calcRoadKmAdmin(10.9328, 108.1025, lat, lon);
+            if (kmInp) kmInp.value = km;
+            manualPosShipFeeOverride = false;
+            recalcPosDeliveryTotals();
+            if (statusTag) statusTag.innerHTML = `📍 Đã định vị tự động: <b style="color:#dc2626;">${km} km</b>`;
+          } else {
+            // Neu khong tim thay tren ban do so, uoc luong theo Phuong + do dai dia chi
+            const baseWardKm = POS_WARD_KM_MAP[ward] || 2.0;
+            if (kmInp) kmInp.value = baseWardKm;
+            manualPosShipFeeOverride = false;
+            recalcPosDeliveryTotals();
+            if (statusTag) statusTag.innerHTML = `📌 Khoảng cách theo khu vực ${ward}: <b style="color:#dc2626;">~${baseWardKm} km</b> (Có thể bấm Ghim Bản Đồ)`;
+          }
+        }).catch(() => {});
+    };
+
+    // --- BAN DO GOOGLE MAPS HYBRID TRONG ADMIN (KHONG BAO GIO XAM MAN HINH) ---
+    window.openAdminPosMapModal = function() {
+      const modal = document.getElementById('adminPosMapModal');
+      if (!modal) return;
+      modal.classList.add('active');
+      modal.style.display = 'flex';
+
+      setTimeout(() => {
+        if (!adminPosMap) {
+          adminPosMap = L.map('adminLeafletMap', { center: [10.9328, 108.1025], zoom: 15 });
+          // Su dung Google Maps Road Tiles chinh hang - Load cuc nhanh & day du ten Quan/Nha hang/Duong moi nhat!
+          adminMapRoadLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi', {
+            maxZoom: 20,
+            attribution: 'Google Maps Hy Chay'
+          }).addTo(adminPosMap);
+
+          adminMapSatLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=vi', {
+            maxZoom: 20,
+            attribution: 'Google Satellite'
+          });
+
+          adminPosMarker = L.marker([10.9328, 108.1025], { draggable: true }).addTo(adminPosMap);
+          adminPosMarker.on('dragend', () => {
+            const p = adminPosMarker.getLatLng();
+            updateAdminPinPreview(p.lat, p.lng);
+          });
+          adminPosMap.on('click', (e) => {
+            adminPosMarker.setLatLng(e.latlng);
+            updateAdminPinPreview(e.latlng.lat, e.latlng.lng);
+          });
+        }
+        adminPosMap.invalidateSize();
+        setTimeout(() => { if (adminPosMap) adminPosMap.invalidateSize(); }, 250);
+      }, 100);
+    };
+
+    window.closeAdminPosMapModal = function() {
+      const modal = document.getElementById('adminPosMapModal');
+      if (modal) { modal.classList.remove('active'); modal.style.display = 'none'; }
+    };
+
+    window.switchAdminMapLayer = function(mode) {
+      if (!adminPosMap) return;
+      if (mode === 'sat') {
+        if (adminPosMap.hasLayer(adminMapRoadLayer)) adminPosMap.removeLayer(adminMapRoadLayer);
+        adminMapSatLayer.addTo(adminPosMap);
+      } else {
+        if (adminPosMap.hasLayer(adminMapSatLayer)) adminPosMap.removeLayer(adminMapSatLayer);
+        adminMapRoadLayer.addTo(adminPosMap);
+      }
+    };
+
+    window.centerAdminMapToStore = function() {
+      if (!adminPosMap || !adminPosMarker) return;
+      adminPosMap.setView([10.9328, 108.1025], 16);
+      adminPosMarker.setLatLng([10.9328, 108.1025]);
+      updateAdminPinPreview(10.9328, 108.1025);
+    };
+
+    function updateAdminPinPreview(lat, lng) {
+      adminPinnedLat = lat;
+      adminPinnedLng = lng;
+      const km = calcRoadKmAdmin(10.9328, 108.1025, lat, lng);
+      const infoEl = document.getElementById('adminMapPinInfoText');
+      if (infoEl) {
+        infoEl.innerHTML = `📍 Tọa độ ghim: <b>${lat.toFixed(5)}, ${lng.toFixed(5)}</b> — Khoảng cách từ quán: <b style="color:#dc2626; font-size:0.92rem;">${km} km</b>`;
+      }
+    }
+
+    window.searchPlaceOnAdminMap = function() {
+      const kw = (document.getElementById('adminMapPlaceSearchInput')?.value || '').trim();
+      const resBox = document.getElementById('adminMapSearchResults');
+      if (!kw || !resBox) return;
+      resBox.style.display = 'block';
+      resBox.innerHTML = '<div style="padding:8px; color:#0369a1; font-weight:700;">⏳ Đang tìm địa điểm / quán trên bản đồ...</div>';
+
+      const q = kw.toLowerCase().includes('phan thiết') ? kw : `${kw}, Phan Thiết`;
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=5&q=${encodeURIComponent(q)}`)
+        .then(r => r.json())
+        .then(list => {
+          if (!list || list.length === 0) {
+            resBox.innerHTML = '<div style="padding:8px; color:#dc2626; font-weight:700;">⚠️ Không tìm thấy tên tự động. Bạn hãy kéo trực tiếp ghim đỏ trên bản đồ Google Maps bên dưới!</div>';
+            return;
+          }
+          resBox.innerHTML = list.map(item => {
+            const lat = parseFloat(item.lat), lon = parseFloat(item.lon);
+            const km = calcRoadKmAdmin(10.9328, 108.1025, lat, lon);
+            const safeLabel = (item.display_name || kw).replace(/'/g, "\\'");
+            return `<div onclick="selectAdminMapSearchResult(${lat}, ${lon}, '${safeLabel}')" style="padding:7px 10px; border-bottom:1px solid #bae6fd; cursor:pointer; font-weight:700; color:#0f172a;">
+              📍 <b>${item.display_name.split(',').slice(0, 3).join(', ')}</b> <span style="color:#dc2626;">(${km} km)</span>
+            </div>`;
+          }).join('');
+          // Nhay luon toi ket qua dau tien
+          window.selectAdminMapSearchResult(parseFloat(list[0].lat), parseFloat(list[0].lon), list[0].display_name);
+        }).catch(() => {});
+    };
+
+    window.selectAdminMapSearchResult = function(lat, lon, labelText) {
+      if (adminPosMap && adminPosMarker) {
+        adminPosMap.setView([lat, lon], 17);
+        adminPosMarker.setLatLng([lat, lon]);
+      }
+      updateAdminPinPreview(lat, lon);
+      document.getElementById('adminMapPlaceSearchInput').value = labelText.split(',').slice(0, 2).join(', ');
+    };
+
+    window.confirmAdminPosMapPin = function() {
+      const lat = adminPinnedLat || 10.9328;
+      const lng = adminPinnedLng || 108.1025;
+      const km = calcRoadKmAdmin(10.9328, 108.1025, lat, lng);
+      const placeName = (document.getElementById('adminMapPlaceSearchInput')?.value || '').trim();
+      const addrInp = document.getElementById('posShipCusAddress');
+      const kmInp = document.getElementById('posShipKmInput');
+      const statusTag = document.getElementById('posAutoKmStatusTag');
+
+      if (kmInp) kmInp.value = km;
+      if (addrInp) {
+        // Luu ro ten quan (neu co) kem cap toa do chuan X.XXXXX, Y.YYYYY de Google Maps cua Shipper nhan 100%!
+        addrInp.value = placeName
+          ? `${placeName} (${lat.toFixed(5)}, ${lng.toFixed(5)})`
+          : `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+      }
+      manualPosShipFeeOverride = false;
+      recalcPosDeliveryTotals();
+      if (statusTag) statusTag.innerHTML = `✅ Đã ghim Google Maps: <b style="color:#dc2626;">${km} km</b> (Shipper bấm chỉ đường nhận 100%)`;
+      window.closeAdminPosMapModal();
+    };
+
+    // --- 28.3. TÁCH RIÊNG GRAB (KINH DOANH CÁ NHÂN - KHÔNG TÍNH HĐ ĐẦU VÀO CÔNG TY) VS SHOPEE (CÔNG TY) ---
+    function upgradeGrabPersonalVsShopeeCompanyAccounting() {
+      const platSel = document.getElementById('extPlatformSelect');
+      if (platSel) {
+        platSel.innerHTML = `
+          <option value="GRAB_PERSONAL">🟢 GrabFood (Đang ĐK Cá Nhân — Chỉ tính Doanh thu Nội bộ, KHÔNG đưa vào Thuế/HĐ Công ty)</option>
+          <option value="SHOPEE_FOOD">🟠 ShopeeFood (Pháp nhân Công ty — Gộp vào Tờ khai Thuế 3401289271)</option>
+          <option value="SHOPEE_MALL">🛍️ Shopee Seller Center (Pháp nhân Công ty — Gộp vào Tờ khai Thuế 3401289271)</option>
+        `;
+      }
+
+      // Ghi chú rõ ở Trạm Hóa Đơn Đầu Vào
+      const invHeader = document.querySelector('#viewShiftReport h3[style*="#166534"]');
+      if (invHeader && !invHeader.innerHTML.includes('Lưu ý Grab')) {
+        invHeader.insertAdjacentHTML('afterend', `
+          <div style="background:#fffbeb; border:1px solid #f59e0b; color:#92400e; padding:8px 12px; border-radius:8px; font-size:0.78rem; font-weight:700; margin-bottom:10px;">
+            📌 <b>Quy tắc Kế toán Pháp nhân Bảo Anh Lâm (MST: 3401289271):</b> Hiện tại tài khoản <b>GrabFood</b> đang đăng ký dưới tên <b>Cá nhân</b> (chưa phải Công ty) nên hóa đơn phí dịch vụ của Grab sẽ chỉ ghi nhận vào <b>Chi phí Nội bộ</b> để tính lãi/lỗ thực tế, <b>tuyệt đối KHÔNG cộng vào chỉ tiêu Khấu trừ thuế GTGT đầu vào [ct23, ct24]</b> của Công ty! Chỉ các hóa đơn đầu vào đứng tên <b>Công ty Bảo Anh Lâm (MST: 3401289271)</b> (như ShopeeFood, Điện, Nước, Nguyên liệu, MISA...) mới được cộng vào [ct23, ct24].
+          </div>
+        `);
+      }
+    }
+    setTimeout(upgradeGrabPersonalVsShopeeCompanyAccounting, 500);
+
+    // Ghi de renderInputInvoicesTable de chi cong cac Hoa don dung MST Cong ty 3401289271 (va khong phai Grab ca nhan) vao [ct24]
+    const origRenderInputInvoicesV28 = window.renderInputInvoicesTable;
+    window.renderInputInvoicesTable = function() {
+      const tbody = document.getElementById('inputInvoicesTableBody');
+      if (!tbody) return;
+      let html = '', sumCompanyPre = 0, sumCompanyVat = 0, sumPersonalInternal = 0;
+
+      Object.keys(inputInvoicesCache).forEach(k => {
+        const inv = inputInvoicesCache[k];
+        if (!isDateMatchingCurrentReportPeriod(inv.invDate)) return;
+        const isGrabPersonal = (inv.seller || '').toLowerCase().includes('grab') || (inv.invName || '').toLowerCase().includes('grab');
+        const isCompanyValid = (String(inv.buyerMst || '').trim() === '3401289271') && !isGrabPersonal;
+
+        if (isCompanyValid) {
+          sumCompanyPre += (Number(inv.preTax) || 0);
+          sumCompanyVat += (Number(inv.vatAmt) || 0);
+        } else {
+          sumPersonalInternal += (Number(inv.preTax) || 0) + (Number(inv.vatAmt) || 0);
+        }
+
+        const badgeHtml = isCompanyValid
+          ? `<span class="inv-check-badge inv-valid">✅ Khấu trừ Công ty [ct24]</span>`
+          : `<span class="inv-check-badge" style="background:#fef3c7; color:#b45309; border:1px solid #f59e0b;">👤 Chi phí Cá nhân / Nội bộ (Không tính thuế CTY)</span>`;
+
+        html += `<tr>
+          <td><b>${inv.invDate ? new Date(inv.invDate).toLocaleString('vi-VN') : '--'}</b></td>
+          <td><b>${inv.invSymbol || ''}</b> #<b>${inv.invNo || ''}</b></td>
+          <td><b>${inv.invName || ''}</b><br><small>${inv.seller || ''}</small></td>
+          <td><b>${inv.buyerMst || 'Cá nhân'}</b></td>
+          <td style="text-align:right; font-weight:800;">${(Number(inv.preTax) || 0).toLocaleString()}đ</td>
+          <td style="text-align:right; font-weight:900; color:#dc2626;">${(Number(inv.vatAmt) || 0).toLocaleString()}đ</td>
+          <td style="text-align:center;">${badgeHtml}</td>
+          <td><button type="button" onclick="deleteInputInvoiceRecord('${k}')" style="background:#fee2e2; color:#b91c1c; border:none; padding:4px 8px; border-radius:6px; cursor:pointer;">Xóa</button></td>
+        </tr>`;
+      });
+
+      tbody.innerHTML = html || '<tr><td colspan="8" style="text-align:center; padding:14px; color:#64748b;">Chưa có hóa đơn đầu vào trong kỳ này.</td></tr>';
+      const badgeEl = document.getElementById('inputInvoiceTotalBadge');
+      if (badgeEl) {
+        badgeEl.innerHTML = `📌 Khấu trừ Công ty: [ct23] = <b>${sumCompanyPre.toLocaleString()}đ</b> | VAT [ct24] = <b style="color:#dc2626;">${sumCompanyVat.toLocaleString()}đ</b> ${sumPersonalInternal > 0 ? `<span style="color:#b45309;">(Chi phí Grab/Cá nhân nội bộ: ${sumPersonalInternal.toLocaleString()}đ - Đã tách khỏi thuế CTY)</span>` : ''}`;
+      }
+      const dnVatInp = document.getElementById('dnInputVat');
+      if (dnVatInp) {
+        dnVatInp.value = sumCompanyVat;
+        if (typeof window.updateXmlTaxPreview === 'function') window.updateXmlTaxPreview();
+      }
+    };
+
+    // Cap nhat getTaxReportData de Grab (Ca nhan) chi hien thi o bang Doi soat San, KHONG cong vao To khai Thue XML Cong ty!
+    getTaxReportData = function() {
+      const base = origGetTaxReportDataV22();
+      const includeExt = document.getElementById('chkIncludeExtRevInTax')?.checked !== false;
+      let extCompany5610 = 0, extCompany5630 = 0, extPersonalGrab = 0, extFee = 0, extOrders = 0;
+      const extRowsHtml = [];
+
+      Object.keys(externalRevenuesCache).forEach(k => {
+        const r = externalRevenuesCache[k];
+        if (!r || !isDateMatchingCurrentReportPeriod(r.date)) return;
+        const r5610 = Number(r.rev5610) || 0, r5630 = Number(r.rev5630) || 0, fee = Number(r.platformFee) || 0;
+        const net = Number(r.netReceived) || Math.max(0, r5610 + r5630 - fee);
+        const cnt = Number(r.orderCount) || 1;
+        const isGrabPersonal = String(r.platform || '').includes('GRAB');
+
+        extFee += fee;
+        extOrders += cnt;
+
+        if (isGrabPersonal) {
+          extPersonalGrab += (r5610 + r5630);
+          // Grab dang la Kinh doanh Ca nhan -> Khong cong vao Doanh thu chiu thue Cong ty (base.total5610 / 5630)
+        } else {
+          extCompany5610 += r5610;
+          extCompany5630 += r5630;
+          if (includeExt) {
+            base.total5610 += r5610;
+            base.total5630 += r5630;
+            base.totalTaxable += (r5610 + r5630);
+            base.count += cnt;
+            if (!base.daily[r.date]) base.daily[r.date] = { count: 0, tax5610: 0, tax5630: 0, ship: 0 };
+            base.daily[r.date].count += cnt;
+            base.daily[r.date].tax5610 += r5610;
+            base.daily[r.date].tax5630 += r5630;
+          }
+        }
+
+        const platLabel = isGrabPersonal
+          ? '<span style="background:#dcfce7; color:#166534; padding:2px 7px; border-radius:6px; font-weight:800; font-size:0.75rem;">🟢 GrabFood (Cá nhân - Nội bộ)</span>'
+          : `<span style="background:#ffedd5; color:#c2410c; padding:2px 7px; border-radius:6px; font-weight:800; font-size:0.75rem;">🟠 ${r.platform} (Thuế Công ty)</span>`;
+
+        extRowsHtml.push(`<tr>
+          <td><b>${r.date}</b></td>
+          <td>${platLabel}</td>
+          <td style="text-align:center;">${cnt}</td>
+          <td style="text-align:right; font-weight:800; color:#1e5e3a;">${r5610.toLocaleString()}đ</td>
+          <td style="text-align:right; font-weight:800; color:#d97706;">${r5630.toLocaleString()}đ</td>
+          <td style="text-align:right; color:#dc2626;">-${fee.toLocaleString()}đ</td>
+          <td style="text-align:right; font-weight:900; color:#15803d;">${net.toLocaleString()}đ</td>
+          <td style="font-size:0.78rem;">${r.note || ''}</td>
+          <td><button type="button" onclick="deleteExternalRevenueRecord('${k}')" style="background:#fee2e2; color:#b91c1c; border:none; padding:4px 8px; border-radius:6px; cursor:pointer;">Xóa</button></td>
+        </tr>`);
+      });
+
+      const extTbody = document.getElementById('extPlatformRevTableBody');
+      if (extTbody) extTbody.innerHTML = extRowsHtml.join('') || '<tr><td colspan="9" style="text-align:center; padding:14px; color:#64748b;">Chưa có báo cáo Grab / Shopee trong kỳ này.</td></tr>';
+      const extTag = document.getElementById('extRevSummaryTag');
+      if (extTag) {
+        extTag.innerHTML = `📊 Shopee (Thuế CTY): <b>${(extCompany5610 + extCompany5630).toLocaleString()}đ</b> | Grab (Cá nhân - Nội bộ): <b style="color:#0369a1;">${extPersonalGrab.toLocaleString()}đ</b> | Phí sàn: <b style="color:#dc2626;">-${extFee.toLocaleString()}đ</b>`;
+      }
+      return base;
     };
   </script>
 </body>
