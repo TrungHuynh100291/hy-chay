@@ -208,6 +208,19 @@
  .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
  input:checked + .slider { background-color: #22c55e; }
  input:checked + .slider:before { transform: translateX(22px); }
+      /* MODULE 28: GIAO DIEN BAC TAI CHUAN GRABDRIVER / SHOPEEFOOD DRIVER CHUYEN NGHIEP */
+    html, body { max-width: 100vw; overflow-x: hidden; }
+    .shipper-mode-overlay { background: #f1f5f9 !important; padding: 0 !important; justify-content: flex-start !important; overflow-y: auto !important; }
+    .shipper-card { max-width: 100% !important; width: 100% !important; min-height: 100vh !important; border-radius: 0 !important; background: #f8fafc !important; color: #0f172a !important; border: none !important; padding: 0 0 24px 0 !important; box-shadow: none !important; max-height: none !important; }
+    #shipperLoginBox { max-width: 420px !important; min-height: auto !important; margin: auto !important; border-radius: 20px !important; background: #ffffff !important; padding: 28px 20px !important; box-shadow: 0 20px 40px rgba(0,0,0,0.15) !important; }
+    #shipperLoginBox h2 { color: #00b14f !important; }
+    #shipperLoginBox .shipper-input { background: #f8fafc !important; color: #0f172a !important; border: 2px solid #cbd5e1 !important; }
+    .grab-driver-topbar { background: linear-gradient(135deg, #00b14f, #059669); color: #ffffff; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 12px rgba(0, 177, 79, 0.25); }
+    .grab-route-card { background: #ffffff; margin: 12px; border-radius: 16px; padding: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; text-align: left; }
+    .grab-timeline-item { display: flex; gap: 12px; align-items: flex-start; position: relative; }
+    .grab-dot-pickup { width: 24px; height: 24px; border-radius: 50%; background: #00b14f; color: #fff; font-weight: 900; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+    .grab-dot-dropoff { width: 24px; height: 24px; border-radius: 50%; background: #ee4d2d; color: #fff; font-weight: 900; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+    .grab-cash-banner { background: linear-gradient(135deg, #fff7ed, #ffedd5); border: 2px solid #ee4d2d; border-radius: 14px; padding: 12px 14px; margin: 0 12px 12px; text-align: left; }
   </style>
 </head>
 <body>
@@ -225,27 +238,61 @@
       <button class="shipper-btn" onclick="shipperLogin()">TIẾP TỤC</button>
     </div>
 
-    <div class="shipper-card" id="shipperOrderBox" style="display:none;">
-      <h2>📦 CHI TIẾT ĐƠN HÀNG</h2>
-<!-- CÔNG TẮC TRẠNG THÁI TÀI XẾ & KÍCH HOẠT CÒI HÚ CHẠY NGẦM -->
-      <div style="background:#1e293b; border:2px solid #475569; padding:10px; border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-        <span style="font-size:0.9rem; font-weight:700; color:#fff;" id="shipperStatusText">Trạng thái: Đang nghỉ</span>
-        <label class="switch">
-          <input type="checkbox" id="shipperOnlineToggle" onchange="toggleShipperOnline(this.checked)">
-          <span class="slider"></span>
-        </label>
+        <div class="shipper-card" id="shipperOrderBox" style="display:none;">
+      <!-- TOPBAR CHUẨN APP GRABDRIVER / SHOPEEFOOD DRIVER -->
+      <div class="grab-driver-topbar">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="width:40px; height:40px; border-radius:50%; background:#ffffff; color:#00b14f; font-weight:900; font-size:1.2rem; display:flex; align-items:center; justify-content:center;">🛵</div>
+          <div style="text-align:left;">
+            <div style="font-weight:900; font-size:1rem; letter-spacing:0.3px;">HY CHAY DRIVER PRO</div>
+            <div id="shipperStatusText" style="font-size:0.78rem; color:#dcfce7; font-weight:700;">Trạng thái: Đang trực đơn</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <label class="switch">
+            <input type="checkbox" id="shipperOnlineToggle" onchange="toggleShipperOnline(this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
       </div>
-<button type="button" onclick="openSmartInstallPrompt('shipper')" style="width:100%; background:#0284c7; color:#fff; border:1px solid #38bdf8; padding:10px; border-radius:10px; font-weight:800; font-size:0.86rem; cursor:pointer; margin-bottom:12px;">
-        📲 ĐƯA APP ĐỘI SHIP RA MÀN HÌNH ĐIỆN THOẠI (1-CHẠM)
-      </button>
-      <div style="background:#0f172a; border-radius:12px; padding:15px; margin-bottom:20px; text-align:left; border:1px dashed #475569;">
-        <p style="color:#94a3b8; margin-bottom:5px; font-size:0.9rem;">Mã đơn: <b id="shpOrderId" style="color:#fff;">--</b></p>
-        <p style="color:#94a3b8; margin-bottom:5px; font-size:0.9rem;">👤 Khách: <b id="shpCustomerInfo" style="color:#fff;">--</b></p>
-        <p style="color:#94a3b8; margin-bottom:5px; font-size:0.9rem;">📍 Địa chỉ: <b id="shpAddress" style="color:#38bdf8;">--</b></p>
-        <p style="color:#94a3b8; font-size:0.9rem;">💰 Phí Ship bạn nhận: <b id="shpFee" style="color:#22c55e; font-size:1.1rem;">--</b></p>
+
+      <div style="padding: 10px 12px 0;">
+        <button type="button" onclick="openSmartInstallPrompt('shipper')" style="width:100%; background:#0f172a; color:#ffd800; border:1.5px solid #ffd800; padding:9px; border-radius:10px; font-weight:800; font-size:0.82rem; cursor:pointer; margin-bottom:4px;">
+          📲 Đưa App Tài Xế Ra Màn Hình Chính (1-Chạm)
+        </button>
       </div>
-      
-      <div id="shpStatusMsg" style="color:#fde047; font-weight:bold; margin-bottom:10px; min-height:24px;">Đang kiểm tra lượt...</div>
+
+      <!-- THẺ LỘ TRÌNH LẤY HÀNG (A) -> GIAO HÀNG (B) CHUẨN GRAB -->
+      <div class="grab-route-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed #cbd5e1; padding-bottom:8px; margin-bottom:12px;">
+          <span style="font-size:0.82rem; color:#64748b; font-weight:700;">MÃ CHUYẾN GIAO:</span>
+          <b id="shpOrderId" style="color:#0f172a; font-size:1.05rem; background:#fef3c7; padding:3px 10px; border-radius:8px; border:1px solid #f59e0b;">--</b>
+        </div>
+
+        <div class="grab-timeline-item" style="margin-bottom:14px;">
+          <div class="grab-dot-pickup">A</div>
+          <div style="flex:1;">
+            <div style="font-size:0.72rem; font-weight:800; color:#00b14f; text-transform:uppercase;">Điểm lấy món (Nhà hàng Hy Chay)</div>
+            <div style="font-weight:800; font-size:0.92rem; color:#0f172a;">280 Trần Hưng Đạo, P. Phan Thiết, Lâm Đồng</div>
+          </div>
+        </div>
+
+        <div class="grab-timeline-item">
+          <div class="grab-dot-dropoff">B</div>
+          <div style="flex:1;">
+            <div style="font-size:0.72rem; font-weight:800; color:#ee4d2d; text-transform:uppercase;">Điểm giao khách hàng</div>
+            <div style="font-weight:800; font-size:0.98rem; color:#0f172a; margin-bottom:2px;" id="shpCustomerInfo">--</div>
+            <div style="font-weight:700; font-size:0.9rem; color:#0284c7; background:#f0f9ff; padding:8px 10px; border-radius:8px; border:1px solid #bae6fd; margin-top:4px;" id="shpAddress">--</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- THẺ ĐỐI SOÁT TIỀN THU KHÁCH & PHÍ SHIP CHUẨN SHOPEEFOOD DRIVER -->
+      <div class="grab-cash-banner">
+        <div style="font-size:0.75rem; font-weight:800; color:#9a3412; text-transform:uppercase; margin-bottom:4px;">💰 THÔNG TIN THU TIỀN &amp; PHÍ SHIP BÁC TÀI NHẬN:</div>
+        <div id="shpFee" style="color:#0f172a; font-weight:800; font-size:1rem; line-height:1.45;">--</div>
+      </div>
+      <div id="shpStatusMsg" style="margin:0 12px 8px; padding:10px; border-radius:10px; background:#0f172a; color:#fde047; font-weight:800;" style="color:#fde047; font-weight:bold; margin-bottom:10px; min-height:24px;">Đang kiểm tra lượt...</div>
       <div class="shipper-countdown" id="shpCountdown">00</div>
       
       <!-- Nút thao tác trước khi nhận -->
@@ -2790,6 +2837,163 @@ ${clipsXml}
 
     window.openInstallGuideModal = () => window.openSmartInstallPrompt(shipperOrderIdParam ? 'shipper' : 'customer');
     window.closeInstallGuideModal = () => window.closeSmartInstallOverlay();
+  
+    // =========================================================================
+    // 28. MODULE NANG CAP INDEX.HTML (GOOGLE MAPS HYBRID + FIX DAN DUONG TOA DO)
+    // =========================================================================
+    let customerGoogleRoadLayer = null;
+    let customerGoogleSatLayer = null;
+    window.customerPinnedLat = null;
+    window.customerPinnedLng = null;
+
+    // 1. Nang cap Modal Ban do Khach hang (#mapModal): Thêm thanh tìm kiếm Tên Quán/Nhà hàng & Chuyển sang Google Maps Tiles
+    function upgradeCustomerMapModalUI() {
+      const mapEl = document.getElementById('leafletMap');
+      if (!mapEl || document.getElementById('cusMapSearchInput')) return;
+      const searchBar = document.createElement('div');
+      searchBar.style.cssText = 'margin-bottom:8px;';
+      searchBar.innerHTML = `
+        <div style="display:flex; gap:6px; margin-bottom:6px;">
+          <input type="text" id="cusMapSearchInput" placeholder="🔍 Gõ tên Nhà hàng, Quán ăn, Khách sạn hoặc Đường..." onkeydown="if(event.key==='Enter'){event.preventDefault(); searchCustomerMapPlace();}" style="flex:1; padding:9px 12px; border:2px solid #1e5e3a; border-radius:8px; font-weight:700; font-size:0.86rem;">
+          <button type="button" onclick="searchCustomerMapPlace()" style="background:#1e5e3a; color:#fff; border:none; padding:9px 14px; border-radius:8px; font-weight:800; cursor:pointer;">Tìm</button>
+        </div>
+        <div style="display:flex; gap:6px;">
+          <button type="button" onclick="switchCustomerMapType('road')" style="flex:1; padding:5px; background:#eaf5ed; color:#1e5e3a; border:1px solid #86efac; border-radius:6px; font-weight:800; font-size:0.75rem; cursor:pointer;">🗺️ Bản Đồ Đường Phố Google</button>
+          <button type="button" onclick="switchCustomerMapType('sat')" style="flex:1; padding:5px; background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; border-radius:6px; font-weight:800; font-size:0.75rem; cursor:pointer;">🛰️ Bản Đồ Vệ Tinh</button>
+        </div>
+      `;
+      mapEl.parentNode.insertBefore(searchBar, mapEl);
+    }
+    setTimeout(upgradeCustomerMapModalUI, 300);
+
+    window.openMapModal = function() {
+      upgradeCustomerMapModalUI();
+      const modal = document.getElementById('mapModal');
+      modal.classList.add('active');
+      modal.style.display = 'flex';
+
+      setTimeout(() => {
+        if (!map) {
+          map = L.map('leafletMap', { center: [STORE_LAT, STORE_LON], zoom: 15 });
+          // Dung Google Maps Tiles chinh hang - Load tuc thi, khong bao gio bi xam man hinh!
+          customerGoogleRoadLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi', {
+            maxZoom: 20,
+            attribution: 'Google Maps Hy Chay'
+          }).addTo(map);
+          customerGoogleSatLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=vi', {
+            maxZoom: 20,
+            attribution: 'Google Satellite'
+          });
+
+          marker = L.marker([STORE_LAT, STORE_LON], { draggable: true }).addTo(map);
+          marker.on('dragend', function() {
+            const pos = marker.getLatLng();
+            mapSelectedLat = pos.lat; mapSelectedLng = pos.lng;
+            map.panTo(pos);
+          });
+          map.on('click', function(e) {
+            mapSelectedLat = e.latlng.lat; mapSelectedLng = e.latlng.lng;
+            marker.setLatLng(e.latlng);
+            map.panTo(e.latlng);
+          });
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(p => {
+              mapSelectedLat = p.coords.latitude; mapSelectedLng = p.coords.longitude;
+              map.setView([mapSelectedLat, mapSelectedLng], 17);
+              marker.setLatLng([mapSelectedLat, mapSelectedLng]);
+            }, () => {}, { timeout: 3000 });
+          }
+        } else {
+          // Neu map da khoi tao truoc do bang OpenStreetMap thi chuyen sang Google Maps
+          if (!customerGoogleRoadLayer) {
+            customerGoogleRoadLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi', { maxZoom: 20 }).addTo(map);
+          }
+        }
+        map.invalidateSize();
+        setTimeout(() => { if (map) map.invalidateSize(); }, 200);
+        setTimeout(() => { if (map) map.invalidateSize(); }, 500);
+      }, 100);
+    };
+
+    window.switchCustomerMapType = function(type) {
+      if (!map) return;
+      if (type === 'sat' && customerGoogleSatLayer) {
+        if (map.hasLayer(customerGoogleRoadLayer)) map.removeLayer(customerGoogleRoadLayer);
+        customerGoogleSatLayer.addTo(map);
+      } else if (customerGoogleRoadLayer) {
+        if (customerGoogleSatLayer && map.hasLayer(customerGoogleSatLayer)) map.removeLayer(customerGoogleSatLayer);
+        customerGoogleRoadLayer.addTo(map);
+      }
+    };
+
+    window.searchCustomerMapPlace = function() {
+      const kw = (document.getElementById('cusMapSearchInput')?.value || '').trim();
+      if (!kw) return;
+      const q = kw.toLowerCase().includes('phan thiết') ? kw : `${kw}, Phan Thiết`;
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=3&q=${encodeURIComponent(q)}`)
+        .then(r => r.json())
+        .then(list => {
+          if (list && list[0]) {
+            mapSelectedLat = parseFloat(list[0].lat);
+            mapSelectedLng = parseFloat(list[0].lon);
+            if (map && marker) {
+              map.setView([mapSelectedLat, mapSelectedLng], 17);
+              marker.setLatLng([mapSelectedLat, mapSelectedLng]);
+            }
+          } else {
+            alert("📍 Bạn hãy kéo trực tiếp ghim màu đỏ trên bản đồ Google Maps tới vị trí nhà/quán của bạn nhé!");
+          }
+        }).catch(() => {});
+    };
+
+    // 2. SUA TRIET DE saveGPSLocation: Luu toa do chuan, KHONG ghep chu "Tọa độ (...)" + Phường Tỉnh gây lỗi Google Maps
+    window.saveGPSLocation = function() {
+      window.customerPinnedLat = mapSelectedLat;
+      window.customerPinnedLng = mapSelectedLng;
+      const coordClean = `${mapSelectedLat.toFixed(5)}, ${mapSelectedLng.toFixed(5)}`;
+      const searchedPlace = (document.getElementById('cusMapSearchInput')?.value || '').trim();
+
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${mapSelectedLat}&lon=${mapSelectedLng}&zoom=18&addressdetails=1`)
+        .then(res => res.json())
+        .then(data => {
+          const road = searchedPlace || data.address?.amenity || data.address?.shop || data.address?.tourism || data.address?.road || '';
+          const displayAddr = road ? `${road} (${coordClean})` : coordClean;
+          if (document.getElementById('cusHouse')) document.getElementById('cusHouse').value = road || coordClean;
+          document.getElementById('cusAddress').value = displayAddr;
+          window.saveCheckoutDraft();
+          window.closeMapModal();
+          window.calcDistance(displayAddr, mapSelectedLat, mapSelectedLng);
+        })
+        .catch(() => {
+          const displayAddr = searchedPlace ? `${searchedPlace} (${coordClean})` : coordClean;
+          if (document.getElementById('cusHouse')) document.getElementById('cusHouse').value = displayAddr;
+          document.getElementById('cusAddress').value = displayAddr;
+          window.saveCheckoutDraft();
+          window.closeMapModal();
+          window.calcDistance(displayAddr, mapSelectedLat, mapSelectedLng);
+        });
+    };
+
+    // 3. SUA TRIET DE shipperActionNavigate: Khi dia chi co Toa do ghim -> Chi gui cap so "lat,lng" tinh khiet 100% sang Google Maps!
+    window.shipperActionNavigate = function() {
+      let destQuery = currentOrderAddress || "Phan Thiết, Lâm Đồng";
+
+      // Uu tien 1: Neu trong don hang luu san deliveryLat & deliveryLng
+      if (currentOrderCached && currentOrderCached.deliveryLat && currentOrderCached.deliveryLng) {
+        destQuery = `${currentOrderCached.deliveryLat},${currentOrderCached.deliveryLng}`;
+      } else {
+        // Uu tien 2: Neu trong chuoi dia chi co chua cap toa do (VD: "Tọa độ (10.9328, 108.1025), Phường Phan Thiết, Tỉnh Lâm Đồng")
+        // -> Cat bo toan bo chu "Tọa độ" va "Phường..., Tỉnh...", chi lay duy nhat "10.9328,108.1025"!
+        const coordMatch = String(destQuery).match(/(\d{1,2}\.\d{3,8})\s*,\s*(\d{2,3}\.\d{3,8})/);
+        if (coordMatch) {
+          destQuery = `${coordMatch[1]},${coordMatch[2]}`;
+        }
+      }
+
+      const originCoords = `${STORE_LAT},${STORE_LON}`;
+      const mapUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originCoords)}&destination=${encodeURIComponent(destQuery)}&travelmode=driving`;
+      window.open(mapUrl, '_blank');
+    };
   </script>
 </body>
 </html>
