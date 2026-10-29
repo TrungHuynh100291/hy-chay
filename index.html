@@ -342,7 +342,8 @@
   <!-- GIAO DIỆN KHÁCH HÀNG CHÍNH       -->
   <!-- =============================== -->
   <div id="customerAppWrapper">
-    <header>
+    
+  <header>
       <div class="nav-container">
         <a href="#" class="brand-logo">
           <img src="Logo nho.png" alt="Hy Chay Logo" onerror="this.src='https://hychayfood.vercel.app/Logo%20nho.png'">
@@ -2994,6 +2995,256 @@ ${clipsXml}
       const mapUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originCoords)}&destination=${encodeURIComponent(destQuery)}&travelmode=driving`;
       window.open(mapUrl, '_blank');
     };
+  
+    // =========================================================================
+    // MODULE 31 (INDEX.HTML): CƯỠNG CHẾ ĐIỆN THOẠI BÁC TÀI LUÔN TRONG TRẠNG THÁI
+    // CHỜ NHẬN ĐƠN & ĐỔ CHUÔNG LIÊN HOÀN (TRỪ KHI GẠT TẮT NÚT NHẬN ĐƠN)
+    // =========================================================================
+    let forcedSirenLoopTimer = null;
+    let forcedAudioUnlocked = false;
+    let currentForcedSirenOrderId = null;
+
+    // Tạo Giao diện Khiên Mở Khóa Ca Trực & Màn Hình Đổ Chuông Cuộc Gọi Đơn Mới Toàn Màn Hình
+    function injectForcedShipperSirenModals() {
+      if (document.getElementById('forcedShipperDutyShield')) return;
+      const wrap = document.createElement('div');
+      wrap.innerHTML = `
+        <!-- KHIÊN BẮT BUỘC CHẠM 1 LẦN ĐỂ KÍCH HOẠT LOA & GIỮ ĐIỆN THOẠI THỨC 100% KHI ĐANG BẬT NHẬN ĐƠN -->
+        <div id="forcedShipperDutyShield" style="display:none; position:fixed; inset:0; z-index:999998; background:rgba(15,23,42,0.96); color:#fff; flex-direction:column; justify-content:center; align-items:center; padding:24px; text-align:center;">
+          <div style="width:90px; height:90px; border-radius:50%; background:#00b14f; display:flex; align-items:center; justify-content:center; font-size:2.8rem; margin-bottom:18px; box-shadow:0 0 30px rgba(0,177,79,0.7);">🛵</div>
+          <h2 style="color:#ffd800; font-size:1.45rem; font-weight:900; margin-bottom:10px;">CHẾ ĐỘ CƯỠNG CHẾ TRỰC ĐƠN ĐANG BẬT</h2>
+          <p style="color:#e2e8f0; font-size:0.95rem; max-width:380px; margin-bottom:24px; line-height:1.5;">
+            Bạn đang bật nút <b>🟢 NHẬN ĐƠN (ONLINE)</b>. Hãy chạm nút bên dưới 1 lần để khóa màn hình luôn thức và tự động <b>HÚ CÒI ĐỔ CHUÔNG</b> ngay khi quán bắn đơn!
+          </p>
+          <button type="button" onclick="activateForcedShipperStandbyMode()" style="width:100%; max-width:360px; padding:18px; background:linear-gradient(135deg,#00b14f,#059669); color:#fff; border:3px solid #ffd800; border-radius:16px; font-weight:900; font-size:1.1rem; cursor:pointer; box-shadow:0 10px 25px rgba(0,177,79,0.5);">
+            🔊 BẤM ĐỂ BẮT ĐẦU TRỰC &amp; MỞ CHUÔNG CƯỠNG CHẾ
+          </button>
+          <button type="button" onclick="turnOffShipperOnlineFromShield()" style="margin-top:16px; background:none; border:1px solid #64748b; color:#94a3b8; padding:10px 18px; border-radius:10px; font-weight:700; font-size:0.82rem; cursor:pointer;">
+            🔴 Tắt nút Nhận đơn (Nghỉ ca)
+          </button>
+        </div>
+
+        <!-- MÀN HÌNH CUỘC GỌI ĐƠN MỚI ĐỔ CHUÔNG CƯỠNG CHẾ (NHƯ CUỘC GỌI GRABDRIVER) -->
+        <div id="forcedIncomingOrderCallModal" style="display:none; position:fixed; inset:0; z-index:999999; background:linear-gradient(160deg,#7f1d1d,#dc2626,#ea580c); color:#ffffff; flex-direction:column; justify-content:space-between; padding:24px 18px; text-align:center;">
+          <div>
+            <div style="display:inline-block; background:#ffd800; color:#0f172a; padding:6px 16px; border-radius:30px; font-weight:900; font-size:0.9rem; margin-bottom:12px;">
+              🚨 CÓ ĐƠN GIAO HÀNG MỚI ĐANG GỌI BÁC TÀI!
+            </div>
+            <h1 id="forcedCallOrderSeq" style="font-size:2.3rem; font-weight:900; color:#ffffff; margin:4px 0;">ĐƠN #01</h1>
+            <p style="font-size:0.88rem; color:#fef08a; font-weight:700;">Còi sẽ kêu liên tục cho đến khi Bác tài bấm Nhận Đơn!</p>
+          </div>
+
+          <div style="background:#ffffff; color:#0f172a; border-radius:20px; padding:18px; text-align:left; box-shadow:0 15px 35px rgba(0,0,0,0.35);">
+            <div style="font-size:0.78rem; font-weight:800; color:#00b14f; text-transform:uppercase;">📍 Giao đến khách hàng:</div>
+            <div id="forcedCallCusName" style="font-size:1.15rem; font-weight:900; margin:3px 0;">--</div>
+            <div id="forcedCallAddress" style="font-size:0.95rem; font-weight:700; color:#0284c7; background:#f0f9ff; padding:10px; border-radius:10px; border:1px solid #bae6fd; margin:8px 0;">--</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px dashed #cbd5e1; padding-top:10px; margin-top:8px;">
+              <div>
+                <span style="font-size:0.75rem; color:#64748b; font-weight:700;">TỔNG THU KHÁCH:</span><br>
+                <b id="forcedCallTotal" style="font-size:1.25rem; color:#dc2626;">0đ</b>
+              </div>
+              <div style="text-align:right;">
+                <span style="font-size:0.75rem; color:#64748b; font-weight:700;">TIỀN SHIP BÁC TÀI NHẬN:</span><br>
+                <b id="forcedCallShipFee" style="font-size:1.25rem; color:#15803d;">0đ</b>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <button type="button" onclick="acceptForcedIncomingOrderNow()" style="width:100%; padding:18px; background:#00b14f; color:#ffffff; border:3px solid #ffd800; border-radius:16px; font-weight:900; font-size:1.2rem; cursor:pointer; box-shadow:0 10px 25px rgba(0,0,0,0.35);">
+              ✅ NHẬN ĐƠN NÀY NGAY (TẮT CÒI)
+            </button>
+            <button type="button" onclick="turnOffShipperOnlineFromShield()" style="width:100%; padding:11px; background:rgba(15,23,42,0.65); color:#cbd5e1; border:1px solid #94a3b8; border-radius:12px; font-weight:800; font-size:0.82rem; cursor:pointer;">
+              🔴 Gạt Tắt Nhận Đơn (Nghỉ Ca - Không Đổ Chuông Nữa)
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(wrap);
+    }
+    setTimeout(injectForcedShipperSirenModals, 300);
+
+    // Phát tiếng còi hú cảnh báo kép (880Hz <-> 1320Hz) + Rung điện thoại + Giọng đọc
+    function playLoudGrabDriverSirenBurst() {
+      try {
+        if (!shipperAudioCtx) {
+          shipperAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (shipperAudioCtx.state === 'suspended') shipperAudioCtx.resume();
+        const now = shipperAudioCtx.currentTime;
+        const freqs = [880, 1320, 880, 1320, 1046.5, 1567.98];
+        freqs.forEach((f, idx) => {
+          const osc = shipperAudioCtx.createOscillator();
+          const g = shipperAudioCtx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(f, now + idx * 0.18);
+          g.gain.setValueAtTime(0.95, now + idx * 0.18);
+          g.gain.exponentialRampToValueAtTime(0.05, now + idx * 0.18 + 0.16);
+          osc.connect(g);
+          g.connect(shipperAudioCtx.destination);
+          osc.start(now + idx * 0.18);
+          osc.stop(now + idx * 0.18 + 0.17);
+        });
+      } catch (_) {}
+
+      if ('vibrate' in navigator) {
+        try { navigator.vibrate([600, 200, 600, 200, 800]); } catch (_) {}
+      }
+
+      if ('speechSynthesis' in window) {
+        try {
+          window.speechSynthesis.cancel();
+          const u = new SpeechSynthesisUtterance("Có đơn giao hàng mới Hy Chay! Bác tài bấm nhận đơn ngay!");
+          u.lang = 'vi-VN'; u.rate = 1.05; u.volume = 1.0;
+          window.speechSynthesis.speak(u);
+        } catch (_) {}
+      }
+    }
+
+    function stopForcedShipperSirenLoop() {
+      if (forcedSirenLoopTimer) {
+        clearInterval(forcedSirenLoopTimer);
+        forcedSirenLoopTimer = null;
+      }
+      if ('vibrate' in navigator) {
+        try { navigator.vibrate(0); } catch (_) {}
+      }
+      const modal = document.getElementById('forcedIncomingOrderCallModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function startForcedShipperSirenLoop(orderId, orderObj) {
+      const toggleEl = document.getElementById('shipperOnlineToggle');
+      if (!toggleEl || !toggleEl.checked) return; // Nếu đã gạt tắt Nhận đơn thì không đổ chuông
+
+      currentForcedSirenOrderId = orderId;
+      injectForcedShipperSirenModals();
+
+      const seqBadge = orderObj.dailySeq ? `#${String(orderObj.dailySeq).padStart(2, '0')}` : `#HC-${orderId.substring(orderId.length - 4).toUpperCase()}`;
+      document.getElementById('forcedCallOrderSeq').innerText = `ĐƠN MỚI ${seqBadge}`;
+      document.getElementById('forcedCallCusName').innerText = `${orderObj.customerName || 'Khách hàng'} (${orderObj.phone || ''})`;
+      document.getElementById('forcedCallAddress').innerText = orderObj.address || 'Phan Thiết, Lâm Đồng';
+      document.getElementById('forcedCallTotal').innerText = ((orderObj.grandTotal || 0)).toLocaleString() + 'đ';
+      document.getElementById('forcedCallShipFee').innerText = ((orderObj.shippingFee || 0)).toLocaleString() + 'đ';
+
+      const modal = document.getElementById('forcedIncomingOrderCallModal');
+      if (modal) modal.style.display = 'flex';
+
+      playLoudGrabDriverSirenBurst();
+      if (forcedSirenLoopTimer) clearInterval(forcedSirenLoopTimer);
+      // CƯỠNG CHẾ ĐỔ CHUÔNG LIÊN TỤC MỖI 3.5 GIÂY CHO ĐẾN KHI NHẬN ĐƠN HOẶC GẠT TẮT!
+      forcedSirenLoopTimer = setInterval(() => {
+        const tg = document.getElementById('shipperOnlineToggle');
+        if (!tg || !tg.checked) {
+          stopForcedShipperSirenLoop();
+          return;
+        }
+        playLoudGrabDriverSirenBurst();
+      }, 3500);
+    }
+
+    window.activateForcedShipperStandbyMode = function() {
+      forcedAudioUnlocked = true;
+      startShipperBackgroundKeepAlive();
+      playLoudGrabDriverSirenBurst();
+      const shield = document.getElementById('forcedShipperDutyShield');
+      if (shield) shield.style.display = 'none';
+      checkAnyWaitingDeliveryOrdersForSiren();
+    };
+
+    window.turnOffShipperOnlineFromShield = function() {
+      stopForcedShipperSirenLoop();
+      const shield = document.getElementById('forcedShipperDutyShield');
+      if (shield) shield.style.display = 'none';
+      const toggleEl = document.getElementById('shipperOnlineToggle');
+      if (toggleEl) {
+        toggleEl.checked = false;
+        window.toggleShipperOnline(false);
+      }
+    };
+
+    window.acceptForcedIncomingOrderNow = function() {
+      const oid = currentForcedSirenOrderId;
+      stopForcedShipperSirenLoop();
+      if (!oid) return;
+      currentShipperOrderId = oid;
+      // Gắn đơn vào màn hình Bác tài và bấm nhận đơn ngay lập tức
+      listenToShipperOrder(oid);
+      setTimeout(() => {
+        if (typeof window.shipperAcceptOrder === 'function') {
+          window.shipperAcceptOrder();
+        }
+      }, 250);
+    };
+
+    // Kiểm tra xem có đơn giao hàng nào đang cần tài xế mà chưa có ai nhận không
+    let allOrdersForShipperWatch = {};
+    function checkAnyWaitingDeliveryOrdersForSiren() {
+      const shpPhone = localStorage.getItem('hy_chay_shipper_phone');
+      const toggleEl = document.getElementById('shipperOnlineToggle');
+      if (!shpPhone || !toggleEl || !toggleEl.checked) {
+        stopForcedShipperSirenLoop();
+        return;
+      }
+
+      // Nếu bác tài đang giao dở 1 đơn rồi thì không hú đơn khác đè lên
+      const myBusyOrder = Object.keys(allOrdersForShipperWatch).find(id => {
+        const o = allOrdersForShipperWatch[id];
+        return o && !o.archived && o.shipperPhone === shpPhone && (o.status === 'Tài xế đang đến quán' || o.status === 'Đang giao hàng');
+      });
+      if (myBusyOrder) {
+        stopForcedShipperSirenLoop();
+        if (currentShipperOrderId !== myBusyOrder) {
+          currentShipperOrderId = myBusyOrder;
+          listenToShipperOrder(myBusyOrder);
+        }
+        return;
+      }
+
+      // Tìm đơn giao hàng mới chưa có tài xế nhận
+      const waitingOrderId = Object.keys(allOrdersForShipperWatch).find(id => {
+        const o = allOrdersForShipperWatch[id];
+        if (!o || o.archived || o.orderType === 'dine_in') return false;
+        if (o.status === 'Đã hoàn tất' || o.status === 'Đã hủy' || o.status === 'Đang giao hàng' || o.status === 'Tài xế đang đến quán') return false;
+        return !o.shipperPhone;
+      });
+
+      if (waitingOrderId) {
+        startForcedShipperSirenLoop(waitingOrderId, allOrdersForShipperWatch[waitingOrderId]);
+      } else {
+        stopForcedShipperSirenLoop();
+      }
+    }
+
+    // Lắng nghe toàn bộ nhánh orders & shipper_siren_broadcast theo thời gian thực cho mọi bác tài đang mở App
+    onValue(ref(db, 'orders'), (snap) => {
+      allOrdersForShipperWatch = snap.val() || {};
+      if (window.location.search.includes('shipper=')) {
+        checkAnyWaitingDeliveryOrdersForSiren();
+      }
+    });
+
+    onValue(ref(db, 'shipper_siren_broadcast/latest'), (snap) => {
+      const data = snap.val();
+      if (!data || !data.orderId || !window.location.search.includes('shipper=')) return;
+      if (Date.now() - (data.timestamp || 0) < 45000) {
+        const ord = allOrdersForShipperWatch[data.orderId] || data;
+        if (!ord.shipperPhone) {
+          startForcedShipperSirenLoop(data.orderId, ord);
+        }
+      }
+    });
+
+    // Cưỡng chế hiện Khiên Mở Khóa Chuông nếu Bác Tài đang bật ONLINE mà vừa tải lại trang
+    setInterval(() => {
+      if (!window.location.search.includes('shipper=')) return;
+      const shpPhone = localStorage.getItem('hy_chay_shipper_phone');
+      const toggleEl = document.getElementById('shipperOnlineToggle');
+      const shield = document.getElementById('forcedShipperDutyShield');
+      if (shpPhone && toggleEl && toggleEl.checked && !forcedAudioUnlocked && shield) {
+        shield.style.display = 'flex';
+      }
+    }, 1500);
   </script>
 </body>
 </html>
