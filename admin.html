@@ -267,6 +267,14 @@
       .admin-cat-chip, #viewPosOrder.staff-big-mode .admin-cat-chip { padding: 5px 10px !important; font-size: 0.76rem !important; }
       .btn-voice-mic-main { padding: 10px 12px !important; font-size: 0.88rem !important; }
     }
+      /* MODULE 21: TRAM VOICE ORDER & NUT MICRO NOI */
+    .voice-order-station { background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 2px solid #f59e0b; border-radius: 14px; padding: 12px 14px; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15); }
+    .btn-voice-mic-main { width: 100%; background: linear-gradient(135deg, #dc2626, #ea580c); color: #ffffff; border: none; padding: 13px 16px; border-radius: 12px; font-weight: 900; font-size: 0.98rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 6px 18px rgba(220, 38, 38, 0.35); transition: transform 0.15s; }
+    .btn-voice-mic-main.listening { background: linear-gradient(135deg, #16a34a, #059669); animation: alert-card 0.7s infinite alternate; }
+    .btn-big-mode-toggle { background: #0f172a; color: #ffd800; border: 2px solid #ffd800; padding: 7px 12px; border-radius: 10px; font-weight: 800; font-size: 0.8rem; cursor: pointer; }
+    .btn-big-mode-toggle.active { background: #16a34a; color: #ffffff; border-color: #86efac; }
+    .floating-voice-fab { position: fixed; bottom: 16px; left: 14px; z-index: 9500; background: linear-gradient(135deg, #dc2626, #ea580c); color: #fff; border: 2.5px solid #ffd800; border-radius: 50px; padding: 10px 16px; font-weight: 900; font-size: 0.86rem; box-shadow: 0 8px 25px rgba(220,38,38,0.45); cursor: pointer; display: flex; align-items: center; gap: 6px; }
+    .floating-voice-fab.listening { background: #16a34a; animation: alert-card 0.7s infinite alternate; }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -461,7 +469,7 @@
             <div id="posDeliveryCustomerSection" style="display:none; background:#f0f9ff; border:2px solid #0284c7; border-radius:12px; padding:12px; margin-bottom:14px;">
               <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
                 <b style="color:#0369a1; font-size:0.9rem;">👵 TÌM NHANH KHÁCH QUEN / CÔ CHÚ LỚN TUỔI (GÕ TÊN, SĐT HOẶC ĐỊA CHỈ):</b>
-                <button type="button" onclick="clearPosDeliveryCustomerForm()" style="background:#fff; color:#475569; border:1px solid #cbd5e1; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:700; cursor:pointer;">🔄 Nhập Khách Mới</button>
+                <div style="display:flex; gap:6px; flex-wrap:wrap;"><button type="button" id="btnSaveNewPosCustomerNow" onclick="saveNewPosCustomerDirectly()" style="background:#16a34a; color:#fff; border:none; padding:5px 10px; border-radius:6px; font-size:0.75rem; font-weight:800; cursor:pointer;">💾 Lưu Khách Mới Vào Danh Bạ</button><button type="button" onclick="clearPosDeliveryCustomerForm()" style="background:#fff; color:#475569; border:1px solid #cbd5e1; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:700; cursor:pointer;">🔄 Nhập Khách Mới</button></div>
               </div>
 
               <!-- Ô tìm kiếm tổng hợp Tên / SĐT / Địa chỉ -->
@@ -509,7 +517,28 @@
 
               <div>
                 <label style="font-size:0.75rem; font-weight:800; color:#0f172a;">Số nhà, Tên đường / Địa chỉ giao hàng chi tiết (*):</label>
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:6px; margin-top:4px;">
+                  <span id="posAutoKmStatusTag" style="font-size:0.74rem; font-weight:800; color:#15803d;">💡 Gõ địa chỉ hoặc tên quán/khách sạn -&gt; Số Km tự nhảy!</span>
+                  <div style="display:flex; gap:5px; flex-wrap:wrap;">
+                    <button type="button" onclick="openAdminPosMapModal()" style="background:#0284c7; color:#fff; border:none; padding:5px 10px; border-radius:6px; font-weight:800; font-size:0.75rem; cursor:pointer;">
+                      📍 Tìm Tên Quán / Ghim Bản Đồ Google Maps
+                    </button>
+                    <button type="button" onclick="autoComputePosAddressDistance(document.getElementById('posShipCusAddress').value, true)" style="background:#f59e0b; color:#0f172a; border:none; padding:5px 9px; border-radius:6px; font-weight:800; font-size:0.74rem; cursor:pointer;">
+                      🔄 Tính Km Ngay
+                    </button>
+                  </div>
+                </div>
                 <input type="text" id="posShipCusAddress" placeholder="VD: 125 Nguyễn Hội, Phường Phan Thiết, Tỉnh Lâm Đồng" oninput="onPosCustomerFieldInput(this.value)" style="width:100%; padding:8px; border:1px solid #94a3b8; border-radius:6px; font-weight:700;">
+                <div style="margin-top:8px; background:#e0f2fe; border:1.5px solid #0284c7; padding:8px 10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                  <label style="font-size:0.78rem; font-weight:800; color:#0369a1; margin:0;">⏰ Thời gian giao đơn Ship hộ:</label>
+                  <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                    <select id="posShipTimeMode" onchange="onPosShipTimeModeChange()" style="padding:5px 8px; border:1.5px solid #0284c7; border-radius:6px; font-weight:800; font-size:0.78rem; background:#fff; color:#0369a1; cursor:pointer;">
+                      <option value="immediate" selected>⚡ Giao ngay (~30p)</option>
+                      <option value="scheduled">🕒 Hẹn giờ giao (Bếp nấu trước 30p)</option>
+                    </select>
+                    <input type="time" id="posShipScheduledTimeInput" min="06:30" max="20:30" onchange="recalcPosDeliveryTotals()" style="display:none; padding:4px 8px; border:2px solid #dc2626; border-radius:6px; font-weight:900; color:#dc2626; background:#fff;">
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -1327,6 +1356,9 @@
       <button type="button" onclick="confirmAdminPosMapPin()" style="width:100%; padding:12px; background:#16a34a; color:#fff; border:none; border-radius:10px; font-weight:900; font-size:0.95rem; cursor:pointer;">&#9989; XÁC NHẬN VỊ TRÍ NÀY &amp; TỰ TÍNH SỐ KM</button>
     </div>
   </div>
+    <button type="button" id="floatingVoiceFab" class="floating-voice-fab no-print" onclick="quickOpenAndStartVoiceOrder()">
+    <span>&#127908;</span> <span id="floatingVoiceFabText">&#272;&#7885;c Order</span>
+  </button>
   <div id="printArea"></div>
 
   <script type="module">
@@ -2848,8 +2880,8 @@ window.deleteDishFromMenu = function(id, name) {
           province: 'Lâm Đồng',
           address: fullAddr,
           deliveryKm: km,
-          deliveryTimeMode: 'immediate',
-          scheduledTime: null,
+          deliveryTimeMode: (document.getElementById('posShipTimeMode')?.value || 'immediate'),
+          scheduledTime: (document.getElementById('posShipTimeMode')?.value === 'scheduled' ? (document.getElementById('posShipScheduledTimeInput')?.value || null) : null),
           note: noteVal ? `[Quán đặt hộ khách] ${noteVal}` : '[Quán đặt hộ khách qua ĐT]',
           items: posCart,
           rawSubtotal: sub,
@@ -3566,9 +3598,10 @@ window.deleteDishFromMenu = function(id, name) {
                 ${!isDineIn ? `<p>📍 ${order.address}</p>` : ''}
                 ${order.note ? `<p style="color:#e11d48; margin-top:2px;"><b>📝 Ghi chú:</b> ${order.note}</p>` : ''}
                 ${!isDone && !isCanceled && !isDelivering ? `
-                  <div class="customer-action-row">
-                    ${cleanPhoneCall ? `<a href="tel:${cleanPhoneCall}" class="btn-call-customer">📞 Gọi Khách Đổi Món</a>` : ''}
-                    <button type="button" class="btn-edit-order" onclick="openEditOrderModal('${id}')">✏️ Sửa Món (Thêm/Bỏ)</button>
+                  <div class="customer-action-row" style="flex-wrap:wrap;">
+                    ${(!isDineIn && cleanPhoneCall) ? `<a href="tel:${cleanPhoneCall}" class="btn-call-customer">📞 Gọi Khách</a>` : ''}
+                    <button type="button" class="btn-edit-order" onclick="openEditOrderModal('${id}')">✏️ Sửa/Thêm Món</button>
+                    ${isDineIn ? `<button type="button" class="btn-move-merge-table" onclick="openTableTransferMergeModal('${id}')">🔄 Chuyển / Gộp / Tách Bàn</button>` : ''}
                   </div>
                 ` : ''}
               </div>
@@ -3580,7 +3613,19 @@ window.deleteDishFromMenu = function(id, name) {
               </div>
               <table class="items-table">${itemsRows}</table>
               <div class="financial-split-box">
-                <div class="fin-row"><span>Doanh thu món (Quán):</span><b style="color:#1e5e3a;">${subtotal.toLocaleString()}đ</b></div>
+                ${(!isDone && !isCanceled) ? `
+                  <div class="card-inline-discount-bar">
+                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.74rem; color:#166534; font-weight:800;">
+                      <span>🏷️ Chiết khấu trên hóa đơn (Gốc: ${(order.rawSubtotal || (subtotal + (order.discount || 0))).toLocaleString()}đ):</span>
+                      <span style="color:#dc2626;">${(order.discount > 0 || order.discountPercent > 0) ? `-${order.discountPercent || Math.round((order.discount / (order.rawSubtotal || subtotal || 1)) * 100)}% (-${(order.discount || 0).toLocaleString()}đ)` : '0%'}</span>
+                    </div>
+                    <div class="card-disc-chips">
+                      ${[0, 5, 10, 15, 20, 50].map(p => `<button type="button" class="btn-card-disc-chip ${(Number(order.discountPercent) === p) ? 'active' : ''}" onclick="applyQuickCardDiscount('${id}', ${p})">${p}%</button>`).join('')}
+                      <input type="number" value="${order.discountPercent || 0}" min="0" max="100" placeholder="%" title="Nhập % chiết khấu" onchange="applyQuickCardDiscount('${id}', this.value)" style="width:46px; padding:2px 4px; border:1px solid #16a34a; border-radius:5px; font-weight:800; font-size:0.72rem; text-align:right; color:#dc2626;">
+                    </div>
+                  </div>
+                ` : ((order.discount > 0 || order.discountPercent > 0) ? `<div class="fin-row" style="color:#dc2626; font-weight:800;"><span>🏷️ Đã chiết khấu (${order.discountPercent || 0}%):</span><span>-${(order.discount || 0).toLocaleString()}đ</span></div>` : '')}
+                <div class="fin-row"><span>Doanh thu món (Sau CK):</span><b style="color:#1e5e3a;">${subtotal.toLocaleString()}đ</b></div>
                 <div class="fin-row" style="color:#2563eb;"><span>Ship thu hộ (Trả tài xế):</span><b>${shipFee.toLocaleString()}đ</b></div>
                 <div class="fin-row fin-total"><span>TỔNG THU KHÁCH:</span><span>${grandTotal.toLocaleString()}đ</span></div>
               </div>
@@ -3813,25 +3858,34 @@ function getTaxReportData() {
           daily[dStr].count++; daily[dStr].ship += ship;
           
           let orderTotal5610 = 0, orderTotal5630 = 0;
+          let raw5610 = 0, raw5630 = 0;
           const unifiedMenu = getUnifiedMenuList();
-          
+          const rawItemSum = Object.values(o.items || {}).reduce((acc, it) => acc + (Number(it.price) || 0) * (Number(it.qty) || 0), 0);
+          const netOrderSub = (o.subtotal !== undefined) ? Number(o.subtotal) : rawItemSum;
+          const discRatio = (rawItemSum > 0 && netOrderSub < rawItemSum) ? (netOrderSub / rawItemSum) : 1;
+
           for (let k in o.items) {
-            const it = o.items[k]; 
-            const lineTotal = it.price * it.qty;
+            const it = o.items[k];
+            const lineTotal = (Number(it.price) || 0) * (Number(it.qty) || 0);
+            const netLineTotal = Math.round(lineTotal * discRatio);
             const dishBase = unifiedMenu.find(d => d.name === it.name);
             if (it.cat === 'douong' || (dishBase && dishBase.cat === 'douong')) {
-              orderTotal5630 += lineTotal;
-              total5630 += lineTotal;
-              daily[dStr].tax5630 += lineTotal;
+              raw5630 += lineTotal;
             } else {
-              orderTotal5610 += lineTotal;
-              total5610 += lineTotal;
-              daily[dStr].tax5610 += lineTotal;
+              raw5610 += lineTotal;
             }
-            
             if (!dishStats[it.name]) dishStats[it.name] = { qty: 0, total: 0 };
-            dishStats[it.name].qty += it.qty; dishStats[it.name].total += lineTotal;
+            dishStats[it.name].qty += it.qty;
+            dishStats[it.name].total += netLineTotal;
           }
+
+          orderTotal5610 = Math.round(raw5610 * discRatio);
+          orderTotal5630 = (discRatio < 1) ? Math.max(0, netOrderSub - orderTotal5610) : raw5630;
+          total5610 += orderTotal5610;
+          total5630 += orderTotal5630;
+          daily[dStr].tax5610 += orderTotal5610;
+          daily[dStr].tax5630 += orderTotal5630;
+
           o.id = id;
           o.calc5610 = orderTotal5610;
           o.calc5630 = orderTotal5630;
@@ -5882,8 +5936,8 @@ window.openInstallGuideModal = function() {
           province: 'Lâm Đồng',
           address: fullAddr,
           deliveryKm: km,
-          deliveryTimeMode: 'immediate',
-          scheduledTime: null,
+          deliveryTimeMode: (document.getElementById('posShipTimeMode')?.value || 'immediate'),
+          scheduledTime: (document.getElementById('posShipTimeMode')?.value === 'scheduled' ? (document.getElementById('posShipScheduledTimeInput')?.value || null) : null),
           note: noteVal ? `[Quán đặt hộ khách] ${noteVal}` : '[Quán đặt hộ khách qua ĐT]',
           items: posCart,
           rawSubtotal: rawSub,
@@ -6230,25 +6284,944 @@ window.openInstallGuideModal = function() {
     };
   
     // =========================================================================
-    
-  
+    // MODULE 20 -> 30 (MASTER UNIFIED EDITION):
+    //  - 1. CHIET KHAU CO DINH TREN THE HOA DON MON (applyQuickCardDiscount)
+    //  - 2. BO 3 CHUYEN BAN • GOP BAN • TACH BAN (Move / Merge / Split Tables)
+    //  - 3. DAT SHIP HO KHACH: HEN GIO + LUU KHACH MOI + BAN DO GOOGLE MAPS + TU NHAY KM
+    //  - 4. BAO CAO DOANH THU GRAB (CA NHAN/NOI BO) & SHOPEE (CONG TY 3401289271)
+    //  - 5. TRAM NHAP HOA DON DAU VAO PDF / XML / ANH & KIEM TRA CAU TRUC 6 TIEU CHI
+    //  - 6. HE DIEU HANH GIONG NOI TOAN TRINH V4 (TACH SO GHEP + TU DIEN 122 MON + AI TU SUA CHU)
     // =========================================================================
-    // MODULE V29: BO NAO GIONG NOI AI V4 (TU TACH SO GHEP & TU TU DUY SUA CHU)
-    // + CO DINH CHIET KHAU HOA DON + CHUYEN/GOP/TACH BAN + 11 PHONG BAN AI STUDIO
-    // =========================================================================
+
+    // --- PHẦN 1: CHIẾT KHẤU TRỰC TIẾP TRÊN THẺ ĐƠN KDS (TRƯỚC NÚT IN BILL) ---
+    window.applyQuickCardDiscount = function(orderId, pctVal) {
+      const o = ordersCache[orderId];
+      if (!o) return;
+      const role = localStorage.getItem('hy_chay_active_role') || 'staff';
+      if (role === 'staff') return alert("⛔ Nhân viên không có quyền chỉnh chiết khấu hóa đơn!");
+
+      const pct = Math.min(100, Math.max(0, parseFloat(pctVal) || 0));
+      let rawSub = 0;
+      for (let k in (o.items || {})) {
+        rawSub += (Number(o.items[k].price) || 0) * (Number(o.items[k].qty) || 0);
+      }
+      const newDiscAmt = Math.round(rawSub * pct / 100);
+      const newNetSub = Math.max(0, rawSub - newDiscAmt);
+      const shipFee = o.orderType === 'dine_in' ? 0 : (Number(o.shippingFee) || 0);
+      const newGrandTotal = newNetSub + shipFee;
+
+      const isBillPrinted = (o.billPrintedCount || 0) > 0;
+      const oldNetSub = o.subtotal !== undefined ? Number(o.subtotal) : rawSub;
+
+      if (isBillPrinted && newNetSub < oldNetSub && role === 'cashier') {
+        const pin = prompt(`🔒 KHÓA CHỐNG GIAN LẬN:\nĐơn này ĐÃ IN BILL (${o.billPrintedCount} lần). Thu ngân muốn áp dụng chiết khấu ${pct}% giảm tiền từ ${oldNetSub.toLocaleString()}đ xuống ${newNetSub.toLocaleString()}đ phải nhập Mật khẩu Chủ quán:`);
+        if (pin !== "hychayfood" && pin !== "baochay2026") {
+          if (typeof writeAuditLog === 'function') {
+            writeAuditLog("THU NGÂN TỰ Ý CHIẾT KHẤU SAU IN BILL BỊ CHẶN", `Đơn #HC-${orderId.substring(orderId.length - 5).toUpperCase()} định giảm còn ${newNetSub.toLocaleString()}đ`, "DANGER");
+          }
+          return alert("❌ Mật khẩu Chủ quán không đúng!");
+        }
+      }
+
+      let baseNote = (o.note || '').replace(/\[Ưu đãi giảm.*?\]/g, '').trim();
+      const discTag = pct > 0 ? `[Ưu đãi giảm ${pct}% (-${newDiscAmt.toLocaleString()}đ)]` : '';
+      const updatedNote = [discTag, baseNote].filter(Boolean).join(' ');
+
+      update(ref(db, `orders/${orderId}`), {
+        rawSubtotal: rawSub,
+        discountPercent: pct,
+        discount: newDiscAmt,
+        subtotal: newNetSub,
+        grandTotal: newGrandTotal,
+        note: updatedNote
+      }).then(() => {
+        if (isBillPrinted && newNetSub !== oldNetSub && typeof writeAuditLog === 'function') {
+          writeAuditLog("CHIẾT KHẤU TRÊN HÓA ĐƠN SAU IN BILL", `Đơn #HC-${orderId.substring(orderId.length - 5).toUpperCase()}: Áp dụng CK ${pct}% (-${newDiscAmt.toLocaleString()}đ) -> Còn ${newNetSub.toLocaleString()}đ`, "WARN");
+        }
+      });
+    };
+
+    // --- PHẦN 2: BỘ 3 CHUYỂN BÀN • GỘP BÀN • TÁCH BÀN (MOVE / MERGE / SPLIT TABLES) ---
+    let currentTmModalMode = 'move_merge';
+    let splitSelectedQtyMap = {};
+
+    function getOpenDineInOrders() {
+      const list = [];
+      Object.keys(ordersCache).forEach(id => {
+        const o = ordersCache[id];
+        if (o && !o.archived && o.orderType === 'dine_in' && o.status !== 'Đã hoàn tất' && o.status !== 'Đã hủy') {
+          list.push({ id, order: o });
+        }
+      });
+      return list;
+    }
+
+    window.switchTmModalMode = function(mode) {
+      currentTmModalMode = mode;
+      const tabMM = document.getElementById('tmTabMoveMerge');
+      const tabSp = document.getElementById('tmTabSplit');
+      const splitSec = document.getElementById('tmSplitItemsSection');
+      if (mode === 'split') {
+        if (tabSp) tabSp.classList.add('active');
+        if (tabMM) tabMM.classList.remove('active');
+        if (splitSec) splitSec.style.display = 'block';
+      } else {
+        if (tabMM) tabMM.classList.add('active');
+        if (tabSp) tabSp.classList.remove('active');
+        if (splitSec) splitSec.style.display = 'none';
+      }
+      window.onTmSourceChange();
+    };
+
+    window.openTableTransferMergeModal = function(preselectedOrderId = null) {
+      const openList = getOpenDineInOrders();
+      if (openList.length === 0) {
+        return alert("Hiện tại không có bàn nào đang mở để Chuyển, Gộp hoặc Tách bàn!");
+      }
+      const srcSel = document.getElementById('tmSourceOrderSelect');
+      if (!srcSel) return;
+
+      let srcHtml = '';
+      openList.forEach(({ id, order }) => {
+        const seq = getOrderSeqBadgeText(id);
+        const selAttr = (preselectedOrderId === id || (!preselectedOrderId && order.table === selectedTable)) ? 'selected' : '';
+        srcHtml += `<option value="${id}" ${selAttr}>🪑 ${order.table} — Đơn ${seq} (${(order.grandTotal || 0).toLocaleString()}đ)</option>`;
+      });
+      srcSel.innerHTML = srcHtml;
+
+      window.switchTmModalMode('move_merge');
+      document.getElementById('tableTransferMergeModal').classList.add('active');
+    };
+
+    window.closeTableTransferMergeModal = function() {
+      document.getElementById('tableTransferMergeModal').classList.remove('active');
+    };
+
+    window.changeSplitItemQty = function(itemKey, delta, maxQty) {
+      const cur = splitSelectedQtyMap[itemKey] || 0;
+      const next = Math.min(maxQty, Math.max(0, cur + delta));
+      splitSelectedQtyMap[itemKey] = next;
+      const spanEl = document.getElementById('split_qty_' + itemKey);
+      if (spanEl) spanEl.innerText = next;
+      window.onTmTargetChange();
+    };
+
+    window.onTmSourceChange = function() {
+      const srcOrderId = document.getElementById('tmSourceOrderSelect')?.value;
+      const srcOrder = ordersCache[srcOrderId];
+      const tgtSel = document.getElementById('tmTargetTableSelect');
+      if (!srcOrder || !tgtSel) return;
+
+      splitSelectedQtyMap = {};
+      const splitListEl = document.getElementById('tmSplitItemsList');
+      if (splitListEl) {
+        let sHtml = '';
+        for (let k in (srcOrder.items || {})) {
+          const it = srcOrder.items[k];
+          const cleanK = safeItemKey(k);
+          splitSelectedQtyMap[cleanK] = 0;
+          const safeK = cleanK.replace(/'/g, "\\'");
+          sHtml += `
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px dashed #fde68a; font-size:0.84rem;">
+              <div><b>${it.name}</b> <small style="color:#64748b;">(Đang có: ${it.qty} phần - ${it.price.toLocaleString()}đ)</small></div>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <button type="button" class="edit-qty-btn" onclick="changeSplitItemQty('${safeK}', -1, ${it.qty})">-</button>
+                <b id="split_qty_${cleanK}" style="min-width:22px; text-align:center; color:#dc2626;">0</b>
+                <button type="button" class="edit-qty-btn" onclick="changeSplitItemQty('${safeK}', 1, ${it.qty})">+</button>
+              </div>
+            </div>`;
+        }
+        splitListEl.innerHTML = sHtml;
+      }
+
+      const openList = getOpenDineInOrders();
+      let tgtHtml = '';
+      (tablesListCache || []).forEach(tName => {
+        const otherOpenOnTable = openList.filter(x => x.order.table === tName && x.id !== srcOrderId);
+        if (currentTmModalMode === 'split') {
+          if (tName === srcOrder.table) {
+            tgtHtml += `<option value="${tName}">✂️ Tách thành Hóa đơn thứ 2 ngay tại ${tName}</option>`;
+          } else if (otherOpenOnTable.length > 0) {
+            tgtHtml += `<option value="${tName}">🔗 Tách món chuyển sang gộp vào ${tName} (Đang có khách)</option>`;
+          } else {
+            tgtHtml += `<option value="${tName}">➡️ Tách món chuyển sang bàn trống: ${tName}</option>`;
+          }
+        } else {
+          if (tName === srcOrder.table && otherOpenOnTable.length === 0) return;
+          if (otherOpenOnTable.length > 0) {
+            const totalOther = otherOpenOnTable.reduce((s, x) => s + (x.order.grandTotal || 0), 0);
+            tgtHtml += `<option value="${tName}">🔗 GỘP VÀO: ${tName} (Đang có đơn ${totalOther.toLocaleString()}đ)</option>`;
+          } else {
+            tgtHtml += `<option value="${tName}">➡️ CHUYỂN SANG: ${tName} (Bàn đang trống)</option>`;
+          }
+        }
+      });
+      tgtSel.innerHTML = tgtHtml;
+      window.onTmTargetChange();
+    };
+
+    window.onTmTargetChange = function() {
+      const srcOrderId = document.getElementById('tmSourceOrderSelect')?.value;
+      const tgtTable = document.getElementById('tmTargetTableSelect')?.value;
+      const previewEl = document.getElementById('tmActionPreviewBox');
+      if (!srcOrderId || !tgtTable || !previewEl) return;
+
+      const srcOrder = ordersCache[srcOrderId];
+      if (currentTmModalMode === 'split') {
+        let splitTotal = 0, splitCount = 0;
+        for (let k in (srcOrder.items || {})) {
+          const cleanK = safeItemKey(k);
+          const q = splitSelectedQtyMap[cleanK] || 0;
+          if (q > 0) {
+            splitCount += q;
+            splitTotal += q * (Number(srcOrder.items[k].price) || 0);
+          }
+        }
+        previewEl.style.background = '#fffbeb';
+        previewEl.style.color = '#b45309';
+        previewEl.style.borderColor = '#f59e0b';
+        previewEl.innerHTML = splitCount > 0
+          ? `✂️ <b>CHẾ ĐỘ TÁCH BÀN:</b> Sẽ tách <b>${splitCount} món (${splitTotal.toLocaleString()}đ)</b> từ <b>${srcOrder.table}</b> sang <b>${tgtTable}</b>.`
+          : `⚠️ Hãy bấm nút <b>[+]</b> ở danh sách món phía trên để chọn số lượng món cần tách!`;
+        return;
+      }
+
+      const openList = getOpenDineInOrders();
+      const targetExisting = openList.find(x => x.order.table === tgtTable && x.id !== srcOrderId);
+      if (targetExisting) {
+        const combinedTotal = (srcOrder.subtotal || 0) + (targetExisting.order.subtotal || 0);
+        previewEl.style.background = '#fef3c7';
+        previewEl.style.color = '#92400e';
+        previewEl.style.borderColor = '#f59e0b';
+        previewEl.innerHTML = `🔗 <b>CHẾ ĐỘ GỘP BÀN:</b> Cộng dồn toàn bộ món của <b>${srcOrder.table}</b> vào <b>${tgtTable}</b>.<br>👉 Tổng hóa đơn mới sau khi gộp: <b style="color:#dc2626;">${combinedTotal.toLocaleString()}đ</b>`;
+      } else {
+        previewEl.style.background = '#dcfce7';
+        previewEl.style.color = '#166534';
+        previewEl.style.borderColor = '#16a34a';
+        previewEl.innerHTML = `➡️ <b>CHẾ ĐỘ CHUYỂN BÀN:</b> Chuyển nguyên đơn hàng từ <b>${srcOrder.table}</b> sang vị trí mới <b>${tgtTable}</b>.`;
+      }
+    };
+
+    window.executeTableTransferMergeOrSplit = function() {
+      const srcOrderId = document.getElementById('tmSourceOrderSelect')?.value;
+      const tgtTable = document.getElementById('tmTargetTableSelect')?.value;
+      if (!srcOrderId || !tgtTable) return;
+
+      const srcOrder = ordersCache[srcOrderId];
+      if (!srcOrder) return;
+      const oldTableName = srcOrder.table || 'Bàn cũ';
+
+      if (currentTmModalMode === 'split') {
+        const remainingItems = {}, splitOutItems = {};
+        let splitCount = 0, remainCount = 0;
+
+        for (let k in (srcOrder.items || {})) {
+          const it = srcOrder.items[k];
+          const cleanK = safeItemKey(k);
+          const splitQty = splitSelectedQtyMap[cleanK] || 0;
+          const remainQty = (Number(it.qty) || 0) - splitQty;
+
+          if (splitQty > 0) {
+            splitCount += splitQty;
+            splitOutItems[cleanK] = { name: it.name, price: Number(it.price) || 0, qty: splitQty, cat: it.cat || 'bun' };
+          }
+          if (remainQty > 0) {
+            remainCount += remainQty;
+            remainingItems[cleanK] = { name: it.name, price: Number(it.price) || 0, qty: remainQty, cat: it.cat || 'bun' };
+          }
+        }
+
+        if (splitCount === 0) return alert("⚠️ Vui lòng bấm dấu [+] chọn ít nhất 1 món cần tách!");
+        if (remainCount === 0) return alert("⚠️ Bạn đang chọn tách hết toàn bộ món! Nếu muốn chuyển cả bàn, hãy chọn Tab [1. Chuyển Bàn / Gộp Bàn].");
+
+        let remainRawSub = 0;
+        for (let k in remainingItems) remainRawSub += remainingItems[k].price * remainingItems[k].qty;
+        const srcPct = Number(srcOrder.discountPercent) || 0;
+        const remainDisc = Math.round(remainRawSub * srcPct / 100);
+        const remainNet = Math.max(0, remainRawSub - remainDisc);
+
+        let splitRawSub = 0;
+        for (let k in splitOutItems) splitRawSub += splitOutItems[k].price * splitOutItems[k].qty;
+
+        update(ref(db, `orders/${srcOrderId}`), {
+          items: remainingItems,
+          rawSubtotal: remainRawSub,
+          discount: remainDisc,
+          subtotal: remainNet,
+          grandTotal: remainNet,
+          note: (srcOrder.note ? srcOrder.note + ' | ' : '') + `[Đã tách ${splitCount} món sang ${tgtTable}]`
+        });
+
+        const nextSeq = getNextDailyOrderSequenceNumber();
+        push(ref(db, 'orders'), {
+          orderType: 'dine_in',
+          dailySeq: nextSeq,
+          table: tgtTable,
+          customerName: `${tgtTable} (Tách từ ${oldTableName})`,
+          phone: 'Tại quán',
+          address: '280 Trần Hưng Đạo',
+          note: `[Đơn tách từ ${oldTableName}]`,
+          items: splitOutItems,
+          rawSubtotal: splitRawSub,
+          discountPercent: 0,
+          discount: 0,
+          subtotal: splitRawSub,
+          shippingFee: 0,
+          grandTotal: splitRawSub,
+          paymentMethod: 'COD',
+          paymentStatus: 'Thu tại bàn',
+          status: srcOrder.status || 'Đang chế biến',
+          createdAt: new Date().toISOString(),
+          archived: false
+        }).then(() => {
+          broadcastAndSpeakKitchenAlert(`Chú ý bếp! Đã tách ${splitCount} món từ ${oldTableName} sang ${tgtTable}.`);
+          alert(`✅ Đã tách ${splitCount} món (${splitRawSub.toLocaleString()}đ) từ [${oldTableName}] sang [${tgtTable}] thành công!`);
+          window.closeTableTransferMergeModal();
+        });
+        return;
+      }
+
+      const openList = getOpenDineInOrders();
+      const targetExisting = openList.find(x => x.order.table === tgtTable && x.id !== srcOrderId);
+
+      if (!targetExisting) {
+        const moveStamp = `[Đã chuyển từ ${oldTableName} sang ${tgtTable}]`;
+        update(ref(db, `orders/${srcOrderId}`), {
+          table: tgtTable,
+          customerName: tgtTable,
+          note: srcOrder.note ? `${srcOrder.note} | ${moveStamp}` : moveStamp
+        }).then(() => {
+          broadcastAndSpeakKitchenAlert(`Chú ý bếp! Đã chuyển toàn bộ đơn của ${oldTableName} sang ${tgtTable}.`);
+          alert(`✅ Đã chuyển đơn từ [${oldTableName}] sang [${tgtTable}] thành công!`);
+          window.closeTableTransferMergeModal();
+        });
+        return;
+      }
+
+      const tgtId = targetExisting.id;
+      const tgtOrder = targetExisting.order;
+      const mergedItems = JSON.parse(JSON.stringify(tgtOrder.items || {}));
+      const mergedChecked = JSON.parse(JSON.stringify(tgtOrder.checkedItems || {}));
+
+      for (let k in (srcOrder.items || {})) {
+        const srcIt = srcOrder.items[k];
+        const cleanK = safeItemKey(srcIt.name || k);
+        if (mergedItems[cleanK]) {
+          mergedItems[cleanK].qty = (Number(mergedItems[cleanK].qty) || 0) + (Number(srcIt.qty) || 0);
+        } else {
+          mergedItems[cleanK] = { name: srcIt.name, price: Number(srcIt.price) || 0, qty: Number(srcIt.qty) || 1, cat: srcIt.cat || 'bun' };
+        }
+      }
+
+      let rawSub = 0;
+      for (let k in mergedItems) rawSub += (Number(mergedItems[k].price) || 0) * (Number(mergedItems[k].qty) || 0);
+      const keepPct = Math.max(Number(tgtOrder.discountPercent) || 0, Number(srcOrder.discountPercent) || 0);
+      const newDisc = Math.round(rawSub * keepPct / 100);
+      const netSub = Math.max(0, rawSub - newDisc);
+
+      const updates = {};
+      updates[`orders/${tgtId}/items`] = mergedItems;
+      updates[`orders/${tgtId}/checkedItems`] = mergedChecked;
+      updates[`orders/${tgtId}/rawSubtotal`] = rawSub;
+      updates[`orders/${tgtId}/discountPercent`] = keepPct;
+      updates[`orders/${tgtId}/discount`] = newDisc;
+      updates[`orders/${tgtId}/subtotal`] = netSub;
+      updates[`orders/${tgtId}/grandTotal`] = netSub;
+      updates[`orders/${tgtId}/note`] = [tgtOrder.note || '', srcOrder.note || '', `[Đã gộp từ ${oldTableName}]`].filter(Boolean).join(' | ');
+
+      updates[`orders/${srcOrderId}/status`] = 'Đã hủy';
+      updates[`orders/${srcOrderId}/archived`] = true;
+      updates[`orders/${srcOrderId}/cancelReason`] = `Đã gộp chung hóa đơn vào ${tgtTable}`;
+
+      update(ref(db), updates).then(() => {
+        broadcastAndSpeakKitchenAlert(`Chú ý bếp! Đã gộp toàn bộ món của ${oldTableName} vào chung với ${tgtTable}.`);
+        alert(`✅ Đã gộp toàn bộ món của [${oldTableName}] vào [${tgtTable}] (Tổng mới: ${netSub.toLocaleString()}đ)!`);
+        window.closeTableTransferMergeModal();
+      });
+    };
+
+    // --- PHẦN 3: ĐẶT SHIP HỘ KHÁCH (HẸN GIỜ + LƯU KHÁCH MỚI + BẢN ĐỒ GOOGLE MAPS + TỰ NHẢY KM) ---
+    let adminPosMap = null, adminPosMarker = null, adminMapRoadLayer = null, adminMapSatLayer = null;
+    let adminPinnedLat = null, adminPinnedLng = null, addressGeocodeTimer = null;
+
+    const PHAN_THIET_POI_AND_STREETS_KM = [
+      { keys: ["tran hung dao", "trần hưng đạo"], lat: 10.9320, lon: 108.1020, km: 1.2 },
+      { keys: ["coopmart", "co.opmart", "siêu thị coop"], lat: 10.9355, lon: 108.1032, km: 0.9 },
+      { keys: ["lotte", "lotte mart", "siêu thị lotte"], lat: 10.9462, lon: 108.1118, km: 2.3 },
+      { keys: ["nguyen hoi", "nguyễn hội"], lat: 10.9410, lon: 108.1015, km: 2.1 },
+      { keys: ["thu khoa huan", "thủ khoa huân"], lat: 10.9365, lon: 108.1095, km: 1.9 },
+      { keys: ["ton duc thang", "tôn đức thắng"], lat: 10.9425, lon: 108.1080, km: 2.0 },
+      { keys: ["le hong phong", "lê hồng phong"], lat: 10.9340, lon: 108.0980, km: 1.4 },
+      { keys: ["vo van kiet", "võ văn kiệt"], lat: 10.9440, lon: 108.1060, km: 2.2 },
+      { keys: ["hung vuong", "hùng vương"], lat: 10.9435, lon: 108.1165, km: 2.8 },
+      { keys: ["doi duong", "đồi dương", "khách sạn đồi dương", "bãi biển đồi dương"], lat: 10.9295, lon: 108.1135, km: 2.1 },
+      { keys: ["ga phan thiet", "ga phan thiết", "bến xe phan thiết"], lat: 10.9480, lon: 108.0910, km: 2.9 },
+      { keys: ["cảng phú hài", "phu hai", "phú hài"], lat: 10.9450, lon: 108.1480, km: 5.5 },
+      { keys: ["hàm tiến", "ham tien", "nguyễn đình chiểu", "nguyen dinh chieu"], lat: 10.9510, lon: 108.2050, km: 12.5 },
+      { keys: ["bệnh viện đa khoa", "benh vien tinh", "bệnh viện an phước"], lat: 10.9385, lon: 108.0975, km: 1.7 },
+      { keys: ["chợ phan thiết", "cho phan thiet", "chợ lớn"], lat: 10.9255, lon: 108.0995, km: 1.4 },
+      { keys: ["chợ phú thủy", "cho phu thuy"], lat: 10.9390, lon: 108.1150, km: 2.2 }
+    ];
+
+    function calcRoadKmAdmin(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+      const straightKm = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return Math.max(0.5, Math.round(straightKm * 1.25 * 10) / 10);
+    }
+
+    window.onPosShipTimeModeChange = function() {
+      const mode = document.getElementById('posShipTimeMode')?.value || 'immediate';
+      const timeInp = document.getElementById('posShipScheduledTimeInput');
+      if (!timeInp) return;
+      if (mode === 'scheduled') {
+        timeInp.style.display = 'inline-block';
+        if (!timeInp.value) {
+          const now = new Date();
+          const targetMins = Math.ceil((now.getHours() * 60 + now.getMinutes() + 45) / 15) * 15;
+          const hh = String(Math.min(20, Math.floor(targetMins / 60))).padStart(2, '0');
+          const mm = String(targetMins % 60).padStart(2, '0');
+          timeInp.value = hh + ':' + mm;
+        }
+      } else {
+        timeInp.style.display = 'none';
+        timeInp.value = '';
+      }
+      recalcPosDeliveryTotals();
+    };
+
+    window.saveNewPosCustomerDirectly = function() {
+      const name = (document.getElementById('posShipCusName')?.value || '').trim();
+      const rawPhone = (document.getElementById('posShipCusPhone')?.value || '').trim();
+      const cleanPhone = normalizeShipperPhone(rawPhone);
+      const ward = document.getElementById('posShipCusWard')?.value || 'Phường Phan Thiết';
+      const addr = (document.getElementById('posShipCusAddress')?.value || '').trim() || `${ward}, Tỉnh Lâm Đồng`;
+      const km = Math.max(0.5, parseFloat(document.getElementById('posShipKmInput')?.value || '1.8') || 1.8);
+      const note = (document.getElementById('posOrderNote')?.value || '').trim();
+
+      if (!name || !cleanPhone) {
+        return alert("⚠️ Vui lòng nhập Họ tên khách mới và Số điện thoại trước khi bấm Lưu!");
+      }
+      const rec = {
+        name, phone: cleanPhone, ward, province: 'Lâm Đồng',
+        address: addr, fullAddress: addr, km, deliveryKm: km,
+        deliveryLat: adminPinnedLat || null, deliveryLng: adminPinnedLng || null,
+        note, updatedAt: new Date().toISOString()
+      };
+      update(ref(db, `pos_customers/${cleanPhone}`), rec);
+      update(ref(db, `users/${cleanPhone}`), rec).then(() => {
+        alert(`✅ Đã lưu khách hàng mới [${name} - ${cleanPhone}] (${addr} - ${km}km) vào Danh bạ Khách quen thành công!`);
+      });
+    };
+
+    window.autoComputePosAddressDistance = function(rawAddr, forceOnlineLookup = false) {
+      if (!rawAddr || rawAddr.trim().length < 3) return;
+      const txt = rawAddr.trim();
+      const lower = txt.toLowerCase();
+      const statusTag = document.getElementById('posAutoKmStatusTag');
+      const kmInp = document.getElementById('posShipKmInput');
+
+      const coordMatch = txt.match(/(\d{1,2}\.\d{3,8})\s*,\s*(\d{2,3}\.\d{3,8})/);
+      if (coordMatch) {
+        const lat = parseFloat(coordMatch[1]), lng = parseFloat(coordMatch[2]);
+        adminPinnedLat = lat; adminPinnedLng = lng;
+        const km = calcRoadKmAdmin(10.9328, 108.1025, lat, lng);
+        if (kmInp) kmInp.value = km;
+        manualPosShipFeeOverride = false;
+        recalcPosDeliveryTotals();
+        if (statusTag) statusTag.innerHTML = `📍 Đã tính từ tọa độ ghim: <b style="color:#dc2626;">${km} km</b>`;
+        return;
+      }
+
+      for (const poi of PHAN_THIET_POI_AND_STREETS_KM) {
+        if (poi.keys.some(k => lower.includes(k))) {
+          adminPinnedLat = poi.lat; adminPinnedLng = poi.lon;
+          const houseNumMatch = lower.match(/^(\d{1,4})\b/);
+          let calcKm = poi.km;
+          if (houseNumMatch && parseInt(houseNumMatch[1]) > 200) {
+            calcKm = Math.round((calcKm + 0.5) * 10) / 10;
+          }
+          if (kmInp) kmInp.value = calcKm;
+          manualPosShipFeeOverride = false;
+          recalcPosDeliveryTotals();
+          if (statusTag) statusTag.innerHTML = `✅ Đã tự động nhảy khoảng cách: <b style="color:#dc2626;">${calcKm} km</b>`;
+          if (!forceOnlineLookup) return;
+        }
+      }
+
+      const ward = document.getElementById('posShipCusWard')?.value || 'Phan Thiết';
+      const queryStr = lower.includes('phan thiết') || lower.includes('lâm đồng') ? txt : `${txt}, ${ward}, Phan Thiết`;
+      if (statusTag) statusTag.innerHTML = `⏳ Đang dò khoảng cách cho "${txt}"...`;
+
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=3&q=${encodeURIComponent(queryStr)}`)
+        .then(r => r.json())
+        .then(list => {
+          if (list && list.length > 0) {
+            const best = list[0];
+            const lat = parseFloat(best.lat), lon = parseFloat(best.lon);
+            adminPinnedLat = lat; adminPinnedLng = lon;
+            const km = calcRoadKmAdmin(10.9328, 108.1025, lat, lon);
+            if (kmInp) kmInp.value = km;
+            manualPosShipFeeOverride = false;
+            recalcPosDeliveryTotals();
+            if (statusTag) statusTag.innerHTML = `📍 Đã định vị tự động: <b style="color:#dc2626;">${km} km</b>`;
+          } else {
+            const baseWardKm = POS_WARD_KM_MAP[ward] || 2.0;
+            if (kmInp) kmInp.value = baseWardKm;
+            manualPosShipFeeOverride = false;
+            recalcPosDeliveryTotals();
+            if (statusTag) statusTag.innerHTML = `📌 Khoảng cách theo khu vực ${ward}: <b style="color:#dc2626;">~${baseWardKm} km</b>`;
+          }
+        }).catch(() => {});
+    };
+
+    // Gan su kien tu dong nhay Km ngay khi go vao o #posShipCusAddress
+    setTimeout(() => {
+      const addrInp = document.getElementById('posShipCusAddress');
+      if (addrInp) {
+        addrInp.addEventListener('input', (e) => {
+          const val = e.target.value;
+          if (addressGeocodeTimer) clearTimeout(addressGeocodeTimer);
+          addressGeocodeTimer = setTimeout(() => { window.autoComputePosAddressDistance(val, false); }, 500);
+        });
+        addrInp.addEventListener('change', (e) => { window.autoComputePosAddressDistance(e.target.value, true); });
+      }
+    }, 400);
+
+    window.openAdminPosMapModal = function() {
+      const modal = document.getElementById('adminPosMapModal');
+      if (!modal) return;
+      modal.classList.add('active');
+      modal.style.display = 'flex';
+      setTimeout(() => {
+        if (!adminPosMap) {
+          adminPosMap = L.map('adminLeafletMap', { center: [10.9328, 108.1025], zoom: 15 });
+          adminMapRoadLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=vi', { maxZoom: 20, attribution: 'Google Maps Hy Chay' }).addTo(adminPosMap);
+          adminMapSatLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=vi', { maxZoom: 20, attribution: 'Google Satellite' });
+          adminPosMarker = L.marker([10.9328, 108.1025], { draggable: true }).addTo(adminPosMap);
+          adminPosMarker.on('dragend', () => {
+            const p = adminPosMarker.getLatLng();
+            updateAdminPinPreview(p.lat, p.lng);
+          });
+          adminPosMap.on('click', (e) => {
+            adminPosMarker.setLatLng(e.latlng);
+            updateAdminPinPreview(e.latlng.lat, e.latlng.lng);
+          });
+        }
+        adminPosMap.invalidateSize();
+        setTimeout(() => { if (adminPosMap) adminPosMap.invalidateSize(); }, 250);
+      }, 100);
+    };
+
+    window.closeAdminPosMapModal = function() {
+      const modal = document.getElementById('adminPosMapModal');
+      if (modal) { modal.classList.remove('active'); modal.style.display = 'none'; }
+    };
+
+    window.switchAdminMapLayer = function(mode) {
+      if (!adminPosMap) return;
+      if (mode === 'sat') {
+        if (adminPosMap.hasLayer(adminMapRoadLayer)) adminPosMap.removeLayer(adminMapRoadLayer);
+        adminMapSatLayer.addTo(adminPosMap);
+      } else {
+        if (adminPosMap.hasLayer(adminMapSatLayer)) adminPosMap.removeLayer(adminMapSatLayer);
+        adminMapRoadLayer.addTo(adminPosMap);
+      }
+    };
+
+    window.centerAdminMapToStore = function() {
+      if (!adminPosMap || !adminPosMarker) return;
+      adminPosMap.setView([10.9328, 108.1025], 16);
+      adminPosMarker.setLatLng([10.9328, 108.1025]);
+      updateAdminPinPreview(10.9328, 108.1025);
+    };
+
+    function updateAdminPinPreview(lat, lng) {
+      adminPinnedLat = lat; adminPinnedLng = lng;
+      const km = calcRoadKmAdmin(10.9328, 108.1025, lat, lng);
+      const infoEl = document.getElementById('adminMapPinInfoText');
+      if (infoEl) infoEl.innerHTML = `📍 Tọa độ ghim: <b>${lat.toFixed(5)}, ${lng.toFixed(5)}</b> — Khoảng cách từ quán: <b style="color:#dc2626; font-size:0.92rem;">${km} km</b>`;
+    }
+
+    window.searchPlaceOnAdminMap = function() {
+      const kw = (document.getElementById('adminMapPlaceSearchInput')?.value || '').trim();
+      const resBox = document.getElementById('adminMapSearchResults');
+      if (!kw || !resBox) return;
+      resBox.style.display = 'block';
+      resBox.innerHTML = '<div style="padding:8px; color:#0369a1; font-weight:700;">⏳ Đang tìm địa điểm / quán trên bản đồ...</div>';
+      const q = kw.toLowerCase().includes('phan thiết') ? kw : `${kw}, Phan Thiết`;
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=5&q=${encodeURIComponent(q)}`)
+        .then(r => r.json())
+        .then(list => {
+          if (!list || list.length === 0) {
+            resBox.innerHTML = '<div style="padding:8px; color:#dc2626; font-weight:700;">⚠️ Không tìm thấy tự động. Hãy kéo ghim đỏ trên bản đồ Google Maps bên dưới!</div>';
+            return;
+          }
+          resBox.innerHTML = list.map(item => {
+            const lat = parseFloat(item.lat), lon = parseFloat(item.lon);
+            const km = calcRoadKmAdmin(10.9328, 108.1025, lat, lon);
+            const safeLabel = (item.display_name || kw).replace(/'/g, "\\'");
+            return `<div onclick="selectAdminMapSearchResult(${lat}, ${lon}, '${safeLabel}')" style="padding:7px 10px; border-bottom:1px solid #bae6fd; cursor:pointer; font-weight:700; color:#0f172a;">📍 <b>${item.display_name.split(',').slice(0, 3).join(', ')}</b> <span style="color:#dc2626;">(${km} km)</span></div>`;
+          }).join('');
+          window.selectAdminMapSearchResult(parseFloat(list[0].lat), parseFloat(list[0].lon), list[0].display_name);
+        }).catch(() => {});
+    };
+
+    window.selectAdminMapSearchResult = function(lat, lon, labelText) {
+      if (adminPosMap && adminPosMarker) {
+        adminPosMap.setView([lat, lon], 17);
+        adminPosMarker.setLatLng([lat, lon]);
+      }
+      updateAdminPinPreview(lat, lon);
+      document.getElementById('adminMapPlaceSearchInput').value = labelText.split(',').slice(0, 2).join(', ');
+    };
+
+    window.confirmAdminPosMapPin = function() {
+      const lat = adminPinnedLat || 10.9328, lng = adminPinnedLng || 108.1025;
+      const km = calcRoadKmAdmin(10.9328, 108.1025, lat, lng);
+      const placeName = (document.getElementById('adminMapPlaceSearchInput')?.value || '').trim();
+      const addrInp = document.getElementById('posShipCusAddress');
+      const kmInp = document.getElementById('posShipKmInput');
+      const statusTag = document.getElementById('posAutoKmStatusTag');
+
+      if (kmInp) kmInp.value = km;
+      if (addrInp) addrInp.value = placeName ? `${placeName} (${lat.toFixed(5)}, ${lng.toFixed(5)})` : `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+      manualPosShipFeeOverride = false;
+      recalcPosDeliveryTotals();
+      if (statusTag) statusTag.innerHTML = `✅ Đã ghim Google Maps: <b style="color:#dc2626;">${km} km</b> (Shipper bấm chỉ đường nhận 100%)`;
+      window.closeAdminPosMapModal();
+    };
+
+    // --- PHẦN 4: BÁO CÁO DOANH THU GRAB (CÁ NHÂN/NỘI BỘ) & SHOPEE (THUẾ CÔNG TY 3401289271) ---
+    let externalRevenuesCache = {};
+    if (document.getElementById('extRevDateInput')) {
+      document.getElementById('extRevDateInput').value = getVNDateStr();
+    }
+
+    setTimeout(() => {
+      const platSel = document.getElementById('extPlatformSelect');
+      if (platSel) {
+        platSel.innerHTML = `
+          <option value="GRAB_PERSONAL">🟢 GrabFood (Đang ĐK Cá Nhân — Chỉ tính Doanh thu Nội bộ, KHÔNG đưa vào Thuế/HĐ Công ty)</option>
+          <option value="SHOPEE_FOOD">🟠 ShopeeFood (Pháp nhân Công ty — Gộp vào Tờ khai Thuế 3401289271)</option>
+          <option value="SHOPEE_MALL">🛍️ Shopee Seller Center (Pháp nhân Công ty — Gộp vào Tờ khai Thuế 3401289271)</option>
+        `;
+      }
+    }, 300);
+
+    onValue(ref(db, 'external_revenues'), (snap) => {
+      externalRevenuesCache = snap.val() || {};
+      window.renderShiftReport();
+    });
+
+    window.calcExtNetPreview = function() {
+      const r5610 = parseInt(document.getElementById('extRev5610Input')?.value || '0') || 0;
+      const r5630 = parseInt(document.getElementById('extRev5630Input')?.value || '0') || 0;
+      const fee = parseInt(document.getElementById('extRevFeeInput')?.value || '0') || 0;
+      const net = Math.max(0, r5610 + r5630 - fee);
+      const netEl = document.getElementById('extRevNetPreview');
+      if (netEl) netEl.value = net.toLocaleString() + 'đ';
+      return { r5610, r5630, fee, net };
+    };
+
+    window.saveExternalPlatformRevenue = function() {
+      const platform = document.getElementById('extPlatformSelect')?.value || 'GRAB_PERSONAL';
+      const dateStr = document.getElementById('extRevDateInput')?.value || getVNDateStr();
+      const orderCount = Math.max(1, parseInt(document.getElementById('extRevOrderCount')?.value || '1') || 1);
+      const { r5610, r5630, fee, net } = window.calcExtNetPreview();
+      const note = (document.getElementById('extRevNoteInput')?.value || '').trim();
+
+      if (r5610 + r5630 <= 0) return alert("⚠️ Vui lòng nhập Doanh thu 5610 hoặc 5630 lớn hơn 0đ!");
+
+      push(ref(db, 'external_revenues'), {
+        platform, date: dateStr, orderCount, rev5610: r5610, rev5630: r5630,
+        platformFee: fee, netReceived: net, note, createdAt: new Date().toISOString()
+      }).then(() => {
+        alert(`✅ Đã lưu báo cáo doanh thu ${platform} ngày ${dateStr}!`);
+        document.getElementById('extRev5610Input').value = '0';
+        document.getElementById('extRev5630Input').value = '0';
+        document.getElementById('extRevFeeInput').value = '0';
+        document.getElementById('extRevNoteInput').value = '';
+        window.calcExtNetPreview();
+      });
+    };
+
+    window.deleteExternalRevenueRecord = function(recId) {
+      if (confirm("Xác nhận xóa bản ghi báo cáo doanh thu sàn này?")) {
+        remove(ref(db, `external_revenues/${recId}`));
+      }
+    };
+
+    window.importExternalPlatformCSV = function(input) {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target.result || '';
+        const numbers = (text.match(/\b\d{4,9}\b/g) || []).map(Number).filter(n => n >= 10000 && n <= 50000000);
+        if (numbers.length > 0) {
+          const maxVal = Math.max(...numbers);
+          document.getElementById('extRev5610Input').value = maxVal;
+          document.getElementById('extRevNoteInput').value = `Từ file: ${file.name}`;
+          window.calcExtNetPreview();
+          alert(`📂 Đã đọc file "${file.name}" (Doanh thu gợi ý: ${maxVal.toLocaleString()}đ). Hãy bấm Lưu!`);
+        }
+      };
+      reader.readAsText(file);
+    };
+
+    // --- PHẦN 5: TRẠM NHẬP HÓA ĐƠN ĐẦU VÀO PDF / XML / ẢNH & KIỂM TRA 6 TIÊU CHÍ HỢP LỆ ---
+    let inputInvoicesCache = {};
+    if (document.getElementById('invDateTimeInput')) {
+      const now = new Date();
+      document.getElementById('invDateTimeInput').value = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    }
+
+    onValue(ref(db, 'input_invoices'), (snap) => {
+      inputInvoicesCache = snap.val() || {};
+      window.renderInputInvoicesTable();
+    });
+
+    window.validateInputInvoiceRealtime = function() {
+      const invName = (document.getElementById('invNameInput')?.value || '').trim().toUpperCase();
+      const invSymbol = (document.getElementById('invSymbolInput')?.value || '').trim().toUpperCase();
+      const invNo = (document.getElementById('invNumberInput')?.value || '').trim();
+      const invDate = (document.getElementById('invDateTimeInput')?.value || '').trim();
+      const seller = (document.getElementById('invSellerInput')?.value || '').trim();
+      const buyerMst = (document.getElementById('invBuyerMstInput')?.value || '').trim();
+      const preTax = parseInt(document.getElementById('invPreTaxInput')?.value || '0') || 0;
+      const vatAmt = parseInt(document.getElementById('invVatAmountInput')?.value || '0') || 0;
+
+      const checks = [
+        { ok: invName.includes("HÓA ĐƠN") || invName.includes("GTGT"), label: "1. Tên HĐ", detail: invName || "Thiếu tên HĐ" },
+        { ok: /^[12][CK]\d{2}[A-Z]{2,3}$/i.test(invSymbol.replace(/[^A-Z0-9]/gi, '')) || invSymbol.length >= 4, label: "2. Ký hiệu HĐ", detail: invSymbol || "Thiếu ký hiệu (VD: 1C26TAA)" },
+        { ok: /^\d{1,8}$/.test(invNo) || invNo.length >= 1, label: "3. Số HĐ", detail: invNo || "Thiếu số HĐ" },
+        { ok: invDate.length >= 10, label: "4. Ngày giờ", detail: invDate ? new Date(invDate).toLocaleString('vi-VN') : "Thiếu ngày giờ" },
+        { ok: buyerMst === "3401289271", label: "5. MST Người mua", detail: buyerMst === "3401289271" ? "Khớp Bảo Anh Lâm (3401289271)" : `Lệch MST (${buyerMst})` },
+        { ok: preTax > 0 && vatAmt >= 0, label: "6. Tiền & VAT", detail: `Trước thuế: ${preTax.toLocaleString()}đ | VAT: ${vatAmt.toLocaleString()}đ` }
+      ];
+
+      const allPassed = checks.every(c => c.ok);
+      const banner = document.getElementById('invoiceAuditResultBanner');
+      if (banner) {
+        banner.style.display = 'block';
+        banner.style.background = allPassed ? '#dcfce7' : '#fff1f2';
+        banner.style.border = allPassed ? '2px solid #16a34a' : '2px solid #ef4444';
+        banner.style.color = allPassed ? '#14532d' : '#991b1b';
+        banner.innerHTML = `<b>${allPassed ? '✅ CẤU TRÚC HÓA ĐƠN HỢP LỆ 100% (ĐỦ ĐIỀU KIỆN KHẤU TRỪ THUẾ CÔNG TY)' : '⚠️ CẢNH BÁO CẤU TRÚC HÓA ĐƠN:'}</b><div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:4px; margin-top:4px;">${checks.map(c => `<div>${c.ok ? '🟢' : '🔴'} <b>${c.label}:</b> ${c.detail}</div>`).join('')}</div>`;
+      }
+      return { allPassed, invName, invSymbol, invNo, invDate, seller, buyerMst, preTax, vatAmt };
+    };
+
+    function parseExtractedInvoiceText(rawText, fileName = '') {
+      const txt = String(rawText || '').replace(/\s+/g, ' ');
+      const symMatch = txt.match(/\b([12][CK]\d{2}[A-Z]{2,3})\b/i);
+      if (symMatch) document.getElementById('invSymbolInput').value = symMatch[1].toUpperCase();
+      const noMatch = txt.match(/(?:Số|So|SHĐ|SHDon)\s*[:.]?\s*0*(\d{1,8})\b/i) || txt.match(/\b00(\d{5,6})\b/);
+      if (noMatch) document.getElementById('invNumberInput').value = noMatch[1].padStart(7, '0');
+      const allMsts = txt.match(/\b\d{10}(?:-\d{3})?\b/g) || [];
+      if (allMsts.includes('3401289271')) document.getElementById('invBuyerMstInput').value = '3401289271';
+      const sellerMst = allMsts.find(m => m !== '3401289271');
+      document.getElementById('invSellerInput').value = sellerMst ? `MST Bán: ${sellerMst} (${fileName})` : fileName;
+
+      const moneyMatches = (txt.match(/\b\d{1,3}(?:[.,]\d{3})+\b/g) || []).map(s => parseInt(s.replace(/[.,]/g, ''))).filter(n => n >= 1000 && n <= 500000000).sort((a, b) => b - a);
+      if (moneyMatches.length >= 2) {
+        const total = moneyMatches[0];
+        const pre = moneyMatches.find(n => n < total && n >= total * 0.85) || Math.round(total / 1.08);
+        document.getElementById('invPreTaxInput').value = pre;
+        document.getElementById('invVatAmountInput').value = Math.max(0, total - pre);
+      }
+      window.validateInputInvoiceRealtime();
+    }
+
+    window.handleInputInvoiceFileUpload = async function(input) {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      const ext = file.name.split('.').pop().toLowerCase();
+      if (ext === 'xml') {
+        const text = await file.text();
+        const xmlDoc = new DOMParser().parseFromString(text, "text/xml");
+        const getTag = (t) => xmlDoc.getElementsByTagName(t)[0]?.textContent?.trim() || '';
+        document.getElementById('invNameInput').value = (getTag('THDon') || 'HÓA ĐƠN GIÁ TRỊ GIA TĂNG').toUpperCase();
+        document.getElementById('invSymbolInput').value = (getTag('KHMSHDon') + getTag('KHHDon')).toUpperCase();
+        document.getElementById('invNumberInput').value = getTag('SHDon').padStart(7, '0');
+        const nLap = getTag('NLap');
+        if (nLap) document.getElementById('invDateTimeInput').value = nLap.includes('T') ? nLap.slice(0, 16) : `${nLap}T08:30`;
+        document.getElementById('invSellerInput').value = `${getTag('Ten')} (MST: ${getTag('MST')})`;
+        document.getElementById('invBuyerMstInput').value = text.includes('3401289271') ? '3401289271' : '';
+        document.getElementById('invPreTaxInput').value = parseInt(getTag('TgTCThue') || '0') || 0;
+        document.getElementById('invVatAmountInput').value = parseInt(getTag('TgTThue') || '0') || 0;
+        window.validateInputInvoiceRealtime();
+        return;
+      }
+      if (ext === 'pdf' && window.pdfjsLib) {
+        try {
+          window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+          const pdf = await window.pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+          let fullText = '';
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            fullText += content.items.map(it => it.str).join(' ') + ' ';
+          }
+          parseExtractedInvoiceText(fullText, file.name);
+          return;
+        } catch (_) {}
+      }
+      parseExtractedInvoiceText(file.name, file.name);
+    };
+
+    window.saveVerifiedInputInvoice = function() {
+      const check = window.validateInputInvoiceRealtime();
+      if (!check.allPassed && !confirm("⚠️ Hóa đơn có chỉ tiêu đang cảnh báo đỏ (ví dụ lệch MST hoặc HĐ cá nhân). Bạn vẫn muốn lưu?")) return;
+      push(ref(db, 'input_invoices'), {
+        invName: check.invName, invSymbol: check.invSymbol, invNo: check.invNo, invDate: check.invDate,
+        seller: check.seller || 'Nhà cung cấp', buyerMst: check.buyerMst, preTax: check.preTax, vatAmt: check.vatAmt,
+        isValidStructure: check.allPassed, createdAt: new Date().toISOString()
+      }).then(() => {
+        alert(`✅ Đã lưu Hóa đơn đầu vào #${check.invNo}!`);
+      });
+    };
+
+    window.deleteInputInvoiceRecord = function(id) {
+      if (confirm("Xóa hóa đơn đầu vào này?")) remove(ref(db, `input_invoices/${id}`));
+    };
+
+    function isDateMatchingCurrentReportPeriod(dateStr) {
+      if (!dateStr || dateStr.length < 10) return false;
+      const dStr = dateStr.slice(0, 10);
+      const mode = document.getElementById('filterMode')?.value || 'day';
+      const y = parseInt(dStr.slice(0, 4)), m = parseInt(dStr.slice(5, 7));
+      if (mode === 'quarter') {
+        const q = parseInt(document.getElementById('filterQuarter')?.value || '4');
+        const qY = parseInt(document.getElementById('filterQuarterYear')?.value || '2026');
+        return (y === qY && m >= (q - 1) * 3 + 1 && m <= q * 3);
+      } else if (mode === 'month') {
+        return dStr.startsWith(document.getElementById('filterMonthInput')?.value || '');
+      }
+      return dStr === (document.getElementById('filterDayInput')?.value || '');
+    }
+
+    window.renderInputInvoicesTable = function() {
+      const tbody = document.getElementById('inputInvoicesTableBody');
+      if (!tbody) return;
+      let html = '', sumCompanyPre = 0, sumCompanyVat = 0, sumPersonalInternal = 0;
+
+      Object.keys(inputInvoicesCache).forEach(k => {
+        const inv = inputInvoicesCache[k];
+        if (!isDateMatchingCurrentReportPeriod(inv.invDate)) return;
+        const isGrabPersonal = (inv.seller || '').toLowerCase().includes('grab') || (inv.invName || '').toLowerCase().includes('grab');
+        const isCompanyValid = (String(inv.buyerMst || '').trim() === '3401289271') && !isGrabPersonal;
+
+        if (isCompanyValid) {
+          sumCompanyPre += (Number(inv.preTax) || 0);
+          sumCompanyVat += (Number(inv.vatAmt) || 0);
+        } else {
+          sumPersonalInternal += (Number(inv.preTax) || 0) + (Number(inv.vatAmt) || 0);
+        }
+
+        const badgeHtml = isCompanyValid
+          ? `<span class="inv-check-badge inv-valid">✅ Khấu trừ Công ty [ct24]</span>`
+          : `<span class="inv-check-badge" style="background:#fef3c7; color:#b45309; border:1px solid #f59e0b;">👤 Chi phí Cá nhân / Nội bộ (Không tính thuế CTY)</span>`;
+
+        html += `<tr>
+          <td><b>${inv.invDate ? new Date(inv.invDate).toLocaleString('vi-VN') : '--'}</b></td>
+          <td><b>${inv.invSymbol || ''}</b> #<b>${inv.invNo || ''}</b></td>
+          <td><b>${inv.invName || ''}</b><br><small>${inv.seller || ''}</small></td>
+          <td><b>${inv.buyerMst || 'Cá nhân'}</b></td>
+          <td style="text-align:right; font-weight:800;">${(Number(inv.preTax) || 0).toLocaleString()}đ</td>
+          <td style="text-align:right; font-weight:900; color:#dc2626;">${(Number(inv.vatAmt) || 0).toLocaleString()}đ</td>
+          <td style="text-align:center;">${badgeHtml}</td>
+          <td><button type="button" onclick="deleteInputInvoiceRecord('${k}')" style="background:#fee2e2; color:#b91c1c; border:none; padding:4px 8px; border-radius:6px; cursor:pointer;">Xóa</button></td>
+        </tr>`;
+      });
+
+      tbody.innerHTML = html || '<tr><td colspan="8" style="text-align:center; padding:14px; color:#64748b;">Chưa có hóa đơn đầu vào trong kỳ này.</td></tr>';
+      const badgeEl = document.getElementById('inputInvoiceTotalBadge');
+      if (badgeEl) {
+        badgeEl.innerHTML = `📌 Khấu trừ Công ty: [ct23] = <b>${sumCompanyPre.toLocaleString()}đ</b> | VAT [ct24] = <b style="color:#dc2626;">${sumCompanyVat.toLocaleString()}đ</b> ${sumPersonalInternal > 0 ? `<span style="color:#b45309;">(Chi phí Grab/Cá nhân nội bộ: ${sumPersonalInternal.toLocaleString()}đ)</span>` : ''}`;
+      }
+      const dnVatInp = document.getElementById('dnInputVat');
+      if (dnVatInp) {
+        dnVatInp.value = sumCompanyVat;
+        if (typeof window.updateXmlTaxPreview === 'function') window.updateXmlTaxPreview();
+      }
+    };
+
+    const origGetTaxReportDataV30 = getTaxReportData;
+    getTaxReportData = function() {
+      const base = origGetTaxReportDataV30();
+      const includeExt = document.getElementById('chkIncludeExtRevInTax')?.checked !== false;
+      let extCompany5610 = 0, extCompany5630 = 0, extPersonalGrab = 0, extFee = 0, extOrders = 0;
+      const extRowsHtml = [];
+
+      Object.keys(externalRevenuesCache).forEach(k => {
+        const r = externalRevenuesCache[k];
+        if (!r || !isDateMatchingCurrentReportPeriod(r.date)) return;
+        const r5610 = Number(r.rev5610) || 0, r5630 = Number(r.rev5630) || 0, fee = Number(r.platformFee) || 0;
+        const net = Number(r.netReceived) || Math.max(0, r5610 + r5630 - fee);
+        const cnt = Number(r.orderCount) || 1;
+        const isGrabPersonal = String(r.platform || '').includes('GRAB');
+
+        extFee += fee;
+        extOrders += cnt;
+
+        if (isGrabPersonal) {
+          extPersonalGrab += (r5610 + r5630);
+        } else {
+          extCompany5610 += r5610;
+          extCompany5630 += r5630;
+          if (includeExt) {
+            base.total5610 += r5610;
+            base.total5630 += r5630;
+            base.totalTaxable += (r5610 + r5630);
+            base.count += cnt;
+            if (!base.daily[r.date]) base.daily[r.date] = { count: 0, tax5610: 0, tax5630: 0, ship: 0 };
+            base.daily[r.date].count += cnt;
+            base.daily[r.date].tax5610 += r5610;
+            base.daily[r.date].tax5630 += r5630;
+          }
+        }
+
+        const platLabel = isGrabPersonal
+          ? '<span style="background:#dcfce7; color:#166534; padding:2px 7px; border-radius:6px; font-weight:800; font-size:0.75rem;">🟢 GrabFood (Cá nhân - Nội bộ)</span>'
+          : `<span style="background:#ffedd5; color:#c2410c; padding:2px 7px; border-radius:6px; font-weight:800; font-size:0.75rem;">🟠 ${r.platform} (Thuế Công ty)</span>`;
+
+        extRowsHtml.push(`<tr>
+          <td><b>${r.date}</b></td>
+          <td>${platLabel}</td>
+          <td style="text-align:center;">${cnt}</td>
+          <td style="text-align:right; font-weight:800; color:#1e5e3a;">${r5610.toLocaleString()}đ</td>
+          <td style="text-align:right; font-weight:800; color:#d97706;">${r5630.toLocaleString()}đ</td>
+          <td style="text-align:right; color:#dc2626;">-${fee.toLocaleString()}đ</td>
+          <td style="text-align:right; font-weight:900; color:#15803d;">${net.toLocaleString()}đ</td>
+          <td style="font-size:0.78rem;">${r.note || ''}</td>
+          <td><button type="button" onclick="deleteExternalRevenueRecord('${k}')" style="background:#fee2e2; color:#b91c1c; border:none; padding:4px 8px; border-radius:6px; cursor:pointer;">Xóa</button></td>
+        </tr>`);
+      });
+
+      const extTbody = document.getElementById('extPlatformRevTableBody');
+      if (extTbody) extTbody.innerHTML = extRowsHtml.join('') || '<tr><td colspan="9" style="text-align:center; padding:14px; color:#64748b;">Chưa có báo cáo Grab / Shopee trong kỳ này.</td></tr>';
+      const extTag = document.getElementById('extRevSummaryTag');
+      if (extTag) {
+        extTag.innerHTML = `📊 Shopee (Thuế CTY): <b>${(extCompany5610 + extCompany5630).toLocaleString()}đ</b> | Grab (Cá nhân - Nội bộ): <b style="color:#0369a1;">${extPersonalGrab.toLocaleString()}đ</b> | Phí sàn: <b style="color:#dc2626;">-${extFee.toLocaleString()}đ</b>`;
+      }
+      return base;
+    };
+
+    const origRenderShiftReportV30 = window.renderShiftReport;
+    window.renderShiftReport = function() {
+      origRenderShiftReportV30();
+      if (typeof window.renderInputInvoicesTable === 'function') window.renderInputInvoicesTable();
+    };
+
+    // --- PHẦN 6: HỆ ĐIỀU HÀNH GIỌNG NÓI TOÀN TRÌNH V4 (TÁCH SỐ GHÉP + TỪ ĐIỂN 122 MÓN + AI TỰ SỬA CHỮ) ---
     let isStaffBigMode = false;
     let speechRecognizer = null;
     let isVoiceListening = false;
     let lastVoiceCartSnapshot = null;
-
-    // 1. Luon hien thi nut Micro Noi & Tab Dieu Khien PC
-    function initV29ButtonsVisibility() {
-      const fab = document.getElementById('floatingVoiceFab');
-      if (fab) fab.style.display = 'flex';
-      const tabD = document.getElementById('tabDispatch');
-      if (tabD) tabD.style.display = 'none';
-    }
-    setTimeout(initV29ButtonsVisibility, 300);
 
     window.toggleStaffBigMode = function() {
       isStaffBigMode = !isStaffBigMode;
@@ -6274,7 +7247,7 @@ window.openInstallGuideModal = function() {
       window.toggleVoiceOrderRecognition();
     };
 
-    function normNoAccentV29(str) {
+    function normNoAccentV30(str) {
       return String(str || '')
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
@@ -6285,41 +7258,161 @@ window.openInstallGuideModal = function() {
         .trim();
     }
 
-    // =========================================================================
-    // BO NAO TANG 1: SUA TRIET DE LOI NHAY SO LUNG TUNG CUA GOOGLE SPEECH-TO-TEXT
-    // Giải quyết hiện tượng đọc "1 bún thái" -> "14 thái", "2 bún riêu" -> "24 riêu",
-    // "1 bún mắm" -> "145", "2 bún mắm" -> "245", "cháo nấm" -> "cháo 5", "cơm tấm" -> "cơm 8"!
-    // =========================================================================
+    function normKeepAccentV30(str) {
+      return String(str || '')
+        .toLowerCase()
+        .replace(/[.,;!?+()\/\\"-]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    const VOICE_EXACT_SYNONYMS_BY_ID = {
+      bunmoc: ["bún mọc chay", "bún mọc"],
+      bunthai: ["bún thái chay", "bún thái"],
+      bunrieu: ["bún riêu chay", "bún riêu", "bún riu"],
+      bunhue: ["bún huế chay", "bún huế", "bún bò huế"],
+      bunmam: ["bún mắm chay", "bún mắm"],
+      bunbokho: ["bún bò kho chay", "bún bò kho"],
+      bunchuathila: ["bún chua thì là", "bún thì là", "bún chua"],
+      miquang: ["mì quảng chay", "mì quảng"],
+      mitiem: ["mì tiềm chay", "mì tiềm"],
+      hoanhthanhmi: ["mì hoành thánh chay", "mì hoành thánh", "hoành thánh mì"],
+      mitronkho: ["mì trộn khô chay", "mì trộn khô", "mì trộn", "mì khô"],
+      mispaghetti: ["mì ý sốt bò bằm chay", "mì ý sốt bò bằm", "mì ý bò bằm", "mì ý", "mì spaghetti"],
+      miykemnam: ["mì ý kem nấm", "mì kem nấm"],
+      micay: ["mì cay chay", "mì cay"],
+      phoboga: ["phở bò gà chay", "phở bò chay", "phở gà chay", "phở bò", "phở gà", "phở chay"],
+      hutieudai: ["hủ tiếu dai hủ tiếu mì", "hủ tiếu dai", "hủ tiếu mì", "hủ tiếu nước", "hủ tiếu chay"],
+      hutieutronkho: ["hủ tiếu trộn khô", "hủ tiếu trộn", "hủ tiếu khô"],
+      hutieubokho: ["hủ tiếu bò kho chay", "hủ tiếu bò kho"],
+      banhmibokho: ["bánh mì bò kho chay", "bánh mì bò kho"],
+      banhcanh: ["bánh canh chay", "bánh canh"],
+      comga: ["cơm gà chay", "cơm gà"],
+      comtam: ["cơm tấm chay", "cơm tấm", "cơm sườn"],
+      comdiathapcam: ["cơm dĩa thập cẩm chay", "cơm dĩa thập cẩm", "cơm thập cẩm", "cơm dĩa"],
+      comchienraucunam: ["cơm chiên rau củ nấm", "cơm chiên rau củ", "cơm chiên nấm", "cơm chiên"],
+      chaonam: ["cháo nấm chay", "cháo nấm"],
+      banhmipatecha: ["bánh mì pate chả chay", "bánh mì pate chả", "bánh mì pate", "bánh mì chả"],
+      xoi: ["xôi thập cẩm chay", "xôi thập cẩm"],
+      xoichabongnam: ["xôi chà bông nấm hương", "xôi chà bông nấm", "xôi chà bông"],
+      banhuot: ["bánh ướt chay", "bánh ướt"],
+      banhhoi: ["bánh hỏi chay", "bánh hỏi"],
+      bunchagio: ["bún chả giò chay", "bún chả giò"],
+      bunmamnem: ["bún mắm nêm chay", "bún mắm nêm"],
+      chagiochien: ["chả giò chiên giòn", "chả giò chiên", "chả giò"],
+      baonguchienxu: ["bào ngư chiên xù", "bào ngư chiên", "nấm bào ngư chiên"],
+      khoaitaychien: ["khoai tây chiên"],
+      phomaivienchien: ["phô mai viên chiên", "phô mai viên", "phô mai chiên"],
+      hoanhthanhchien: ["hoành thánh chiên giòn", "hoành thánh chiên", "hoành thánh lá"],
+      dauhuchien: ["đậu hũ chiên giòn", "đậu hũ chiên", "đậu khuôn chiên"],
+      namcuonthinh: ["nấm cuộn thính", "nấm thính"],
+      namxucbanhda: ["nấm xúc bánh đa", "xúc bánh đa"],
+      nomhoachuoi: ["nộm hoa chuối tri kỷ", "nộm hoa chuối", "gỏi hoa chuối"],
+      boluclacbanhmi: ["bò lúc lắc bánh mì"],
+      boluclackhoaitay: ["bò lúc lắc khoai tây", "bò lúc lắc"],
+      lauthai: ["lẩu thái chay nồi lớn", "lẩu thái chay", "lẩu thái"],
+      lauchao: ["lẩu chao chay nồi lớn", "lẩu chao chay", "lẩu chao"],
+      chanamhuong: ["chả nấm hương"],
+      charaucunam: ["chả rau củ nấm", "chả rau củ"],
+      chamitnon: ["chả mít non", "chả mít"],
+      channamhuong: ["chân nấm hương"],
+      gahukychuachien: ["gà hũ ky cuộn nấm chưa chiên", "gà hũ ky cuộn nấm", "gà hũ ky"],
+      chagiochuachien: ["chả giò chưa chiên", "chả giò sống"],
+      patehatdieu: ["pate hạt điều", "pa tê hạt điều"],
+      chabongnamhuonganlien: ["chà bông nấm hương ăn liền", "chà bông nấm hương"],
+      chabongsuonanlien: ["chà bông sườn ăn liền", "chà bông sườn"],
+      namchienxuchuachien: ["nấm chiên xù chưa chiên", "nấm chiên xù"],
+      rongbiensayanlien: ["rong biển sấy ăn liền", "rong biển sấy", "rong biển"],
+      suonsaymeanlien: ["sườn sấy mè ăn liền", "sườn sấy mè"],
+      suonrimcayanlien: ["sườn rim cay ăn liền", "sườn rim cay"],
+      mocvien: ["mọc viên"],
+      cafeda: ["cafe đá", "cà phê đá", "cà phê đen", "cafe đen"],
+      cafesua: ["cafe sữa", "cà phê sữa", "cà phê sữa đá"],
+      bacxiu: ["bạc xỉu", "bạc sỉu"],
+      cafemuoi: ["cafe muối", "cà phê muối"],
+      cafekemtrung: ["cafe kem trứng", "cà phê kem trứng"],
+      cacaomuoi: ["cacao muối", "ca cao muối"],
+      cacaosualac: ["cacao sữa lắc", "ca cao sữa lắc", "ca cao sữa"],
+      cacaokemtrung: ["cacao kem trứng", "ca cao kem trứng"],
+      lattematcha: ["latte matcha", "matcha latte"],
+      lattecacao: ["latte cacao", "latte ca cao"],
+      lattecafe: ["latte cafe", "latte cà phê"],
+      lattematchakemtrung: ["latte matcha kem trứng", "matcha kem trứng"],
+      lattecacaokemtrung: ["latte cacao kem trứng", "latte ca cao kem trứng"],
+      lattecafekemtrung: ["latte cafe kem trứng", "latte cà phê kem trứng"],
+      trataximuoi: ["trà tắc xí muội", "trà tắc"],
+      tratacthaixanh: ["trà tắc thái xanh", "trà thái xanh"],
+      traoi: ["trà ổi", "trà ổi hồng"],
+      traxoai: ["trà xoài"],
+      tradao: ["trà đào"],
+      tradau: ["trà dâu"],
+      travietquat: ["trà việt quất"],
+      trachanhday: ["trà chanh dây"],
+      tramangcau: ["trà mãng cầu"],
+      tradualuoi: ["trà dưa lưới"],
+      epcam: ["nước ép cam", "ép cam"],
+      epthom: ["nước ép thơm", "nước ép dứa", "ép thơm", "ép dứa"],
+      epoi: ["nước ép ổi", "ép ổi"],
+      epcarot: ["nước ép cà rốt", "ép cà rốt"],
+      epcachua: ["nước ép cà chua", "ép cà chua"],
+      epduahau: ["nước ép dưa hấu", "ép dưa hấu"],
+      yaourtda: ["yaourt đá", "sữa chua đá"],
+      yaourtthomtuoi: ["yaourt thơm tươi", "yaourt thơm", "sữa chua thơm"],
+      yaourtcamtuoi: ["yaourt cam tươi", "yaourt cam", "sữa chua cam"],
+      yaourtdao: ["yaourt đào", "sữa chua đào"],
+      yaourtdau: ["yaourt dâu", "sữa chua dâu"],
+      yaourtxoai: ["yaourt xoài", "sữa chua xoài"],
+      yaourtoi: ["yaourt ổi", "sữa chua ổi"],
+      yaourtvietquat: ["yaourt việt quất", "sữa chua việt quất"],
+      yaourtchanhday: ["yaourt chanh dây", "sữa chua chanh dây"],
+      yaourtmangcau: ["yaourt mãng cầu", "sữa chua mãng cầu"],
+      yaourtdualuoi: ["yaourt dưa lưới", "sữa chua dưa lưới"],
+      suoitac: ["suối tắc"],
+      sodadau: ["soda dâu"],
+      sodaxoai: ["soda xoài"],
+      sodaoi: ["soda ổi"],
+      sodadao: ["soda đào"],
+      sodavietquat: ["soda việt quất"],
+      sodachanhday: ["soda chanh dây"],
+      sodamangcau: ["soda mãng cầu"],
+      sodadualuoi: ["soda dưa lưới"],
+      nuocmia: ["nước mía"],
+      nuockhoangsuoigas: ["nước khoáng suối gas", "nước khoáng", "nước suối", "suối gas"],
+      nuocngot: ["nước ngọt"],
+      bohucthai: ["bò húc thái", "bò húc", "redbull"],
+      top_bunmipho: ["thêm bún", "thêm mì", "thêm phở", "thêm hủ tiếu", "bún thêm", "mì thêm"],
+      top_comxoi: ["thêm cơm trắng", "thêm cơm", "cơm trắng thêm", "thêm xôi"],
+      top_banhmi: ["thêm bánh mì không", "bánh mì không", "thêm bánh mì"],
+      top_chamoc: ["thêm chả", "thêm mọc", "thêm đậu hũ"],
+      top_hoanhthanh: ["thêm hoành thánh", "thêm chả giò"],
+      top_raunamlau: ["thêm rau nấm lẩu", "thêm rau lẩu", "thêm nấm lẩu", "thêm rau"],
+      top_nuocleo: ["thêm nước lèo", "thêm sốt chấm"],
+      top_kemtrung: ["topping kem trứng", "thêm kem trứng", "topping trái cây"],
+      top_togiay: ["thêm tô giấy", "tô giấy", "hộp giấy", "hộp mang về"]
+    };
+
     function smartRepairSttNumbersAndHomophones(rawSpeech) {
       let s = ' ' + String(rawSpeech || '').toLowerCase() + ' ';
-
-      // A. Tách các số hàng trăm do đọc "[Số lượng] + bún (4) + mắm (5)" (VD: 145 -> 1 bún mắm, 245 -> 2 bún mắm)
       s = s.replace(/\b([1-9])45\s+nêm\b/gi, ' $1 bún mắm nêm ');
       s = s.replace(/\b([1-9])45\b/gi, ' $1 bún mắm ');
       s = s.replace(/\b45\s+nêm\b/gi, ' 1 bún mắm nêm ');
       s = s.replace(/\b45\b/gi, ' 1 bún mắm ');
 
-      // B. Tách các số hàng chục có đuôi 4 (14, 24, 34, 44, 54, 64, 74, 84, 94) đứng trước từ khóa món Bún!
-      // VD: "14 thái" -> "1 bún thái", "24 riêu" -> "2 bún riêu", "34 bò kho" -> "3 bún bò kho"
       s = s.replace(/\b([1-9])4\s*(mọc|thái|riêu|riu|huế|mắm|bò|chua|thì|chả|giò)/gi, ' $1 bún $2');
       s = s.replace(/\b(?:4|bốn)\s*(mọc|thái|riêu|riu|huế|mắm|bò\s*kho|chua|thì\s*là|chả\s*giò)/gi, ' 1 bún $1 ');
 
-      // C. Tách số ghép đuôi 8 (18, 28, 38 -> "[Số lượng] + tấm / tắc")
       s = s.replace(/\b([1-9])\s*cơm\s*8\b/gi, ' $1 cơm tấm ');
       s = s.replace(/\bcơm\s*(?:8|tám)\b/gi, ' cơm tấm ');
       s = s.replace(/\b(trà|suối)\s*(?:8|tám)\b/gi, ' $1 tắc ');
 
-      // D. Tách số 5 bị nghe nhầm từ chữ "nấm" hoặc "mắm"
       s = s.replace(/\b(cháo|rau\s*củ|mì\s*ý\s*kem|kem|chả|chân|chà\s*bông|xôi\s*chà\s*bông|hũ\s*ky\s*cuộn)\s*(?:5|năm)\b/gi, ' $1 nấm ');
       s = s.replace(/\b([1-9])5\s+(hương|cuộn|xúc|chiên|bào\s*ngư)/gi, ' $1 nấm $2 ');
       s = s.replace(/\b(?:5|năm)\s+(hương|cuộn\s*thính|xúc\s*bánh\s*đa|chiên\s*xù|bào\s*ngư)/gi, ' nấm $1 ');
       s = s.replace(/\bbún\s*(?:5|năm)\s*nêm\b/gi, ' bún mắm nêm ');
       s = s.replace(/\bbún\s*(?:5|năm)\b/gi, ' bún mắm ');
 
-      // E. Tách số 9 bị nghe nhầm từ chữ "chiên"
       s = s.replace(/\b(chả\s*giò|bào\s*ngư|khoai\s*tây|phô\s*mai|phô\s*mai\s*viên|hoành\s*thánh|đậu\s*hũ|cơm|nấm)\s*(?:9|chín)\b/gi, ' $1 chiên ');
 
-      // F. Tách số 10 / 6 / 7 / 2 / 3 bị nghe nhầm từ "muối", "sữa", "ổi", "hỏi", "bạc xỉu"
       s = s.replace(/\b(cafe|cà\s*phê|cacao|ca\s*cao)\s*(?:10|mười|múi|mùi)\b/gi, ' $1 muối ');
       s = s.replace(/\b(cafe|cà\s*phê|cacao|ca\s*cao)\s*(?:6|sáu)\b/gi, ' $1 sữa ');
       s = s.replace(/\b(trà|ép|nước\s*ép|yaourt|sữa\s*chua|soda)\s*(?:7|bảy)\b/gi, ' $1 ổi ');
@@ -6329,7 +7422,6 @@ window.openInstallGuideModal = function() {
       s = s.replace(/\bchả\s*(?:1|một)\s*non\b/gi, ' chả mít non ');
       s = s.replace(/\bnước\s*(?:1|một)\b/gi, ' nước mía ');
 
-      // G. Đổi chữ số đơn lẻ ("một, hai, ba...") sang số một cách an toàn
       const numWords = [
         ['mười', '10'], ['chục', '10'], ['chín', '9'], ['tám', '8'], ['bảy', '7'],
         ['sáu', '6'], ['năm', '5'], ['bốn', '4'], ['ba', '3'], ['hai', '2'], ['một', '1']
@@ -6340,36 +7432,9 @@ window.openInstallGuideModal = function() {
         s = s.replace(rx, '$1' + d);
       });
 
-      // H. Xóa bỏ các con số lớn vô lý (> 30) do tạp âm tạo ra để không bao giờ nhảy số lượng trăm/ngàn cái!
       s = s.replace(/\b\d{3,}\b/g, ' ');
-
       return s.replace(/\s+/g, ' ').trim();
     }
-
-    // =========================================================================
-    // BO NAO TANG 2: AI TU TU DUY SUA CHU KHI NGHE SAI TEN MON (FUZZY PHONETIC BRAIN)
-    // So khớp âm tiết & khoảng cách ký tự Levenshtein trên toàn bộ 122 món!
-    // =========================================================================
-    const PHONETIC_MISTAKE_DICTIONARY = [
-      [/\bbun\s*riu\b/g, 'bún riêu'],
-      [/\bmi\s*quang\b/g, 'mì quảng'],
-      [/\bmi\s*hoanh\s*thanh\b/g, 'mì hoành thánh'],
-      [/\bhoanh\s*thanh\s*mi\b/g, 'mì hoành thánh'],
-      [/\bmi\s*y\s*bo\s*bam\b/g, 'mì ý sốt bò bằm'],
-      [/\bmi\s*y\b(?!\s*kem)/g, 'mì ý sốt bò bằm'],
-      [/\bhu\s*tiu\b/g, 'hủ tiếu'],
-      [/\bcom\s*chien\b(?!\s*rau)/g, 'cơm chiên rau củ nấm'],
-      [/\bcom\s*dia\b/g, 'cơm dĩa thập cẩm'],
-      [/\bxoi\s*cha\s*bong\b/g, 'xôi chà bông nấm hương'],
-      [/\bnom\s*bong\s*chuoi\b/g, 'nộm hoa chuối'],
-      [/\bgoi\s*hoa\s*chuoi\b/g, 'nộm hoa chuối'],
-      [/\bbo\s*luc\s*lat\b/g, 'bò lúc lắc'],
-      [/\bca\s*phe\b/g, 'cafe'],
-      [/\bsua\s*chua\b/g, 'yaourt'],
-      [/\bya\s*ua\b/g, 'yaourt'],
-      [/\bso\s*da\b/g, 'soda'],
-      [/\bbo\s*huc\b(?!\s*thai)/g, 'bò húc thái']
-    ];
 
     function calcLevenshteinSimilarity(a, b) {
       if (!a || !b) return 0;
@@ -6387,78 +7452,81 @@ window.openInstallGuideModal = function() {
       return 1 - dp[m][n] / Math.max(m, n);
     }
 
-    // Ham AI tu suy luan va tim mon an gan dung nhat trong 122 mon khi nguoi doc hoac may nghe bi sai chu
     function smartExtractAndSelfCorrectDishes(rawSegment) {
-      let repaired = smartRepairSttNumbersAndHomophones(rawSegment);
-      let noAcc = normNoAccentV29(repaired);
-      PHONETIC_MISTAKE_DICTIONARY.forEach(([rx, rep]) => {
-        noAcc = noAcc.replace(rx, normNoAccentV29(rep));
-      });
-
+      const repaired = smartRepairSttNumbersAndHomophones(rawSegment);
+      const segAcc = normKeepAccentV30(repaired);
       const menuList = getUnifiedMenuList();
-      const catalog = [];
+      const phraseDictionary = [];
 
       menuList.forEach(item => {
-        const baseNoAcc = normNoAccentV29(item.name);
-        const aliases = new Set([baseNoAcc]);
-        // Tao ban rut gon bo chu "chay", "noi lon", "an lien", "chua chien"
-        const shortNoAcc = baseNoAcc.replace(/\b(chay|noi lon|an lien|chua chien)\b/g, ' ').replace(/\s+/g, ' ').trim();
-        if (shortNoAcc.length >= 4 && item.cat !== 'topping') {
-          aliases.add(shortNoAcc);
+        const synList = VOICE_EXACT_SYNONYMS_BY_ID[item.id] ? [...VOICE_EXACT_SYNONYMS_BY_ID[item.id]] : [item.name.toLowerCase()];
+        const cleanFullName = normKeepAccentV30(item.name);
+        if (!synList.includes(cleanFullName)) synList.push(cleanFullName);
+        if (item.isCustom) {
+          const shortCustom = cleanFullName.replace(/\b(chay)\b/gi, '').trim();
+          if (shortCustom.length >= 4 && !synList.includes(shortCustom)) synList.push(shortCustom);
         }
-        if (item.id === 'phoboga') { aliases.add('pho bo'); aliases.add('pho ga'); }
-        if (item.id === 'hutieudai') { aliases.add('hu tieu dai'); aliases.add('hu tieu mi'); aliases.add('hu tieu'); }
-        if (item.id === 'mispaghetti') { aliases.add('mi y'); aliases.add('mi y sot bo bam'); }
-        if (item.id === 'hoanhthanhmi') { aliases.add('mi hoanh thanh'); aliases.add('hoanh thanh mi'); }
-        if (item.id === 'xoi') { aliases.add('xoi thap cam'); }
-        if (item.id === 'top_togiay') { aliases.add('to giay'); aliases.add('hop giay'); aliases.add('them to giay'); }
-
-        aliases.forEach(al => {
-          catalog.push({
-            alias: al,
-            words: al.split(' '),
-            item: item
-          });
+        synList.forEach(syn => {
+          const synAccented = normKeepAccentV30(syn);
+          const synNoAcc = normNoAccentV30(syn);
+          if (synAccented.length >= 3) {
+            phraseDictionary.push({
+              accentedAlias: synAccented,
+              noAccentAlias: synNoAcc,
+              words: synNoAcc.split(' '),
+              wordCount: synAccented.split(' ').length,
+              charLen: synAccented.length,
+              item: item
+            });
+          }
         });
       });
 
-      // Uu tien cum tu dai nhat truoc
-      catalog.sort((a, b) => (b.words.length - a.words.length) || (b.alias.length - a.alias.length));
+      phraseDictionary.sort((a, b) => (b.wordCount - a.wordCount) || (b.charLen - a.charLen));
 
-      let working = ' ' + noAcc + ' ';
+      let workAcc = ' ' + segAcc.replace(/\s+/g, ' ').trim() + ' ';
       const results = [];
       const correctionsLog = [];
 
-      // BƯỚC 1: Khớp trực tiếp trên chuỗi đã qua sửa số & từ đồng âm
-      catalog.forEach(entry => {
-        const rx = new RegExp('(?:^|\\s)(?:(\\d{1,2})\\s*(?:to|phan|ly|chen|dia|hop|chai|lon|suat|noi|cai|o)?\\s+)?(' + entry.alias + ')(?=\\s|$)', 'i');
+      phraseDictionary.forEach(entry => {
+        const esc = entry.accentedAlias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const rx = new RegExp('(?:^|\\s)(?:(\\d{1,2})\\s*(?:tô|phần|ly|chén|dĩa|đĩa|hộp|chai|lon|suất|nồi|cái|ổ)?\\s+)?(' + esc + ')(?=\\s|$)', 'i');
         let m;
-        while ((m = working.match(rx)) !== null) {
-          const qty = m[1] ? Math.min(20, Math.max(1, parseInt(m[1]))) : 1;
+        while ((m = workAcc.match(rx)) !== null) {
+          const qty = m[1] ? Math.min(30, Math.max(1, parseInt(m[1]))) : 1;
           results.push({ item: entry.item, qty: qty });
-          working = working.replace(m[0], ' # ');
+          workAcc = workAcc.replace(m[0], ' # ');
         }
       });
 
-      // BƯỚC 2: AI TỰ TƯ DUY SỬA CHỮ (Fuzzy N-gram Sliding Window) cho những từ bị Google ghi sai chính tả!
-      const leftoverChunks = working.split('#').map(c => c.trim()).filter(c => c.length >= 4);
+      let workNoAcc = ' ' + normNoAccentV30(workAcc.replace(/#/g, ' ')) + ' ';
+      if (workNoAcc.trim().length >= 3) {
+        phraseDictionary.forEach(entry => {
+          const escNo = entry.noAccentAlias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const rxNo = new RegExp('(?:^|\\s)(?:(\\d{1,2})\\s*(?:to|phan|ly|chen|dia|hop|chai|lon|suat|noi|cai|o)?\\s+)?(' + escNo + ')(?=\\s|$)', 'i');
+          let m2;
+          while ((m2 = workNoAcc.match(rxNo)) !== null) {
+            const qty = m2[1] ? Math.min(30, Math.max(1, parseInt(m2[1]))) : 1;
+            results.push({ item: entry.item, qty: qty });
+            workNoAcc = workNoAcc.replace(m2[0], ' # ');
+          }
+        });
+      }
+
+      // AI TỰ TƯ DUY SỬA CHỮ KHI NGHE SAI TÊN MÓN (Fuzzy Phonetic Brain)
+      const leftoverChunks = workNoAcc.split('#').map(c => c.trim()).filter(c => c.length >= 4);
       leftoverChunks.forEach(chunk => {
-        // Bo qua cac tu lenh giao tiep thong thuong
         const cleanChunk = chunk.replace(/\b(lay|cho|them|goi|mon|mot|hai|ba|to|ly|phan|dia|suat|chai|ban|so)\b/g, ' ').replace(/\s+/g, ' ').trim();
         if (cleanChunk.length < 4) return;
-
         const qtyMatch = chunk.match(/\b(\d{1,2})\b/);
         const guessedQty = qtyMatch ? Math.min(20, Math.max(1, parseInt(qtyMatch[1]))) : 1;
         const textOnly = cleanChunk.replace(/\b\d+\b/g, '').trim();
         if (textOnly.length < 4) return;
 
-        let bestEntry = null;
-        let bestScore = 0;
-
-        catalog.forEach(entry => {
+        let bestEntry = null, bestScore = 0;
+        phraseDictionary.forEach(entry => {
           if (entry.item.cat === 'topping' && !chunk.includes('them') && !chunk.includes('giay')) return;
-          const sim = calcLevenshteinSimilarity(textOnly, entry.alias);
-          // Kiem tra do trung khop am tiet
+          const sim = calcLevenshteinSimilarity(textOnly, entry.noAccentAlias);
           const chunkWords = textOnly.split(' ');
           let matchedWords = 0;
           entry.words.forEach(ew => {
@@ -6466,14 +7534,12 @@ window.openInstallGuideModal = function() {
           });
           const wordCoverage = matchedWords / entry.words.length;
           const combinedScore = (sim * 0.55) + (wordCoverage * 0.45);
-
           if (combinedScore > bestScore) {
             bestScore = combinedScore;
             bestEntry = entry;
           }
         });
 
-        // Nếu điểm tương đồng âm tiết >= 0.68 -> AI tự động sửa chữ và nhặt đúng món!
         if (bestEntry && bestScore >= 0.68) {
           results.push({ item: bestEntry.item, qty: guessedQty });
           correctionsLog.push(`"${textOnly}" ➡️ ${bestEntry.item.name}`);
@@ -6501,25 +7567,14 @@ window.openInstallGuideModal = function() {
       }
     }
 
-    function getOpenDineInOrders() {
-      const list = [];
-      Object.keys(ordersCache).forEach(id => {
-        const o = ordersCache[id];
-        if (o && !o.archived && o.orderType === 'dine_in' && o.status !== 'Đã hoàn tất' && o.status !== 'Đã hủy') {
-          list.push({ id, order: o });
-        }
-      });
-      return list;
-    }
-
     function resolveTableNameFromVoice(rawTableStr) {
       if (!rawTableStr) return null;
-      const n = normNoAccentV29(rawTableStr);
+      const n = normNoAccentV30(rawTableStr);
       if (n.includes('mang ve') || n.includes('dem ve')) return 'Mang Về';
       const numMatch = n.match(/\b(\d{1,2})\b/);
       if (numMatch) {
         const num = numMatch[1];
-        const found = (tablesListCache || []).find(t => normNoAccentV29(t) === 'ban ' + num || normNoAccentV29(t).endsWith(' ' + num));
+        const found = (tablesListCache || []).find(t => normNoAccentV30(t) === 'ban ' + num || normNoAccentV30(t).endsWith(' ' + num));
         return found || ('Bàn ' + num);
       }
       return null;
@@ -6527,8 +7582,34 @@ window.openInstallGuideModal = function() {
 
     function findActiveOrderByTableName(tableName) {
       if (!tableName) return null;
-      const targetNorm = normNoAccentV29(tableName);
-      return getOpenDineInOrders().find(x => normNoAccentV29(x.order.table) === targetNorm) || null;
+      const targetNorm = normNoAccentV30(tableName);
+      return getOpenDineInOrders().find(x => normNoAccentV30(x.order.table) === targetNorm) || null;
+    }
+
+    function recalcAndSaveOrderItemsToFirebase(orderId, orderObj, updatedItems, actionNote, voiceAlertText) {
+      let rawSub = 0;
+      for (let k in updatedItems) {
+        rawSub += (Number(updatedItems[k].price) || 0) * (Number(updatedItems[k].qty) || 0);
+      }
+      const pct = Number(orderObj.discountPercent) || 0;
+      const discAmt = Math.round(rawSub * pct / 100);
+      const netSub = Math.max(0, rawSub - discAmt);
+      const shipFee = orderObj.orderType === 'dine_in' ? 0 : (Number(orderObj.shippingFee) || 0);
+      const grandTotal = netSub + shipFee;
+      const stamp = `[${actionNote} lúc ${new Date().toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'})}]`;
+      const newNote = orderObj.note ? `${orderObj.note} | ${stamp}` : stamp;
+
+      return update(ref(db, `orders/${orderId}`), {
+        items: updatedItems,
+        rawSubtotal: rawSub,
+        discount: discAmt,
+        subtotal: netSub,
+        grandTotal: grandTotal,
+        note: newNote,
+        editedByAdminAt: new Date().toISOString()
+      }).then(() => {
+        if (voiceAlertText) broadcastAndSpeakKitchenAlert(voiceAlertText);
+      });
     }
 
     window.undoLastVoiceOrderAction = function() {
@@ -6539,22 +7620,20 @@ window.openInstallGuideModal = function() {
       showGlobalVoiceHud('↩️ Đã hoàn tác lệnh giọng nói vừa rồi!');
     };
 
-    // HAM XU LY GIONG NOI TOAN TRINH V4 (ORDER • HUY/DOI MON • CHUYEN/GOP/TACH BAN • TU SUA CHU)
     window.parseAndExecuteVoiceOrder = function(rawTranscript) {
       if (!rawTranscript || !rawTranscript.trim()) return;
       lastVoiceCartSnapshot = JSON.parse(JSON.stringify(posCart));
 
       const repairedSpeech = smartRepairSttNumbersAndHomophones(rawTranscript);
-      const noAcc = normNoAccentV29(repairedSpeech);
+      const noAcc = normNoAccentV30(repairedSpeech);
 
-      // 1. Lenh Xoa Gio Hang
       if (/\b(xoa gio hang|xoa het mon|huy gio hang)\b/.test(noAcc)) {
         posCart = {};
         renderPosCartUI();
         return showGlobalVoiceHud('🗑️ Đã làm trống giỏ hàng theo lệnh giọng nói!');
       }
 
-      // 2. Lenh Chuyen Ban / Doi Ban ("Chuyển bàn 2 sang bàn 5")
+      // 1. Chuyển bàn / Đổi bàn bằng giọng nói
       const moveMatch = noAcc.match(/\b(?:chuyen|doi)\s+(?:don\s+)?(ban\s*\d+|mang\s*ve)\s+(?:sang|qua|thanh|den|vao)\s+(ban\s*\d+|mang\s*ve)\b/);
       if (moveMatch) {
         const srcTable = resolveTableNameFromVoice(moveMatch[1]);
@@ -6563,12 +7642,12 @@ window.openInstallGuideModal = function() {
         if (!srcActive) return showGlobalVoiceHud(`⚠️ Không tìm thấy đơn đang mở tại <b>${srcTable}</b>!`, true);
         update(ref(db, `orders/${srcActive.id}`), { table: tgtTable, customerName: tgtTable }).then(() => {
           broadcastAndSpeakKitchenAlert(`Chú ý bếp! Đã chuyển đơn từ ${srcTable} sang ${tgtTable}.`);
-          showGlobalVoiceHud(`➡️ <b>Đã chuyển bàn:</b> <b>${srcTable}</b> ➡️ <b>${tgtTable}</b>!`);
+          showGlobalVoiceHud(`➡️ <b>Đã chuyển bàn bằng giọng nói:</b> <b>${srcTable}</b> ➡️ <b>${tgtTable}</b>!`);
         });
         return;
       }
 
-      // 3. Lenh Gop Ban ("Gộp bàn 2 vào bàn 4")
+      // 2. Gộp bàn bằng giọng nói
       const mergeMatch = noAcc.match(/\b(?:gop|ghep|nhap)\s+(?:don\s+)?(ban\s*\d+|mang\s*ve)\s+(?:vao|voi|sang|qua)\s+(ban\s*\d+|mang\s*ve)\b/);
       if (mergeMatch) {
         const srcTable = resolveTableNameFromVoice(mergeMatch[1]);
@@ -6579,11 +7658,89 @@ window.openInstallGuideModal = function() {
         const tgtSel = document.getElementById('tmTargetTableSelect');
         if (tgtSel) tgtSel.value = tgtTable;
         window.executeTableTransferMergeOrSplit();
-        showGlobalVoiceHud(`🔗 <b>Đã gộp bàn:</b> Gộp <b>${srcTable}</b> vào <b>${tgtTable}</b>!`);
+        showGlobalVoiceHud(`🔗 <b>Đã gộp bàn bằng giọng nói:</b> Gộp <b>${srcTable}</b> vào <b>${tgtTable}</b>!`);
         return;
       }
 
-      // 4. Nhan dien So Ban ở đầu câu ("Bàn 3 lấy...")
+      // 3. Tách bàn bằng giọng nói
+      if (/\btach\b/.test(noAcc) && /\b(sang|qua|den|vao)\s+(ban\s*\d+|mang\s*ve)\b/.test(noAcc)) {
+        const tgtMatch = noAcc.match(/\b(?:sang|qua|den|vao)\s+(ban\s*\d+|mang\s*ve)\b/);
+        const tgtTable = tgtMatch ? resolveTableNameFromVoice(tgtMatch[1]) : null;
+        const beforeTgtStr = repairedSpeech.split(/\b(?:sang|qua|đến|vào|den|vao)\b/i)[0] || repairedSpeech;
+        const srcTblMatch = normNoAccentV30(beforeTgtStr).match(/\b(ban\s*\d+|mang\s*ve)\b/);
+        const srcTable = srcTblMatch ? resolveTableNameFromVoice(srcTblMatch[1]) : selectedTable;
+        const srcActive = findActiveOrderByTableName(srcTable);
+
+        if (!srcActive || !tgtTable) return showGlobalVoiceHud(`⚠️ Không tìm thấy đơn đang mở tại <b>${srcTable || 'bàn nguồn'}</b>!`, true);
+        const cleanDishSeg = beforeTgtStr.replace(/\b(?:bàn|ban)\s*(?:số|so)?\s*\d+\b/gi, ' ');
+        const { results: dishesToSplit } = smartExtractAndSelfCorrectDishes(cleanDishSeg);
+        if (dishesToSplit.length === 0) return showGlobalVoiceHud(`⚠️ Chưa nghe rõ tên món cần tách!`, true);
+
+        const remainingItems = JSON.parse(JSON.stringify(srcActive.order.items || {}));
+        const splitOutItems = {}, splitSummary = [];
+        dishesToSplit.forEach(({ item, qty }) => {
+          const cleanK = safeItemKey(item.name);
+          const existingKey = Object.keys(remainingItems).find(k => safeItemKey(k) === cleanK || normNoAccentV30(remainingItems[k].name) === normNoAccentV30(item.name));
+          if (existingKey && remainingItems[existingKey]) {
+            const curQ = Number(remainingItems[existingKey].qty) || 1;
+            const takeQ = Math.min(curQ, qty);
+            splitOutItems[cleanK] = { name: remainingItems[existingKey].name, price: Number(remainingItems[existingKey].price) || item.price, qty: takeQ, cat: remainingItems[existingKey].cat || item.cat };
+            if (curQ - takeQ <= 0) delete remainingItems[existingKey];
+            else remainingItems[existingKey].qty = curQ - takeQ;
+            splitSummary.push(`${takeQ}x ${item.name}`);
+          }
+        });
+        if (splitSummary.length === 0) return showGlobalVoiceHud(`⚠️ Món đọc không có trong đơn của <b>${srcTable}</b>!`, true);
+
+        let splitRawSub = 0;
+        for (let k in splitOutItems) splitRawSub += splitOutItems[k].price * splitOutItems[k].qty;
+        recalcAndSaveOrderItemsToFirebase(srcActive.id, srcActive.order, remainingItems, `Tách ${splitSummary.join(', ')} sang ${tgtTable}`, `Chú ý bếp! Đã tách ${splitSummary.join(', ')} từ ${srcTable} sang ${tgtTable}.`);
+        push(ref(db, 'orders'), {
+          orderType: 'dine_in', dailySeq: getNextDailyOrderSequenceNumber(), table: tgtTable,
+          customerName: `${tgtTable} (Tách từ ${srcTable})`, phone: 'Tại quán', address: '280 Trần Hưng Đạo',
+          note: `[Đơn tách bằng giọng nói từ ${srcTable}]`, items: splitOutItems, rawSubtotal: splitRawSub,
+          discountPercent: 0, discount: 0, subtotal: splitRawSub, shippingFee: 0, grandTotal: splitRawSub,
+          paymentMethod: 'COD', paymentStatus: 'Thu tại bàn', status: srcActive.order.status || 'Đang chế biến',
+          createdAt: new Date().toISOString(), archived: false
+        });
+        return showGlobalVoiceHud(`✂️ <b>Đã tách bàn bằng giọng nói:</b> Tách <b>${splitSummary.join(', ')}</b> sang <b>${tgtTable}</b>!`);
+      }
+
+      // 4. Đổi món bằng giọng nói ("Bàn 3 đổi 1 bún thái sang 1 mì quảng")
+      if (/\bdoi\b/.test(noAcc) && /\b(sang|thanh|qua|lay)\b/.test(noAcc) && !/\bdoi\s+ban\b/.test(noAcc)) {
+        const tblMatch = noAcc.match(/\b(ban\s*\d+|mang\s*ve)\b/);
+        const targetTable = tblMatch ? resolveTableNameFromVoice(tblMatch[1]) : selectedTable;
+        const cleanWithoutTable = repairedSpeech.replace(/\b(?:bàn|ban)\s*(?:số|so)?\s*\d+\b/gi, ' ');
+        const parts = cleanWithoutTable.split(/\b(?:sang|thành|thanh|qua|lấy|lay)\b/i);
+        if (parts.length >= 2) {
+          const oldDishes = smartExtractAndSelfCorrectDishes(parts[0]).results;
+          const newDishes = smartExtractAndSelfCorrectDishes(parts.slice(1).join(' ')).results;
+          const activeOrd = findActiveOrderByTableName(targetTable);
+          if (activeOrd && oldDishes.length > 0 && newDishes.length > 0) {
+            const itemsCopy = JSON.parse(JSON.stringify(activeOrd.order.items || {}));
+            const removedNames = [], addedNames = [];
+            oldDishes.forEach(({ item, qty }) => {
+              const kFound = Object.keys(itemsCopy).find(k => normNoAccentV30(itemsCopy[k].name) === normNoAccentV30(item.name));
+              if (kFound) {
+                const curQ = Number(itemsCopy[kFound].qty) || 1;
+                if (curQ <= qty) delete itemsCopy[kFound];
+                else itemsCopy[kFound].qty = curQ - qty;
+                removedNames.push(`${Math.min(curQ, qty)} ${item.name}`);
+              }
+            });
+            newDishes.forEach(({ item, qty }) => {
+              const cleanK = safeItemKey(item.name);
+              if (itemsCopy[cleanK]) itemsCopy[cleanK].qty += qty;
+              else itemsCopy[cleanK] = { name: item.name, price: item.price, qty: qty, cat: item.cat };
+              addedNames.push(`${qty} ${item.name}`);
+            });
+            recalcAndSaveOrderItemsToFirebase(activeOrd.id, activeOrd.order, itemsCopy, `Đổi món: -${removedNames.join(', ')} +${addedNames.join(', ')}`, `Chú ý bếp! ${targetTable} vừa đổi món: hủy ${removedNames.join(', ')}, đổi sang ${addedNames.join(', ')}.`);
+            return showGlobalVoiceHud(`🔄 <b>Đã đổi món tại ${targetTable}:</b> Hủy <b>${removedNames.join(', ')}</b> ➡️ Thêm <b>${addedNames.join(', ')}</b>!`);
+          }
+        }
+      }
+
+      // 5. Nhận diện Số Bàn ở đầu câu
       let detectedTable = null;
       let speechWithoutTable = repairedSpeech;
       if (/\b(mang ve|dem ve)\b/.test(noAcc)) {
@@ -6599,16 +7756,14 @@ window.openInstallGuideModal = function() {
 
       if (detectedTable) {
         selectedTable = detectedTable;
-        if (document.getElementById('currentSelectedTable')) {
-          document.getElementById('currentSelectedTable').innerText = detectedTable;
-        }
+        if (document.getElementById('currentSelectedTable')) document.getElementById('currentSelectedTable').innerText = detectedTable;
         document.querySelectorAll('.btn-table-pill').forEach(b => {
           if (b.innerText.trim() === detectedTable) b.classList.add('active');
           else b.classList.remove('active');
         });
       }
 
-      // 5. Lenh Huy Mon / Bot Mon ("Bàn 3 hủy 1 bún thái")
+      // 6. Hủy món / Bớt món bằng giọng nói
       if (/\b(huy|bo|xoa|bot|giam)\b/.test(noAcc)) {
         const targetT = detectedTable || selectedTable;
         const { results } = smartExtractAndSelfCorrectDishes(speechWithoutTable);
@@ -6617,7 +7772,7 @@ window.openInstallGuideModal = function() {
           const itemsCopy = JSON.parse(JSON.stringify(activeOrd.order.items || {}));
           const removedList = [];
           results.forEach(({ item, qty }) => {
-            const kFound = Object.keys(itemsCopy).find(k => normNoAccentV29(itemsCopy[k].name) === normNoAccentV29(item.name));
+            const kFound = Object.keys(itemsCopy).find(k => normNoAccentV30(itemsCopy[k].name) === normNoAccentV30(item.name));
             if (kFound) {
               const curQ = Number(itemsCopy[kFound].qty) || 1;
               const remQ = Math.min(curQ, qty);
@@ -6627,16 +7782,37 @@ window.openInstallGuideModal = function() {
             }
           });
           if (removedList.length > 0) {
-            let newSub = 0;
-            for (let k in itemsCopy) newSub += itemsCopy[k].price * itemsCopy[k].qty;
-            update(ref(db, `orders/${activeOrd.id}`), { items: itemsCopy, rawSubtotal: newSub, subtotal: newSub, grandTotal: newSub });
-            broadcastAndSpeakKitchenAlert(`Chú ý bếp! ${targetT} vừa báo hủy ${removedList.join(', ')}.`);
+            recalcAndSaveOrderItemsToFirebase(activeOrd.id, activeOrd.order, itemsCopy, `Hủy món: -${removedList.join(', ')}`, `Chú ý bếp! ${targetT} vừa báo hủy ${removedList.join(', ')}.`);
             return showGlobalVoiceHud(`🗑️ <b>Đã hủy món tại ${targetT}:</b> -${removedList.join(', ')}`);
           }
         }
       }
 
-      // 6. Nhan dien Ghi chu Bep
+      // 7. Chiết khấu hoặc In bill bằng giọng nói
+      const discMatch = noAcc.match(/\b(?:chiet khau|giam gia|uu dai)\s*(\d+)\s*(?:phan tram|%)/);
+      if (discMatch) {
+        const pct = parseInt(discMatch[1]) || 0;
+        const targetT = detectedTable || selectedTable;
+        const activeOrd = findActiveOrderByTableName(targetT);
+        if (activeOrd) {
+          window.applyQuickCardDiscount(activeOrd.id, pct);
+          return showGlobalVoiceHud(`🏷️ <b>Đã áp dụng chiết khấu ${pct}%</b> lên hóa đơn <b>${targetT}</b>!`);
+        } else {
+          window.setV19PosDiscount(pct);
+          return showGlobalVoiceHud(`🏷️ <b>Đã chọn chiết khấu ${pct}%</b> cho giỏ hàng hiện tại!`);
+        }
+      }
+
+      if (/\b(in bill|in hoa don|tinh tien)\b/.test(noAcc)) {
+        const targetT = detectedTable || selectedTable;
+        const activeOrd = findActiveOrderByTableName(targetT);
+        if (activeOrd) {
+          window.printCustomerBill(activeOrd.id);
+          return showGlobalVoiceHud(`🧾 Đang mở lệnh <b>In Bill</b> cho <b>${targetT}</b>!`);
+        }
+      }
+
+      // 8. Bắt ghi chú bếp & Nhặt món (kèm AI Tự Tư Duy Sửa Chữ)
       const noteRules = [
         [/không hành tỏi/gi, 'Không hành tỏi'], [/không hành/gi, 'Không hành'], [/ít hành/gi, 'Ít hành'],
         [/không cay/gi, 'Không cay'], [/ít cay/gi, 'Ít cay'], [/cay nhiều/gi, 'Cay nhiều'],
@@ -6650,7 +7826,6 @@ window.openInstallGuideModal = function() {
         }
       });
 
-      // 7. Chay Bo Nao AI Tu Tu Duy Sua Chu & Nhat Mon
       const { results, correctionsLog } = smartExtractAndSelfCorrectDishes(speechWithoutTable);
       const addedSummary = [];
       results.forEach(({ item, qty }) => {
@@ -6672,7 +7847,7 @@ window.openInstallGuideModal = function() {
       if (addedSummary.length > 0 || detectedTable || notesFound.length > 0) {
         playHardwareBeep();
         const aiSelfThinkHtml = correctionsLog.length > 0
-          ? `<br><span style="color:#b45309; font-size:0.78rem;">🧠 <b>AI Tự Tư Duy Sửa Chữ:</b> ${correctionsLog.join(' | ')}</span>`
+          ? `<br><span style="color:#fde047; font-size:0.78rem;">🧠 <b>AI Tự Tư Duy Sửa Chữ:</b> ${correctionsLog.join(' | ')}</span>`
           : '';
         showGlobalVoiceHud(`
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
@@ -6758,7 +7933,6 @@ window.openInstallGuideModal = function() {
         let interimTranscript = '';
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           const res = event.results[i];
-          // Duyệt cả 5 phương án nghe của Google, chọn phương án khớp được nhiều món ăn nhất!
           let bestTranscript = res[0].transcript;
           let bestDishCount = -1;
           for (let a = 0; a < res.length; a++) {
@@ -6798,82 +7972,6 @@ window.openInstallGuideModal = function() {
       };
 
       try { speechRecognizer.start(); } catch (_) {}
-    };
-
-    // =========================================================================
-    // CAC HAM CUA TRAM 11 PHONG BAN AO & 5 SIEU KY NANG (PROMPT MASTER, SCQA, STOP SLOP)
-    // =========================================================================
-    const AI_SLOP_BLACKLIST = [
-      "trong thời đại số", "không thể phủ nhận", "khám phá ngay", "bùng nổ",
-      "chinh phục", "nâng tầm trải nghiệm", "một cách toàn diện", "hơn thế nữa",
-      "tóm lại", "không chỉ là", "mà còn là", "đánh thức mọi giác quan"
-    ];
-
-    window.checkAiSlopScoreInText = function() {
-      const raw = (document.getElementById('aiStudioInputText')?.value || '').trim();
-      const outBox = document.getElementById('aiStudioOutputBox');
-      const badge = document.getElementById('aiDetectionBadge');
-      if (!raw) return alert("Vui lòng nhập văn bản vào ô bên trái để kiểm tra!");
-      const found = AI_SLOP_BLACKLIST.filter(w => raw.toLowerCase().includes(w));
-      const emDash = (raw.match(/—/g) || []).length;
-      const score = Math.min(100, found.length * 20 + emDash * 15);
-      if (badge) { badge.style.background = score === 0 ? '#16a34a' : '#dc2626'; badge.innerText = `Mùi AI: ${score}%`; }
-      if (outBox) outBox.innerText = score === 0 ? `✅ ĐẠT CHUẨN STOP SLOP (0% DẤU VẾT AI)!` : `⚠️ Phát hiện từ ngữ AI: ${found.join(', ')} (Dấu gạch ngang dài: ${emDash}). Hãy bấm [⚡ KÍCH HOẠT SKILL NGAY] để làm sạch!`;
-    };
-
-    window.executeAiStudioSkillGenerator = function() {
-      const skill = document.getElementById('aiStudioSkillSelect')?.value || 'PROMPT_MASTER';
-      const rawInput = (document.getElementById('aiStudioInputText')?.value || '').trim() || 'Bún Thái Chay 35.000đ và Chà bông nấm hương 120.000đ';
-      const outBox = document.getElementById('aiStudioOutputBox');
-      let res = '';
-
-      if (skill === 'PROMPT_MASTER') {
-        res = [
-          `🪄 [KẾT QUẢ TỪ SKILL PROMPT MASTER & THƯ VIỆN 10.000 PROMPTS.CHAT]:`,
-          `• 1. VAI TRÒ: Giám đốc Marketing F&B 10 năm kinh nghiệm trong ngành ẩm thực chay thực dưỡng tại Việt Nam.`,
-          `• 2. BỐI CẢNH: Nhà hàng Hy Chay & Đồ uống BAL'S HOUSE (280 Trần Hưng Đạo, P. Phan Thiết, Tỉnh Lâm Đồng - thuộc Công ty TNHH TMDV & SX Bảo Anh Lâm). Sản phẩm trọng tâm: ${rawInput}.`,
-          `• 3. NHIỆM VỤ: Soạn 3 mẫu nội dung chuyển đổi cao (1 bài đăng Facebook địa phương, 1 kịch bản Reels 25 giây, 1 tin nhắn Zalo CSKH).`,
-          `• 4. ĐỊNH DẠNG: Ngắn gọn dưới 100 chữ mỗi mẫu, đi thẳng vào nguyên liệu tươi, giá bán và ưu đãi Freeship 5km đơn từ 200k.`,
-          `• 5. RÀNG BUỘC (STOP SLOP): Cấm dùng từ sáo rỗng ("trong thời đại số", "không chỉ... mà còn"), cấm dùng dấu gạch ngang dài (—), giọng văn đời thường 100%.`
-        ].join('\n');
-      } else if (skill === 'SCQA_DECK') {
-        res = [
-          `📊 [CẤU TRÚC BÁO CÁO & SLIDE THUYẾT TRÌNH CHUẨN KHUNG PHÂN TÍCH SCQA]:`,
-          `• Slide 1 (Cover): Báo cáo Chiến lược Tăng trưởng Đa kênh — ${rawInput} (Công ty Bảo Anh Lâm).`,
-          `• Slide 2 (Situation - Bối cảnh): Nhu cầu ăn chay thanh tịnh và thực phẩm chay đóng gói tiện lợi tăng mạnh tại Phan Thiết & trên Shopee/TikTok.`,
-          `• Slide 3 (Complication - Vấn đề): Khách hàng bận rộn ngại chờ lâu; các sản phẩm chay công nghiệp trên thị trường nhiều phụ gia.`,
-          `• Slide 4 (Question - Câu hỏi trọng tâm): Làm thế nào để đưa món chay tươi nhà làm đến bàn ăn của khách trong 25 phút với chi phí ship thấp nhất?`,
-          `• Slide 5-10 (Answer - Giải pháp Thực thi): Hệ thống Web POS đặt món hẹn giờ trước 30p + Trợ giá Ship 30% + Chuỗi sản phẩm đóng gói chuẩn VSATTP.`
-        ].join('\n');
-      } else if (skill === 'LAST_30_DAYS') {
-        res = [
-          `🔥 [BÁO CÁO XU HƯỚNG 30 NGÀY GẦN NHẤT - SKILL LAST30DAYS]:`,
-          `1. Trend Video F&B đang lên: Góc quay POV "Một buổi sáng lúc 06:30 tại bếp chay" kết hợp tiếng động thực tế (ASMR tiếng thái nấm, tiếng phi thơm sả ớt, tiếng rót Cafe Muối).`,
-          `2. Thuyết minh bằng VoiceStudio: Dùng giọng thật đã clone của chủ quán (15s mẫu trên Google Antigravity) kể chuyện nguyên liệu ngắn gọn trong 20 giây đầu.`,
-          `3. Combo hút khách nhất: Combo Bữa Trưa Thanh Tịnh (1 Món Nước/Cơm + 1 Ly Nước Ép/Trà Trái Cây BAL'S HOUSE) giảm 10% khi đặt hẹn giờ trước 10:30 sáng.`
-        ].join('\n');
-      } else {
-        res = [
-          `✍️ [VĂN BẢN ĐÃ QUA BỘ LỌC STOP SLOP - GIỐNG NGƯỜI THẬT 99.99%]:`,
-          `Trưa nay ở Phan Thiết chưa biết ăn gì cho nhẹ bụng thì ghé 280 Trần Hưng Đạo thưởng thức ${rawInput} nha cô chú anh chị.`,
-          `Món ăn bên bếp Hy Chay nấu mới mỗi sáng từ rau củ nấm tươi ngọt tự nhiên. Cô chú anh chị đặt giao tận nơi cứ bấm thẳng trên web hychayfood.vercel.app hoặc gọi 0903.242.400, đơn từ 100k quán trợ giá 30% phí ship, từ 200k miễn phí ship 5km luôn!`
-        ].join('\n');
-      }
-      if (outBox) outBox.innerText = res;
-    };
-
-    window.runVercelUiAndDataHealthAudit = function() {
-      const outBox = document.getElementById('aiStudioOutputBox');
-      const cnt = getUnifiedMenuList().length;
-      if (outBox) {
-        outBox.innerText = [
-          `👁️ [KIỂM THỬ TỰ ĐỘNG UIX PRO MAX & VISUAL QA - BÁO CÁO HỆ THỐNG]:`,
-          `1. Thực đơn Hybrid 122 món ALL_MENU_DATA: Đang hoạt động ${cnt} món -> PASS ✅`,
-          `2. Bộ não Voice V4 (Tự tách số ghép 14/24/34/145 & Tự sửa chữ sai): Đang bật -> PASS ✅`,
-          `3. Tab Điều Khiển PC & AI Studio: Hiển thị cố định trên thanh Menu chính -> PASS ✅`,
-          `4. Trạm Hóa đơn đầu vào (Đã gỡ bỏ ô Gmail 2 nick theo yêu cầu): Gọn sạch 100% -> PASS ✅`
-        ].join('\n');
-      }
     };
   </script>
 </body>
