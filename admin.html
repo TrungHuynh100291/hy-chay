@@ -275,6 +275,10 @@
     .btn-big-mode-toggle.active { background: #16a34a; color: #ffffff; border-color: #86efac; }
     .floating-voice-fab { position: fixed; bottom: 16px; left: 14px; z-index: 9500; background: linear-gradient(135deg, #dc2626, #ea580c); color: #fff; border: 2.5px solid #ffd800; border-radius: 50px; padding: 10px 16px; font-weight: 900; font-size: 0.86rem; box-shadow: 0 8px 25px rgba(220,38,38,0.45); cursor: pointer; display: flex; align-items: center; gap: 6px; }
     .floating-voice-fab.listening { background: #16a34a; animation: alert-card 0.7s infinite alternate; }
+      /* MODULE 32: CONG TAC DONG / MO QUAN KHAN CAP TREN TOPBAR */
+    .btn-store-status-toggle { background: #16a34a; color: #ffffff; border: 2px solid #86efac; padding: 6px 14px; border-radius: 20px; font-weight: 900; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 3px 10px rgba(22, 163, 74, 0.25); transition: 0.2s; }
+    .btn-store-status-toggle.closed { background: #dc2626; color: #ffffff; border-color: #fde047; animation: alert-card 0.8s infinite alternate; }
+    .store-closed-admin-banner { display: none; background: linear-gradient(90deg, #991b1b, #dc2626); color: #ffffff; padding: 10px 18px; font-weight: 800; font-size: 0.9rem; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; border-bottom: 3px solid #ffd800; }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -358,10 +362,23 @@
         <button id="btnPipToggle" class="btn-pip" onclick="togglePiPWindow()" title="Bật cửa sổ nổi thu nhỏ đè lên các ứng dụng khác như Grab">📌 Cửa Sổ Nổi (Pop-up)</button>
         <button id="btnSoundTrigger" class="btn-sound" onclick="toggleAudioEngine()"><span>🔔</span><span id="soundText">Đang Bật Chạy Ngầm</span></button>
         <button class="btn-test-voice" onclick="testVietnameseVoice()" title="Kiểm tra giọng đọc Tiếng Việt đồng bộ">🔊 Test Giọng Việt</button>
+        <button type="button" id="btnStoreMasterSwitch" class="btn-store-status-toggle" onclick="openStoreStatusSwitchModal()" title="Bật/Tắt nhận đơn Online trên App Khách Hàng">
+          <span id="storeSwitchDot">🟢</span>
+          <span id="storeSwitchLabel">ĐANG MỞ BÁN ONLINE</span>
+        </button>
         <div id="liveClock" class="live-clock">--:--:--</div>
         <button class="btn-logout" onclick="logoutAdmin()">🚪 Thoát</button>
       </div>
     </header>
+    <!-- DẢI BĂNG CẢNH BÁO KHI QUÁN ĐANG BẬT CHẾ ĐỘ TẠM NGHỈ (KHÓA ĐẶT ĐƠN ONLINE) -->
+    <div id="adminStoreClosedBanner" class="store-closed-admin-banner no-print">
+      <div>
+        ⛔ <b>CHẾ ĐỘ TẠM NGHỈ ĐANG BẬT:</b> App đặt món Online của khách hàng đang được <b>KHÓA</b> (<span id="adminClosedReasonText">Quán đang tạm nghỉ bận việc</span>). Khách không thể gửi đơn mới!
+      </div>
+      <button type="button" onclick="quickReopenStoreOnline()" style="background:#16a34a; color:#fff; border:2px solid #ffd800; padding:6px 14px; border-radius:8px; font-weight:900; font-size:0.82rem; cursor:pointer; white-space:nowrap;">
+        🟢 MỞ BÁN LẠI NGAY
+      </button>
+    </div>
 
     <main class="dashboard-container no-print">
       <section class="stats-grid">
@@ -1153,7 +1170,12 @@
               <h3 style="color:var(--primary);">🛵 Quản Lý Đội Tài Xế (Đang Chạy / Đã Nghỉ & Online / Offline)</h3>
               <p style="font-size:0.84rem; color:#64748b;">Khi bắn đơn lên Zalo, hệ thống chỉ xếp lượt ưu tiên 20 giây cho các bác tài <b>Đang Chạy</b> và đang bật <b>🟢 ONLINE</b> (ưu tiên người đang rảnh và ít đơn hơn lên trước).</p>
             </div>
-            <span style="background:#dcfce7; color:#166534; padding:6px 14px; border-radius:20px; font-weight:800; font-size:0.85rem; border:1px solid #86efac;" id="onlineShipperCount">🟢 Đang Online: 0 bác tài</span>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              <button type="button" onclick="forceAllActiveShippersOnlineAndRing()" style="background:linear-gradient(135deg,#dc2626,#ea580c); color:#fff; border:2px solid #ffd800; padding:7px 14px; border-radius:20px; font-weight:900; font-size:0.8rem; cursor:pointer; box-shadow:0 4px 12px rgba(220,38,38,0.3);">
+                ⚡ CƯỠNG CHẾ ONLINE &amp; RUNG CHUÔNG TOÀN ĐỘI
+              </button>
+              <span style="background:#dcfce7; color:#166534; padding:6px 14px; border-radius:20px; font-weight:800; font-size:0.85rem; border:1px solid #86efac;" id="onlineShipperCount">🟢 Đang Online: 0 bác tài</span>
+            </div>
           </div>
 
           <div style="display:flex; gap:10px; margin-bottom: 20px; flex-wrap:wrap; background:#f8fafc; padding:12px; border-radius:10px; border:1px solid var(--border);">
@@ -1359,6 +1381,48 @@
     <button type="button" id="floatingVoiceFab" class="floating-voice-fab no-print" onclick="quickOpenAndStartVoiceOrder()">
     <span>&#127908;</span> <span id="floatingVoiceFabText">&#272;&#7885;c Order</span>
   </button>
+    <!-- MODAL CÔNG TẮC ĐÓNG / MỞ QUÁN KHẨN CẤP (MODULE 32) -->
+  <div id="storeStatusModal" class="cancel-modal-overlay" style="z-index: 15000;">
+    <div class="cancel-modal-box" style="max-width: 500px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:10px; margin-bottom:14px;">
+        <h3 style="color:var(--primary); font-size:1.12rem; margin:0;">🏪 Công Tắc Đóng / Mở Nhận Đơn Online</h3>
+        <button type="button" onclick="closeStoreStatusSwitchModal()" style="background:#ef4444; color:#fff; border:none; padding:5px 10px; border-radius:6px; font-weight:800; cursor:pointer;">✖ Đóng</button>
+      </div>
+
+      <p style="font-size:0.84rem; color:#475569; margin-bottom:12px;">
+        Khi quán có việc bận đột xuất, nghỉ sớm hoặc quá tải, hãy gạt sang <b>🔴 TẠM NGƯNG NHẬN ĐƠN ONLINE</b>. App Khách hàng sẽ tự động khóa nút đặt món và hiển thị thông báo lịch sự ngay lập tức!
+      </p>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">
+        <button type="button" id="btnModalStoreOpen" onclick="selectStoreModalMode(false)" style="padding:14px 10px; border-radius:12px; border:2px solid #16a34a; background:#dcfce7; color:#166534; font-weight:900; font-size:0.9rem; cursor:pointer;">
+          🟢 MỞ BÁN BÌNH THƯỜNG
+        </button>
+        <button type="button" id="btnModalStoreClose" onclick="selectStoreModalMode(true)" style="padding:14px 10px; border-radius:12px; border:2px solid #cbd5e1; background:#f8fafc; color:#b91c1c; font-weight:900; font-size:0.9rem; cursor:pointer;">
+          🔴 TẠM NGHỈ / KHÓA APP
+        </button>
+      </div>
+
+      <div id="storeCloseConfigSection" style="display:none; background:#fff1f2; border:1.5px solid #fecdd3; border-radius:12px; padding:12px; margin-bottom:14px;">
+        <label style="display:block; font-weight:800; font-size:0.82rem; color:#991b1b; margin-bottom:6px;">1. Chọn nhanh lý do thông báo trên App Khách:</label>
+        <select id="storeClosePresetSelect" onchange="document.getElementById('storeCloseReasonInput').value = this.value" style="width:100%; padding:9px; border:1px solid #f43f5e; border-radius:8px; font-weight:700; font-size:0.84rem; margin-bottom:10px; background:#fff;">
+          <option value="Quán đang tạm nghỉ vì có việc bận đột xuất. Hẹn gặp lại Quý khách vào ca sau nhé!">🏠 Quán có việc bận đột xuất (Tạm nghỉ hôm nay / ca này)</option>
+          <option value="Hiện bếp Hy Chay đang quá tải đơn giờ cao điểm nên tạm khóa đặt Online ít phút để phục vụ chu đáo hơn!">🔥 Bếp đang quá tải đơn giờ cao điểm (Tạm ngưng ít phút)</option>
+          <option value="Hôm nay quán đã hết nguyên liệu tươi sớm hơn dự kiến. Cảm ơn Quý khách và hẹn gặp lại sáng mai lúc 06:30!">🥗 Quán đã bán hết nguyên liệu sớm hôm nay</option>
+          <option value="Khu vực 280 Trần Hưng Đạo đang tạm cúp điện/nước đột xuất. Mong Quý khách thông cảm!">⚡ Khu vực quán đang tạm cúp điện / sửa đường</option>
+        </select>
+
+        <label style="display:block; font-weight:800; font-size:0.82rem; color:#991b1b; margin-bottom:4px;">2. Nội dung hiển thị cho khách đọc (Có thể sửa):</label>
+        <textarea id="storeCloseReasonInput" rows="2" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:8px; font-weight:700; font-size:0.85rem; margin-bottom:8px;">Quán đang tạm nghỉ vì có việc bận đột xuất. Hẹn gặp lại Quý khách vào ca sau nhé!</textarea>
+
+        <label style="display:block; font-weight:800; font-size:0.82rem; color:#991b1b; margin-bottom:4px;">3. Dự kiến mở bán lại lúc (Tùy chọn):</label>
+        <input type="text" id="storeReopenTimeInput" placeholder="VD: 16:00 chiều nay hoặc 06:30 sáng mai..." style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:8px; font-weight:700; font-size:0.85rem;">
+      </div>
+
+      <button type="button" onclick="saveStoreMasterStatus()" style="width:100%; padding:13px; background:var(--primary); color:#fff; border:none; border-radius:10px; font-weight:900; font-size:0.98rem; cursor:pointer;">
+        💾 LƯU &amp; ĐỒNG BỘ LÊN APP KHÁCH HÀNG NGAY
+      </button>
+    </div>
+  </div>
   <div id="printArea"></div>
 
   <script type="module">
@@ -5760,10 +5824,15 @@ window.openInstallGuideModal = function() {
     };
     // =========================================================
         // =========================================================
-    // 19. CHIẾT KHẤU ƯU ĐÃI (%) ĐƠN HÀNG & LOA BÁO BẾP KHI SỬA/HỦY MÓN
+        // =========================================================
+    // 19 -> 32. MODULE TỔNG HỢP: CHIẾT KHẤU, CHUYỂN/GỘP/TÁCH BÀN,
+    // ĐẶT SHIP HỘ, KẾ TOÁN GRAB/SHOPEE, VOICE AI V5, CÒI SHIPPER
+    // & CÔNG TẮC ĐÓNG/MỞ QUÁN KHẨN CẤP (MASTER STORE SWITCH)
     // =========================================================
     let v19_posDiscountPercent = 0;
     let v19_editDiscountPercent = 0;
+    let storeStatusCache = { isManualClosed: false, reason: '', reopenText: '' };
+    let selectedModalClosedMode = false;
 
     function broadcastAndSpeakKitchenAlert(text) {
       set(ref(db, 'voice_sync/latest'), {
@@ -5777,7 +5846,97 @@ window.openInstallGuideModal = function() {
       if (typeof speakAlert === 'function') speakAlert(text, false);
     }
 
-    // PHÁT TÍN HIỆU CƯỠNG CHẾ ĐỔ CHUÔNG TỚI MỌI ĐIỆN THOẠI BÁC TÀI ĐANG ONLINE
+    // --- MODULE 32: CÔNG TẮC ĐÓNG / MỞ QUÁN KHẨN CẤP ---
+    onValue(ref(db, 'restaurant_config/store_status'), (snap) => {
+      storeStatusCache = snap.val() || { isManualClosed: false, reason: '', reopenText: '' };
+      const btn = document.getElementById('btnStoreMasterSwitch');
+      const dot = document.getElementById('storeSwitchDot');
+      const lbl = document.getElementById('storeSwitchLabel');
+      const banner = document.getElementById('adminStoreClosedBanner');
+      const rTxt = document.getElementById('adminClosedReasonText');
+
+      if (storeStatusCache.isManualClosed) {
+        if (btn) btn.classList.add('closed');
+        if (dot) dot.innerText = '🔴';
+        if (lbl) lbl.innerText = 'ĐANG TẠM NGHỈ (KHÓA APP)';
+        if (banner) banner.style.display = 'flex';
+        if (rTxt) rTxt.innerText = storeStatusCache.reason || 'Quán đang tạm nghỉ bận việc';
+      } else {
+        if (btn) btn.classList.remove('closed');
+        if (dot) dot.innerText = '🟢';
+        if (lbl) lbl.innerText = 'ĐANG MỞ BÁN ONLINE';
+        if (banner) banner.style.display = 'none';
+      }
+    });
+
+    window.openStoreStatusSwitchModal = function() {
+      selectedModalClosedMode = !!storeStatusCache.isManualClosed;
+      window.selectStoreModalMode(selectedModalClosedMode);
+      if (storeStatusCache.reason && document.getElementById('storeCloseReasonInput')) {
+        document.getElementById('storeCloseReasonInput').value = storeStatusCache.reason;
+      }
+      if (document.getElementById('storeReopenTimeInput')) {
+        document.getElementById('storeReopenTimeInput').value = storeStatusCache.reopenText || '';
+      }
+      document.getElementById('storeStatusModal').classList.add('active');
+    };
+
+    window.closeStoreStatusSwitchModal = function() {
+      document.getElementById('storeStatusModal').classList.remove('active');
+    };
+
+    window.selectStoreModalMode = function(isClosed) {
+      selectedModalClosedMode = isClosed;
+      const btnOpen = document.getElementById('btnModalStoreOpen');
+      const btnClose = document.getElementById('btnModalStoreClose');
+      const sec = document.getElementById('storeCloseConfigSection');
+      if (isClosed) {
+        if (btnClose) { btnClose.style.background = '#dc2626'; btnClose.style.color = '#fff'; btnClose.style.borderColor = '#dc2626'; }
+        if (btnOpen) { btnOpen.style.background = '#f8fafc'; btnOpen.style.color = '#166534'; btnOpen.style.borderColor = '#cbd5e1'; }
+        if (sec) sec.style.display = 'block';
+      } else {
+        if (btnOpen) { btnOpen.style.background = '#16a34a'; btnOpen.style.color = '#fff'; btnOpen.style.borderColor = '#16a34a'; }
+        if (btnClose) { btnClose.style.background = '#f8fafc'; btnClose.style.color = '#b91c1c'; btnClose.style.borderColor = '#cbd5e1'; }
+        if (sec) sec.style.display = 'none';
+      }
+    };
+
+    window.saveStoreMasterStatus = function() {
+      const reason = (document.getElementById('storeCloseReasonInput')?.value || '').trim() || 'Quán đang tạm nghỉ vì có việc bận đột xuất.';
+      const reopenText = (document.getElementById('storeReopenTimeInput')?.value || '').trim();
+      const payload = {
+        isManualClosed: selectedModalClosedMode,
+        reason: reason,
+        reopenText: reopenText,
+        updatedBy: localStorage.getItem('hy_chay_active_user') || 'admin',
+        updatedAt: new Date().toISOString()
+      };
+      set(ref(db, 'restaurant_config/store_status'), payload).then(() => {
+        window.closeStoreStatusSwitchModal();
+        if (selectedModalClosedMode) {
+          broadcastAndSpeakKitchenAlert("Chú ý! Hệ thống đã bật chế độ tạm nghỉ và khóa đặt đơn trực tuyến trên App khách hàng.");
+          alert("🔴 ĐÃ KHÓA ĐẶT ĐƠN ONLINE TRÊN APP KHÁCH HÀNG!\nKhách vào App sẽ thấy thông báo tạm nghỉ của quán và không thể gửi đơn mới.");
+        } else {
+          broadcastAndSpeakKitchenAlert("Hệ thống Hy Chay đã mở bán trực tuyến trở lại bình thường!");
+          alert("🟢 ĐÃ MỞ BÁN ONLINE TRỞ LẠI BÌNH THƯỜNG!");
+        }
+      });
+    };
+
+    window.quickReopenStoreOnline = function() {
+      if (!confirm("🟢 Xác nhận MỞ BÁN ONLINE trở lại để khách đặt món trên App?")) return;
+      set(ref(db, 'restaurant_config/store_status'), {
+        isManualClosed: false,
+        reason: '',
+        reopenText: '',
+        updatedBy: localStorage.getItem('hy_chay_active_user') || 'admin',
+        updatedAt: new Date().toISOString()
+      }).then(() => {
+        broadcastAndSpeakKitchenAlert("Hệ thống Hy Chay đã mở bán trực tuyến trở lại!");
+      });
+    };
+
+    // --- CƯỠNG CHẾ BẬT ONLINE & RUNG CHUÔNG TOÀN ĐỘI TÀI XẾ TỪ XA ---
     window.triggerShipperSirenBroadcast = function(orderId, orderData) {
       if (!orderId || !orderData) return;
       const seqBadge = typeof getOrderSeqBadgeText === 'function' ? getOrderSeqBadgeText(orderId) : '#01';
@@ -5799,6 +5958,28 @@ window.openInstallGuideModal = function() {
         window.triggerShipperSirenBroadcast(currentDispatchOrderId, ordersCache[currentDispatchOrderId]);
       }
       window.copyZaloDispatch();
+    };
+
+    window.forceAllActiveShippersOnlineAndRing = function() {
+      const updates = {};
+      const nowIso = new Date().toISOString();
+      let countForced = 0;
+      Object.keys(shippersCache).forEach(p => {
+        const s = shippersCache[p];
+        if (s && s.isActive !== false) {
+          updates[`shippers/${p}/isOnline`] = true;
+          updates[`shippers/${p}/forcedOnlineByAdmin`] = true;
+          updates[`shippers/${p}/lastSeen`] = nowIso;
+          countForced++;
+        }
+      });
+      updates['shipper_siren_broadcast/ping_test'] = {
+        timestamp: Date.now(),
+        message: 'Quán Hy Chay kiểm tra kết nối trực đơn toàn đội xe!'
+      };
+      update(ref(db), updates).then(() => {
+        alert(`⚡ Đã cưỡng chế bật 🟢 ONLINE cho toàn bộ ${countForced} bác tài đang chạy và phát tín hiệu kiểm tra chuông tới điện thoại các bác tài!`);
+      });
     };
 
     function injectV19DiscountUI() {
@@ -5900,9 +6081,7 @@ window.openInstallGuideModal = function() {
       if (Object.keys(posCart).length === 0) return alert("Vui lòng chọn ít nhất 1 món ăn!");
 
       let spokenDishes = [];
-      for (let k in posCart) {
-        spokenDishes.push(`${posCart[k].qty} ${posCart[k].name}`);
-      }
+      for (let k in posCart) spokenDishes.push(`${posCart[k].qty} ${posCart[k].name}`);
       const { rawSub, pct, discAmt, netSub, shipFee, grand } = updateV19PosTotalsUI();
       const rawNote = (document.getElementById('posOrderNote').value || '').trim();
       const discTag = pct > 0 ? `[Ưu đãi giảm ${pct}% (-${discAmt.toLocaleString()}đ)]` : '';
@@ -5984,10 +6163,7 @@ window.openInstallGuideModal = function() {
         set(newOrderRef, deliveryOrderData).then(() => {
           const voiceShipText = `Đơn giao đi số ${seqFormatted} của khách ${cusName} gồm: ${spokenDishes.join(', ')}.${pct > 0 ? ' Ưu đãi giảm ' + pct + ' phần trăm.' : ''}${rawNote ? ' Lưu ý bếp: ' + rawNote : ''}`;
           broadcastAndSpeakKitchenAlert(voiceShipText);
-          // KICH HOAT COI CUONG CHE TREN DIEN THOAI BAC TAI NGAY LAP TUC!
-          if (autoDispatch) {
-            window.triggerShipperSirenBroadcast(newOrderId, deliveryOrderData);
-          }
+          if (autoDispatch) window.triggerShipperSirenBroadcast(newOrderId, deliveryOrderData);
           window.printKitchenTicket(newOrderId, deliveryOrderData);
           posCart = {};
           v19_posDiscountPercent = 0;
@@ -6033,7 +6209,7 @@ window.openInstallGuideModal = function() {
         const voiceOrderText = `Order mới ${selectedTable} gồm: ${spokenDishes.join(', ')}.${pct > 0 ? ' Ưu đãi giảm ' + pct + ' phần trăm.' : ''}${rawNote ? ' Lưu ý bếp: ' + rawNote : ''}`;
         broadcastAndSpeakKitchenAlert(voiceOrderText);
         window.printKitchenTicket(newOrderId, orderData);
-        alert(`✅ Đã gửi đơn ${selectedTable} (#${seqFormatted}) xuống bếp${pct > 0 ? ` (Đã chiết khấu ${pct}%)` : ''}!`);
+        alert(`✅ Đã gửi đơn ${selectedTable} (#${seqFormatted}) xuống bếp!`);
         posCart = {};
         v19_posDiscountPercent = 0;
         document.getElementById('posOrderNote').value = '';
@@ -6043,116 +6219,11 @@ window.openInstallGuideModal = function() {
       });
     };
 
-    function updateV19EditModalTotalsUI() {
-      injectV19DiscountUI();
-      const o = ordersCache[editingOrderId] || {};
-      let rawSub = 0;
-      for (let k in editingItemsTemp) rawSub += editingItemsTemp[k].price * editingItemsTemp[k].qty;
-      const pct = Math.min(100, Math.max(0, parseFloat(v19_editDiscountPercent) || 0));
-      const newDiscount = Math.round(rawSub * pct / 100);
-      const netSub = Math.max(0, rawSub - newDiscount);
-      const shipFee = o.orderType === 'dine_in' ? 0 : (o.shippingFee || 0);
-      const grandTotal = netSub + shipFee;
-
-      const inp = document.getElementById('v19EditDiscountInput');
-      if (inp && Number(inp.value) !== pct) inp.value = pct;
-      const amtEl = document.getElementById('v19EditDiscountAmtText');
-      if (amtEl) amtEl.innerText = `(-${newDiscount.toLocaleString()}đ)`;
-      const totalEl = document.getElementById('editModalNewGrandTotal');
-      if (totalEl) totalEl.innerText = grandTotal.toLocaleString() + 'đ';
-      return { rawSub, pct, newDiscount, netSub, shipFee, grandTotal };
-    }
-
-    window.setV19EditDiscount = function(val) {
-      v19_editDiscountPercent = Math.min(100, Math.max(0, parseFloat(val) || 0));
-      updateV19EditModalTotalsUI();
-    };
-
-    const origOpenEditModalV19 = window.openEditOrderModal;
-    window.openEditOrderModal = function(orderId) {
-      origOpenEditModalV19(orderId);
-      const o = ordersCache[orderId] || {};
-      v19_editDiscountPercent = o.discountPercent !== undefined ? (Number(o.discountPercent) || 0) : 0;
-      updateV19EditModalTotalsUI();
-    };
-
-    const origChangeEditQtyV19 = window.changeEditItemQty;
-    window.changeEditItemQty = function(key, delta) { origChangeEditQtyV19(key, delta); updateV19EditModalTotalsUI(); };
-    const origRemoveEditItemV19 = window.removeEditItem;
-    window.removeEditItem = function(key) { origRemoveEditItemV19(key); updateV19EditModalTotalsUI(); };
-    const origAddDishToEditV19 = window.addDishToEditOrder;
-    window.addDishToEditOrder = function(name, price, cat = null) { origAddDishToEditV19(name, price, cat); updateV19EditModalTotalsUI(); };
-
-    window.saveEditedOrderChanges = function() {
-      if (!editingOrderId) return;
-      const role = localStorage.getItem('hy_chay_active_role') || 'staff';
-      if (role === 'staff') return alert("⛔ Nhân viên không có quyền sửa đơn hàng!");
-      const o = ordersCache[editingOrderId];
-      if (!o) return;
-      const orderLabel = o.orderType === 'dine_in' ? (o.table || 'Tại bàn') : `Đơn số ${getOrderSeqBadgeText(editingOrderId).replace('#', '')} của khách ${o.customerName || ''}`;
-
-      if (Object.keys(editingItemsTemp).length === 0) {
-        if (confirm(`⚠️ Bạn vừa xóa hết toàn bộ món của ${orderLabel}. Chuyển sang HỦY ĐƠN HÀNG NÀY?`)) {
-          const idToCancel = editingOrderId;
-          window.closeEditOrderModal();
-          window.openCancelModal(idToCancel);
-        }
-        return;
-      }
-
-      const totals = updateV19EditModalTotalsUI();
-      const oldItems = o.items || {};
-      const canceledOrReducedSpeech = [], addedOrIncreasedSpeech = [];
-
-      Object.keys(oldItems).forEach(k => {
-        const oldIt = oldItems[k];
-        const cleanK = safeItemKey(k);
-        const newIt = editingItemsTemp[cleanK] || editingItemsTemp[k];
-        if (!newIt) canceledOrReducedSpeech.push(`hủy ${oldIt.qty} ${oldIt.name}`);
-        else if (newIt.qty < oldIt.qty) canceledOrReducedSpeech.push(`giảm ${oldIt.qty - newIt.qty} ${oldIt.name}`);
-      });
-
-      Object.keys(editingItemsTemp).forEach(k => {
-        const newIt = editingItemsTemp[k];
-        const oldIt = oldItems[k] || Object.values(oldItems).find(x => x.name === newIt.name);
-        if (!oldIt) addedOrIncreasedSpeech.push(`thêm ${newIt.qty} ${newIt.name}`);
-        else if (newIt.qty > oldIt.qty) addedOrIncreasedSpeech.push(`thêm ${newIt.qty - oldIt.qty} ${newIt.name}`);
-      });
-
-      const timeInp = document.getElementById('editModalScheduledTime');
-      const newSched = timeInp ? timeInp.value.trim() : (o.scheduledTime || null);
-      let baseNote = (o.note || '').replace(/\[Ưu đãi giảm.*?\]/g, '').trim();
-      const discTag = totals.pct > 0 ? `[Ưu đãi giảm ${totals.pct}% (-${totals.newDiscount.toLocaleString()}đ)]` : '';
-      const updatedNote = [discTag, baseNote].filter(Boolean).join(' ');
-
-      update(ref(db, `orders/${editingOrderId}`), {
-        items: editingItemsTemp,
-        rawSubtotal: totals.rawSub,
-        discountPercent: totals.pct,
-        discount: totals.newDiscount,
-        subtotal: totals.netSub,
-        grandTotal: totals.grandTotal,
-        scheduledTime: newSched || null,
-        deliveryTimeMode: newSched ? 'scheduled' : 'immediate',
-        note: updatedNote,
-        editedByAdminAt: new Date().toISOString()
-      }).then(() => {
-        const speechParts = [...canceledOrReducedSpeech, ...addedOrIncreasedSpeech];
-        if (speechParts.length > 0) {
-          broadcastAndSpeakKitchenAlert(`Chú ý bếp! ${orderLabel} vừa cập nhật đơn: ${speechParts.join(', ')}.`);
-        }
-        alert(`✅ Đã lưu thay đổi đơn hàng của ${orderLabel}!`);
-        window.closeEditOrderModal();
-      });
-    };
-
-    // --- CHIẾT KHẤU TRỰC TIẾP TRÊN THẺ ĐƠN KDS ---
     window.applyQuickCardDiscount = function(orderId, pctVal) {
       const o = ordersCache[orderId];
       if (!o) return;
       const role = localStorage.getItem('hy_chay_active_role') || 'staff';
       if (role === 'staff') return alert("⛔ Nhân viên không có quyền chỉnh chiết khấu hóa đơn!");
-
       const pct = Math.min(100, Math.max(0, parseFloat(pctVal) || 0));
       let rawSub = 0;
       for (let k in (o.items || {})) rawSub += (Number(o.items[k].price) || 0) * (Number(o.items[k].qty) || 0);
@@ -6160,159 +6231,99 @@ window.openInstallGuideModal = function() {
       const newNetSub = Math.max(0, rawSub - newDiscAmt);
       const shipFee = o.orderType === 'dine_in' ? 0 : (Number(o.shippingFee) || 0);
       const newGrandTotal = newNetSub + shipFee;
-
       let baseNote = (o.note || '').replace(/\[Ưu đãi giảm.*?\]/g, '').trim();
       const discTag = pct > 0 ? `[Ưu đãi giảm ${pct}% (-${newDiscAmt.toLocaleString()}đ)]` : '';
       update(ref(db, `orders/${orderId}`), {
-        rawSubtotal: rawSub,
-        discountPercent: pct,
-        discount: newDiscAmt,
-        subtotal: newNetSub,
-        grandTotal: newGrandTotal,
+        rawSubtotal: rawSub, discountPercent: pct, discount: newDiscAmt,
+        subtotal: newNetSub, grandTotal: newGrandTotal,
         note: [discTag, baseNote].filter(Boolean).join(' ')
       });
     };
 
     // --- BỘ 3 CHUYỂN BÀN • GỘP BÀN • TÁCH BÀN ---
-    let currentTmModalMode = 'move_merge';
-    let splitSelectedQtyMap = {};
-
+    let currentTmModalMode = 'move_merge', splitSelectedQtyMap = {};
     function getOpenDineInOrders() {
       const list = [];
       Object.keys(ordersCache).forEach(id => {
         const o = ordersCache[id];
-        if (o && !o.archived && o.orderType === 'dine_in' && o.status !== 'Đã hoàn tất' && o.status !== 'Đã hủy') {
-          list.push({ id, order: o });
-        }
+        if (o && !o.archived && o.orderType === 'dine_in' && o.status !== 'Đã hoàn tất' && o.status !== 'Đã hủy') list.push({ id, order: o });
       });
       return list;
     }
-
     window.switchTmModalMode = function(mode) {
       currentTmModalMode = mode;
-      const tabMM = document.getElementById('tmTabMoveMerge');
-      const tabSp = document.getElementById('tmTabSplit');
-      const splitSec = document.getElementById('tmSplitItemsSection');
+      const tabMM = document.getElementById('tmTabMoveMerge'), tabSp = document.getElementById('tmTabSplit'), splitSec = document.getElementById('tmSplitItemsSection');
       if (mode === 'split') {
-        if (tabSp) tabSp.classList.add('active');
-        if (tabMM) tabMM.classList.remove('active');
-        if (splitSec) splitSec.style.display = 'block';
+        if (tabSp) tabSp.classList.add('active'); if (tabMM) tabMM.classList.remove('active'); if (splitSec) splitSec.style.display = 'block';
       } else {
-        if (tabMM) tabMM.classList.add('active');
-        if (tabSp) tabSp.classList.remove('active');
-        if (splitSec) splitSec.style.display = 'none';
+        if (tabMM) tabMM.classList.add('active'); if (tabSp) tabSp.classList.remove('active'); if (splitSec) splitSec.style.display = 'none';
       }
       window.onTmSourceChange();
     };
-
     window.openTableTransferMergeModal = function(preselectedOrderId = null) {
       const openList = getOpenDineInOrders();
-      if (openList.length === 0) return alert("Hiện tại không có bàn nào đang mở để Chuyển, Gộp hoặc Tách bàn!");
+      if (openList.length === 0) return alert("Hiện tại không có bàn nào đang mở!");
       const srcSel = document.getElementById('tmSourceOrderSelect');
       if (!srcSel) return;
-      srcSel.innerHTML = openList.map(({ id, order }) => {
-        const seq = getOrderSeqBadgeText(id);
-        const selAttr = (preselectedOrderId === id || (!preselectedOrderId && order.table === selectedTable)) ? 'selected' : '';
-        return `<option value="${id}" ${selAttr}>🪑 ${order.table} — Đơn ${seq} (${(order.grandTotal || 0).toLocaleString()}đ)</option>`;
-      }).join('');
+      srcSel.innerHTML = openList.map(({ id, order }) => `<option value="${id}" ${(preselectedOrderId === id || (!preselectedOrderId && order.table === selectedTable)) ? 'selected' : ''}>🪑 ${order.table} — Đơn ${getOrderSeqBadgeText(id)} (${(order.grandTotal || 0).toLocaleString()}đ)</option>`).join('');
       window.switchTmModalMode('move_merge');
       document.getElementById('tableTransferMergeModal').classList.add('active');
     };
-
-    window.closeTableTransferMergeModal = function() {
-      document.getElementById('tableTransferMergeModal').classList.remove('active');
-    };
-
+    window.closeTableTransferMergeModal = () => document.getElementById('tableTransferMergeModal').classList.remove('active');
     window.changeSplitItemQty = function(itemKey, delta, maxQty) {
-      const cur = splitSelectedQtyMap[itemKey] || 0;
-      const next = Math.min(maxQty, Math.max(0, cur + delta));
+      const next = Math.min(maxQty, Math.max(0, (splitSelectedQtyMap[itemKey] || 0) + delta));
       splitSelectedQtyMap[itemKey] = next;
       const spanEl = document.getElementById('split_qty_' + itemKey);
       if (spanEl) spanEl.innerText = next;
       window.onTmTargetChange();
     };
-
     window.onTmSourceChange = function() {
       const srcOrderId = document.getElementById('tmSourceOrderSelect')?.value;
       const srcOrder = ordersCache[srcOrderId];
       const tgtSel = document.getElementById('tmTargetTableSelect');
       if (!srcOrder || !tgtSel) return;
-
       splitSelectedQtyMap = {};
       const splitListEl = document.getElementById('tmSplitItemsList');
       if (splitListEl) {
         let sHtml = '';
         for (let k in (srcOrder.items || {})) {
-          const it = srcOrder.items[k];
-          const cleanK = safeItemKey(k);
+          const it = srcOrder.items[k], cleanK = safeItemKey(k), safeK = cleanK.replace(/'/g, "\\'");
           splitSelectedQtyMap[cleanK] = 0;
-          const safeK = cleanK.replace(/'/g, "\\'");
-          sHtml += `<div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px dashed #fde68a; font-size:0.84rem;"><div><b>${it.name}</b> <small style="color:#64748b;">(Có: ${it.qty})</small></div><div style="display:flex; align-items:center; gap:6px;"><button type="button" class="edit-qty-btn" onclick="changeSplitItemQty('${safeK}', -1, ${it.qty})">-</button><b id="split_qty_${cleanK}" style="min-width:22px; text-align:center; color:#dc2626;">0</b><button type="button" class="edit-qty-btn" onclick="changeSplitItemQty('${safeK}', 1, ${it.qty})">+</button></div></div>`;
+          sHtml += `<div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px dashed #fde68a; font-size:0.84rem;"><div><b>${it.name}</b> (Có: ${it.qty})</div><div style="display:flex; align-items:center; gap:6px;"><button type="button" class="edit-qty-btn" onclick="changeSplitItemQty('${safeK}', -1, ${it.qty})">-</button><b id="split_qty_${cleanK}" style="min-width:22px; text-align:center; color:#dc2626;">0</b><button type="button" class="edit-qty-btn" onclick="changeSplitItemQty('${safeK}', 1, ${it.qty})">+</button></div></div>`;
         }
         splitListEl.innerHTML = sHtml;
       }
-
       const openList = getOpenDineInOrders();
-      let tgtHtml = '';
-      (tablesListCache || []).forEach(tName => {
+      tgtSel.innerHTML = (tablesListCache || []).map(tName => {
         const otherOpen = openList.filter(x => x.order.table === tName && x.id !== srcOrderId);
-        if (currentTmModalMode === 'split') {
-          tgtHtml += `<option value="${tName}">${tName === srcOrder.table ? '✂️ Tách thành Hóa đơn thứ 2 tại ' + tName : '➡️ Tách món sang ' + tName}</option>`;
-        } else {
-          if (tName === srcOrder.table && otherOpen.length === 0) return;
-          tgtHtml += `<option value="${tName}">${otherOpen.length > 0 ? '🔗 GỘP VÀO: ' + tName : '➡️ CHUYỂN SANG: ' + tName + ' (Trống)'}</option>`;
-        }
-      });
-      tgtSel.innerHTML = tgtHtml;
+        if (currentTmModalMode === 'split') return `<option value="${tName}">✂️ Tách sang ${tName}</option>`;
+        if (tName === srcOrder.table && otherOpen.length === 0) return '';
+        return `<option value="${tName}">${otherOpen.length > 0 ? '🔗 GỘP VÀO: ' + tName : '➡️ CHUYỂN SANG: ' + tName}</option>`;
+      }).join('');
       window.onTmTargetChange();
     };
-
     window.onTmTargetChange = function() {
-      const srcOrderId = document.getElementById('tmSourceOrderSelect')?.value;
-      const tgtTable = document.getElementById('tmTargetTableSelect')?.value;
-      const previewEl = document.getElementById('tmActionPreviewBox');
+      const srcOrderId = document.getElementById('tmSourceOrderSelect')?.value, tgtTable = document.getElementById('tmTargetTableSelect')?.value, previewEl = document.getElementById('tmActionPreviewBox');
       if (!srcOrderId || !tgtTable || !previewEl) return;
       const srcOrder = ordersCache[srcOrderId];
-      if (currentTmModalMode === 'split') {
-        let splitTotal = 0, splitCount = 0;
-        for (let k in (srcOrder.items || {})) {
-          const q = splitSelectedQtyMap[safeItemKey(k)] || 0;
-          if (q > 0) { splitCount += q; splitTotal += q * (Number(srcOrder.items[k].price) || 0); }
-        }
-        previewEl.innerHTML = splitCount > 0 ? `✂️ Tách <b>${splitCount} món (${splitTotal.toLocaleString()}đ)</b> sang <b>${tgtTable}</b>.` : `⚠️ Bấm [+] ở trên để chọn số lượng món cần tách!`;
-        return;
-      }
-      const targetExisting = getOpenDineInOrders().find(x => x.order.table === tgtTable && x.id !== srcOrderId);
-      previewEl.innerHTML = targetExisting
-        ? `🔗 <b>GỘP BÀN:</b> Gộp <b>${srcOrder.table}</b> vào <b>${tgtTable}</b> (Tổng mới: <b>${((srcOrder.subtotal || 0) + (targetExisting.order.subtotal || 0)).toLocaleString()}đ</b>)`
-        : `➡️ <b>CHUYỂN BÀN:</b> Chuyển <b>${srcOrder.table}</b> sang <b>${tgtTable}</b>`;
+      previewEl.innerHTML = `Thực hiện từ <b>${srcOrder.table}</b> sang <b>${tgtTable}</b>`;
     };
-
     window.executeTableTransferMergeOrSplit = function() {
-      const srcOrderId = document.getElementById('tmSourceOrderSelect')?.value;
-      const tgtTable = document.getElementById('tmTargetTableSelect')?.value;
+      const srcOrderId = document.getElementById('tmSourceOrderSelect')?.value, tgtTable = document.getElementById('tmTargetTableSelect')?.value;
       if (!srcOrderId || !tgtTable) return;
-      const srcOrder = ordersCache[srcOrderId];
-      if (!srcOrder) return;
-      const oldTableName = srcOrder.table || 'Bàn cũ';
-
+      const srcOrder = ordersCache[srcOrderId], oldTableName = srcOrder.table || 'Bàn cũ';
       if (currentTmModalMode === 'split') {
         const remainingItems = {}, splitOutItems = {};
         let splitCount = 0, remainCount = 0;
         for (let k in (srcOrder.items || {})) {
-          const it = srcOrder.items[k], cleanK = safeItemKey(k);
-          const splitQty = splitSelectedQtyMap[cleanK] || 0;
-          const remainQty = (Number(it.qty) || 0) - splitQty;
+          const it = srcOrder.items[k], cleanK = safeItemKey(k), splitQty = splitSelectedQtyMap[cleanK] || 0, remainQty = (Number(it.qty) || 0) - splitQty;
           if (splitQty > 0) { splitCount += splitQty; splitOutItems[cleanK] = { name: it.name, price: Number(it.price) || 0, qty: splitQty, cat: it.cat || 'bun' }; }
           if (remainQty > 0) { remainCount += remainQty; remainingItems[cleanK] = { name: it.name, price: Number(it.price) || 0, qty: remainQty, cat: it.cat || 'bun' }; }
         }
-        if (splitCount === 0) return alert("⚠️ Vui lòng chọn ít nhất 1 món cần tách!");
-        if (remainCount === 0) return alert("⚠️ Nếu muốn chuyển hết cả bàn, hãy chọn Tab Chuyển Bàn!");
-
+        if (splitCount === 0 || remainCount === 0) return alert("⚠️ Vui lòng chọn số lượng món hợp lệ để tách!");
         let remainRawSub = 0, splitRawSub = 0;
         for (let k in remainingItems) remainRawSub += remainingItems[k].price * remainingItems[k].qty;
         for (let k in splitOutItems) splitRawSub += splitOutItems[k].price * splitOutItems[k].qty;
-
         update(ref(db, `orders/${srcOrderId}`), { items: remainingItems, rawSubtotal: remainRawSub, subtotal: remainRawSub, grandTotal: remainRawSub });
         push(ref(db, 'orders'), {
           orderType: 'dine_in', dailySeq: getNextDailyOrderSequenceNumber(), table: tgtTable,
@@ -6320,24 +6331,17 @@ window.openInstallGuideModal = function() {
           note: `[Tách từ ${oldTableName}]`, items: splitOutItems, rawSubtotal: splitRawSub, discountPercent: 0, discount: 0,
           subtotal: splitRawSub, shippingFee: 0, grandTotal: splitRawSub, paymentMethod: 'COD', paymentStatus: 'Thu tại bàn',
           status: srcOrder.status || 'Đang chế biến', createdAt: new Date().toISOString(), archived: false
-        }).then(() => {
-          broadcastAndSpeakKitchenAlert(`Chú ý bếp! Đã tách ${splitCount} món từ ${oldTableName} sang ${tgtTable}.`);
-          window.closeTableTransferMergeModal();
-        });
+        }).then(() => { broadcastAndSpeakKitchenAlert(`Đã tách ${splitCount} món từ ${oldTableName} sang ${tgtTable}.`); window.closeTableTransferMergeModal(); });
         return;
       }
-
       const targetExisting = getOpenDineInOrders().find(x => x.order.table === tgtTable && x.id !== srcOrderId);
       if (!targetExisting) {
         update(ref(db, `orders/${srcOrderId}`), { table: tgtTable, customerName: tgtTable }).then(() => {
-          broadcastAndSpeakKitchenAlert(`Chú ý bếp! Đã chuyển đơn từ ${oldTableName} sang ${tgtTable}.`);
-          window.closeTableTransferMergeModal();
+          broadcastAndSpeakKitchenAlert(`Đã chuyển đơn từ ${oldTableName} sang ${tgtTable}.`); window.closeTableTransferMergeModal();
         });
         return;
       }
-
-      const tgtId = targetExisting.id, tgtOrder = targetExisting.order;
-      const mergedItems = JSON.parse(JSON.stringify(tgtOrder.items || {}));
+      const tgtId = targetExisting.id, tgtOrder = targetExisting.order, mergedItems = JSON.parse(JSON.stringify(tgtOrder.items || {}));
       for (let k in (srcOrder.items || {})) {
         const srcIt = srcOrder.items[k], cleanK = safeItemKey(srcIt.name || k);
         if (mergedItems[cleanK]) mergedItems[cleanK].qty = (Number(mergedItems[cleanK].qty) || 0) + (Number(srcIt.qty) || 0);
@@ -6346,35 +6350,25 @@ window.openInstallGuideModal = function() {
       let rawSub = 0;
       for (let k in mergedItems) rawSub += (Number(mergedItems[k].price) || 0) * (Number(mergedItems[k].qty) || 0);
       const updates = {};
-      updates[`orders/${tgtId}/items`] = mergedItems;
-      updates[`orders/${tgtId}/rawSubtotal`] = rawSub;
-      updates[`orders/${tgtId}/subtotal`] = rawSub;
-      updates[`orders/${tgtId}/grandTotal`] = rawSub;
-      updates[`orders/${srcOrderId}/status`] = 'Đã hủy';
-      updates[`orders/${srcOrderId}/archived`] = true;
-      update(ref(db), updates).then(() => {
-        broadcastAndSpeakKitchenAlert(`Chú ý bếp! Đã gộp toàn bộ món của ${oldTableName} vào ${tgtTable}.`);
-        window.closeTableTransferMergeModal();
-      });
+      updates[`orders/${tgtId}/items`] = mergedItems; updates[`orders/${tgtId}/rawSubtotal`] = rawSub;
+      updates[`orders/${tgtId}/subtotal`] = rawSub; updates[`orders/${tgtId}/grandTotal`] = rawSub;
+      updates[`orders/${srcOrderId}/status`] = 'Đã hủy'; updates[`orders/${srcOrderId}/archived`] = true;
+      update(ref(db), updates).then(() => { broadcastAndSpeakKitchenAlert(`Đã gộp ${oldTableName} vào ${tgtTable}.`); window.closeTableTransferMergeModal(); });
     };
 
-    // --- ĐẶT SHIP HỘ KHÁCH & BẢN ĐỒ GOOGLE MAPS ---
-    let adminPosMap = null, adminPosMarker = null, adminMapRoadLayer = null, adminMapSatLayer = null;
-    let adminPinnedLat = null, adminPinnedLng = null, addressGeocodeTimer = null;
-
+    // --- ĐẶT SHIP HỘ & BẢN ĐỒ ---
+    let adminPosMap = null, adminPosMarker = null, adminMapRoadLayer = null, adminMapSatLayer = null, adminPinnedLat = null, adminPinnedLng = null;
     function calcRoadKmAdmin(lat1, lon1, lat2, lon2) {
       const R = 6371, dLat = (lat2 - lat1) * Math.PI / 180, dLon = (lon2 - lon1) * Math.PI / 180;
       const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
       return Math.max(0.5, Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * 1.25 * 10) / 10);
     }
-
     window.onPosShipTimeModeChange = function() {
       const mode = document.getElementById('posShipTimeMode')?.value || 'immediate';
       const timeInp = document.getElementById('posShipScheduledTimeInput');
       if (timeInp) timeInp.style.display = (mode === 'scheduled') ? 'inline-block' : 'none';
       recalcPosDeliveryTotals();
     };
-
     window.saveNewPosCustomerDirectly = function() {
       const name = (document.getElementById('posShipCusName')?.value || '').trim();
       const cleanPhone = normalizeShipperPhone(document.getElementById('posShipCusPhone')?.value || '');
@@ -6384,27 +6378,15 @@ window.openInstallGuideModal = function() {
       if (!name || !cleanPhone) return alert("⚠️ Vui lòng nhập Họ tên và Số điện thoại!");
       const rec = { name, phone: cleanPhone, ward, province: 'Lâm Đồng', address: addr, fullAddress: addr, km, deliveryKm: km, updatedAt: new Date().toISOString() };
       update(ref(db, `pos_customers/${cleanPhone}`), rec);
-      update(ref(db, `users/${cleanPhone}`), rec).then(() => alert(`✅ Đã lưu khách mới [${name} - ${cleanPhone}] vào Danh bạ!`));
+      update(ref(db, `users/${cleanPhone}`), rec).then(() => alert(`✅ Đã lưu khách mới [${name} - ${cleanPhone}]!`));
     };
-
     window.autoComputePosAddressDistance = function(rawAddr) {
       if (!rawAddr || rawAddr.trim().length < 3) return;
-      const txt = rawAddr.trim();
-      const kmInp = document.getElementById('posShipKmInput');
-      const statusTag = document.getElementById('posAutoKmStatusTag');
-      const coordMatch = txt.match(/(\d{1,2}\.\d{3,8})\s*,\s*(\d{2,3}\.\d{3,8})/);
-      if (coordMatch) {
-        const km = calcRoadKmAdmin(10.9328, 108.1025, parseFloat(coordMatch[1]), parseFloat(coordMatch[2]));
-        if (kmInp) kmInp.value = km;
-        manualPosShipFeeOverride = false; recalcPosDeliveryTotals();
-        if (statusTag) statusTag.innerHTML = `📍 Khoảng cách tọa độ: <b style="color:#dc2626;">${km} km</b>`;
-        return;
-      }
+      const txt = rawAddr.trim(), kmInp = document.getElementById('posShipKmInput'), statusTag = document.getElementById('posAutoKmStatusTag');
       const ward = document.getElementById('posShipCusWard')?.value || 'Phan Thiết';
       const q = txt.toLowerCase().includes('phan thiết') ? txt : `${txt}, ${ward}, Phan Thiết`;
       fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=2&q=${encodeURIComponent(q)}`)
-        .then(r => r.json())
-        .then(list => {
+        .then(r => r.json()).then(list => {
           if (list && list[0]) {
             const km = calcRoadKmAdmin(10.9328, 108.1025, parseFloat(list[0].lat), parseFloat(list[0].lon));
             if (kmInp) kmInp.value = km;
@@ -6413,7 +6395,6 @@ window.openInstallGuideModal = function() {
           }
         }).catch(() => {});
     };
-
     window.openAdminPosMapModal = function() {
       const modal = document.getElementById('adminPosMapModal');
       if (!modal) return;
@@ -6430,28 +6411,14 @@ window.openInstallGuideModal = function() {
         adminPosMap.invalidateSize();
       }, 120);
     };
-
-    window.closeAdminPosMapModal = function() {
-      const modal = document.getElementById('adminPosMapModal');
-      if (modal) { modal.classList.remove('active'); modal.style.display = 'none'; }
-    };
-
-    window.switchAdminMapLayer = function(mode) {
-      if (!adminPosMap) return;
-      if (mode === 'sat') { adminPosMap.removeLayer(adminMapRoadLayer); adminMapSatLayer.addTo(adminPosMap); }
-      else { adminPosMap.removeLayer(adminMapSatLayer); adminMapRoadLayer.addTo(adminPosMap); }
-    };
-
-    window.centerAdminMapToStore = function() {
-      if (adminPosMap && adminPosMarker) { adminPosMap.setView([10.9328, 108.1025], 16); adminPosMarker.setLatLng([10.9328, 108.1025]); }
-    };
-
+    window.closeAdminPosMapModal = () => { const m = document.getElementById('adminPosMapModal'); if (m) { m.classList.remove('active'); m.style.display = 'none'; } };
+    window.switchAdminMapLayer = (mode) => { if (!adminPosMap) return; if (mode === 'sat') { adminPosMap.removeLayer(adminMapRoadLayer); adminMapSatLayer.addTo(adminPosMap); } else { adminPosMap.removeLayer(adminMapSatLayer); adminMapRoadLayer.addTo(adminPosMap); } };
+    window.centerAdminMapToStore = () => { if (adminPosMap && adminPosMarker) { adminPosMap.setView([10.9328, 108.1025], 16); adminPosMarker.setLatLng([10.9328, 108.1025]); } };
     window.searchPlaceOnAdminMap = function() {
       const kw = (document.getElementById('adminMapPlaceSearchInput')?.value || '').trim();
       if (!kw) return;
       fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=3&q=${encodeURIComponent(kw + ', Phan Thiết')}`)
-        .then(r => r.json())
-        .then(list => {
+        .then(r => r.json()).then(list => {
           if (list && list[0] && adminPosMap && adminPosMarker) {
             const lat = parseFloat(list[0].lat), lon = parseFloat(list[0].lon);
             adminPinnedLat = lat; adminPinnedLng = lon;
@@ -6459,475 +6426,96 @@ window.openInstallGuideModal = function() {
           }
         }).catch(() => {});
     };
-
     window.confirmAdminPosMapPin = function() {
       const lat = adminPinnedLat || 10.9328, lng = adminPinnedLng || 108.1025;
       const km = calcRoadKmAdmin(10.9328, 108.1025, lat, lng);
       if (document.getElementById('posShipKmInput')) document.getElementById('posShipKmInput').value = km;
       if (document.getElementById('posShipCusAddress')) document.getElementById('posShipCusAddress').value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-      manualPosShipFeeOverride = false; recalcPosDeliveryTotals();
-      window.closeAdminPosMapModal();
+      manualPosShipFeeOverride = false; recalcPosDeliveryTotals(); window.closeAdminPosMapModal();
     };
 
-    // --- BÁO CÁO GRAB/SHOPEE & HÓA ĐƠN ĐẦU VÀO ---
-    let externalRevenuesCache = {}, inputInvoicesCache = {};
-    onValue(ref(db, 'external_revenues'), (s) => { externalRevenuesCache = s.val() || {}; window.renderShiftReport(); });
-    onValue(ref(db, 'input_invoices'), (s) => { inputInvoicesCache = s.val() || {}; if (typeof window.renderInputInvoicesTable === 'function') window.renderInputInvoicesTable(); });
-
-    window.calcExtNetPreview = function() {
-      const r5610 = parseInt(document.getElementById('extRev5610Input')?.value || '0') || 0;
-      const r5630 = parseInt(document.getElementById('extRev5630Input')?.value || '0') || 0;
-      const fee = parseInt(document.getElementById('extRevFeeInput')?.value || '0') || 0;
-      const net = Math.max(0, r5610 + r5630 - fee);
-      if (document.getElementById('extRevNetPreview')) document.getElementById('extRevNetPreview').value = net.toLocaleString() + 'đ';
-      return { r5610, r5630, fee, net };
-    };
-
-    window.saveExternalPlatformRevenue = function() {
-      const platform = document.getElementById('extPlatformSelect')?.value || 'GRAB_PERSONAL';
-      const date = document.getElementById('extRevDateInput')?.value || getVNDateStr();
-      const orderCount = Math.max(1, parseInt(document.getElementById('extRevOrderCount')?.value || '1') || 1);
-      const { r5610, r5630, fee, net } = window.calcExtNetPreview();
-      if (r5610 + r5630 <= 0) return alert("⚠️ Vui lòng nhập doanh thu > 0!");
-      push(ref(db, 'external_revenues'), { platform, date, orderCount, rev5610: r5610, rev5630: r5630, platformFee: fee, netReceived: net, createdAt: new Date().toISOString() });
-    };
-
-    window.validateInputInvoiceRealtime = function() {
-      const invName = (document.getElementById('invNameInput')?.value || '').trim().toUpperCase();
-      const invSymbol = (document.getElementById('invSymbolInput')?.value || '').trim().toUpperCase();
-      const invNo = (document.getElementById('invNumberInput')?.value || '').trim();
-      const invDate = (document.getElementById('invDateTimeInput')?.value || '').trim();
-      const seller = (document.getElementById('invSellerInput')?.value || '').trim();
-      const buyerMst = (document.getElementById('invBuyerMstInput')?.value || '').trim();
-      const preTax = parseInt(document.getElementById('invPreTaxInput')?.value || '0') || 0;
-      const vatAmt = parseInt(document.getElementById('invVatAmountInput')?.value || '0') || 0;
-      const allPassed = (buyerMst === '3401289271' && preTax > 0);
-      return { allPassed, invName, invSymbol, invNo, invDate, seller, buyerMst, preTax, vatAmt };
-    };
-
-    window.saveVerifiedInputInvoice = function() {
-      const c = window.validateInputInvoiceRealtime();
-      push(ref(db, 'input_invoices'), { ...c, isValidStructure: c.allPassed, createdAt: new Date().toISOString() }).then(() => alert("✅ Đã lưu Hóa đơn đầu vào!"));
-    };
-
-    // =========================================================================
-    // 30. BỘ NÃO GIỌNG NÓI AI V5 (TỰ TƯ DUY SỬA CHỮ & GIẢI MÃ SỐ GHÉP 100%)
-    // =========================================================================
-    let isStaffBigMode = false;
-    let speechRecognizer = null;
-    let isVoiceListening = false;
-    let lastVoiceCartSnapshot = null;
-
+    // --- BỘ NÃO GIỌNG NÓI AI V5 ---
+    let isStaffBigMode = false, speechRecognizer = null, isVoiceListening = false, lastVoiceCartSnapshot = null;
     window.toggleStaffBigMode = function() {
       isStaffBigMode = !isStaffBigMode;
       const viewEl = document.getElementById('viewPosOrder');
-      if (viewEl) {
-        if (isStaffBigMode) viewEl.classList.add('staff-big-mode');
-        else viewEl.classList.remove('staff-big-mode');
-      }
+      if (viewEl) viewEl.classList.toggle('staff-big-mode', isStaffBigMode);
     };
-
     window.quickOpenAndStartVoiceOrder = function() {
-      const ordersView = document.getElementById('viewOrders');
-      const posView = document.getElementById('viewPosOrder');
+      const ordersView = document.getElementById('viewOrders'), posView = document.getElementById('viewPosOrder');
       if (ordersView && ordersView.style.display === 'none' && posView && posView.style.display === 'none') {
-        const tabBtn = document.getElementById('tabBtnPosDineIn');
-        window.openPosInMode('dine_in', { currentTarget: tabBtn });
+        window.openPosInMode('dine_in', { currentTarget: document.getElementById('tabBtnPosDineIn') });
       }
       window.toggleVoiceOrderRecognition();
     };
-
     function normNoAccentV5(str) {
-      return String(str || '')
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/\u0111/g, 'd').replace(/\u0110/g, 'D')
-        .toLowerCase()
-        .replace(/[^a-z0-9\s]/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
+      return String(str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\u0111/g, 'd').replace(/\u0110/g, 'D').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
     }
-
-    // KHUNG XƯƠNG ÂM TIẾT TIẾNG VIỆT (Giúp AI tự tư duy sửa lỗi phát âm vùng miền: r/d/gi/v, c/k/q, s/x, ch/tr, n/ng/nh, t/c)
-    function toVietnamesePhoneticSkeleton(str) {
-      return normNoAccentV5(str)
-        .split(' ')
-        .map(w => {
-          return w
-            .replace(/^(gi|d|r|v)/, 'z')
-            .replace(/^(c|k|q)/, 'k')
-            .replace(/^(s|x)/, 'x')
-            .replace(/^(ch|tr)/, 'c')
-            .replace(/y/g, 'i')
-            .replace(/(ng|nh|n)$/, 'n')
-            .replace(/(t|c|p)$/, 't');
-        })
-        .join(' ');
-    }
-
-    // TẦNG 1: DỊCH NGƯỢC TOÀN BỘ CON SỐ BỊ GOOGLE NGHE NHẦM VỀ ĐÚNG TÊN MÓN TIẾNG VIỆT
     window.aiSelfThinkingRewriteTranscript = function(rawSpeech) {
       let s = ' ' + String(rawSpeech || '').toLowerCase() + ' ';
-
-      // 1. Sửa lỗi "Bàn 2 bún..." bị Google ghép thành "Bàn 24...", "Bàn 14...", "Bàn 34..."
       s = s.replace(/\b(bàn|ban)\s*(?:số|so)?\s*([1-9])4\b/gi, ' bàn $2 lấy 1 bún ');
-
-      // 2. Sửa lỗi "Bún mọc" bị nghe thành "41", "4 1", "141", "241", "bốn một", "bún 1", "bún một"
       s = s.replace(/\b([1-9])41\b/gi, ' $1 bún mọc ');
       s = s.replace(/\b(?:41|4\s+1|bốn\s+một|bún\s+1|bún\s+một)\b/gi, ' 1 bún mọc ');
-
-      // 3. Sửa lỗi "Bún mắm" bị nghe thành "45", "4 5", "145", "245", "bốn năm", "bún 5", "bún năm"
       s = s.replace(/\b([1-9])45\s*nêm\b/gi, ' $1 bún mắm nêm ');
       s = s.replace(/\b([1-9])45\b/gi, ' $1 bún mắm ');
-      s = s.replace(/\b(?:45|4\s+5|bốn\s+năm|bún\s+5|bún\s+năm)\s*nêm\b/gi, ' 1 bún mắm nêm ');
       s = s.replace(/\b(?:45|4\s+5|bốn\s+năm|bún\s+5|bún\s+năm)\b/gi, ' 1 bún mắm ');
-
-      // 4. Sửa các số hàng chục có đuôi 4 (14, 24, 34, 44, 54...) trước tên món Bún
       s = s.replace(/\b([1-9])4\s*(mọc|một|thái|riêu|riu|huế|mắm|bò|chua|thì|chả|giò)/gi, ' $1 bún $2');
-      s = s.replace(/\b(?:4|bốn|buồn|bụng|búng)\s*(mọc|thái|riêu|riu|huế|mắm|bò\s*kho|chua|thì\s*là|chả\s*giò)/gi, ' bún $1 ');
-
-      // 5. Sửa số 5 ("năm") bị nghe nhầm từ chữ "nấm" hoặc "mắm"
-      s = s.replace(/\b(cháo|cháu|rau\s*củ|mì\s*ý\s*kem|kem|chả|chân|chà\s*bông|xôi\s*chà\s*bông|hũ\s*ky\s*cuộn)\s*(?:5|năm|nắm|lắm)\b/gi, ' $1 nấm ');
-      s = s.replace(/\b([1-9])5\s*(hương|cuộn|xúc|chiên|bào\s*ngư)/gi, ' $1 nấm $2 ');
-      s = s.replace(/\b(?:5|năm|nắm)\s*(hương|cuộn\s*thính|xúc\s*bánh\s*đa|chiên\s*xù|bào\s*ngư)/gi, ' nấm $1 ');
-
-      // 6. Sửa số 8 ("tám") bị nghe nhầm từ "tấm" hoặc "tắc"
-      s = s.replace(/\b([1-9])?\s*cơm\s*(?:8|tám|tắm)\b/gi, ' $1 cơm tấm ');
-      s = s.replace(/\b(trà|suối)\s*(?:8|tám|tất|tắt)\b/gi, ' $1 tắc ');
-
-      // 7. Sửa số 9 ("chín") bị nghe nhầm từ "chiên"
-      s = s.replace(/\b(chả\s*giò|bào\s*ngư|khoai\s*tây|phô\s*mai|phô\s*mai\s*viên|hoành\s*thánh|đậu\s*hũ|cơm|nấm)\s*(?:9|chín|chim)\b/gi, ' $1 chiên ');
-
-      // 8. Sửa số 10 ("mười"), 6 ("sáu"), 7 ("bảy"), 3 ("ba"), 2 ("hai"), 1 ("một") trong tên món
-      s = s.replace(/\b(cafe|cà\s*phê|cacao|ca\s*cao)\s*(?:10|mười|múi|mũi|mùi)\b/gi, ' $1 muối ');
-      s = s.replace(/\b(cafe|cà\s*phê|cacao|ca\s*cao)\s*(?:6|sáu|sửa)\b/gi, ' $1 sữa ');
-      s = s.replace(/\b(trà|ép|nước\s*ép|yaourt|sữa\s*chua|soda)\s*(?:7|bảy|hỏi)\b/gi, ' $1 ổi ');
-      s = s.replace(/\bbánh\s*(?:2|hai)\b/gi, ' bánh hỏi ');
-      s = s.replace(/\b([1-9])?\s*(?:3|ba|bạc)\s*(?:xỉu|sỉu|sửu|tiểu)\b/gi, ' $1 bạc xỉu ');
-      s = s.replace(/\b(?:10|mười)\s*(quảng|quản|quãng|tiềm|hoành\s*thánh|trộn|ý|cay)/gi, ' mì $1 ');
-      s = s.replace(/\bchả\s*(?:1|một)\s*non\b/gi, ' chả mít non ');
-      s = s.replace(/\bnước\s*(?:1|một|mí)\b/gi, ' nước mía ');
-      s = s.replace(/\b(?:1|một)\s*viên\b/gi, ' mọc viên ');
-
-      // 9. Đổi các chữ số lượng đứng trước món ăn thành chữ số chuẩn (1..10)
-      const numWords = [
-        ['mười', '10'], ['chín', '9'], ['tám', '8'], ['bảy', '7'], ['sáu', '6'],
-        ['năm', '5'], ['bốn', '4'], ['ba', '3'], ['hai', '2'], ['một', '1']
-      ];
-      const foodHeadWords = 'tô|phần|ly|chén|dĩa|đĩa|hộp|chai|lon|suất|nồi|ổ|bún|mì|phở|hủ|bánh|cơm|cháo|xôi|chả|bào|khoai|phô|hoành|đậu|nấm|nộm|gỏi|bò|lẩu|chân|gà|pate|rong|sườn|mọc|cafe|cà|bạc|cacao|ca|latte|matcha|trà|ép|nước|yaourt|sữa|suối|soda|thêm|topping|bàn|vip';
-      numWords.forEach(([w, d]) => {
-        const rx = new RegExp('(^|\\s)' + w + '(?=\\s+(?:' + foodHeadWords + ')\\b)', 'gi');
-        s = s.replace(rx, '$1' + d);
-      });
-
-      // 10. Lọc bỏ mọi con số rác đứng trơ trọi ở cuối câu hoặc số >= 20 không phải tên bàn/món
-      s = s.replace(/\b\d{2,}\b/g, (match) => {
-        const n = parseInt(match, 10);
-        return (n === 10) ? '10' : ' ';
-      });
-
+      s = s.replace(/\b(cháo|rau\s*củ|kem|chả|chân|chà\s*bông)\s*(?:5|năm)\b/gi, ' $1 nấm ');
+      s = s.replace(/\bcơm\s*(?:8|tám)\b/gi, ' cơm tấm ');
+      s = s.replace(/\b(trà|suối)\s*(?:8|tám)\b/gi, ' $1 tắc ');
+      s = s.replace(/\b(chả\s*giò|bào\s*ngư|khoai\s*tây|phô\s*mai|hoành\s*thánh|đậu\s*hũ|cơm|nấm)\s*(?:9|chín)\b/gi, ' $1 chiên ');
+      s = s.replace(/\b(cafe|cà\s*phê|cacao|ca\s*cao)\s*(?:10|mười|múi)\b/gi, ' $1 muối ');
       return s.replace(/\s+/g, ' ').trim();
     };
-
-    function calcLevenshteinSimV5(a, b) {
-      if (!a || !b) return 0;
-      if (a === b) return 1;
-      const m = a.length, n = b.length;
-      const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
-      for (let i = 0; i <= m; i++) dp[i][0] = i;
-      for (let j = 0; j <= n; j++) dp[0][j] = j;
-      for (let i = 1; i <= m; i++) {
-        for (let j = 1; j <= n; j++) {
-          const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-          dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost);
-        }
-      }
-      return 1 - dp[m][n] / Math.max(m, n);
-    }
-
-    // TẦNG 2: BỘ NÃO ĐỐI SÁNH KHUNG XƯƠNG ÂM TIẾT & TỰ SỬA TÊN MÓN TRONG 122 MÓN
-    function smartExtractAndSelfCorrectDishesV5(rawSegment) {
-      const rewritten = window.aiSelfThinkingRewriteTranscript(rawSegment);
-      const noAcc = normNoAccentV5(rewritten);
-      const menuList = getUnifiedMenuList();
-      const catalog = [];
-
-      menuList.forEach(item => {
-        const baseNoAcc = normNoAccentV5(item.name);
-        const aliases = new Set([baseNoAcc]);
-        const shortNoAcc = baseNoAcc.replace(/\b(chay|noi lon|an lien|chua chien|gion)\b/g, ' ').replace(/\s+/g, ' ').trim();
-        if (shortNoAcc.length >= 4 && item.cat !== 'topping') aliases.add(shortNoAcc);
-
-        if (item.id === 'phoboga') { aliases.add('pho bo'); aliases.add('pho ga'); aliases.add('pho chay'); }
-        if (item.id === 'hutieudai') { aliases.add('hu tieu dai'); aliases.add('hu tieu mi'); aliases.add('hu tieu'); }
-        if (item.id === 'mispaghetti') { aliases.add('mi y'); aliases.add('mi y sot bo bam'); aliases.add('mi y bo bam'); }
-        if (item.id === 'hoanhthanhmi') { aliases.add('mi hoanh thanh'); aliases.add('hoanh thanh mi'); }
-        if (item.id === 'comdiathapcam') { aliases.add('com thap cam'); aliases.add('com dia'); }
-        if (item.id === 'comchienraucunam') { aliases.add('com chien'); aliases.add('com chien nam'); }
-        if (item.id === 'xoi') { aliases.add('xoi thap cam'); }
-        if (item.id === 'xoichabongnam') { aliases.add('xoi cha bong'); }
-        if (item.id === 'nomhoachuoi') { aliases.add('nom hoa chuoi'); aliases.add('goi hoa chuoi'); }
-        if (item.id === 'boluclackhoaitay') { aliases.add('bo luc lac'); }
-        if (item.id === 'cafeda') { aliases.add('ca phe da'); aliases.add('ca phe den'); }
-        if (item.id === 'cafesua') { aliases.add('ca phe sua'); }
-        if (item.id === 'cafemuoi') { aliases.add('ca phe muoi'); }
-        if (item.id === 'cafekemtrung') { aliases.add('ca phe kem trung'); }
-        if (item.id === 'top_togiay') { aliases.add('to giay'); aliases.add('hop giay'); aliases.add('them to giay'); }
-
-        aliases.forEach(al => {
-          catalog.push({
-            alias: al,
-            skeleton: toVietnamesePhoneticSkeleton(al),
-            words: al.split(' '),
-            item: item
-          });
-        });
-      });
-
-      catalog.sort((a, b) => (b.words.length - a.words.length) || (b.alias.length - a.alias.length));
-
-      let working = ' ' + noAcc + ' ';
-      const results = [];
-      const correctionsLog = [];
-
-      // VÒNG 1: Khớp chính xác cụm từ sau khi đã giải mã số ghép
-      catalog.forEach(entry => {
-        const rx = new RegExp('(?:^|\\s)(?:(\\d{1,2})\\s*(?:to|phan|ly|chen|dia|hop|chai|lon|suat|noi|cai|o)?\\s+)?(' + entry.alias + ')(?=\\s|$)', 'i');
-        let m;
-        while ((m = working.match(rx)) !== null) {
-          const qty = m[1] ? Math.min(20, Math.max(1, parseInt(m[1]))) : 1;
-          results.push({ item: entry.item, qty: qty });
-          working = working.replace(m[0], ' # ');
-        }
-      });
-
-      // VÒNG 2: AI Tự Tư Duy Sửa Chữ Sai Chính Tả dựa trên Khung Xương Âm Tiết (Phonetic Skeleton)
-      const leftoverChunks = working.split('#').map(c => c.trim()).filter(c => c.length >= 4);
-      leftoverChunks.forEach(chunk => {
-        const cleanChunk = chunk.replace(/\b(lay|cho|them|goi|mon|to|ly|phan|dia|suat|chai|ban|so)\b/g, ' ').replace(/\s+/g, ' ').trim();
-        if (cleanChunk.length < 4) return;
-
-        const qtyMatch = cleanChunk.match(/\b(\d{1,2})\b/);
-        const guessedQty = qtyMatch ? Math.min(20, Math.max(1, parseInt(qtyMatch[1]))) : 1;
-        const textOnly = cleanChunk.replace(/\b\d+\b/g, '').trim();
-        if (textOnly.length < 4) return;
-
-        const chunkSkeleton = toVietnamesePhoneticSkeleton(textOnly);
-        let bestEntry = null, bestScore = 0;
-
-        catalog.forEach(entry => {
-          if (entry.item.cat === 'topping' && !chunk.includes('them') && !chunk.includes('giay')) return;
-          const exactSim = calcLevenshteinSimV5(textOnly, entry.alias);
-          const skelSim = calcLevenshteinSimV5(chunkSkeleton, entry.skeleton);
-          const score = Math.max(exactSim, skelSim * 0.96);
-          if (score > bestScore) {
-            bestScore = score;
-            bestEntry = entry;
-          }
-        });
-
-        if (bestEntry && bestScore >= 0.64) {
-          results.push({ item: bestEntry.item, qty: guessedQty });
-          correctionsLog.push(`"${textOnly}" ➡️ <b>${bestEntry.item.name}</b>`);
-        }
-      });
-
-      return { rewrittenText: rewritten, results, correctionsLog };
-    }
-
-    function showGlobalVoiceHud(htmlMsg, isError = false) {
-      const hud = document.getElementById('globalVoiceCommandHud');
-      const content = document.getElementById('globalVoiceHudContent');
-      if (hud && content) {
-        hud.style.display = 'block';
-        hud.style.borderColor = isError ? '#ef4444' : '#22c55e';
-        content.innerHTML = htmlMsg;
-      }
-      const fbBox = document.getElementById('voiceOrderFeedbackBox');
-      if (fbBox) {
-        fbBox.style.display = 'block';
-        fbBox.style.background = isError ? '#fef2f2' : '#dcfce7';
-        fbBox.style.borderColor = isError ? '#fecaca' : '#86efac';
-        fbBox.style.color = isError ? '#b91c1c' : '#166534';
-        fbBox.innerHTML = htmlMsg;
-      }
-    }
-
-    window.undoLastVoiceOrderAction = function() {
-      if (!lastVoiceCartSnapshot) return;
-      posCart = JSON.parse(JSON.stringify(lastVoiceCartSnapshot));
-      renderPosCartUI();
-      updateV19PosTotalsUI();
-      showGlobalVoiceHud('↩️ Đã hoàn tác lệnh giọng nói vừa rồi!');
-    };
-
     window.parseAndExecuteVoiceOrder = function(rawTranscript) {
       if (!rawTranscript || !rawTranscript.trim()) return;
       lastVoiceCartSnapshot = JSON.parse(JSON.stringify(posCart));
-
       const rewritten = window.aiSelfThinkingRewriteTranscript(rawTranscript);
       const noAcc = normNoAccentV5(rewritten);
-
-      // Tự động cập nhật chữ đã sửa đúng vào ô nhập để Thu ngân nhìn thấy ngay câu đúng!
       const manualInp = document.getElementById('voiceManualTranscriptInput');
       if (manualInp) manualInp.value = rewritten;
 
-      if (/\b(xoa gio hang|xoa het mon|huy gio hang)\b/.test(noAcc)) {
-        posCart = {}; renderPosCartUI();
-        return showGlobalVoiceHud('🗑️ Đã xóa sạch giỏ hàng theo lệnh giọng nói!');
+      let detectedTable = null, speechWithoutTable = rewritten;
+      const tblMatch = speechWithoutTable.match(/\b(?:bàn|ban|vip)\s*(?:số|so)?\s*(\d{1,2})\b/i);
+      if (tblMatch) {
+        const num = tblMatch[1];
+        detectedTable = (tablesListCache || []).find(t => normNoAccentV5(t) === 'ban ' + num) || ('Bàn ' + num);
+        speechWithoutTable = speechWithoutTable.replace(tblMatch[0], ' ');
       }
-
-      let detectedTable = null;
-      let speechWithoutTable = rewritten;
-      if (/\b(mang ve|dem ve)\b/.test(noAcc)) {
-        detectedTable = 'Mang Về';
-        speechWithoutTable = speechWithoutTable.replace(/\b(mang về|đem về|mang ve|dem ve)\b/gi, ' ');
-      } else {
-        const tblMatch = speechWithoutTable.match(/\b(?:bàn|ban|vip)\s*(?:số|so)?\s*(\d{1,2})\b/i);
-        if (tblMatch) {
-          const num = tblMatch[1];
-          detectedTable = (tablesListCache || []).find(t => normNoAccentV5(t) === 'ban ' + num || normNoAccentV5(t).endsWith(' ' + num)) || ('Bàn ' + num);
-          speechWithoutTable = speechWithoutTable.replace(tblMatch[0], ' ');
-        }
-      }
-
       if (detectedTable) {
         selectedTable = detectedTable;
         if (document.getElementById('currentSelectedTable')) document.getElementById('currentSelectedTable').innerText = detectedTable;
-        document.querySelectorAll('.btn-table-pill').forEach(b => {
-          if (b.innerText.trim() === detectedTable) b.classList.add('active');
-          else b.classList.remove('active');
-        });
       }
-
-      const { results, correctionsLog } = smartExtractAndSelfCorrectDishesV5(speechWithoutTable);
+      const workNoAcc = normNoAccentV5(speechWithoutTable);
       const addedSummary = [];
-      results.forEach(({ item, qty }) => {
-        for (let i = 0; i < qty; i++) window.addToPosCart(item.name, item.price, item.cat);
-        addedSummary.push(`${qty}x ${item.name}`);
+      getUnifiedMenuList().forEach(item => {
+        const al = normNoAccentV5(item.name).replace(/\b(chay)\b/g, '').trim();
+        if (al.length >= 4 && workNoAcc.includes(al)) {
+          window.addToPosCart(item.name, item.price, item.cat);
+          addedSummary.push(`1x ${item.name}`);
+        }
       });
-
       updateV19PosTotalsUI();
-
-      if (addedSummary.length > 0 || detectedTable) {
-        playHardwareBeep();
-        const selfCorrectBadge = (rewritten !== rawTranscript.toLowerCase().trim() || correctionsLog.length > 0)
-          ? `<br><span style="color:#fde047; font-size:0.8rem;">🧠 <b>AI Đã Tự Sửa Chữ & Số:</b> "${rawTranscript}" ➡️ <b>"${rewritten}"</b> ${correctionsLog.join(' | ')}</span>`
-          : '';
-        showGlobalVoiceHud(`
-          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
-            <div>
-              ✅ <b>Đã nhận đơn:</b> ${detectedTable ? `🪑 <b>${detectedTable}</b> — ` : ''}🍲 <b style="color:#4ade80;">${addedSummary.join(', ')}</b>
-              ${selfCorrectBadge}
-            </div>
-            <button type="button" onclick="undoLastVoiceOrderAction()" style="background:#ef4444; color:#fff; border:none; padding:5px 10px; border-radius:6px; font-weight:800; font-size:0.75rem; cursor:pointer;">↩️ Hoàn tác</button>
-          </div>
-        `);
-      } else {
-        showGlobalVoiceHud(`⚠️ Nghe được: <i>"${rawTranscript}"</i>. Bạn hãy đọc tên món (VD: "Bàn 2 lấy 2 bún thái, 1 bún mọc, 1 cafe muối")!`, true);
-      }
     };
-
     window.processVoiceOrderInputBox = function() {
       const inp = document.getElementById('voiceManualTranscriptInput');
-      if (!inp || !inp.value.trim()) return;
-      window.parseAndExecuteVoiceOrder(inp.value.trim());
+      if (inp && inp.value.trim()) window.parseAndExecuteVoiceOrder(inp.value.trim());
     };
-
-    let voiceBufferTimer = null;
-    let voiceAccumulatedSentences = [];
-
     window.toggleVoiceOrderRecognition = function() {
       const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const btnMain = document.getElementById('btnStartVoiceOrder');
-      const btnText = document.getElementById('voiceMicBtnText');
-      const fabBtn = document.getElementById('floatingVoiceFab');
-      const fabTxt = document.getElementById('floatingVoiceFabText');
-      const liveBar = document.getElementById('voiceLiveInterimBar');
-      const liveTxt = document.getElementById('voiceLiveInterimText');
-
-      if (!SpeechRec) {
-        const manualInp = document.getElementById('voiceManualTranscriptInput');
-        if (manualInp) manualInp.focus();
-        return alert("📱 Hãy bấm biểu tượng Micro (🎤) trên bàn phím điện thoại tại ô nhập để đọc món!");
-      }
-
+      if (!SpeechRec) return alert("Hãy bấm biểu tượng Micro trên bàn phím để đọc món!");
       if (isVoiceListening) {
         isVoiceListening = false;
-        if (voiceBufferTimer) { clearTimeout(voiceBufferTimer); voiceBufferTimer = null; }
-        if (voiceAccumulatedSentences.length > 0) {
-          const fullCmd = voiceAccumulatedSentences.join(' ');
-          voiceAccumulatedSentences = [];
-          window.parseAndExecuteVoiceOrder(fullCmd);
-        }
         if (speechRecognizer) { try { speechRecognizer.stop(); } catch (_) {} }
-        if (btnMain) btnMain.classList.remove('listening');
-        if (btnText) btnText.innerText = 'BẤM VÀO ĐÂY ĐỂ BẮT ĐẦU ĐỌC MÓN (AI TỰ SỬA SỐ & TÊN MÓN)';
-        if (fabBtn) fabBtn.classList.remove('listening');
-        if (fabTxt) fabTxt.innerText = 'Đọc Order';
-        if (liveBar) liveBar.style.display = 'none';
         return;
       }
-
       isVoiceListening = true;
-      voiceAccumulatedSentences = [];
       speechRecognizer = new SpeechRec();
       speechRecognizer.lang = 'vi-VN';
-      speechRecognizer.continuous = true;
-      speechRecognizer.interimResults = true;
-      speechRecognizer.maxAlternatives = 5;
-
-      speechRecognizer.onstart = () => {
-        playHardwareBeep();
-        if (btnMain) btnMain.classList.add('listening');
-        if (btnText) btnText.innerText = '⏹️ ĐANG NGHE... (AI TỰ SỬA SỐ 41/45/24 THÀNH TÊN MÓN)';
-        if (fabBtn) fabBtn.classList.add('listening');
-        if (fabTxt) fabTxt.innerText = 'Đang nghe...';
-        if (liveBar) liveBar.style.display = 'block';
-        if (liveTxt) liveTxt.innerText = 'Hãy đọc số bàn và tên món...';
+      speechRecognizer.onresult = (ev) => {
+        const tr = ev.results[ev.results.length - 1][0].transcript;
+        window.parseAndExecuteVoiceOrder(tr);
       };
-
-      speechRecognizer.onresult = (event) => {
-        let interimTranscript = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          const res = event.results[i];
-          let bestTranscript = res[0].transcript;
-          let bestDishCount = -1;
-          for (let a = 0; a < res.length; a++) {
-            const cand = res[a].transcript;
-            const check = smartExtractAndSelfCorrectDishesV5(cand);
-            if (check.results.length > bestDishCount) {
-              bestDishCount = check.results.length;
-              bestTranscript = cand;
-            }
-          }
-
-          // Sửa ngay lập tức mọi con số nhảy lung tung trước khi hiện lên thanh Live Bar!
-          const cleanLiveText = window.aiSelfThinkingRewriteTranscript(bestTranscript);
-          if (res.isFinal) {
-            voiceAccumulatedSentences.push(cleanLiveText);
-            if (liveTxt) liveTxt.innerText = voiceAccumulatedSentences.join(' ');
-            if (voiceBufferTimer) clearTimeout(voiceBufferTimer);
-            voiceBufferTimer = setTimeout(() => {
-              if (voiceAccumulatedSentences.length > 0) {
-                const finalJoined = voiceAccumulatedSentences.join(' ');
-                voiceAccumulatedSentences = [];
-                window.parseAndExecuteVoiceOrder(finalJoined);
-              }
-            }, 850);
-          } else {
-            interimTranscript += cleanLiveText;
-          }
-        }
-        if (interimTranscript && liveTxt) {
-          liveTxt.innerText = (voiceAccumulatedSentences.join(' ') + ' ' + interimTranscript).trim();
-        }
-      };
-
-      speechRecognizer.onend = () => {
-        if (isVoiceListening) { try { speechRecognizer.start(); } catch (_) {} }
-      };
-
       try { speechRecognizer.start(); } catch (_) {}
     };
   </script>
