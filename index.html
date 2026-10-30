@@ -221,6 +221,19 @@
     .grab-dot-pickup { width: 24px; height: 24px; border-radius: 50%; background: #00b14f; color: #fff; font-weight: 900; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
     .grab-dot-dropoff { width: 24px; height: 24px; border-radius: 50%; background: #ee4d2d; color: #fff; font-weight: 900; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
     .grab-cash-banner { background: linear-gradient(135deg, #fff7ed, #ffedd5); border: 2px solid #ee4d2d; border-radius: 14px; padding: 12px 14px; margin: 0 12px 12px; text-align: left; }
+      /* MODULE 32: GIAO DIEN BUONG LAI BAC TAI HY CHAY DRIVER PRO V2 & BANNER QUAN TAM NGHI */
+    .driver-kpi-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px 12px 4px; background: #0f172a; }
+    .driver-kpi-box { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 10px 6px; text-align: center; color: #fff; }
+    .driver-kpi-box span { display: block; font-size: 0.68rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; }
+    .driver-kpi-box b { display: block; font-size: 1.02rem; font-weight: 900; margin-top: 2px; }
+    .driver-radar-cockpit { background: linear-gradient(160deg, #0f172a, #1e293b); margin: 12px; border-radius: 20px; padding: 28px 18px; text-align: center; color: #ffffff; border: 2px solid #00b14f; box-shadow: 0 12px 30px rgba(0, 177, 79, 0.18); position: relative; overflow: hidden; }
+    .radar-pulse-circle { width: 96px; height: 96px; border-radius: 50%; background: rgba(0, 177, 79, 0.2); border: 3px solid #00b14f; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; font-size: 2.6rem; position: relative; animation: driverRadarPulse 1.8s infinite ease-out; }
+    @keyframes driverRadarPulse { 0% { box-shadow: 0 0 0 0 rgba(0, 177, 79, 0.7); } 70% { box-shadow: 0 0 0 28px rgba(0, 177, 79, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 177, 79, 0); } }
+    .driver-step-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 10px 12px 4px; }
+    .driver-step-pill { padding: 7px 4px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; background: #e2e8f0; color: #64748b; text-align: center; }
+    .driver-step-pill.active { background: #00b14f; color: #ffffff; box-shadow: 0 3px 10px rgba(0, 177, 79, 0.3); }
+    .driver-items-bag-box { background: #f8fafc; border: 1.5px dashed #0284c7; border-radius: 12px; padding: 10px 12px; margin-top: 10px; text-align: left; font-size: 0.85rem; color: #0f172a; }
+    .store-closed-customer-banner { display: none; background: linear-gradient(135deg, #991b1b, #dc2626); color: #ffffff; padding: 16px 20px; text-align: center; border-bottom: 4px solid #ffd800; box-shadow: 0 6px 20px rgba(220, 38, 38, 0.35); position: sticky; top: 60px; z-index: 998; }
   </style>
 </head>
 <body>
@@ -239,100 +252,158 @@
     </div>
 
         <div class="shipper-card" id="shipperOrderBox" style="display:none;">
-      <!-- TOPBAR CHUẨN APP GRABDRIVER / SHOPEEFOOD DRIVER -->
+      <!-- TOPBAR CHUẨN APP GRABDRIVER PRO V2 -->
       <div class="grab-driver-topbar">
         <div style="display:flex; align-items:center; gap:10px;">
-          <div style="width:40px; height:40px; border-radius:50%; background:#ffffff; color:#00b14f; font-weight:900; font-size:1.2rem; display:flex; align-items:center; justify-content:center;">🛵</div>
+          <div style="width:42px; height:42px; border-radius:50%; background:#ffffff; color:#00b14f; font-weight:900; font-size:1.3rem; display:flex; align-items:center; justify-content:center; border:2px solid #ffd800;">🛵</div>
           <div style="text-align:left;">
-            <div style="font-weight:900; font-size:1rem; letter-spacing:0.3px;">HY CHAY DRIVER PRO</div>
-            <div id="shipperStatusText" style="font-size:0.78rem; color:#dcfce7; font-weight:700;">Trạng thái: Đang trực đơn</div>
+            <div style="font-weight:900; font-size:0.98rem; letter-spacing:0.3px;" id="shpDriverHeaderName">HY CHAY DRIVER PRO</div>
+            <div id="shipperStatusText" style="font-size:0.76rem; color:#fde047; font-weight:800;">🟢 ĐANG TRỰC ĐƠN 24/7 (ĐÃ KHÓA ONLINE)</div>
           </div>
         </div>
         <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:0.72rem; font-weight:800; background:rgba(0,0,0,0.25); padding:4px 8px; border-radius:12px;">Nút Trực</span>
           <label class="switch">
-            <input type="checkbox" id="shipperOnlineToggle" onchange="toggleShipperOnline(this.checked)">
+            <input type="checkbox" id="shipperOnlineToggle" checked onchange="handleShipperToggleWithGuard(this)">
             <span class="slider"></span>
           </label>
         </div>
       </div>
 
-      <div style="padding: 10px 12px 0;">
-        <button type="button" onclick="openSmartInstallPrompt('shipper')" style="width:100%; background:#0f172a; color:#ffd800; border:1.5px solid #ffd800; padding:9px; border-radius:10px; font-weight:800; font-size:0.82rem; cursor:pointer; margin-bottom:4px;">
-          📲 Đưa App Tài Xế Ra Màn Hình Chính (1-Chạm)
+      <!-- 3 THẺ VÍ & HIỆU SUẤT BÁC TÀI THỜI GIAN THỰC -->
+      <div class="driver-kpi-strip">
+        <div class="driver-kpi-box">
+          <span>📦 Đơn Hôm Nay</span>
+          <b id="drvKpiOrdersToday" style="color:#38bdf8;">0 đơn</b>
+        </div>
+        <div class="driver-kpi-box">
+          <span>💚 Thu Nhập Ship</span>
+          <b id="drvKpiShipEarned" style="color:#4ade80;">0đ</b>
+        </div>
+        <div class="driver-kpi-box">
+          <span>💰 Nộp Về Quán</span>
+          <b id="drvKpiNetCashOwed" style="color:#fde047;">0đ</b>
+        </div>
+      </div>
+
+      <!-- THANH CÔNG CỤ NHANH CỦA TÀI XẾ -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:8px 12px 0; background:#0f172a;">
+        <button type="button" id="btnShipperSoundArm" onclick="armShipperBackgroundAlarm(false)" style="padding:9px 8px; background:#16a34a; color:#fff; border:1.5px solid #86efac; border-radius:10px; font-weight:800; font-size:0.76rem; cursor:pointer;">
+          🔊 Đã Bật Còi &amp; Rung Ngầm
+        </button>
+        <button type="button" onclick="openSmartInstallPrompt('shipper')" style="padding:9px 8px; background:#1e293b; color:#ffd800; border:1.5px solid #ffd800; border-radius:10px; font-weight:800; font-size:0.76rem; cursor:pointer;">
+          📲 Cài App Ra Màn Hình
         </button>
       </div>
 
-      <!-- THẺ LỘ TRÌNH LẤY HÀNG (A) -> GIAO HÀNG (B) CHUẨN GRAB -->
-      <div class="grab-route-card">
-        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed #cbd5e1; padding-bottom:8px; margin-bottom:12px;">
-          <span style="font-size:0.82rem; color:#64748b; font-weight:700;">MÃ CHUYẾN GIAO:</span>
-          <b id="shpOrderId" style="color:#0f172a; font-size:1.05rem; background:#fef3c7; padding:3px 10px; border-radius:8px; border:1px solid #f59e0b;">--</b>
+      <!-- CHẾ ĐỘ A: BUỒNG LÁI RADAR QUÉT ĐƠN SỐNG ĐỘNG (HIỆN KHI ĐANG RẢNH CHỜ ĐƠN) -->
+      <div id="driverRadarStandbyView" class="driver-radar-cockpit">
+        <div class="radar-pulse-circle">📡</div>
+        <div style="display:inline-block; background:#00b14f; color:#ffffff; padding:4px 14px; border-radius:20px; font-weight:900; font-size:0.76rem; margin-bottom:10px; letter-spacing:0.5px;">
+          HỆ THỐNG CƯỠNG CHẾ NHẬN ĐƠN ĐANG HOẠT ĐỘNG
         </div>
-
-        <div class="grab-timeline-item" style="margin-bottom:14px;">
-          <div class="grab-dot-pickup">A</div>
-          <div style="flex:1;">
-            <div style="font-size:0.72rem; font-weight:800; color:#00b14f; text-transform:uppercase;">Điểm lấy món (Nhà hàng Hy Chay)</div>
-            <div style="font-weight:800; font-size:0.92rem; color:#0f172a;">280 Trần Hưng Đạo, P. Phan Thiết, Lâm Đồng</div>
-          </div>
-        </div>
-
-        <div class="grab-timeline-item">
-          <div class="grab-dot-dropoff">B</div>
-          <div style="flex:1;">
-            <div style="font-size:0.72rem; font-weight:800; color:#ee4d2d; text-transform:uppercase;">Điểm giao khách hàng</div>
-            <div style="font-weight:800; font-size:0.98rem; color:#0f172a; margin-bottom:2px;" id="shpCustomerInfo">--</div>
-            <div style="font-weight:700; font-size:0.9rem; color:#0284c7; background:#f0f9ff; padding:8px 10px; border-radius:8px; border:1px solid #bae6fd; margin-top:4px;" id="shpAddress">--</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- THẺ ĐỐI SOÁT TIỀN THU KHÁCH & PHÍ SHIP CHUẨN SHOPEEFOOD DRIVER -->
-      <div class="grab-cash-banner">
-        <div style="font-size:0.75rem; font-weight:800; color:#9a3412; text-transform:uppercase; margin-bottom:4px;">💰 THÔNG TIN THU TIỀN &amp; PHÍ SHIP BÁC TÀI NHẬN:</div>
-        <div id="shpFee" style="color:#0f172a; font-weight:800; font-size:1rem; line-height:1.45;">--</div>
-      </div>
-      <div id="shpStatusMsg" style="margin:0 12px 8px; padding:10px; border-radius:10px; background:#0f172a; color:#fde047; font-weight:800;" style="color:#fde047; font-weight:bold; margin-bottom:10px; min-height:24px;">Đang kiểm tra lượt...</div>
-      <div class="shipper-countdown" id="shpCountdown">00</div>
-      
-      <!-- Nút thao tác trước khi nhận -->
-      <button id="btnAcceptOrder" class="shipper-btn" onclick="acceptOrderByShipper()" disabled>ĐANG XỬ LÝ LƯỢT...</button>
-
-<!-- Các nút thao tác SAU KHI nhận (ĐÃ THÊM NÚT GỌI KHÁCH) -->
-      <div id="shipperActionButtons" style="display:none; flex-direction:column; gap:10px; margin-top:15px;">
-        <!-- Nút GỌI KHÁCH luôn hiện nổi bật để bác tài gọi khi tìm nhà hoặc khi đã đến nơi -->
-        <a id="btnShipperCallCustomer" href="tel:" style="display:flex; align-items:center; justify-content:center; gap:8px; background:#f59e0b; color:#0f172a; border:2px solid #fde047; padding:14px; border-radius:10px; font-weight:900; font-size:1.05rem; cursor:pointer; text-decoration:none; box-shadow:0 4px 12px rgba(245,158,11,0.3);">
-          📞 GỌI ĐIỆN CHO KHÁCH HÀNG
-        </a>
-
-        <!-- Nút 1: Chỉ hiện khi đang chạy tới quán -->
-        <button id="btnShipperPickedUp" onclick="shipperActionPickedUp()" style="background:#22c55e; color:#fff; border:none; padding:14px; border-radius:10px; font-weight:800; font-size:1rem; cursor:pointer;">✅ ĐÃ TỚI QUÁN & NHẬN ĐƠN THÀNH CÔNG</button>
-        
-        <!-- Nút 2: Luôn hiện để dẫn đường -->
-        <button id="btnShipperNavigate" onclick="shipperActionNavigate()" style="background:#3b82f6; color:#fff; border:none; padding:14px; border-radius:10px; font-weight:800; font-size:1rem; cursor:pointer;">🗺️ DẪN ĐƯỜNG BẰNG GOOGLE MAPS</button>
-        
-        <!-- Nút 3: Chỉ hiện khi đang chạy tới quán; TỰ ĐỘNG ẨN khi đã nhận món đi giao -->
-        <button id="btnShipperIssue" onclick="shipperActionIssue()" style="background:#ef4444; color:#fff; border:none; padding:12px; border-radius:10px; font-weight:800; font-size:0.9rem; cursor:pointer;">⚠️ BÁO SỰ CỐ / HƯ XE (TRẢ ĐƠN)</button>
-
-        <!-- Khung 4: Chỉ hiện sau khi đã lấy món tại quán đi giao cho khách -->
-        <div id="shipperProofSection" style="display:none; background:#0f172a; border:1px solid #334155; border-radius:12px; padding:14px; margin-top:4px; text-align:center;">
-          <p style="color:#38bdf8; font-size:0.85rem; font-weight:700; margin-bottom:8px;">📍 Đã tới điểm giao? Bấm gọi khách ra nhận món & chụp ảnh xác nhận:</p>
-          <a id="btnShipperArrivedCall" href="tel:" style="display:block; width:100%; background:#16a34a; color:#fff; padding:12px; border-radius:10px; font-weight:900; font-size:0.98rem; text-decoration:none; margin-bottom:10px; border:1px solid #86efac;">
-            📲 BẤM GỌI KHÁCH: "TÀI XẾ ĐÃ ĐẾN NƠI"
+        <h3 style="color:#ffd800; font-size:1.22rem; font-weight:900; margin-bottom:6px;">ĐANG QUÉT ĐƠN GIAO HÀNG MỚI...</h3>
+        <p style="color:#cbd5e1; font-size:0.86rem; line-height:1.5; max-width:340px; margin:0 auto 16px;">
+          Điện thoại của bạn đã được <b>khóa thức chạy ngầm</b>. Ngay khi quán Hy Chay bắn đơn, màn hình sẽ <b>tự động bật sáng và hú còi liên hoàn</b>!
+        </p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px;">
+          <a href="tel:0903242400" style="background:#1e293b; color:#38bdf8; border:1px solid #334155; padding:10px; border-radius:10px; font-weight:800; font-size:0.8rem; text-decoration:none;">
+            📞 Gọi Quán Hy Chay
           </a>
-          <p style="color:#fde047; font-size:0.88rem; font-weight:700; margin-bottom:10px;">📸 Chụp hình xác nhận giao hàng cho khách:</p>
-          <label style="display:block; width:100%; background:#0284c7; color:#fff; padding:12px; border-radius:10px; font-weight:800; font-size:0.95rem; cursor:pointer; margin-bottom:10px;">
-            📷 BẤM CHỤP HÌNH XÁC NHẬN
-            <input type="file" id="shipperProofInput" accept="image/*" capture="environment" style="display:none;" onchange="handleShipperProofCapture(this)">
-          </label>
-          <div id="shipperProofPreviewBox" style="display:none; margin-bottom:12px;">
-            <img id="shipperProofPreviewImg" src="" alt="Ảnh giao hàng" style="max-height:150px; border-radius:8px; border:2px solid #22c55e; margin:0 auto;">
-            <p style="color:#22c55e; font-size:0.8rem; font-weight:700; margin-top:6px;">✅ Đã lưu hình xác nhận! Nút hoàn tất đã mở khóa.</p>
+          <button type="button" onclick="playStreetPiercingSiren()" style="background:#1e293b; color:#fde047; border:1px solid #334155; padding:10px; border-radius:10px; font-weight:800; font-size:0.8rem; cursor:pointer;">
+            🔔 Test Thử Còi Hú
+          </button>
+        </div>
+      </div>
+
+      <!-- CHẾ ĐỘ B: BUỒNG LÁI ĐƠN HÀNG ĐANG XỬ LÝ (CHỈ HIỆN KHI CÓ ĐƠN MỚI HOẶC ĐANG ĐI GIAO) -->
+      <div id="driverActiveOrderCockpit" style="display:none;">
+        <!-- Thanh tiến trình 3 bước chuẩn GrabDriver -->
+        <div class="driver-step-bar">
+          <div id="drvStep1" class="driver-step-pill active">1. Nhận &amp; Tới Quán</div>
+          <div id="drvStep2" class="driver-step-pill">2. Đang Đi Giao</div>
+          <div id="drvStep3" class="driver-step-pill">3. Chụp Ảnh Xong</div>
+        </div>
+
+        <!-- THẺ LỘ TRÌNH LẤY HÀNG (A) -> GIAO HÀNG (B) -->
+        <div class="grab-route-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed #cbd5e1; padding-bottom:8px; margin-bottom:12px;">
+            <span style="font-size:0.8rem; color:#64748b; font-weight:800;">MÃ CHUYẾN GIAO:</span>
+            <b id="shpOrderId" style="color:#0f172a; font-size:1.05rem; background:#fef3c7; padding:3px 10px; border-radius:8px; border:1.5px solid #f59e0b;">--</b>
           </div>
-          <div id="btnCompleteLockedNotice" style="background:#334155; color:#94a3b8; padding:12px; border-radius:10px; font-weight:700; font-size:0.85rem;">
-            🔒 Chưa chụp hình xác nhận (Chụp hình xong mới hiện nút Hoàn tất đơn)
+
+          <div class="grab-timeline-item" style="margin-bottom:14px;">
+            <div class="grab-dot-pickup">A</div>
+            <div style="flex:1;">
+              <div style="font-size:0.72rem; font-weight:800; color:#00b14f; text-transform:uppercase;">Điểm lấy món (Nhà hàng Hy Chay)</div>
+              <div style="font-weight:800; font-size:0.92rem; color:#0f172a;">280 Trần Hưng Đạo, P. Phan Thiết, Lâm Đồng</div>
+            </div>
           </div>
-<button id="btnShipperCompleteOrder" onclick="shipperActionCompleteDelivery()" style="display:none; width:100%; background:#22c55e; color:#fff; border:none; padding:15px; border-radius:10px; font-weight:900; font-size:1.05rem; cursor:pointer; box-shadow:0 4px 15px rgba(34,197,94,0.35);">🚀 XÁC NHẬN GIAO ĐƠN THÀNH CÔNG</button>
+
+          <div class="grab-timeline-item">
+            <div class="grab-dot-dropoff">B</div>
+            <div style="flex:1;">
+              <div style="font-size:0.72rem; font-weight:800; color:#ee4d2d; text-transform:uppercase;">Điểm giao khách hàng</div>
+              <div style="font-weight:800; font-size:0.98rem; color:#0f172a; margin-bottom:2px;" id="shpCustomerInfo">--</div>
+              <div style="font-weight:700; font-size:0.9rem; color:#0284c7; background:#f0f9ff; padding:8px 10px; border-radius:8px; border:1px solid #bae6fd; margin-top:4px;" id="shpAddress">--</div>
+            </div>
+          </div>
+
+          <!-- DANH SÁCH MÓN ĂN TRONG TÚI ĐỂ BÁC TÀI KIỂM ĐỦ MÓN TẠI QUẦY -->
+          <div class="driver-items-bag-box">
+            <div style="font-weight:900; color:#0369a1; font-size:0.78rem; margin-bottom:4px;">🥡 CHI TIẾT MÓN TRONG ĐƠN (BÁC TÀI KIỂM ĐỦ KHI LẤY HÀNG):</div>
+            <div id="shpOrderItemsBagList" style="font-weight:700; line-height:1.45;">Đang tải danh sách món...</div>
+          </div>
+        </div>
+
+        <!-- THẺ ĐỐI SOÁT TIỀN THU KHÁCH & PHÍ SHIP -->
+        <div class="grab-cash-banner">
+          <div style="font-size:0.75rem; font-weight:800; color:#9a3412; text-transform:uppercase; margin-bottom:4px;">💰 THÔNG TIN THU TIỀN &amp; PHÍ SHIP BÁC TÀI NHẬN:</div>
+          <div id="shpFee" style="color:#0f172a; font-weight:800; font-size:1rem; line-height:1.45;">--</div>
+        </div>
+
+        <div id="shpStatusMsg" style="margin:0 12px 8px; padding:10px; border-radius:10px; background:#0f172a; color:#fde047; font-weight:800;">Đang kiểm tra lượt...</div>
+        <div class="shipper-countdown" id="shpCountdown">00</div>
+        
+        <div style="padding:0 12px;">
+          <button id="btnAcceptOrder" class="shipper-btn" onclick="acceptOrderByShipper()" disabled>ĐANG XỬ LÝ LƯỢT...</button>
+        </div>
+
+        <!-- Các nút thao tác SAU KHI nhận -->
+        <div id="shipperActionButtons" style="display:none; flex-direction:column; gap:10px; margin:12px;">
+          <a id="btnShipperCallCustomer" href="tel:" style="display:flex; align-items:center; justify-content:center; gap:8px; background:#f59e0b; color:#0f172a; border:2px solid #fde047; padding:14px; border-radius:12px; font-weight:900; font-size:1.05rem; cursor:pointer; text-decoration:none; box-shadow:0 4px 12px rgba(245,158,11,0.3);">
+            📞 GỌI ĐIỆN CHO KHÁCH HÀNG
+          </a>
+          <button id="btnShipperPickedUp" onclick="shipperActionPickedUp()" style="background:#00b14f; color:#fff; border:none; padding:15px; border-radius:12px; font-weight:900; font-size:1.02rem; cursor:pointer; box-shadow:0 4px 15px rgba(0,177,79,0.3);">
+            ✅ ĐÃ TỚI QUÁN &amp; NHẬN MÓN THÀNH CÔNG
+          </button>
+          <button id="btnShipperNavigate" onclick="shipperActionNavigate()" style="background:#0284c7; color:#fff; border:none; padding:14px; border-radius:12px; font-weight:900; font-size:1rem; cursor:pointer;">
+            🗺️ MỞ BẢN ĐỒ GOOGLE MAPS DẪN ĐƯỜNG
+          </button>
+          <button id="btnShipperIssue" onclick="shipperActionIssue()" style="background:#ef4444; color:#fff; border:none; padding:12px; border-radius:12px; font-weight:800; font-size:0.9rem; cursor:pointer;">
+            ⚠️ BÁO SỰ CỐ / HƯ XE (CHUYỂN TÀI XẾ KHÁC)
+          </button>
+
+          <div id="shipperProofSection" style="display:none; background:#0f172a; border:2px solid #00b14f; border-radius:14px; padding:14px; margin-top:4px; text-align:center;">
+            <p style="color:#38bdf8; font-size:0.85rem; font-weight:700; margin-bottom:8px;">📍 Đã tới điểm giao? Bấm gọi khách ra nhận món &amp; chụp ảnh xác nhận:</p>
+            <a id="btnShipperArrivedCall" href="tel:" style="display:block; width:100%; background:#16a34a; color:#fff; padding:12px; border-radius:10px; font-weight:900; font-size:0.98rem; text-decoration:none; margin-bottom:10px; border:1px solid #86efac;">
+              📲 BẤM GỌI KHÁCH: "TÀI XẾ ĐÃ ĐẾN NƠI"
+            </a>
+            <label style="display:block; width:100%; background:#0284c7; color:#fff; padding:13px; border-radius:10px; font-weight:900; font-size:0.98rem; cursor:pointer; margin-bottom:10px;">
+              📷 BẤM CHỤP HÌNH XÁC NHẬN GIAO HÀNG
+              <input type="file" id="shipperProofInput" accept="image/*" capture="environment" style="display:none;" onchange="handleShipperProofCapture(this)">
+            </label>
+            <div id="shipperProofPreviewBox" style="display:none; margin-bottom:12px;">
+              <img id="shipperProofPreviewImg" src="" alt="Ảnh giao hàng" style="max-height:150px; border-radius:8px; border:2px solid #22c55e; margin:0 auto;">
+              <p style="color:#22c55e; font-size:0.8rem; font-weight:700; margin-top:6px;">✅ Đã lưu hình xác nhận! Nút hoàn tất đã mở khóa.</p>
+            </div>
+            <div id="btnCompleteLockedNotice" style="background:#334155; color:#94a3b8; padding:12px; border-radius:10px; font-weight:700; font-size:0.85rem;">
+              🔒 Chưa chụp hình xác nhận (Chụp hình xong mới hiện nút Hoàn tất đơn)
+            </div>
+            <button id="btnShipperCompleteOrder" onclick="shipperActionCompleteDelivery()" style="display:none; width:100%; background:#00b14f; color:#fff; border:2px solid #ffd800; padding:16px; border-radius:12px; font-weight:900; font-size:1.08rem; cursor:pointer; box-shadow:0 4px 15px rgba(0,177,79,0.4);">
+              🚀 XÁC NHẬN GIAO ĐƠN THÀNH CÔNG
+            </button>
+          </div>
         </div>
       </div>
     </div> <!-- Đóng #shipperOrderBox -->
@@ -355,6 +426,16 @@
         </div>
       </div>
     </header>
+    <!-- BANNER THÔNG BÁO KHI QUÁN TẠM NGHỈ BẬN VIỆC ĐỘT XUẤT (TỰ ĐỘNG BẬT/TẮT TỪ POS ADMIN) -->
+    <div id="customerStoreClosedBanner" class="store-closed-customer-banner">
+      <div style="font-size:1.15rem; font-weight:900; color:#ffd800; margin-bottom:4px;">
+        ⛔ THÔNG BÁO: QUÁN HY CHAY ĐANG TẠM NGƯNG NHẬN ĐƠN ONLINE
+      </div>
+      <div id="customerStoreClosedReasonText" style="font-size:0.92rem; font-weight:700; max-width:720px; margin:0 auto;">
+        Quán đang tạm nghỉ vì có việc bận đột xuất. Hẹn gặp lại Quý khách vào ca sau nhé!
+      </div>
+      <div id="customerStoreReopenText" style="font-size:0.82rem; color:#fef08a; margin-top:4px; font-weight:800;"></div>
+    </div>
 
     <section class="hero">
       <div class="hero-content">
@@ -2997,41 +3078,257 @@ ${clipsXml}
     };
   
     // =========================================================================
-    // MODULE 31 (INDEX.HTML): CƯỠNG CHẾ ĐIỆN THOẠI BÁC TÀI LUÔN TRONG TRẠNG THÁI
-    // CHỜ NHẬN ĐƠN & ĐỔ CHUÔNG LIÊN HOÀN (TRỪ KHI GẠT TẮT NÚT NHẬN ĐƠN)
+    
+      // =========================================================================
+    // MODULE 31 & 32 (INDEX.HTML):
+    // 1. ĐỒNG BỘ CÔNG TẮC ĐÓNG/MỞ QUÁN KHẨN CẤP (CHẶN ĐẶT ĐƠN KHI QUÁN TẠM NGHỈ)
+    // 2. CƯỠNG CHẾ BÁC TÀI LUÔN ONLINE 100% + HEARTBEAT 25 GIÂY + CÒI HÚ LIÊN HOÀN
+    // 3. ĐIỀU KHIỂN BUỒNG LÁI HY CHAY DRIVER PRO V2 (3 THẺ VÍ KPI + RADAR + TÚI MÓN)
     // =========================================================================
+    let remoteStoreStatus = { isManualClosed: false, reason: '', reopenText: '' };
+
+    // 1. LẮNG NGHE TRẠNG THÁI ĐÓNG / MỞ QUÁN KHẨN CẤP TỪ ADMIN POS
+    onValue(ref(db, 'restaurant_config/store_status'), (snap) => {
+      remoteStoreStatus = snap.val() || { isManualClosed: false, reason: '', reopenText: '' };
+      applyRemoteStoreStatusToCustomerUI();
+    });
+
+    function applyRemoteStoreStatusToCustomerUI() {
+      if (shipperOrderIdParam) return;
+      const banner = document.getElementById('customerStoreClosedBanner');
+      const reasonEl = document.getElementById('customerStoreClosedReasonText');
+      const reopenEl = document.getElementById('customerStoreReopenText');
+      const stTag = document.getElementById('openStatusTag');
+      const btnSubmit = document.getElementById('btnSubmitOrder');
+
+      if (remoteStoreStatus && remoteStoreStatus.isManualClosed) {
+        isStoreOpen = false;
+        if (banner) banner.style.display = 'block';
+        if (reasonEl) reasonEl.innerText = remoteStoreStatus.reason || 'Quán đang tạm nghỉ vì có việc bận đột xuất. Mong Quý khách thông cảm!';
+        if (reopenEl) {
+          reopenEl.innerText = remoteStoreStatus.reopenText ? `⏰ Dự kiến mở bán lại: ${remoteStoreStatus.reopenText} | Hotline: 0903.242.400` : `📞 Hotline hỗ trợ: 0903.242.400`;
+        }
+        if (stTag) {
+          stTag.style.background = '#fee2e2';
+          stTag.style.color = '#b91c1c';
+          stTag.innerText = '⛔ ' + (remoteStoreStatus.reason || 'Quán đang tạm ngưng nhận đơn Online');
+        }
+        if (btnSubmit) {
+          btnSubmit.disabled = true;
+          btnSubmit.style.background = '#cbd5e1';
+          btnSubmit.innerText = '⛔ QUÁN ĐANG TẠM NGHỈ - CHƯA NHẬN ĐƠN';
+        }
+      } else {
+        if (banner) banner.style.display = 'none';
+        checkOperatingHours();
+      }
+    }
+
+    // Ghi đè checkOperatingHours và addToCart để ưu tiên kiểm tra Công tắc Đóng/Mở quán trước tiên
+    const origCheckOperatingHoursV39 = checkOperatingHours;
+    checkOperatingHours = function() {
+      if (remoteStoreStatus && remoteStoreStatus.isManualClosed) {
+        applyRemoteStoreStatusToCustomerUI();
+        return;
+      }
+      origCheckOperatingHoursV39();
+    };
+
+    const origAddToCartV39 = window.addToCart;
+    window.addToCart = function(id, name, p) {
+      if (remoteStoreStatus && remoteStoreStatus.isManualClosed) {
+        return alert(`⛔ THÔNG BÁO TẠM NGHỈ:\n\n${remoteStoreStatus.reason || 'Hiện tại quán Hy Chay đang tạm nghỉ có việc bận nên tạm ngưng nhận đơn Online.'}\n${remoteStoreStatus.reopenText ? '\n⏰ Dự kiến mở lại: ' + remoteStoreStatus.reopenText : ''}\n📞 Hotline: 0903.242.400`);
+      }
+      origAddToCartV39(id, name, p);
+    };
+
+    // 2. HỆ THỐNG CƯỠNG CHẾ BÁC TÀI LUÔN ONLINE & BUỒNG LÁI DRIVER PRO V2
     let forcedSirenLoopTimer = null;
     let forcedAudioUnlocked = false;
     let currentForcedSirenOrderId = null;
+    let allOrdersForShipperWatch = {};
 
-    // Tạo Giao diện Khiên Mở Khóa Ca Trực & Màn Hình Đổ Chuông Cuộc Gọi Đơn Mới Toàn Màn Hình
+    function getLoggedShipperPhone() {
+      return normalizePhone(localStorage.getItem('hyChayShipperPhone') || localStorage.getItem('hy_chay_shipper_phone') || '');
+    }
+    function getLoggedShipperName() {
+      return localStorage.getItem('hyChayShipperName') || localStorage.getItem('hy_chay_shipper_name') || 'Bác Tài Hy Chay';
+    }
+
+    // Chốt chặn không cho bác tài vô tình gạt tắt nút Online
+    window.handleShipperToggleWithGuard = function(checkboxEl) {
+      const phone = getLoggedShipperPhone();
+      const name = getLoggedShipperName();
+      if (!phone) return;
+
+      if (!checkboxEl.checked) {
+        const reason = prompt("⚠️ CHẾ ĐỘ CƯỠNG CHẾ TRỰC ĐƠN:\nTrong ca làm việc, máy bác tài bắt buộc phải luôn bật ONLINE để đổ chuông nhận đơn.\n\nNếu bạn thực sự xin nghỉ ca, vui lòng nhập lý do để báo về máy Giám đốc (Bấm Hủy để giữ Online):", "");
+        if (!reason || !reason.trim()) {
+          checkboxEl.checked = true;
+          update(ref(db, `shippers/${phone}`), { isOnline: true, lastSeen: new Date().toISOString() }).catch(() => {});
+          return;
+        }
+        window.toggleShipperOnline(false);
+        set(ref(db, 'voice_sync/latest'), {
+          text: `Chú ý! Tài xế ${name} vừa xin gạt tắt nhận đơn với lý do: ${reason.trim()}`,
+          timestamp: Date.now(),
+          sender: 'shipper_offline_guard'
+        }).catch(() => {});
+      } else {
+        window.toggleShipperOnline(true);
+        window.armShipperBackgroundAlarm(true);
+      }
+    };
+
+    // Tự động cưỡng chế bật Online mỗi 25 giây (Heartbeat) và lắng nghe lệnh cưỡng chế từ Admin
+    if (shipperOrderIdParam) {
+      setInterval(() => {
+        const phone = getLoggedShipperPhone();
+        const name = getLoggedShipperName();
+        const toggleEl = document.getElementById('shipperOnlineToggle');
+        if (!phone) return;
+        const hdrName = document.getElementById('shpDriverHeaderName');
+        if (hdrName) hdrName.innerText = `🛵 ${name.toUpperCase()} (${phone})`;
+
+        if (toggleEl && toggleEl.checked) {
+          update(ref(db, `shippers/${phone}`), {
+            name: name,
+            phone: phone,
+            isOnline: true,
+            lastSeen: new Date().toISOString()
+          }).catch(() => {});
+        }
+      }, 25000);
+
+      // Nếu Admin bấm nút "Cưỡng chế Online toàn đội" từ máy chủ -> Tự động gạt nút của bác tài sang BẬT ngay lập tức!
+      onValue(ref(db, 'shippers'), (snap) => {
+        const allShp = snap.val() || {};
+        const phone = getLoggedShipperPhone();
+        if (phone && allShp[phone] && allShp[phone].isOnline === true) {
+          const toggleEl = document.getElementById('shipperOnlineToggle');
+          if (toggleEl && !toggleEl.checked) {
+            toggleEl.checked = true;
+            const txt = document.getElementById('shipperStatusText');
+            if (txt) {
+              txt.innerText = "🟢 ĐANG TRỰC ĐƠN 24/7 (ĐÃ KHÓA ONLINE)";
+              txt.style.color = "#fde047";
+            }
+          }
+        }
+      });
+
+      onValue(ref(db, 'shipper_siren_broadcast/ping_test'), (snap) => {
+        const d = snap.val();
+        if (d && d.timestamp && (Date.now() - d.timestamp < 15000)) {
+          playStreetPiercingSiren();
+          if ('vibrate' in navigator) { try { navigator.vibrate([500, 200, 500]); } catch (_) {} }
+        }
+      });
+    }
+
+    // Cập nhật 3 thẻ Ví KPI của Bác tài + Chuyển đổi mượt mà giữa Màn hình Radar và Màn hình Đơn hàng
+    function updateDriverProCockpitAndKPIs() {
+      if (!shipperOrderIdParam) return;
+      const phone = getLoggedShipperPhone();
+      if (!phone) return;
+
+      const todayVN = new Date(Date.now() + 7 * 3600 * 1000).toISOString().split('T')[0];
+      let todayOrdersCnt = 0;
+      let todayShipEarned = 0;
+      let netCashOwedToStore = 0;
+
+      Object.keys(allOrdersForShipperWatch).forEach(oid => {
+        const o = allOrdersForShipperWatch[oid];
+        if (!o || normalizePhone(o.shipperPhone) !== phone) return;
+        const oDate = o.createdAt ? new Date(new Date(o.createdAt).getTime() + 7 * 3600 * 1000).toISOString().split('T')[0] : '';
+        if (oDate === todayVN && (o.status === 'Đã hoàn tất' || o.status === 'Đang giao hàng')) {
+          todayOrdersCnt++;
+          todayShipEarned += (Number(o.shippingFee) || 0);
+        }
+        if (!o.shipperSettled && (o.status === 'Đã hoàn tất' || o.status === 'Đang giao hàng')) {
+          if (o.paymentMethod === 'VIETQR') {
+            netCashOwedToStore -= (Number(o.shippingFee) || 0);
+          } else {
+            netCashOwedToStore += (Number(o.subtotal) || 0);
+          }
+        }
+      });
+
+      const elOrd = document.getElementById('drvKpiOrdersToday');
+      const elEarn = document.getElementById('drvKpiShipEarned');
+      const elOwed = document.getElementById('drvKpiNetCashOwed');
+      if (elOrd) elOrd.innerText = `${todayOrdersCnt} đơn`;
+      if (elEarn) elEarn.innerText = `+${todayShipEarned.toLocaleString()}đ`;
+      if (elOwed) {
+        if (netCashOwedToStore >= 0) {
+          elOwed.style.color = '#fde047';
+          elOwed.innerText = `${netCashOwedToStore.toLocaleString()}đ`;
+        } else {
+          elOwed.style.color = '#38bdf8';
+          elOwed.innerText = `Quán trả ${Math.abs(netCashOwedToStore).toLocaleString()}đ`;
+        }
+      }
+
+      // Kiểm tra đơn hiện tại để bật/tắt Radar vs Active Order Cockpit
+      const radarView = document.getElementById('driverRadarStandbyView');
+      const activeCockpit = document.getElementById('driverActiveOrderCockpit');
+      const curOrder = activeShipperOrderId ? allOrdersForShipperWatch[activeShipperOrderId] : null;
+      const isOrderValidActive = curOrder && !curOrder.archived && curOrder.status !== 'Đã hoàn tất' && curOrder.status !== 'Đã hủy';
+
+      if (isOrderValidActive) {
+        if (radarView) radarView.style.display = 'none';
+        if (activeCockpit) activeCockpit.style.display = 'block';
+
+        // Điền danh sách món ăn vào túi kiểm hàng (#shpOrderItemsBagList)
+        const bagEl = document.getElementById('shpOrderItemsBagList');
+        if (bagEl && curOrder.items) {
+          const itemLines = Object.values(curOrder.items).map(it => `• <b>${it.qty}x ${it.name}</b>`);
+          bagEl.innerHTML = itemLines.join('<br>') || '1x Phần ăn Hy Chay';
+        }
+
+        // Cập nhật thanh tiến trình 3 bước
+        const s1 = document.getElementById('drvStep1');
+        const s2 = document.getElementById('drvStep2');
+        const s3 = document.getElementById('drvStep3');
+        if (s1 && s2 && s3) {
+          s1.className = 'driver-step-pill';
+          s2.className = 'driver-step-pill';
+          s3.className = 'driver-step-pill';
+          if (curOrder.status === 'Đang giao hàng') {
+            s2.classList.add('active');
+          } else {
+            s1.classList.add('active');
+          }
+        }
+      } else {
+        if (radarView) radarView.style.display = 'block';
+        if (activeCockpit) activeCockpit.style.display = 'none';
+      }
+    }
+
+    // Tạo Khiên Mở Khóa Ca Trực & Màn Hình Cuộc Gọi Đơn Mới Toàn Màn Hình
     function injectForcedShipperSirenModals() {
       if (document.getElementById('forcedShipperDutyShield')) return;
       const wrap = document.createElement('div');
       wrap.innerHTML = `
-        <!-- KHIÊN BẮT BUỘC CHẠM 1 LẦN ĐỂ KÍCH HOẠT LOA & GIỮ ĐIỆN THOẠI THỨC 100% KHI ĐANG BẬT NHẬN ĐƠN -->
         <div id="forcedShipperDutyShield" style="display:none; position:fixed; inset:0; z-index:999998; background:rgba(15,23,42,0.96); color:#fff; flex-direction:column; justify-content:center; align-items:center; padding:24px; text-align:center;">
-          <div style="width:90px; height:90px; border-radius:50%; background:#00b14f; display:flex; align-items:center; justify-content:center; font-size:2.8rem; margin-bottom:18px; box-shadow:0 0 30px rgba(0,177,79,0.7);">🛵</div>
-          <h2 style="color:#ffd800; font-size:1.45rem; font-weight:900; margin-bottom:10px;">CHẾ ĐỘ CƯỠNG CHẾ TRỰC ĐƠN ĐANG BẬT</h2>
+          <div style="width:92px; height:92px; border-radius:50%; background:#00b14f; display:flex; align-items:center; justify-content:center; font-size:2.8rem; margin-bottom:18px; box-shadow:0 0 30px rgba(0,177,79,0.7); border:3px solid #ffd800;">🛵</div>
+          <h2 style="color:#ffd800; font-size:1.45rem; font-weight:900; margin-bottom:10px;">KÍCH HOẠT CA TRỰC DRIVER PRO</h2>
           <p style="color:#e2e8f0; font-size:0.95rem; max-width:380px; margin-bottom:24px; line-height:1.5;">
-            Bạn đang bật nút <b>🟢 NHẬN ĐƠN (ONLINE)</b>. Hãy chạm nút bên dưới 1 lần để khóa màn hình luôn thức và tự động <b>HÚ CÒI ĐỔ CHUÔNG</b> ngay khi quán bắn đơn!
+            Chạm nút bên dưới <b>1 lần duy nhất</b> để khóa điện thoại luôn sáng/thức và tự động <b>HÚ CÒI ĐỔ CHUÔNG</b> ngay khi quán Hy Chay bắn đơn!
           </p>
-          <button type="button" onclick="activateForcedShipperStandbyMode()" style="width:100%; max-width:360px; padding:18px; background:linear-gradient(135deg,#00b14f,#059669); color:#fff; border:3px solid #ffd800; border-radius:16px; font-weight:900; font-size:1.1rem; cursor:pointer; box-shadow:0 10px 25px rgba(0,177,79,0.5);">
-            🔊 BẤM ĐỂ BẮT ĐẦU TRỰC &amp; MỞ CHUÔNG CƯỠNG CHẾ
-          </button>
-          <button type="button" onclick="turnOffShipperOnlineFromShield()" style="margin-top:16px; background:none; border:1px solid #64748b; color:#94a3b8; padding:10px 18px; border-radius:10px; font-weight:700; font-size:0.82rem; cursor:pointer;">
-            🔴 Tắt nút Nhận đơn (Nghỉ ca)
+          <button type="button" onclick="activateForcedShipperStandbyMode()" style="width:100%; max-width:360px; padding:18px; background:linear-gradient(135deg,#00b14f,#059669); color:#fff; border:3px solid #ffd800; border-radius:16px; font-weight:900; font-size:1.12rem; cursor:pointer; box-shadow:0 10px 25px rgba(0,177,79,0.5);">
+            🔊 BẮT ĐẦU CA TRỰC &amp; MỞ CÒI CƯỠNG CHẾ
           </button>
         </div>
 
-        <!-- MÀN HÌNH CUỘC GỌI ĐƠN MỚI ĐỔ CHUÔNG CƯỠNG CHẾ (NHƯ CUỘC GỌI GRABDRIVER) -->
         <div id="forcedIncomingOrderCallModal" style="display:none; position:fixed; inset:0; z-index:999999; background:linear-gradient(160deg,#7f1d1d,#dc2626,#ea580c); color:#ffffff; flex-direction:column; justify-content:space-between; padding:24px 18px; text-align:center;">
           <div>
             <div style="display:inline-block; background:#ffd800; color:#0f172a; padding:6px 16px; border-radius:30px; font-weight:900; font-size:0.9rem; margin-bottom:12px;">
-              🚨 CÓ ĐƠN GIAO HÀNG MỚI ĐANG GỌI BÁC TÀI!
+              🚨 ĐƠN GIAO HÀNG MỚI HY CHAY!
             </div>
             <h1 id="forcedCallOrderSeq" style="font-size:2.3rem; font-weight:900; color:#ffffff; margin:4px 0;">ĐƠN #01</h1>
-            <p style="font-size:0.88rem; color:#fef08a; font-weight:700;">Còi sẽ kêu liên tục cho đến khi Bác tài bấm Nhận Đơn!</p>
+            <p style="font-size:0.88rem; color:#fef08a; font-weight:700;">Còi đang hú cưỡng chế — Bấm Nhận Đơn ngay!</p>
           </div>
 
           <div style="background:#ffffff; color:#0f172a; border-radius:20px; padding:18px; text-align:left; box-shadow:0 15px 35px rgba(0,0,0,0.35);">
@@ -3051,73 +3348,29 @@ ${clipsXml}
           </div>
 
           <div style="display:flex; flex-direction:column; gap:10px;">
-            <button type="button" onclick="acceptForcedIncomingOrderNow()" style="width:100%; padding:18px; background:#00b14f; color:#ffffff; border:3px solid #ffd800; border-radius:16px; font-weight:900; font-size:1.2rem; cursor:pointer; box-shadow:0 10px 25px rgba(0,0,0,0.35);">
+            <button type="button" onclick="acceptForcedIncomingOrderNow()" style="width:100%; padding:18px; background:#00b14f; color:#ffffff; border:3px solid #ffd800; border-radius:16px; font-weight:900; font-size:1.22rem; cursor:pointer; box-shadow:0 10px 25px rgba(0,0,0,0.35);">
               ✅ NHẬN ĐƠN NÀY NGAY (TẮT CÒI)
-            </button>
-            <button type="button" onclick="turnOffShipperOnlineFromShield()" style="width:100%; padding:11px; background:rgba(15,23,42,0.65); color:#cbd5e1; border:1px solid #94a3b8; border-radius:12px; font-weight:800; font-size:0.82rem; cursor:pointer;">
-              🔴 Gạt Tắt Nhận Đơn (Nghỉ Ca - Không Đổ Chuông Nữa)
             </button>
           </div>
         </div>
       `;
       document.body.appendChild(wrap);
     }
-    setTimeout(injectForcedShipperSirenModals, 300);
-
-    // Phát tiếng còi hú cảnh báo kép (880Hz <-> 1320Hz) + Rung điện thoại + Giọng đọc
-    function playLoudGrabDriverSirenBurst() {
-      try {
-        if (!shipperAudioCtx) {
-          shipperAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (shipperAudioCtx.state === 'suspended') shipperAudioCtx.resume();
-        const now = shipperAudioCtx.currentTime;
-        const freqs = [880, 1320, 880, 1320, 1046.5, 1567.98];
-        freqs.forEach((f, idx) => {
-          const osc = shipperAudioCtx.createOscillator();
-          const g = shipperAudioCtx.createGain();
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(f, now + idx * 0.18);
-          g.gain.setValueAtTime(0.95, now + idx * 0.18);
-          g.gain.exponentialRampToValueAtTime(0.05, now + idx * 0.18 + 0.16);
-          osc.connect(g);
-          g.connect(shipperAudioCtx.destination);
-          osc.start(now + idx * 0.18);
-          osc.stop(now + idx * 0.18 + 0.17);
-        });
-      } catch (_) {}
-
-      if ('vibrate' in navigator) {
-        try { navigator.vibrate([600, 200, 600, 200, 800]); } catch (_) {}
-      }
-
-      if ('speechSynthesis' in window) {
-        try {
-          window.speechSynthesis.cancel();
-          const u = new SpeechSynthesisUtterance("Có đơn giao hàng mới Hy Chay! Bác tài bấm nhận đơn ngay!");
-          u.lang = 'vi-VN'; u.rate = 1.05; u.volume = 1.0;
-          window.speechSynthesis.speak(u);
-        } catch (_) {}
-      }
-    }
+    setTimeout(injectForcedShipperSirenModals, 250);
 
     function stopForcedShipperSirenLoop() {
-      if (forcedSirenLoopTimer) {
-        clearInterval(forcedSirenLoopTimer);
-        forcedSirenLoopTimer = null;
-      }
-      if ('vibrate' in navigator) {
-        try { navigator.vibrate(0); } catch (_) {}
-      }
+      if (forcedSirenLoopTimer) { clearInterval(forcedSirenLoopTimer); forcedSirenLoopTimer = null; }
+      stopContinuousShipperAlarm();
       const modal = document.getElementById('forcedIncomingOrderCallModal');
       if (modal) modal.style.display = 'none';
     }
 
     function startForcedShipperSirenLoop(orderId, orderObj) {
       const toggleEl = document.getElementById('shipperOnlineToggle');
-      if (!toggleEl || !toggleEl.checked) return; // Nếu đã gạt tắt Nhận đơn thì không đổ chuông
+      if (toggleEl && !toggleEl.checked) return;
 
       currentForcedSirenOrderId = orderId;
+      activeShipperOrderId = orderId;
       injectForcedShipperSirenModals();
 
       const seqBadge = orderObj.dailySeq ? `#${String(orderObj.dailySeq).padStart(2, '0')}` : `#HC-${orderId.substring(orderId.length - 4).toUpperCase()}`;
@@ -3130,78 +3383,58 @@ ${clipsXml}
       const modal = document.getElementById('forcedIncomingOrderCallModal');
       if (modal) modal.style.display = 'flex';
 
-      playLoudGrabDriverSirenBurst();
+      playStreetPiercingSiren();
+      startContinuousShipperAlarm(orderObj);
       if (forcedSirenLoopTimer) clearInterval(forcedSirenLoopTimer);
-      // CƯỠNG CHẾ ĐỔ CHUÔNG LIÊN TỤC MỖI 3.5 GIÂY CHO ĐẾN KHI NHẬN ĐƠN HOẶC GẠT TẮT!
       forcedSirenLoopTimer = setInterval(() => {
         const tg = document.getElementById('shipperOnlineToggle');
-        if (!tg || !tg.checked) {
-          stopForcedShipperSirenLoop();
-          return;
-        }
-        playLoudGrabDriverSirenBurst();
+        if (tg && !tg.checked) { stopForcedShipperSirenLoop(); return; }
+        playStreetPiercingSiren();
       }, 3500);
     }
 
     window.activateForcedShipperStandbyMode = function() {
       forcedAudioUnlocked = true;
-      startShipperBackgroundKeepAlive();
-      playLoudGrabDriverSirenBurst();
+      window.armShipperBackgroundAlarm(false);
       const shield = document.getElementById('forcedShipperDutyShield');
       if (shield) shield.style.display = 'none';
-      checkAnyWaitingDeliveryOrdersForSiren();
-    };
-
-    window.turnOffShipperOnlineFromShield = function() {
-      stopForcedShipperSirenLoop();
-      const shield = document.getElementById('forcedShipperDutyShield');
-      if (shield) shield.style.display = 'none';
-      const toggleEl = document.getElementById('shipperOnlineToggle');
-      if (toggleEl) {
-        toggleEl.checked = false;
-        window.toggleShipperOnline(false);
+      const phone = getLoggedShipperPhone();
+      const name = getLoggedShipperName();
+      if (phone) {
+        update(ref(db, `shippers/${phone}`), { name, phone, isOnline: true, lastSeen: new Date().toISOString() }).catch(() => {});
       }
+      checkAnyWaitingDeliveryOrdersForSiren();
     };
 
     window.acceptForcedIncomingOrderNow = function() {
       const oid = currentForcedSirenOrderId;
       stopForcedShipperSirenLoop();
       if (!oid) return;
-      currentShipperOrderId = oid;
-      // Gắn đơn vào màn hình Bác tài và bấm nhận đơn ngay lập tức
-      listenToShipperOrder(oid);
-      setTimeout(() => {
-        if (typeof window.shipperAcceptOrder === 'function') {
-          window.shipperAcceptOrder();
-        }
-      }, 250);
+      activeShipperOrderId = oid;
+      window.acceptOrderByShipper();
     };
 
-    // Kiểm tra xem có đơn giao hàng nào đang cần tài xế mà chưa có ai nhận không
-    let allOrdersForShipperWatch = {};
     function checkAnyWaitingDeliveryOrdersForSiren() {
-      const shpPhone = localStorage.getItem('hy_chay_shipper_phone');
+      const shpPhone = getLoggedShipperPhone();
       const toggleEl = document.getElementById('shipperOnlineToggle');
-      if (!shpPhone || !toggleEl || !toggleEl.checked) {
+      updateDriverProCockpitAndKPIs();
+
+      if (!shpPhone || (toggleEl && !toggleEl.checked)) {
         stopForcedShipperSirenLoop();
         return;
       }
 
-      // Nếu bác tài đang giao dở 1 đơn rồi thì không hú đơn khác đè lên
       const myBusyOrder = Object.keys(allOrdersForShipperWatch).find(id => {
         const o = allOrdersForShipperWatch[id];
-        return o && !o.archived && o.shipperPhone === shpPhone && (o.status === 'Tài xế đang đến quán' || o.status === 'Đang giao hàng');
+        return o && !o.archived && normalizePhone(o.shipperPhone) === shpPhone && (o.status === 'Tài xế đang đến quán' || o.status === 'Đang giao hàng');
       });
       if (myBusyOrder) {
         stopForcedShipperSirenLoop();
-        if (currentShipperOrderId !== myBusyOrder) {
-          currentShipperOrderId = myBusyOrder;
-          listenToShipperOrder(myBusyOrder);
-        }
+        activeShipperOrderId = myBusyOrder;
+        updateDriverProCockpitAndKPIs();
         return;
       }
 
-      // Tìm đơn giao hàng mới chưa có tài xế nhận
       const waitingOrderId = Object.keys(allOrdersForShipperWatch).find(id => {
         const o = allOrdersForShipperWatch[id];
         if (!o || o.archived || o.orderType === 'dine_in') return false;
@@ -3216,17 +3449,16 @@ ${clipsXml}
       }
     }
 
-    // Lắng nghe toàn bộ nhánh orders & shipper_siren_broadcast theo thời gian thực cho mọi bác tài đang mở App
     onValue(ref(db, 'orders'), (snap) => {
       allOrdersForShipperWatch = snap.val() || {};
-      if (window.location.search.includes('shipper=')) {
+      if (shipperOrderIdParam) {
         checkAnyWaitingDeliveryOrdersForSiren();
       }
     });
 
     onValue(ref(db, 'shipper_siren_broadcast/latest'), (snap) => {
       const data = snap.val();
-      if (!data || !data.orderId || !window.location.search.includes('shipper=')) return;
+      if (!data || !data.orderId || !shipperOrderIdParam) return;
       if (Date.now() - (data.timestamp || 0) < 45000) {
         const ord = allOrdersForShipperWatch[data.orderId] || data;
         if (!ord.shipperPhone) {
@@ -3235,13 +3467,11 @@ ${clipsXml}
       }
     });
 
-    // Cưỡng chế hiện Khiên Mở Khóa Chuông nếu Bác Tài đang bật ONLINE mà vừa tải lại trang
     setInterval(() => {
-      if (!window.location.search.includes('shipper=')) return;
-      const shpPhone = localStorage.getItem('hy_chay_shipper_phone');
-      const toggleEl = document.getElementById('shipperOnlineToggle');
+      if (!shipperOrderIdParam) return;
+      const shpPhone = getLoggedShipperPhone();
       const shield = document.getElementById('forcedShipperDutyShield');
-      if (shpPhone && toggleEl && toggleEl.checked && !forcedAudioUnlocked && shield) {
+      if (shpPhone && !forcedAudioUnlocked && shield) {
         shield.style.display = 'flex';
       }
     }, 1500);
