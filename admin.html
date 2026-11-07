@@ -3609,11 +3609,18 @@ window.deleteDishFromMenu = function(id, name) {
       const todayStr = getVNDateStr();
 
       const allKeys = Object.keys(ordersCache);
+      const curStation = localStorage.getItem('BAL_POS_STATION') || 'HC';
       allKeys.forEach(id => {
         const o = ordersCache[id];
         if (!o || !o.createdAt) return;
-        const orderDayStr = getVNDateStr(o.createdAt);
 
+        // LỌC THEO TRẠM POS CHO CẢ CHỈ SỐ KPI VÀ THỐNG KÊ DOANH THU
+        const isBh = (o.station === 'BH') || (o.table && o.table.startsWith('BH-')) || id.includes('-BH-');
+        const isHc = (o.station === 'HC') || (o.table && o.table.startsWith('HC-')) || id.includes('-HC-') || (!isBh);
+        if (curStation === 'HC' && !isHc) return;
+        if (curStation === 'BH' && !isBh) return;
+
+        const orderDayStr = getVNDateStr(o.createdAt);
         if (orderDayStr === todayStr && (o.status === 'Đã hoàn tất' || o.status === 'Đang giao hàng')) {
           taxableRevToday += (o.subtotal || 0);
           shipRevToday += (o.shippingFee || 0);
@@ -4686,13 +4693,80 @@ window.deleteShipperPermanently = function(phone) {
     let currentPosDrinkSubCat = 'all_drink';
     let currentEditDrinkSubCat = 'all_drink';
     let isTableDeleteMode = false;
-    let tablesListCache = ["Bàn 1", "Bàn 2", "Bàn 3", "Bàn 4", "Bàn 5", "Bàn 6", "Bàn 7", "Bàn 8", "Mang Về"];
+
+    // ĐỊNH DANH DANH SÁCH BÀN ĐỘC LẬP THEO TRẠM: HC (HC-01 -> HC-20) vs BH (BH-01 -> BH-15) vs ALL
+    window.getStationTableList = function(st) {
+      const station = st || localStorage.getItem('BAL_POS_STATION') || 'HC';
+      const hcTables = Array.from({ length: 20 }, (_, i) => `HC-${String(i + 1).padStart(2, '0')}`);
+      hcTables.push('Mang Về (HC)');
+      const bhTables = Array.from({ length: 15 }, (_, i) => `BH-${String(i + 1).padStart(2, '0')}`);
+      bhTables.push('Mang Về (BH)');
+
+      if (station === 'BH') return bhTables;
+      if (station === 'ALL') return [...hcTables, ...bhTables];
+      return hcTables;
+    };
+
+    let tablesListCache = window.getStationTableList();
+
+    // HÀM CHUYỂN ĐỔI TRẠM POS CHÍNH THỨC (TRẠM QUÁN HY CHAY / XE NƯỚC / GIÁM ĐỐC)
+    window.setPosStation = function(st) {
+      const station = (st === 'BH' || st === 'ALL') ? st : 'HC';
+      localStorage.setItem('BAL_POS_STATION', station);
+
+      // 1. Cập nhật trạng thái nút bấm
+      document.querySelectorAll('#posStationSwitcherBar .station-btn').forEach(btn => {
+        if (btn.getAttribute('data-station') === station) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
+      // 2. Cập nhật nhãn trạm đang trực
+      const badge = document.getElementById('currentStationBadge');
+      if (badge) {
+        if (station === 'HC') {
+          badge.innerHTML = `Đang trực: <b style="color:#22c55e;">🏠 Trạm Quán Hy Chay (HC-01 → HC-20)</b>`;
+        } else if (station === 'BH') {
+          badge.innerHTML = `Đang trực: <b style="color:#f59e0b;">🧋 Trạm Xe Nước BAL'S HOUSE (BH-01 → BH-15)</b>`;
+        } else {
+          badge.innerHTML = `Đang trực: <b style="color:#a855f7;">👑 Giám Đốc Xem Tất Cả (All Stations)</b>`;
+        }
+      }
+
+      // 3. Cập nhật sơ đồ bàn ăn ngay lập tức
+      tablesListCache = window.getStationTableList(station);
+      if (!tablesListCache.includes(selectedTable)) {
+        selectedTable = tablesListCache[0] || (station === 'BH' ? 'BH-01' : 'HC-01');
+      }
+      if (document.getElementById('currentSelectedTable')) {
+        document.getElementById('currentSelectedTable').innerText = selectedTable;
+      }
+      renderDynamicTablePills();
+
+      // 4. Lọc lại màn hình đơn hàng theo trạm ngay lập tức
+      if (typeof renderOrders === 'function') {
+        try { renderOrders(); } catch(e) { console.warn(e); }
+      }
+
+      // 5. Cập nhật giao diện cảnh báo đồ uống bắn chéo trạm
+      if (typeof renderCrossStationAlertsUI === 'function') {
+        try { renderCrossStationAlertsUI(); } catch(e) { console.warn(e); }
+      }
+
+      // 6. Nếu chuyển sang Trạm Xe Nước, tự động chuyển danh mục sang Đồ Uống
+      if (station === 'BH' && typeof window.setPosCategory === 'function') {
+        const drinkChip = document.querySelector('#posCatFilterBar .admin-cat-chip[onclick*="douong"]');
+        if (drinkChip) {
+          try { window.setPosCategory('douong', drinkChip); } catch(e) {}
+        }
+      }
+    };
 
     // 16.1. ĐỒNG BỘ DANH SÁCH BÀN ĂN TỪ FIREBASE (TẠO THÊM BÀN / XÓA BÀN)
     onValue(ref(db, 'restaurant_config/tables'), (snap) => {
-      if (snap.exists() && Array.isArray(snap.val()) && snap.val().length > 0) {
-        tablesListCache = snap.val();
-      }
+      tablesListCache = window.getStationTableList();
       renderDynamicTablePills();
     });
 
