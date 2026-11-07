@@ -604,7 +604,7 @@
   <header>
       <div class="nav-container">
         <a href="#" class="brand-logo">
-          <img src="Logo nho.png" alt="Hy Chay Logo" onerror="this.src='https://hychayfood.vercel.app/Logo%20nho.png'" loading="lazy" decoding="async">
+          <img src="/Logo%20nho.png" alt="Hy Chay Logo" width="42" height="42" onerror="this.onerror=null; this.src='/public/Logo%20nho.png';" decoding="async">
           <span>HY CHAY</span>
         </a>
         <div class="nav-actions">
@@ -635,7 +635,7 @@
 
 <section class="section" id="gioi-thieu">
       <div class="featured-banner">
-        <img src="combo 7 mon chay.png" alt="Mâm cỗ 7 món Hy Chay" onerror="this.src='https://hychayfood.vercel.app/combo%207%20mon%20chay.png'" loading="lazy" decoding="async">
+        <img src="/combo%207%20mon%20chay.png" alt="Mâm cỗ 7 món Hy Chay" onerror="this.onerror=null; this.src='/public/combo%207%20mon%20chay.png';" loading="lazy" decoding="async">
         <div class="featured-info">
           <span class="tag-pill">Gợi Ý Đặt Tiệc</span><span class="tag-pill">Trọn Vị Ngũ Hành</span>
           <h3>Mâm Cỗ Chay Sum Vầy 7 Món</h3>
@@ -702,9 +702,9 @@
         <div class="divider"></div>
       </div>
       <div class="menu-cards-grid">
-        <div class="menu-poster-card"><div class="menu-poster-header" style="background: #1e5e3a;">ẨM THỰC TẠI CHỖ</div><a href="menu 1.jpg" target="_blank"><img src="menu 1.jpg" onerror="this.src='https://hychayfood.vercel.app/menu%201.jpg'" loading="lazy" decoding="async"></a><div class="menu-poster-desc">Gồm các món Bún, Phở, Mì Ý, Cơm Chiên, Lẩu Thái & Lẩu Chao thanh tịnh.</div></div>
-        <div class="menu-poster-card"><div class="menu-poster-header" style="background: #c88900;">SƠ CHẾ & ĂN LIỀN</div><a href="Menu 3.jpg" target="_blank"><img src="Menu 3.jpg" onerror="this.src='https://hychayfood.vercel.app/Menu%203.jpg'" loading="lazy" decoding="async"></a><div class="menu-poster-desc">Đặc sản Chà Bông Nấm Hương, Chả Mít Non Độc Quyền, Pate Hạt Điều.</div></div>
-        <div class="menu-poster-card"><div class="menu-poster-header" style="background: #4a2e1b;">ĐỒ UỐNG BAL'S HOUSE</div><a href="Menu 4.jpg" target="_blank"><img src="Menu 4.jpg" onerror="this.src='https://hychayfood.vercel.app/Menu%204.jpg'" loading="lazy" decoding="async"></a><div class="menu-poster-desc">Menu giải khát với Cà Phê Muối, Latte Matcha, Yaourt & Nước Ép Tươi.</div></div>
+        <div class="menu-poster-card"><div class="menu-poster-header" style="background: #1e5e3a;">ẨM THỰC TẠI CHỖ</div><a href="menu 1.jpg" target="_blank"><img src="/menu%201.jpg" onerror="this.onerror=null; this.src='/public/menu%201.jpg';" loading="lazy" decoding="async"></a><div class="menu-poster-desc">Gồm các món Bún, Phở, Mì Ý, Cơm Chiên, Lẩu Thái & Lẩu Chao thanh tịnh.</div></div>
+        <div class="menu-poster-card"><div class="menu-poster-header" style="background: #c88900;">SƠ CHẾ & ĂN LIỀN</div><a href="Menu 3.jpg" target="_blank"><img src="/Menu%203.jpg" onerror="this.onerror=null; this.src='/public/Menu%203.jpg';" loading="lazy" decoding="async"></a><div class="menu-poster-desc">Đặc sản Chà Bông Nấm Hương, Chả Mít Non Độc Quyền, Pate Hạt Điều.</div></div>
+        <div class="menu-poster-card"><div class="menu-poster-header" style="background: #4a2e1b;">ĐỒ UỐNG BAL'S HOUSE</div><a href="Menu 4.jpg" target="_blank"><img src="/Menu%204.jpg" onerror="this.onerror=null; this.src='/public/Menu%204.jpg';" loading="lazy" decoding="async"></a><div class="menu-poster-desc">Menu giải khát với Cà Phê Muối, Latte Matcha, Yaourt & Nước Ép Tươi.</div></div>
       </div>
     </section>
 
@@ -1879,7 +1879,7 @@ const CAT_LABELS_MAP = {
         const safeName = it.name.replace(/'/g, "\\'");
         html += `
           <div class="dish-card ${it.isSoldOut ? 'is-sold-out' : ''} is-hot" data-dish-id="${it.id}">
-            <div class="dish-img-wrap"><span class="hot-badge">🔥 Bán chạy</span><img src="${it.image}" onerror="this.src='Logo nho.png'" loading="lazy" decoding="async"><span class="sold-out-badge">Tạm Hết</span></div>
+            <div class="dish-img-wrap"><span class="hot-badge">🔥 Bán chạy</span><img src="${it.image}" onerror="this.onerror=null; this.src='/Logo%20nho.png';" loading="lazy" decoding="async"><span class="sold-out-badge">Tạm Hết</span></div>
             <div class="dish-body">
               <h3>${it.name}</h3>
               <div class="dish-footer" style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
@@ -1909,7 +1909,7 @@ const CAT_LABELS_MAP = {
         const labelText = it.cat === 'douong' ? (DRINK_SUBCAT_LABELS[getDrinkSubCat(it.id, it.name)] || it.catName) : it.catName;
         html += `
           <div class="menu-item-row ${it.isSoldOut ? 'is-sold-out' : ''}">
-            <div class="item-thumb"><img src="${it.image}" onerror="this.src='Logo nho.png'" loading="lazy" decoding="async"></div>
+            <div class="item-thumb"><img src="${it.image}" onerror="this.onerror=null; this.src='/Logo%20nho.png';" loading="lazy" decoding="async"></div>
             <div class="item-meta"><span class="item-cat-label">${labelText}</span><h4>${it.name} ${it.isHot ? '<span class="hot-label-small">🔥</span>' : ''}</h4><span class="item-price-tag">${it.price.toLocaleString()}đ</span></div>
             <button class="btn-quick-add" ${it.isSoldOut ? 'disabled' : ''} onclick="addToCart('${it.id}', '${safeName}', ${it.price})">${it.isSoldOut ? 'Tạm Hết' : '+ Chọn Món'}</button>
           </div>`;
@@ -2202,19 +2202,49 @@ const CAT_LABELS_MAP = {
     };
 
     window.handleLogin = function() {
-      const cleanPhone = normalizePhone(document.getElementById('lPhone').value);
-      const pass = document.getElementById('lPass').value;
+      const rawInput = (document.getElementById('lPhone').value || '').trim();
+      const lowerInput = rawInput.toLowerCase();
+      const cleanPhone = normalizePhone(rawInput);
+      const pass = (document.getElementById('lPass').value || '').trim();
       const errBox = document.getElementById('lError');
       errBox.style.display = 'none';
-      if (!cleanPhone || !pass) return;
+      if (!rawInput || !pass) {
+        errBox.innerText = "Vui lòng nhập Số điện thoại / Email và Mật khẩu!";
+        errBox.style.display = 'block';
+        return;
+      }
+
+      if ((lowerInput === "balshousevn@gmail.com" && pass === "hychayfood") ||
+          (lowerInput === "hobaoanhpt@gmail.com" && pass === "hychayfood") ||
+          (lowerInput === "admin" && (pass === "baochay2026" || pass === "hychayfood")) ||
+          (lowerInput === "trunghuynh100291@gmail.com" && (pass === "Trung100291#" || pass === "hychayfood")) ||
+          (lowerInput === "huynhthanhtutram@gmail.com" && pass === "hychayfood") ||
+          (lowerInput === "tramanhhoang478@gmail.com" && pass === "hychayfood")) {
+        localStorage.setItem('hy_chay_active_user', lowerInput);
+        localStorage.setItem('hy_chay_active_role', 'root');
+        applyCustomerAuthSession('0903242400');
+        return;
+      }
+
+      if (!cleanPhone) {
+        errBox.innerText = "Sai số điện thoại hoặc mật khẩu!";
+        errBox.style.display = 'block';
+        return;
+      }
 
       get(ref(db, `users/${cleanPhone}`)).then((snap) => {
-        if (snap.exists() && String(snap.val().password) === String(pass)) {
+        if (snap.exists() && (!snap.val().password || String(snap.val().password).trim() === String(pass))) {
+          if (!snap.val().password) {
+            update(ref(db, `users/${cleanPhone}`), { password: pass }).catch(() => {});
+          }
           applyCustomerAuthSession(cleanPhone);
         } else {
           errBox.innerText = "Sai số điện thoại hoặc mật khẩu!";
           errBox.style.display = 'block';
         }
+      }).catch(() => {
+        errBox.innerText = "Lỗi kết nối máy chủ, vui lòng thử lại!";
+        errBox.style.display = 'block';
       });
     };
 

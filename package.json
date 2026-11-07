@@ -4,6 +4,7 @@
   "version": "2.4.0",
   "scripts": {
     "dev": "vite",
+    "build": "node vercel_prepare.cjs",
     "preview": "vite preview"
   },
   "devDependencies": {

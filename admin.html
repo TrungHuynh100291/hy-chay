@@ -27,7 +27,7 @@
     /* MÀN HÌNH ĐĂNG NHẬP ADMIN (NỀN VÀNG) */
     .admin-login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #ffd800, #ffb700); z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; transition: opacity 0.5s ease; }
     .admin-login-box { background: #ffffff; padding: 40px 30px; border-radius: 20px; box-shadow: 0 25px 50px rgba(0,0,0,0.15); width: 100%; max-width: 420px; text-align: center; }
-    .admin-login-box img { width: 110px; margin-bottom: 20px; border-radius: 16px; box-shadow: 0 4px 15px rgba(30, 94, 58, 0.2); }
+    .admin-login-box img { width: 110px; height: 110px; object-fit: contain; display: block; margin: 0 auto 20px; border-radius: 16px; box-shadow: 0 4px 15px rgba(30, 94, 58, 0.2); background: #fff; }
     .admin-login-box h2 { color: var(--primary); font-family: 'Montserrat', sans-serif; font-size: 1.4rem; font-weight: 800; margin-bottom: 5px; }
     .admin-login-box p { color: #64748b; font-size: 0.9rem; margin-bottom: 25px; }
     .admin-login-box input { width: 100%; padding: 14px 16px; margin-bottom: 16px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 0.95rem; font-family: inherit; transition: border-color 0.3s; }
@@ -43,7 +43,7 @@
     /* TOPBAR & ALERTS */
     .topbar { background: #ffffff; border-bottom: 1px solid var(--border); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; gap:10px; }
     .brand-group { display: flex; align-items: center; gap: 12px; }
-    .brand-logo { height: 40px; width: auto; border-radius: 8px; }
+    .brand-logo { height: 40px; width: 40px; object-fit: contain; border-radius: 8px; flex-shrink: 0; }
     .brand-title h1 { font-size: 1.15rem; font-family: 'Montserrat', sans-serif; color: var(--primary); font-weight: 800; }
     .top-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .live-clock { font-size: 0.85rem; font-weight: 700; color: var(--primary); background: #eaf5ed; padding: 6px 12px; border-radius: 20px; }
@@ -373,7 +373,7 @@
   <!-- MÀN HÌNH ĐĂNG NHẬP BẢO MẬT ADMIN (NỀN VÀNG THEO LOGO) -->
   <div id="adminLoginOverlay" class="admin-login-overlay">
     <div class="admin-login-box">
-      <img src="Logo nho.png" alt="Hy Chay Logo" onerror="this.src='https://hychayfood.vercel.app/Logo%20nho.png'">
+      <img src="/Logo%20nho.png" alt="Hy Chay Logo" width="110" height="110" onerror="this.onerror=null; this.src='/public/Logo%20nho.png';">
       <h2>TRUNG TÂM ĐIỀU HÀNH</h2>
       <p>CÔNG TY TNHH TMDV VÀ SẢN XUẤT BẢO ANH LÂM</p>
       <form id="adminLoginForm" onsubmit="handleAdminLogin(event)">
@@ -438,7 +438,7 @@
 
     <header class="topbar no-print">
       <div class="brand-group">
-        <img src="Logo nho.png" class="brand-logo" onerror="this.src='https://hychayfood.vercel.app/Logo%20nho.png'">
+        <img src="/Logo%20nho.png" class="brand-logo" width="40" height="40" onerror="this.onerror=null; this.src='/public/Logo%20nho.png';">
         <div class="brand-title"><h1>HY CHAY POS PRO</h1><p>280 Trần Hưng Đạo, P. Phan Thiết, T. Lâm Đồng</p></div>
       </div>
       <div class="top-actions">
@@ -2526,7 +2526,7 @@ window.deleteDishFromMenu = function(id, name) {
         html += `
           <tr>
             <td>
-              <div class="dish-thumb-box"><img src="${item.image}" onerror="this.src='Logo nho.png'"></div>
+              <div class="dish-thumb-box"><img src="${item.image}" onerror="this.onerror=null; this.src='/Logo%20nho.png';"></div>
               <label class="btn-native-upload">📷 Đổi ảnh<input type="file" accept="image/*" onchange="uploadDishImageDirect(this, '${item.id}')"></label>
             </td>
             <td>
@@ -5121,7 +5121,7 @@ window.setEditModalCategory = function(cat, btn) {
 // Cập nhật đăng nhập nhận diện đúng Role (Không phân biệt chữ Hoa/Thường ở tên đăng nhập & Không bị kẹt nút)
 const origHandleAdminLogin = window.handleAdminLogin;
     window.handleAdminLogin = function(e) {
-      e.preventDefault();
+      if (e && e.preventDefault) e.preventDefault();
       const rawUser = (document.getElementById('adminEmail').value || '').trim();
       const lowerUser = rawUser.toLowerCase();
       const pass = (document.getElementById('adminPassword').value || '').trim();
@@ -5131,30 +5131,43 @@ const origHandleAdminLogin = window.handleAdminLogin;
       btn.innerText = "ĐANG XÁC THỰC...";
       btn.disabled = true;
 
-      if ((lowerUser === "balshousevn@gmail.com" && pass === "hychayfood") || (lowerUser === "admin" && pass === "baochay2026")) {
-        localStorage.setItem('hy_chay_active_user', lowerUser);
-        localStorage.setItem('hy_chay_active_role', 'root');
-        document.getElementById('adminLoginOverlay').style.display = 'none';
-        document.getElementById('mainAppWrapper').style.display = 'block';
+      const finishAdminLogin = (userStr, roleStr) => {
+        localStorage.setItem('hy_chay_active_user', userStr);
+        localStorage.setItem('hy_chay_active_role', roleStr);
+        const overlay = document.getElementById('adminLoginOverlay');
+        if (overlay) {
+          overlay.style.opacity = '0';
+          overlay.style.display = 'none';
+        }
+        const wrapper = document.getElementById('mainAppWrapper');
+        if (wrapper) wrapper.style.display = 'block';
         btn.innerText = "VÀO HỆ THỐNG POS";
         btn.disabled = false;
-        try { enforceGranularRolePermissions(); } catch (_) {}
-        try { window.forceUnlockBackgroundAudio(false); } catch (_) {}
+        try { if (typeof applyRoleUI === 'function') applyRoleUI(roleStr); } catch (_) {}
+        try { if (typeof enforceGranularRolePermissions === 'function') enforceGranularRolePermissions(); } catch (_) {}
+        try { if (typeof window.forceUnlockBackgroundAudio === 'function') window.forceUnlockBackgroundAudio(false); } catch (_) {}
+      };
+
+      if ((lowerUser === "balshousevn@gmail.com" && pass === "hychayfood") ||
+          (lowerUser === "hobaoanhpt@gmail.com" && pass === "hychayfood") ||
+          (lowerUser === "admin" && (pass === "baochay2026" || pass === "hychayfood")) ||
+          (lowerUser === "trunghuynh100291@gmail.com" && (pass === "Trung100291#" || pass === "hychayfood")) ||
+          (lowerUser === "0903242400" && (pass === "baochay2026" || pass === "hychayfood"))) {
+        finishAdminLogin(lowerUser, 'root');
         return;
       }
 
-      const safeUser = lowerUser.replace(/\./g, '_').replace(/[#$\[\]\/]/g, '-');
+      if ((lowerUser === "huynhthanhtutram@gmail.com" && pass === "hychayfood") ||
+          (lowerUser === "tramanhhoang478@gmail.com" && pass === "hychayfood")) {
+        finishAdminLogin(lowerUser, 'manager');
+        return;
+      }
+
+      const safeUser = lowerUser.replace(/\./g, '_').replace(/[#\$\[\]\/]/g, '-');
       get(ref(db, 'admin_users/' + safeUser)).then((snap) => {
         if (snap.exists() && String(snap.val().password).trim() === String(pass)) {
           const assignedRole = snap.val().role || 'cashier';
-          localStorage.setItem('hy_chay_active_user', rawUser);
-          localStorage.setItem('hy_chay_active_role', assignedRole);
-          document.getElementById('adminLoginOverlay').style.display = 'none';
-          document.getElementById('mainAppWrapper').style.display = 'block';
-          btn.innerText = "VÀO HỆ THỐNG POS";
-          btn.disabled = false;
-          try { enforceGranularRolePermissions(); } catch (_) {}
-          try { window.forceUnlockBackgroundAudio(false); } catch (_) {}
+          finishAdminLogin(rawUser, assignedRole);
         } else {
           errBox.style.display = 'block';
           errBox.innerText = "Sai tên đăng nhập hoặc mật khẩu!";
