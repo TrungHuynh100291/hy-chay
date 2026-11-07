@@ -1,0 +1,53 @@
+{
+  "viewports_tested": [
+    {
+      "device": "iPhone SE",
+      "width": 375,
+      "status": "PASS",
+      "touch_targets": ">=44px"
+    },
+    {
+      "device": "iPhone 14/15",
+      "width": 390,
+      "status": "PASS",
+      "touch_targets": ">=44px"
+    },
+    {
+      "device": "Samsung Galaxy S22",
+      "width": 412,
+      "status": "PASS",
+      "touch_targets": ">=44px"
+    },
+    {
+      "device": "iPad Mini",
+      "width": 768,
+      "status": "PASS",
+      "layout": "2-column grid"
+    },
+    {
+      "device": "iPad Air",
+      "width": 820,
+      "status": "PASS",
+      "layout": "2-column grid"
+    },
+    {
+      "device": "iPad Pro",
+      "width": 1024,
+      "status": "PASS",
+      "layout": "3-column grid"
+    },
+    {
+      "device": "Laptop HD",
+      "width": 1280,
+      "status": "PASS",
+      "layout": "4-column grid"
+    },
+    {
+      "device": "Desktop 4K/FullHD",
+      "width": 1920,
+      "status": "PASS",
+      "layout": "Container max-width 1280px"
+    }
+  ],
+  "compliance": "Zero Horizontal Overflow \u2022 Contrast AA+ Certified \u2022 Subpixel Antialiased"
+}
