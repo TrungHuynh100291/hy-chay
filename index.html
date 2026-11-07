@@ -3014,25 +3014,7 @@ ${clipsXml}
     window.downloadAndroidLauncherFile = function(isShp = false) {
       const targetUrl = window.location.origin + (isShp ? '/index.html?shipper=hub' : '/index.html?app=customer');
       const titleText = isShp ? 'Đội Ship Hy Chay' : 'Hy Chay Đặt Món';
-      const launcherHtml = `<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><meta http-equiv="refresh" content="0;url=${targetUrl}"><title>${titleText}</title>  <!-- SCHEMA.ORG VEGETARIAN RESTAURANT -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "VegetarianRestaurant",
-    "name": "Hy Chay — Ẩm Thực Chay Thanh Tịnh",
-    "image": "https://hychayfood.vercel.app/combo%207%20mon%20chay.png",
-    "telephone": "+84903242400",
-    "priceRange": "30.000đ - 180.000đ",
-    "address": {
-      "@type": "PostalAddress",
-      "streetAddress": "280 Trần Hưng Đạo, khu phố 2",
-      "addressLocality": "Phan Thiết",
-      "addressRegion": "Lâm Đồng",
-      "addressCountry": "VN"
-    }
-  }
-  </script>
-</head><body style="background:#1e5e3a;color:#fff;font-family:sans-serif;text-align:center;padding-top:30vh;"><h2>Đang mở ${titleText}...</h2><script>window.location.replace("${targetUrl}");<\/script></body></html>`;
+      const launcherHtml = `<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><meta http-equiv="refresh" content="0;url=${targetUrl}"><title>${titleText}</title></head><body style="background:#1e5e3a;color:#fff;font-family:sans-serif;text-align:center;padding-top:30vh;"><h2>Đang mở ${titleText}...</h2><script>window.location.replace("${targetUrl}");<\/script></body></html>`;
       const blob = new Blob([launcherHtml], { type: 'text/html;charset=utf-8' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);

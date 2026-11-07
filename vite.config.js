@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
-import { ViteImageOptimizer } from 'vite-plugin-image-optimizer';
+import { resolve } from 'path';
 
 export default defineConfig({
   root: '.',
@@ -12,18 +12,17 @@ export default defineConfig({
       ignored: ['**/.agents/**', '**/logs/**', '**/*.md', '**/node_modules/**', '**/.git/**']
     },
     hmr: {
-      overlay: false // Tắt màn hình đỏ báo lỗi liên tục làm treo trình duyệt
+      overlay: false
     }
   },
-  plugins: [
-    ViteImageOptimizer({
-      webp: { quality: 80 },
-      jpeg: { quality: 80 },
-      png: { quality: 80 }
-    })
-  ],
   build: {
     outDir: 'dist',
-    assetsInlineLimit: 4096
+    assetsInlineLimit: 4096,
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        admin: resolve(__dirname, 'admin.html')
+      }
+    }
   }
 });

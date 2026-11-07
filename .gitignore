@@ -1,0 +1,5 @@
+.vercel
+.env*
+node_modules/
+dist/
+fix_index_syntax.py
