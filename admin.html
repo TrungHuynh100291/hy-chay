@@ -6443,7 +6443,7 @@ window.openInstallGuideModal = function() {
         return;
       }
 
-      const newOrderId = ORD---;
+      const newOrderId = `ORD-${orderStation}-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`;
       const orderData = {
         orderType: 'dine_in',
         dailySeq: nextSeq,
@@ -6468,7 +6468,7 @@ window.openInstallGuideModal = function() {
         archived: false
       };
 
-      const newOrderRef = ref(db, orders/);
+      const newOrderRef = ref(db, `orders/${newOrderId}`);
       if (typeof announcedNewOrderIds !== 'undefined') announcedNewOrderIds[newOrderId] = true;
       if (typeof orderLastVoiceReminderAt !== 'undefined') orderLastVoiceReminderAt[newOrderId] = Date.now();
       ordersCache[newOrderId] = orderData;
@@ -6476,10 +6476,11 @@ window.openInstallGuideModal = function() {
 
       set(newOrderRef, orderData).then(() => {
         // GHI LÊN PHÂN HỆ NAMESPACE RIÊNG (orders_by_station) CHỐNG TRÙNG BÀN & ĐÈ DỮ LIỆU
-        set(ref(db, orders_by_station//), orderData).catch(() => {});
-        set(ref(db, orders_by_station//), orderData).catch(() => {});
+        const safeTable = finalTable.replace(/\s+/g, '_');
+        set(ref(db, `orders_by_station/${orderStation}/${newOrderId}`), orderData).catch(() => {});
+        set(ref(db, `orders_by_station/${orderStation}/${safeTable}`), orderData).catch(() => {});
 
-        // ĐỊNH TUYẾN ĐỒ UỐNG LIÊN TRẠM: Bàn HC gọi đồ uống BAL\'S HOUSE (Mã ngành 5630) -> Bắn sang Xe Nước
+        // ĐỊNH TUYẾN ĐỒ UỐNG LIÊN TRẠM: Bàn HC gọi đồ uống BAL'S HOUSE (Mã ngành 5630) -> Bắn sang Xe Nước
         const drinkItems = [];
         const unified = typeof getUnifiedMenuList === 'function' ? getUnifiedMenuList() : ALL_MENU_DATA;
         for (let k in posCart) {
@@ -6491,7 +6492,7 @@ window.openInstallGuideModal = function() {
         }
 
         if (drinkItems.length > 0 && orderStation === 'HC') {
-          const alertId = XALERT--;
+          const alertId = `XALERT-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`;
           const crossData = {
             id: alertId,
             orderId: newOrderId,
@@ -6503,14 +6504,14 @@ window.openInstallGuideModal = function() {
             note: noteVal,
             createdAt: new Date().toISOString()
           };
-          set(ref(db, cross_station_alerts/), crossData).catch(() => {});
-          set(ref(db, orders_by_station/BH/pending_cross/), crossData).catch(() => {});
+          set(ref(db, `cross_station_alerts/${alertId}`), crossData).catch(() => {});
+          set(ref(db, `orders_by_station/BH/pending_cross/${alertId}`), crossData).catch(() => {});
         }
 
-        const voiceOrderText = Order mới  gồm: .;
+        const voiceOrderText = `Order mới ${finalTable} gồm: ${spokenDishes.join(', ')}.${pct > 0 ? ' Ưu đãi giảm ' + pct + ' phần trăm.' : ''}${rawNote ? ' Lưu ý bếp: ' + rawNote : ''}`;
         broadcastAndSpeakKitchenAlert(voiceOrderText);
         window.printKitchenTicket(newOrderId, orderData);
-        alert(✅ Đã gửi đơn  (#) xuống bếp!);
+        alert(`✅ Đã gửi đơn ${finalTable} (#${seqFormatted}) xuống bếp!`);
         posCart = {};
         v19_posDiscountPercent = 0;
         document.getElementById('posOrderNote').value = '';
