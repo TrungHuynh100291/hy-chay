@@ -498,6 +498,9 @@
         <button class="tab-btn" id="tabBtnPosDineIn" onclick="openPosInMode('dine_in', event)">➕ Order Tại Bàn</button>
         <button class="tab-btn" id="tabBtnPosDelivery" onclick="openPosInMode('delivery', event)" style="color:#0284c7; font-weight:800;">🛵 Đặt Ship Hộ Khách (Gọi Điện)</button>
         <button class="tab-btn" onclick="switchMainTab('menuStock', event)">🍽️ Quản Lý Món Ăn</button>
+        <button class="tab-btn" id="tabOperatingHours" onclick="switchMainTab('operatingHours', event)" style="color:#16a34a; font-weight:800;">⏰ Khung Giờ Bán Hàng</button>
+        <button class="tab-btn" id="tabInvoicesInOut" onclick="switchMainTab('invoicesInOut', event)" style="color:#d97706; font-weight:800;">📑 Hóa Đơn Vào - Ra (Zalo)</button>
+
         <button class="tab-btn" onclick="switchMainTab('bankConfig', event)">⚙️ Cấu Hình VietQR</button>
         <button class="tab-btn" id="tabShiftReport" onclick="switchMainTab('shiftReport', event)">📊 Báo Cáo Kế Toán</button>
         <button class="tab-btn" onclick="switchMainTab('printerConfig', event)">🖨️ Máy In</button>
@@ -1228,7 +1231,251 @@
         </div>
       </div>
       
-<!-- VIEW MÁY IN: CẤU HÌNH IN BILL & BÁO BẾP CHUẨN POS -->
+
+      <!-- VIEW: KHUNG GIỜ BÁN HÀNG LINH ĐỘNG (CHUẨN GRABFOOD & SHOPEEFOOD) -->
+      <div id="viewOperatingHours" style="display: none;">
+        <div class="report-card" style="max-width: 1050px; margin: 0 auto;">
+          <div style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border: 1px solid #86efac; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.5rem;">⏰</span>
+                <div>
+                  <h2 style="color: #166534; font-size: 1.15rem; font-weight: 800; margin: 0;">CẤU HÌNH KHUNG GIỜ BÁN HÀNG LINH ĐỘNG (CHUẨN GRAB & SHOPEE)</h2>
+                  <p style="color: #15803d; font-size: 0.85rem; margin: 4px 0 0 0;">Công ty TNHH TMDV & SX Bảo Anh Lâm — Tùy chỉnh giờ mở/đóng 2 ca & công tắc tạm ngưng nhận đơn tức thì</p>
+                </div>
+              </div>
+            </div>
+            <div id="opHeaderLiveBadge" style="background: #16a34a; color: #fff; padding: 8px 16px; border-radius: 20px; font-weight: 800; font-size: 0.88rem; box-shadow: 0 2px 8px rgba(22,163,74,0.3);">
+              🟢 ĐANG BÁN THEO LỊCH 2 CA
+            </div>
+          </div>
+
+          <!-- THANH ĐIỀU KHIỂN NHANH TRẠNG THÁI QUÁN (MERCHANT QUICK ACTIONS) -->
+          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; margin-bottom: 22px; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+            <div style="font-size: 0.88rem; font-weight: 800; color: #334155; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+              ⚡ Chuyển Trạng Thái Nhanh (Merchant Quick Actions - Chuẩn Grab/Shopee):
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px;">
+              <button type="button" onclick="window.setOperatingMode('auto')" class="op-quick-btn" id="btnModeAuto" style="padding: 12px 14px; border-radius: 10px; border: 2px solid #16a34a; background: #f0fdf4; color: #166534; font-weight: 800; font-size: 0.85rem; cursor: pointer; text-align: left;">
+                <div style="font-size: 1rem; margin-bottom: 4px;">🟢 Bán Theo Lịch (2 Ca)</div>
+                <div style="font-size: 0.75rem; color: #15803d; font-weight: 500;">Tự động nhận đơn theo giờ mở 2 ca</div>
+              </button>
+              <button type="button" onclick="window.setOperatingMode('pause', 15)" class="op-quick-btn" id="btnModePause15" style="padding: 12px 14px; border-radius: 10px; border: 1px solid #cbd5e1; background: #fff; color: #475569; font-weight: 700; font-size: 0.85rem; cursor: pointer; text-align: left;">
+                <div style="font-size: 1rem; margin-bottom: 4px;">⏸️ Tạm Nghỉ 15 Phút</div>
+                <div style="font-size: 0.75rem; color: #64748b; font-weight: 500;">Bận dọn bàn / Quá tải đơn hàng</div>
+              </button>
+              <button type="button" onclick="window.setOperatingMode('pause', 30)" class="op-quick-btn" id="btnModePause30" style="padding: 12px 14px; border-radius: 10px; border: 1px solid #cbd5e1; background: #fff; color: #475569; font-weight: 700; font-size: 0.85rem; cursor: pointer; text-align: left;">
+                <div style="font-size: 1rem; margin-bottom: 4px;">⏸️ Tạm Nghỉ 30 Phút</div>
+                <div style="font-size: 0.75rem; color: #64748b; font-weight: 500;">Chờ nấu thêm nước dùng / cơm</div>
+              </button>
+              <button type="button" onclick="window.setOperatingMode('pause', 60)" class="op-quick-btn" id="btnModePause60" style="padding: 12px 14px; border-radius: 10px; border: 1px solid #cbd5e1; background: #fff; color: #475569; font-weight: 700; font-size: 0.85rem; cursor: pointer; text-align: left;">
+                <div style="font-size: 1rem; margin-bottom: 4px;">⏸️ Tạm Nghỉ 1 Tiếng</div>
+                <div style="font-size: 0.75rem; color: #64748b; font-weight: 500;">Tạm nghỉ ngắn có việc đột xuất</div>
+              </button>
+              <button type="button" onclick="window.setOperatingMode('closed_today')" class="op-quick-btn" id="btnModeClosedToday" style="padding: 12px 14px; border-radius: 10px; border: 1px solid #cbd5e1; background: #fff; color: #dc2626; font-weight: 700; font-size: 0.85rem; cursor: pointer; text-align: left;">
+                <div style="font-size: 1rem; margin-bottom: 4px;">🔴 Đóng Cửa Hôm Nay</div>
+                <div style="font-size: 0.75rem; color: #991b1b; font-weight: 500;">Nghỉ lễ / Tiệc nội bộ (Mở lại mai)</div>
+              </button>
+              <button type="button" onclick="window.setOperatingMode('force_open')" class="op-quick-btn" id="btnModeForceOpen" style="padding: 12px 14px; border-radius: 10px; border: 1px solid #cbd5e1; background: #fff; color: #7c3aed; font-weight: 700; font-size: 0.85rem; cursor: pointer; text-align: left;">
+                <div style="font-size: 1rem; margin-bottom: 4px;">⚡ Bật Mở Cửa 24/7</div>
+                <div style="font-size: 0.75rem; color: #6d28d9; font-weight: 500;">Bỏ qua giới hạn giờ (Testing/VIP)</div>
+              </button>
+            </div>
+          </div>
+
+          <!-- BẢNG CẤU HÌNH CHI TIẾT 2 CA BÁN HÀNG -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; margin-bottom: 22px;">
+            <!-- CA 1: SÁNG & TRƯA -->
+            <div style="border: 2px solid #86efac; background: #fafdfb; border-radius: 12px; padding: 18px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+                <div style="font-weight: 800; color: #166534; font-size: 1.05rem;">
+                  ☀️ CA 1: SÁNG & TRƯA
+                </div>
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 700; color: #166534;">
+                  <input type="checkbox" id="cfgShift1Enabled" checked style="width: 18px; height: 18px; accent-color: #16a34a;"> Bật Ca 1
+                </label>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                <div>
+                  <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">Giờ Mở Cửa (Bắt đầu):</label>
+                  <input type="time" id="cfgShift1Start" value="06:30" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 1rem; font-weight: 700; text-align: center;">
+                </div>
+                <div>
+                  <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">Giờ Đóng Ca (Nghỉ trưa):</label>
+                  <input type="time" id="cfgShift1End" value="13:00" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 1rem; font-weight: 700; text-align: center;">
+                </div>
+              </div>
+              <p style="font-size: 0.78rem; color: #64748b; margin: 0; line-height: 1.4;">
+                💡 <b>Hiện tại:</b> Quán mở bán từ <b>06:30 đến 13:00</b>. Hết 13:00 quán tự động chuyển sang chế độ <b>Nghỉ Giữa Ca</b> và gợi ý khách Đặt Trước cho ca chiều.
+              </p>
+            </div>
+
+            <!-- CA 2: CHIỀU & TỐI -->
+            <div style="border: 2px solid #fed7aa; background: #fffcf8; border-radius: 12px; padding: 18px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+                <div style="font-weight: 800; color: #c2410c; font-size: 1.05rem;">
+                  🌙 CA 2: CHIỀU & TỐI
+                </div>
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 700; color: #c2410c;">
+                  <input type="checkbox" id="cfgShift2Enabled" checked style="width: 18px; height: 18px; accent-color: #ea580c;"> Bật Ca 2
+                </label>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                <div>
+                  <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">Giờ Mở Cửa (Bắt đầu):</label>
+                  <input type="time" id="cfgShift2Start" value="16:00" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 1rem; font-weight: 700; text-align: center;">
+                </div>
+                <div>
+                  <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 6px;">Giờ Đóng Cửa (Nghỉ đêm):</label>
+                  <input type="time" id="cfgShift2End" value="20:15" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 1rem; font-weight: 700; text-align: center;">
+                </div>
+              </div>
+              <p style="font-size: 0.78rem; color: #64748b; margin: 0; line-height: 1.4;">
+                💡 <b>Hiện tại:</b> Quán mở bán từ <b>16:00 đến 20:15</b>. Sau 20:15 quán đóng cửa nghỉ đêm và gợi ý khách Đặt Trước cho ca sáng 06:30 hôm sau.
+              </p>
+            </div>
+          </div>
+
+          <!-- CẤU HÌNH ĐẶT TRƯỚC (PRE-ORDER) & THÔNG BÁO CHO KHÁCH HÀNG -->
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; margin-bottom: 22px;">
+            <div style="font-weight: 800; color: #1e293b; font-size: 0.95rem; margin-bottom: 12px;">
+              📋 Cấu Hình Nhận Đơn Đặt Trước (Pre-Order Ngoài Giờ Bán Trực Tiếp):
+            </div>
+            <div style="margin-bottom: 12px;">
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 700; font-size: 0.88rem; color: #166534;">
+                <input type="checkbox" id="cfgAllowPreOrder" checked style="width: 18px; height: 18px; accent-color: #16a34a;">
+                Cho phép khách hàng ĐẶT TRƯỚC khi quán đang nghỉ giữa ca hoặc ngoài giờ mở cửa (Chuẩn Grab/Shopee)
+              </label>
+            </div>
+            <div style="margin-bottom: 14px;">
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Thông báo hiển thị cho khách hàng khi quán ngoài giờ mở cửa:</label>
+              <textarea id="cfgOffHoursNotice" rows="2" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.85rem; font-family: inherit;">Quán hiện đang trong giờ nghỉ giữa ca hoặc ngoài giờ bán trực tiếp. Quý khách vui lòng chọn món và bấm ĐẶT TRƯỚC để hẹn giờ giao cho ca kế tiếp nhé!</textarea>
+            </div>
+          </div>
+
+          <!-- NÚT LƯU CẤU HÌNH -->
+          <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding-top: 10px; border-top: 1px solid #e2e8f0;">
+            <button type="button" onclick="window.resetOperatingHoursDefault()" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 10px 18px; border-radius: 8px; font-weight: 700; cursor: pointer;">
+              🔄 Đặt Lại Mặc Định (6h30 - 13h & 16h - 20h15)
+            </button>
+            <button type="button" onclick="window.saveOperatingHoursConfig()" style="background: #16a34a; color: #ffffff; border: none; padding: 12px 28px; border-radius: 8px; font-weight: 800; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 12px rgba(22,163,74,0.3);">
+              💾 LƯU CẤU HÌNH & ĐỒNG BỘ NGAY CHO APP HY CHAY
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW: SỔ THEO DÕI HÓA ĐƠN VÀO - RA (ĐỐI SOÁT 9 NHÓM ZALO & THUẾ QUÝ 4) -->
+      <div id="viewInvoicesInOut" style="display: none;">
+        <div class="report-card">
+          <!-- HEADER BANNER DOANH NGHIỆP -->
+          <div style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 1px solid #fde68a; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.6rem;">📑</span>
+                <div>
+                  <h2 style="color: #92400e; font-size: 1.18rem; font-weight: 800; margin: 0;">SỔ THEO DÕI HÓA ĐƠN VÀO - RA (ĐỐI SOÁT 9 NHÓM ZALO & THUẾ QUÝ 4)</h2>
+                  <p style="color: #b45309; font-size: 0.85rem; margin: 4px 0 0 0;">
+                    <b>CÔNG TY TNHH TMDV & SX BẢO ANH LÂM</b> (MST: <b>3401289271</b>) — Tự động đồng bộ từ: <i>KHO 30/2, NHẬP HĐ GTGT, HĐ CHAY280, XUẤT HĐ GTGT, ĐƠN SHIP 280, ĐƠN ĐẶT TRƯỚC, Kế Toán Lộc Thọ, MARKETING, CÔNG TY BAL</i>
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" onclick="window.openAddInvoiceModal()" style="background: #16a34a; color: #fff; border: none; padding: 9px 16px; border-radius: 8px; font-weight: 800; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(22,163,74,0.3);">
+                <span>➕</span> Nhập HĐ / Đơn Mới Từ Zalo
+              </button>
+              <button type="button" onclick="window.exportInvoicesCSV()" style="background: #0284c7; color: #fff; border: none; padding: 9px 16px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                <span>📥</span> Xuất Excel Gửi Kế Toán Lộc Thọ
+              </button>
+            </div>
+          </div>
+
+          <!-- 4 Ô CHỈ SỐ KPI TÀI CHÍNH THUẾ QUÝ 4 -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 22px;">
+            <div style="background: #f0fdf4; border-left: 4px solid #16a34a; border-radius: 10px; padding: 14px 16px;">
+              <span style="font-size: 0.8rem; font-weight: 700; color: #166534; text-transform: uppercase;">📤 TỔNG DOANH THU ĐẦU RA (RA)</span>
+              <h3 id="invKpiOutTotal" style="color: #16a34a; font-size: 1.35rem; margin: 6px 0 2px 0;">0đ</h3>
+              <div style="font-size: 0.76rem; color: #15803d;">Thuế GTGT bán ra: <b id="invKpiOutVat">0đ</b></div>
+            </div>
+            <div style="background: #fff7ed; border-left: 4px solid #ea580c; border-radius: 10px; padding: 14px 16px;">
+              <span style="font-size: 0.8rem; font-weight: 700; color: #9a3412; text-transform: uppercase;">📥 HÓA ĐƠN GTGT ĐẦU VÀO (VÀO)</span>
+              <h3 id="invKpiInTotal" style="color: #ea580c; font-size: 1.35rem; margin: 6px 0 2px 0;">0đ</h3>
+              <div style="font-size: 0.76rem; color: #c2410c;">Thuế GTGT được khấu trừ: <b id="invKpiInVat">0đ</b></div>
+            </div>
+            <div style="background: #eff6ff; border-left: 4px solid #2563eb; border-radius: 10px; padding: 14px 16px;">
+              <span style="font-size: 0.8rem; font-weight: 700; color: #1e40af; text-transform: uppercase;">🌾 NÔNG SẢN BẢNG KÊ 01/TNDN (KHO 30/2)</span>
+              <h3 id="invKpiNongSanTotal" style="color: #2563eb; font-size: 1.35rem; margin: 6px 0 2px 0;">0đ</h3>
+              <div style="font-size: 0.76rem; color: #1d4ed8;">Được tính 100% Chi phí hợp lý TNDN</div>
+            </div>
+            <div style="background: #faf5ff; border-left: 4px solid #9333ea; border-radius: 10px; padding: 14px 16px;">
+              <span style="font-size: 0.8rem; font-weight: 700; color: #6b21a8; text-transform: uppercase;">⚖️ THUẾ GTGT TẠM TÍNH QUÝ 4</span>
+              <h3 id="invKpiNetVat" style="color: #9333ea; font-size: 1.35rem; margin: 6px 0 2px 0;">0đ</h3>
+              <div style="font-size: 0.76rem; color: #7e22ce;" id="invKpiNetVatDesc">Thuế ra trừ thuế vào được khấu trừ</div>
+            </div>
+          </div>
+
+          <!-- THANH CÔNG CỤ LỌC & TÌM KIẾM THÔNG MINH -->
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; margin-bottom: 18px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px;">
+            <div style="display: flex; gap: 6px;">
+              <button type="button" onclick="window.filterInvoicesType('ALL', this)" class="inv-type-btn active" style="padding: 7px 14px; border-radius: 6px; font-size: 0.82rem; font-weight: 700; border: 1px solid #cbd5e1; background: #0f172a; color: #fff; cursor: pointer;">Tất Cả</button>
+              <button type="button" onclick="window.filterInvoicesType('IN', this)" class="inv-type-btn" style="padding: 7px 14px; border-radius: 6px; font-size: 0.82rem; font-weight: 700; border: 1px solid #cbd5e1; background: #fff; color: #ea580c; cursor: pointer;">📥 Hóa Đơn VÀO</button>
+              <button type="button" onclick="window.filterInvoicesType('OUT', this)" class="inv-type-btn" style="padding: 7px 14px; border-radius: 6px; font-size: 0.82rem; font-weight: 700; border: 1px solid #cbd5e1; background: #fff; color: #16a34a; cursor: pointer;">📤 Hóa Đơn RA</button>
+            </div>
+
+            <!-- CHỌN NHÓM ZALO NGUỒN -->
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="font-size: 0.82rem; font-weight: 700; color: #475569;">Nhóm Zalo:</span>
+              <select id="selFilterZaloGroup" onchange="window.renderInvoicesInOutTable()" style="padding: 7px 10px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.82rem; font-weight: 700; color: #1e293b; background: #fff;">
+                <option value="ALL">-- Tất cả 9 nhóm Zalo --</option>
+                <option value="KHO 30/2">📦 KHO 30/2 (Nguyên liệu, nấm, đậu hũ)</option>
+                <option value="NHẬP HĐ GTGT">📥 NHẬP HĐ GTGT (Hóa đơn NCC gửi qua Zalo)</option>
+                <option value="HĐ CHAY280">🏠 HĐ CHAY280 (Mặt bằng 280, điện, nước)</option>
+                <option value="XUẤT HĐ GTGT">📤 XUẤT HĐ GTGT (HĐĐT máy tính tiền meInvoice)</option>
+                <option value="ĐƠN SHIP 280">🛵 ĐƠN SHIP 280 (ShopeeFood, Grab, Giao hàng)</option>
+                <option value="ĐƠN ĐẶT TRƯỚC">📋 ĐƠN ĐẶT TRƯỚC (Tiệc chay, khách đoàn)</option>
+                <option value="Kế Toán Lộc Thọ">⚖️ Kế Toán Lộc Thọ (Báo cáo thuế & BHXH)</option>
+                <option value="MARKETING">📢 MARKETING (Bao bì ruốc nấm, quảng cáo)</option>
+                <option value="CÔNG TY BAL">🏢 CÔNG TY BAL (Pháp nhân, Quyết định, Ngân hàng)</option>
+              </select>
+            </div>
+
+            <div style="flex: 1; min-width: 200px;">
+              <input type="text" id="invSearchKeyword" oninput="window.renderInvoicesInOutTable()" placeholder="🔍 Tìm số HĐ, tên NCC, khách hàng, mặt hàng..." style="width: 100%; padding: 7px 12px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.82rem;">
+            </div>
+
+            <button type="button" onclick="window.syncZaloAndPosNewInvoices()" style="background: #f1f5f9; color: #1e293b; border: 1px solid #cbd5e1; padding: 7px 14px; border-radius: 6px; font-size: 0.82rem; font-weight: 700; cursor: pointer;">
+              🔄 Quét Đơn POS & Zalo Mới
+            </button>
+          </div>
+
+          <!-- BẢNG DANH SÁCH CHỨNG TỪ & HÓA ĐƠN -->
+          <div style="overflow-x: auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.83rem; text-align: left;">
+              <thead>
+                <tr style="background: #f8fafc; border-bottom: 2px solid #cbd5e1; color: #475569;">
+                  <th style="padding: 10px 12px;">Loại</th>
+                  <th style="padding: 10px 12px;">Số HĐ / Phiếu</th>
+                  <th style="padding: 10px 12px;">Ngày</th>
+                  <th style="padding: 10px 12px;">Nhóm Zalo</th>
+                  <th style="padding: 10px 12px;">Đối Tác / Khách Hàng</th>
+                  <th style="padding: 10px 12px;">Diễn Giải Mặt Hàng</th>
+                  <th style="padding: 10px 12px; text-align: right;">Tiền Chưa Thuế</th>
+                  <th style="padding: 10px 12px; text-align: right;">Thuế VAT</th>
+                  <th style="padding: 10px 12px; text-align: right;">Tổng Thanh Toán</th>
+                  <th style="padding: 10px 12px; text-align: center;">Tính Hợp Lệ Thuế</th>
+                  <th style="padding: 10px 12px; text-align: center;">Thao Tác</th>
+                </tr>
+              </thead>
+              <tbody id="invoicesInOutTbody">
+                <!-- Dynamic rows rendered by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW MÁY IN: CẤU HÌNH IN BILL & BÁO BẾP CHUẨN POS -->
       <div id="viewPrinterConfig" style="display: none;">
         <div class="config-card" style="max-width: 750px;">
           <h2 style="color:var(--primary); font-size:1.25rem; margin-bottom:6px;">🖨️ Cấu Hình Máy In Bill & Báo Bếp</h2>
@@ -1736,7 +1983,7 @@ const dynamicManifest = {
     window.switchMainTab = function(tabName, ev) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       if (ev && ev.currentTarget) ev.currentTarget.classList.add('active');
-      ['viewOrders','viewPosOrder','viewMenuStock','viewBankConfig','viewPrinterConfig','viewShippers','viewShiftReport','viewUsers','viewDispatch'].forEach(id => {
+      ['viewOrders','viewPosOrder','viewMenuStock','viewBankConfig','viewPrinterConfig','viewShippers','viewShiftReport','viewUsers','viewDispatch','viewOperatingHours','viewInvoicesInOut'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
       });
@@ -1746,6 +1993,8 @@ const dynamicManifest = {
       if (tabName === 'posOrder') window.renderPosDishGrid();
       else if (tabName === 'menuStock') window.renderMenuStockTable();
       else if (tabName === 'shiftReport') window.renderShiftReport();
+      else if (tabName === 'operatingHours' && typeof window.initOperatingHoursUI === 'function') window.initOperatingHoursUI();
+      else if (tabName === 'invoicesInOut' && typeof window.renderInvoicesInOutTable === 'function') window.renderInvoicesInOutTable();
       else if (tabName === 'shippers' && typeof window.renderShippersTable === 'function') window.renderShippersTable();
     };
 
@@ -6916,5 +7165,772 @@ window.openInstallGuideModal = function() {
       }
     }, 100);
   </script>
+
+  <!-- MODAL: XEM & ĐỐI CHIẾU CHI TIẾT HÓA ĐƠN ZALO / THUẾ -->
+  <div id="modalViewInvoiceDetail" style="display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 16px;">
+    <div style="background: #ffffff; border-radius: 16px; width: 100%; max-width: 720px; max-height: 90vh; overflow-y: auto; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); position: relative;">
+      <span onclick="window.closeInvoiceDetailModal()" style="position: absolute; top: 16px; right: 20px; font-size: 1.5rem; font-weight: bold; color: #64748b; cursor: pointer;">&times;</span>
+      
+      <div style="display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 16px;">
+        <span id="dtlTypeBadge" style="padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 800; background: #f0fdf4; color: #166534;">HÓA ĐƠN</span>
+        <h3 id="dtlTitle" style="margin: 0; color: #0f172a; font-size: 1.15rem; font-weight: 800;">CHI TIẾT CHỨNG TỪ ĐỐI SOÁT</h3>
+      </div>
+
+      <div id="dtlContentBody" style="font-size: 0.88rem; color: #334155; line-height: 1.6;">
+        <!-- Filled by JS -->
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid #e2e8f0; padding-top: 16px; margin-top: 20px;">
+        <button type="button" onclick="window.closeInvoiceDetailModal()" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 8px 18px; border-radius: 8px; font-weight: 700; cursor: pointer;">Đóng Cửa Sổ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NHẬP HÓA ĐƠN / ĐƠN MỚI TỪ ZALO -->
+  <div id="modalAddInvoice" style="display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 16px;">
+    <div style="background: #ffffff; border-radius: 16px; width: 100%; max-width: 650px; max-height: 92vh; overflow-y: auto; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); position: relative;">
+      <span onclick="window.closeAddInvoiceModal()" style="position: absolute; top: 16px; right: 20px; font-size: 1.5rem; font-weight: bold; color: #64748b; cursor: pointer;">&times;</span>
+      
+      <div style="border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 16px;">
+        <h3 style="margin: 0; color: #0f172a; font-size: 1.15rem; font-weight: 800;">➕ NHẬP HÓA ĐƠN / ĐƠN PHÁT SINH TỪ NHÓM ZALO</h3>
+        <p style="margin: 4px 0 0 0; font-size: 0.8rem; color: #64748b;">Tự động phân loại đưa vào Báo cáo Thuế Quý 4 của Công ty Bảo Anh Lâm</p>
+      </div>
+
+      <form id="formAddNewInvoice" onsubmit="window.submitNewInvoiceForm(event)" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.84rem;">
+        <div>
+          <label style="display: block; font-weight: 700; color: #334155; margin-bottom: 4px;">Loại Hóa Đơn / Đơn:</label>
+          <select id="newInvType" required style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: 700;">
+            <option value="IN">📥 Hóa Đơn VÀO (Chi phí mua hàng / dịch vụ)</option>
+            <option value="OUT">📤 Hóa Đơn RA (Doanh thu bán món / tiệc chay)</option>
+          </select>
+        </div>
+        <div>
+          <label style="display: block; font-weight: 700; color: #334155; margin-bottom: 4px;">Nhóm Zalo Nguồn:</label>
+          <select id="newInvZaloGroup" required style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: 700;">
+            <option value="NHẬP HĐ GTGT">📥 NHẬP HĐ GTGT</option>
+            <option value="KHO 30/2">📦 KHO 30/2</option>
+            <option value="HĐ CHAY280">🏠 HĐ CHAY280</option>
+            <option value="XUẤT HĐ GTGT">📤 XUẤT HĐ GTGT</option>
+            <option value="ĐƠN SHIP 280">🛵 ĐƠN SHIP 280</option>
+            <option value="ĐƠN ĐẶT TRƯỚC">📋 ĐƠN ĐẶT TRƯỚC</option>
+            <option value="Kế Toán Lộc Thọ">⚖️ Kế Toán Lộc Thọ</option>
+            <option value="MARKETING">📢 MARKETING</option>
+            <option value="CÔNG TY BAL">🏢 CÔNG TY BAL</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="display: block; font-weight: 700; color: #334155; margin-bottom: 4px;">Số Hóa Đơn / Mã Đơn:</label>
+          <input type="text" id="newInvNo" required placeholder="VD: 00007351 hoặc ĐH-ZALO-01" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1;">
+        </div>
+        <div>
+          <label style="display: block; font-weight: 700; color: #334155; margin-bottom: 4px;">Ngày Lập / Phát Sinh:</label>
+          <input type="date" id="newInvDate" required style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1;">
+        </div>
+
+        <div style="grid-column: span 2;">
+          <label style="display: block; font-weight: 700; color: #334155; margin-bottom: 4px;">Tên Đối Tác (Người bán / Người mua):</label>
+          <input type="text" id="newInvPartner" required placeholder="VD: Cty TNHH Thực Phẩm Phát Hiền hoặc Khách tiệc đoàn" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1;">
+        </div>
+
+        <div style="grid-column: span 2;">
+          <label style="display: block; font-weight: 700; color: #334155; margin-bottom: 4px;">Mặt Hàng / Diễn Giải Nghiệp Vụ:</label>
+          <input type="text" id="newInvItems" required placeholder="VD: Mua nấm, tàu hũ ky, bột mì hoặc Doanh thu bán tiệc chay 5 bàn" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1;">
+        </div>
+
+        <div>
+          <label style="display: block; font-weight: 700; color: #334155; margin-bottom: 4px;">Tiền Hàng Chưa VAT (VNĐ):</label>
+          <input type="number" id="newInvSubtotal" required min="0" step="1000" placeholder="VD: 2000000" oninput="window.calcNewInvTotal()" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: 700;">
+        </div>
+        <div>
+          <label style="display: block; font-weight: 700; color: #334155; margin-bottom: 4px;">Thuế Suất GTGT:</label>
+          <select id="newInvVatRate" onchange="window.calcNewInvTotal()" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: 700;">
+            <option value="0.08" selected>8% (Ẩm thực chay, nguyên liệu ưu đãi)</option>
+            <option value="0.10">10% (Dịch vụ, đồ uống thông thường)</option>
+            <option value="0.05">5% (Nước sinh hoạt, hàng ưu đãi)</option>
+            <option value="0">0% (Bảng kê 01 nông sản / KKKNT / Không thuế)</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="display: block; font-weight: 700; color: #334155; margin-bottom: 4px;">Tiền Thuế GTGT (VNĐ):</label>
+          <input type="number" id="newInvVatAmount" readonly value="0" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; background: #f8fafc; font-weight: 700; color: #ea580c;">
+        </div>
+        <div>
+          <label style="display: block; font-weight: 700; color: #334155; margin-bottom: 4px;">Tổng Thanh Toán (VNĐ):</label>
+          <input type="number" id="newInvTotal" readonly value="0" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; background: #f8fafc; font-weight: 800; color: #166534;">
+        </div>
+
+        <div style="grid-column: span 2;">
+          <label style="display: block; font-weight: 700; color: #334155; margin-bottom: 4px;">Phương Thức Thanh Toán:</label>
+          <select id="newInvPayMethod" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1;">
+            <option value="Chuyển khoản TK Công ty Bảo Anh Lâm">Chuyển khoản TK Công ty Bảo Anh Lâm (Chuẩn thuế)</option>
+            <option value="Chi hộ qua Zalo (Đã lập Ủy quyền chi hộ)">Chi hộ qua Zalo cá nhân (Đã có Giấy ủy quyền chi hộ)</option>
+            <option value="Tiền mặt (Bảng kê 01/TNDN hoặc dưới 20tr)">Tiền mặt (Kèm phiếu chi / Bảng kê nông sản 01/TNDN)</option>
+          </select>
+        </div>
+
+        <div style="grid-column: span 2; display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; border-top: 1px solid #e2e8f0; padding-top: 14px;">
+          <button type="button" onclick="window.closeAddInvoiceModal()" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 9px 18px; border-radius: 8px; font-weight: 700; cursor: pointer;">Hủy</button>
+          <button type="submit" style="background: #16a34a; color: #fff; border: none; padding: 9px 24px; border-radius: 8px; font-weight: 800; cursor: pointer;">💾 Lưu Vào Sổ Đối Soát</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- SCRIPT: KHUNG GIỜ HOẠT ĐỘNG LINH ĐỘNG (GRAB/SHOPEE) & SỔ HÓA ĐƠN ZALO THUẾ -->
+  <script>
+    // =========================================================================
+    // 1. QUẢN LÝ KHUNG GIỜ HOẠT ĐỘNG LINH ĐỘNG (CHUẨN GRAB & SHOPEE MERCHANT)
+    // =========================================================================
+    const DEFAULT_OP_CONFIG = {
+      mode: "auto", // "auto" | "pause" | "force_open" | "closed_today"
+      pauseUntil: 0,
+      shift1: { enabled: true, name: "Ca Sáng & Trưa", start: "06:30", end: "13:00" },
+      shift2: { enabled: true, name: "Ca Chiều & Tối", start: "16:00", end: "20:15" },
+      allowPreOrder: true,
+      preOrderMinMinutes: 30,
+      offHoursNotice: "Quán hiện đang trong giờ nghỉ giữa ca hoặc ngoài giờ bán trực tiếp. Quý khách vui lòng chọn món và bấm ĐẶT TRƯỚC để hẹn giờ giao cho ca kế tiếp nhé!"
+    };
+
+    window.getOperatingHoursConfig = function() {
+      try {
+        const raw = localStorage.getItem('HYCHAY_OPERATING_HOURS');
+        if (raw) return Object.assign({}, DEFAULT_OP_CONFIG, JSON.parse(raw));
+      } catch (e) {}
+      return Object.assign({}, DEFAULT_OP_CONFIG);
+    };
+
+    window.initOperatingHoursUI = function() {
+      const cfg = window.getOperatingHoursConfig();
+      const elS1En = document.getElementById('cfgShift1Enabled');
+      const elS1St = document.getElementById('cfgShift1Start');
+      const elS1Ed = document.getElementById('cfgShift1End');
+      const elS2En = document.getElementById('cfgShift2Enabled');
+      const elS2St = document.getElementById('cfgShift2Start');
+      const elS2Ed = document.getElementById('cfgShift2End');
+      const elPre = document.getElementById('cfgAllowPreOrder');
+      const elNotice = document.getElementById('cfgOffHoursNotice');
+
+      if (elS1En) elS1En.checked = cfg.shift1.enabled !== false;
+      if (elS1St) elS1St.value = cfg.shift1.start || "06:30";
+      if (elS1Ed) elS1Ed.value = cfg.shift1.end || "13:00";
+      if (elS2En) elS2En.checked = cfg.shift2.enabled !== false;
+      if (elS2St) elS2St.value = cfg.shift2.start || "16:00";
+      if (elS2Ed) elS2Ed.value = cfg.shift2.end || "20:15";
+      if (elPre) elPre.checked = cfg.allowPreOrder !== false;
+      if (elNotice) elNotice.value = cfg.offHoursNotice || DEFAULT_OP_CONFIG.offHoursNotice;
+
+      window.updateOperatingStatusUI(cfg);
+    };
+
+    window.updateOperatingStatusUI = function(cfg) {
+      if (!cfg) cfg = window.getOperatingHoursConfig();
+      const badge = document.getElementById('opHeaderLiveBadge');
+      const now = new Date();
+      const nowTs = now.getTime();
+      const curMins = now.getHours() * 60 + now.getMinutes();
+
+      // Reset buttons style
+      ['btnModeAuto','btnModePause15','btnModePause30','btnModePause60','btnModeClosedToday','btnModeForceOpen'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.style.borderColor = '#cbd5e1'; el.style.background = '#fff'; }
+      });
+
+      if (cfg.mode === 'force_open') {
+        const b = document.getElementById('btnModeForceOpen');
+        if (b) { b.style.borderColor = '#7c3aed'; b.style.background = '#f5f3ff'; }
+        if (badge) { badge.style.background = '#7c3aed'; badge.innerText = '⚡ ĐANG ÉP MỞ CỬA 24/7 (TESTING/VIP)'; }
+        return;
+      }
+
+      if (cfg.mode === 'closed_today') {
+        const b = document.getElementById('btnModeClosedToday');
+        if (b) { b.style.borderColor = '#dc2626'; b.style.background = '#fef2f2'; }
+        if (badge) { badge.style.background = '#dc2626'; badge.innerText = '🔴 ĐÃ ĐÓNG CỬA HÔM NAY (MỞ LẠI SÁNG MAI)'; }
+        return;
+      }
+
+      if (cfg.mode === 'pause' && cfg.pauseUntil > nowTs) {
+        const remain = Math.ceil((cfg.pauseUntil - nowTs) / 60000);
+        if (badge) { badge.style.background = '#d97706'; badge.innerText = `⏸️ TẠM NGHỈ NHẬN ĐƠN (CÒN ${remain} PHÚT)`; }
+        return;
+      }
+
+      // Mode AUTO: evaluate shifts
+      const bAuto = document.getElementById('btnModeAuto');
+      if (bAuto) { bAuto.style.borderColor = '#16a34a'; bAuto.style.background = '#f0fdf4'; }
+
+      const [s1H, s1M] = (cfg.shift1.start || "06:30").split(':').map(Number);
+      const [e1H, e1M] = (cfg.shift1.end || "13:00").split(':').map(Number);
+      const s1Start = s1H * 60 + s1M;
+      const s1End = e1H * 60 + e1M;
+
+      const [s2H, s2M] = (cfg.shift2.start || "16:00").split(':').map(Number);
+      const [e2H, e2M] = (cfg.shift2.end || "20:15").split(':').map(Number);
+      const s2Start = s2H * 60 + s2M;
+      const s2End = e2H * 60 + e2M;
+
+      if (cfg.shift1.enabled && curMins >= s1Start && curMins <= s1End) {
+        if (badge) { badge.style.background = '#16a34a'; badge.innerText = `🟢 ĐANG BÁN CA SÁNG (${cfg.shift1.start} - ${cfg.shift1.end})`; }
+      } else if (cfg.shift2.enabled && curMins >= s2Start && curMins <= s2End) {
+        if (badge) { badge.style.background = '#16a34a'; badge.innerText = `🟢 ĐANG BÁN CA CHIỀU (${cfg.shift2.start} - ${cfg.shift2.end})`; }
+      } else if (curMins > s1End && curMins < s2Start) {
+        if (badge) { badge.style.background = '#d97706'; badge.innerText = `🟡 ĐANG NGHỈ GIỮA CA (Mở lại lúc ${cfg.shift2.start}) - NHẬN ĐẶT TRƯỚC`; }
+      } else {
+        if (badge) { badge.style.background = '#dc2626'; badge.innerText = `🔴 ĐÃ HẾT GIỜ BÁN (Mở lại lúc ${cfg.shift1.start} sáng mai) - NHẬN ĐẶT TRƯỚC`; }
+      }
+    };
+
+    window.setOperatingMode = function(mode, pauseMinutes = 0) {
+      const cfg = window.getOperatingHoursConfig();
+      cfg.mode = mode;
+      if (mode === 'pause') {
+        cfg.pauseUntil = Date.now() + (pauseMinutes * 60 * 1000);
+      } else {
+        cfg.pauseUntil = 0;
+      }
+      localStorage.setItem('HYCHAY_OPERATING_HOURS', JSON.stringify(cfg));
+      window.updateOperatingStatusUI(cfg);
+      alert(`✅ Đã cập nhật chế độ bán hàng: ${mode.toUpperCase()} ${pauseMinutes ? `(${pauseMinutes} phút)` : ''}!`);
+    };
+
+    window.saveOperatingHoursConfig = function() {
+      const cfg = window.getOperatingHoursConfig();
+      cfg.shift1 = {
+        enabled: document.getElementById('cfgShift1Enabled')?.checked ?? true,
+        name: "Ca Sáng & Trưa",
+        start: document.getElementById('cfgShift1Start')?.value || "06:30",
+        end: document.getElementById('cfgShift1End')?.value || "13:00"
+      };
+      cfg.shift2 = {
+        enabled: document.getElementById('cfgShift2Enabled')?.checked ?? true,
+        name: "Ca Chiều & Tối",
+        start: document.getElementById('cfgShift2Start')?.value || "16:00",
+        end: document.getElementById('cfgShift2End')?.value || "20:15"
+      };
+      cfg.allowPreOrder = document.getElementById('cfgAllowPreOrder')?.checked ?? true;
+      cfg.offHoursNotice = document.getElementById('cfgOffHoursNotice')?.value || DEFAULT_OP_CONFIG.offHoursNotice;
+
+      localStorage.setItem('HYCHAY_OPERATING_HOURS', JSON.stringify(cfg));
+      window.updateOperatingStatusUI(cfg);
+      alert("✅ Đã lưu cấu hình Khung giờ bán hàng & Đồng bộ ngay lập tức cho toàn bộ App Hy Chay!");
+    };
+
+    window.resetOperatingHoursDefault = function() {
+      if (confirm("Khôi phục lại khung giờ hoạt động mặc định: Ca 1 (06:30 - 13:00) và Ca 2 (16:00 - 20:15)?")) {
+        localStorage.setItem('HYCHAY_OPERATING_HOURS', JSON.stringify(DEFAULT_OP_CONFIG));
+        window.initOperatingHoursUI();
+      }
+    };
+
+    // =========================================================================
+    // 2. SỔ THEO DÕI HÓA ĐƠN VÀO - RA (9 NHÓM ZALO & BÁO CÁO THUẾ QUÝ 4)
+    // =========================================================================
+    const DEFAULT_INVOICES_REGISTRY = [
+      {
+        id: "IN_00007351",
+        type: "IN",
+        invoiceNo: "00007351 (1C26THP)",
+        date: "2026-11-01",
+        zaloGroup: "NHẬP HĐ GTGT",
+        partner: "Cty TNHH Thực Phẩm Phát Hiền (MST: 3401265094)",
+        items: "Đường, bột mì, dầu ăn VCOOK, gia vị, tàu hủ ky, bún khô, mộc nhĩ tuyết",
+        subtotal: 1876778,
+        vatRate: 0.08,
+        vatAmount: 136222,
+        total: 2013000,
+        payMethod: "Chuyển khoản (Có Giấy ủy quyền chi hộ & Hoàn ứng)",
+        taxStatus: "✅ HỢP LỆ 100% KHẤU TRỪ VAT & TNDN",
+        note: "Đã có bản thể hiện PDF & XML từ Cổng Thuế điện tử. Kèm phiếu nhập kho.",
+        file: "HD 00007351 - BAO ANH LAM 01.11.26.pdf"
+      },
+      {
+        id: "IN_00528977",
+        type: "IN",
+        invoiceNo: "00528977 (1C26TMS)",
+        date: "2026-09-08",
+        zaloGroup: "CÔNG TY BAL",
+        partner: "Công Ty Cổ Phần MISA (MST: 0101243150)",
+        items: "Bộ giải pháp Chữ ký số từ xa MISA eSign cho Tổ chức (1 năm) + USB Token",
+        subtotal: 1415555,
+        vatRate: 0.08,
+        vatAmount: 24444,
+        total: 1439999,
+        payMethod: "Chuyển khoản ngân hàng",
+        taxStatus: "✅ HỢP LỆ 100% KHẤU TRỪ VAT & TNDN",
+        note: "Phục vụ ký số tờ khai thuế và kê khai bảo hiểm xã hội điện tử.",
+        file: "1C26TMS - 00528977.pdf"
+      },
+      {
+        id: "IN_00516985",
+        type: "IN",
+        invoiceNo: "00516985 (1C26TMS)",
+        date: "2026-08-28",
+        zaloGroup: "HĐ CHAY280",
+        partner: "Công Ty Cổ Phần MISA (MST: 0101243150)",
+        items: "Phần mềm Hóa đơn điện tử máy tính tiền MISA meInvoice (Gói MEIMTT-500)",
+        subtotal: 510000,
+        vatRate: 0,
+        vatAmount: 0,
+        total: 510000,
+        payMethod: "Chuyển khoản ngân hàng",
+        taxStatus: "✅ HỢP LỆ CHI PHÍ TNDN (KHÔNG CHỊU THUẾ GTGT)",
+        note: "Phần mềm khởi tạo hóa đơn điện tử máy tính tiền cho Quán Hy Chay & Xe nước.",
+        file: "1C26TMS - 00516985.pdf"
+      },
+      {
+        id: "IN_BK_01_112026",
+        type: "IN",
+        invoiceNo: "BK-01-TNDN-112026",
+        date: "2026-11-05",
+        zaloGroup: "KHO 30/2",
+        partner: "Tiểu thương Nguyễn Thị Bắc (Chợ Phan Thiết - Zalo Kho)",
+        items: "Nấm bào ngư tươi, đậu hũ non, rau thơm sả ớt phục vụ Menu 122 món",
+        subtotal: 2450000,
+        vatRate: 0,
+        vatAmount: 0,
+        total: 2450000,
+        payMethod: "Tiền mặt / Chuyển khoản tiểu thương",
+        taxStatus: "🌾 HỢP LỆ 100% CHI PHÍ TNDN (BẢNG KÊ 01/TNDN)",
+        note: "Nông sản mua trực tiếp người bán, kèm Bảng kê 01/TNDN + Phiếu nhập kho.",
+        file: "BangKe_01_TNDN_ThuMuaNongSan_Kho30_2.docx"
+      },
+      {
+        id: "IN_MATBANG_10_2026",
+        type: "IN",
+        invoiceNo: "HĐ-MB-280-T10",
+        date: "2026-10-05",
+        zaloGroup: "HĐ CHAY280",
+        partner: "Chủ nhà 280 Trần Hưng Đạo (Hợp đồng thuê)",
+        items: "Tiền thuê mặt bằng kinh doanh Quán Hy Chay tháng 10/2026",
+        subtotal: 15000000,
+        vatRate: 0,
+        vatAmount: 0,
+        total: 15000000,
+        payMethod: "Chuyển khoản ngân hàng",
+        taxStatus: "✅ HỢP LỆ CHI PHÍ TNDN (THEO HỢP ĐỒNG THUÊ)",
+        note: "Đã có Hợp đồng thuê mặt bằng & Giấy nộp tiền thuế môn bài/TNCN cho thuê tài sản.",
+        file: "HopDongThueMuon_MatBang_280TranHungDao.docx"
+      },
+      {
+        id: "IN_MKT_TEM_10_2026",
+        type: "IN",
+        invoiceNo: "HĐ-MKT-TEM-01",
+        date: "2026-09-25",
+        zaloGroup: "MARKETING",
+        partner: "Nhà In Bao Bì Phan Thiết",
+        items: "In tem nhãn decal Ruốc Nấm Hương Thơm Cay & Ruốc Nấm Truyền Thống",
+        subtotal: 1850000,
+        vatRate: 0.08,
+        vatAmount: 148000,
+        total: 1998000,
+        payMethod: "Chuyển khoản",
+        taxStatus: "✅ HỢP LỆ 100% KHẤU TRỪ VAT & TNDN",
+        note: "Bao bì sản phẩm bán kèm tại quán Hy Chay và xe nước.",
+        file: "Tem Bao Bì Ruốc Nấm Hương Thơm Cay.png"
+      },
+      {
+        id: "OUT_1C26MAL_00000001",
+        type: "OUT",
+        invoiceNo: "00000001 (1C26MAL)",
+        date: "2026-10-01",
+        zaloGroup: "ĐƠN SHIP 280",
+        partner: "Khách hàng mua thực phẩm qua ứng dụng ShopeeFood",
+        items: "Doanh thu bán thức ăn qua ShopeeFood (Tháng 10/2026)",
+        subtotal: 1741818,
+        vatRate: 0.10,
+        vatAmount: 174182,
+        total: 1916000,
+        payMethod: "Chuyển khoản Shopee đối soát",
+        taxStatus: "📤 ĐÃ KÝ SỐ PHÁT HÀNH CÓ MÃ CƠ QUAN THUẾ",
+        note: "Hóa đơn điện tử máy tính tiền meInvoice xuất cho đơn ship công nghệ.",
+        file: "1C26MAL_00000001.pdf"
+      },
+      {
+        id: "OUT_CA_BAN_HANG_HC",
+        type: "OUT",
+        invoiceNo: "1C26MAL-CA-HC",
+        date: "2026-11-08",
+        zaloGroup: "XUẤT HĐ GTGT",
+        partner: "Khách lẻ ăn tại quán Hy Chay 280 & Mang về",
+        items: "Tổng hợp doanh thu ca bán món chay (6h30 - 13h & 16h - 20h15)",
+        subtotal: 5250000,
+        vatRate: 0.08,
+        vatAmount: 420000,
+        total: 5670000,
+        payMethod: "Tiền mặt & Chuyển khoản VietQR",
+        taxStatus: "📤 HÓA ĐƠN MÁY TÍNH TIỀN MEINVOICE HỢP CHUẨN",
+        note: "Xuất theo bảng kê kết ca POS bán hàng hàng ngày.",
+        file: "BangKe_CaBanHang_POS.pdf"
+      },
+      {
+        id: "OUT_DON_DAT_TRUOC_TIEC",
+        type: "OUT",
+        invoiceNo: "1C26MAL-TIEC-01",
+        date: "2026-11-07",
+        zaloGroup: "ĐƠN ĐẶT TRƯỚC",
+        partner: "Công ty Khách Đoàn Đặt Tiệc Chay 5 Bàn",
+        items: "Tiệc chay gia đình & Khách đoàn đặt trước theo thực đơn 122 món",
+        subtotal: 4500000,
+        vatRate: 0.08,
+        vatAmount: 360000,
+        total: 4860000,
+        payMethod: "Chuyển khoản TK Công ty Bảo Anh Lâm",
+        taxStatus: "📤 HÓA ĐƠN GTGT XUẤT THEO ĐƠN ĐẶT TRƯỚC",
+        note: "Khách đoàn đặt trước hẹn giờ giao và xuất hóa đơn công ty.",
+        file: "HopDong_TiecChay_DoanKhach.pdf"
+      }
+    ];
+
+    window.getInvoicesRegistry = function() {
+      try {
+        const raw = localStorage.getItem('HYCHAY_INVOICES_REGISTRY');
+        if (raw) return JSON.parse(raw);
+      } catch (e) {}
+      localStorage.setItem('HYCHAY_INVOICES_REGISTRY', JSON.stringify(DEFAULT_INVOICES_REGISTRY));
+      return DEFAULT_INVOICES_REGISTRY.slice();
+    };
+
+    let currentInvFilterType = 'ALL';
+
+    window.filterInvoicesType = function(type, btn) {
+      currentInvFilterType = type;
+      document.querySelectorAll('.inv-type-btn').forEach(b => {
+        b.style.background = '#fff';
+        b.style.color = '#475569';
+      });
+      if (btn) {
+        btn.style.background = '#0f172a';
+        btn.style.color = '#fff';
+      }
+      window.renderInvoicesInOutTable();
+    };
+
+    window.renderInvoicesInOutTable = function() {
+      const list = window.getInvoicesRegistry();
+      const tbody = document.getElementById('invoicesInOutTbody');
+      const groupFilter = document.getElementById('selFilterZaloGroup')?.value || 'ALL';
+      const kw = (document.getElementById('invSearchKeyword')?.value || '').trim().toLowerCase();
+
+      let outTotal = 0, outVat = 0;
+      let inTotal = 0, inVat = 0;
+      let nongSanTotal = 0;
+
+      const filtered = list.filter(item => {
+        // Filter Type
+        if (currentInvFilterType !== 'ALL' && item.type !== currentInvFilterType) return false;
+        // Filter Group
+        if (groupFilter !== 'ALL' && !item.zaloGroup.includes(groupFilter)) return false;
+        // Search Keyword
+        if (kw) {
+          const matchStr = `${item.invoiceNo} ${item.partner} ${item.items} ${item.zaloGroup} ${item.note}`.toLowerCase();
+          if (!matchStr.includes(kw)) return false;
+        }
+        return true;
+      });
+
+      // Compute statistics across all records
+      list.forEach(item => {
+        if (item.type === 'OUT') {
+          outTotal += item.total || 0;
+          outVat += item.vatAmount || 0;
+        } else {
+          inTotal += item.total || 0;
+          inVat += item.vatAmount || 0;
+          if (item.zaloGroup.includes('KHO 30/2') && item.vatRate === 0) {
+            nongSanTotal += item.total || 0;
+          }
+        }
+      });
+
+      // Update KPI Cards
+      const elOutTot = document.getElementById('invKpiOutTotal');
+      const elOutVat = document.getElementById('invKpiOutVat');
+      const elInTot = document.getElementById('invKpiInTotal');
+      const elInVat = document.getElementById('invKpiInVat');
+      const elNsTot = document.getElementById('invKpiNongSanTotal');
+      const elNetVat = document.getElementById('invKpiNetVat');
+      const elNetVatDesc = document.getElementById('invKpiNetVatDesc');
+
+      if (elOutTot) elOutTot.innerText = outTotal.toLocaleString() + 'đ';
+      if (elOutVat) elOutVat.innerText = outVat.toLocaleString() + 'đ';
+      if (elInTot) elInTot.innerText = inTotal.toLocaleString() + 'đ';
+      if (elInVat) elInVat.innerText = inVat.toLocaleString() + 'đ';
+      if (elNsTot) elNsTot.innerText = nongSanTotal.toLocaleString() + 'đ';
+
+      const netVat = outVat - inVat;
+      if (elNetVat) {
+        if (netVat > 0) {
+          elNetVat.innerText = netVat.toLocaleString() + 'đ';
+          elNetVat.style.color = '#dc2626';
+          if (elNetVatDesc) elNetVatDesc.innerText = 'Phải nộp thêm vào NSNN';
+        } else {
+          elNetVat.innerText = Math.abs(netVat).toLocaleString() + 'đ';
+          elNetVat.style.color = '#16a34a';
+          if (elNetVatDesc) elNetVatDesc.innerText = 'Thuế đầu vào còn được khấu trừ chuyển kỳ sau';
+        }
+      }
+
+      if (!tbody) return;
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; padding:30px; color:#64748b;">Không tìm thấy hóa đơn nào phù hợp với bộ lọc hiện tại.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map((item, idx) => {
+        const isOut = item.type === 'OUT';
+        const typeBadge = isOut
+          ? `<span style="background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0; padding:2px 8px; border-radius:12px; font-weight:800; font-size:0.75rem;">📤 RA (BÁN)</span>`
+          : `<span style="background:#fff7ed; color:#ea580c; border:1px solid #fed7aa; padding:2px 8px; border-radius:12px; font-weight:800; font-size:0.75rem;">📥 VÀO (MUA)</span>`;
+
+        return `
+          <tr style="border-bottom: 1px solid #f1f5f9; background: ${idx % 2 === 0 ? '#fff' : '#fcfcfd'};">
+            <td style="padding: 10px 12px;">${typeBadge}</td>
+            <td style="padding: 10px 12px; font-weight: 700; color: #0f172a;">${item.invoiceNo}</td>
+            <td style="padding: 10px 12px; font-size: 0.8rem; color: #64748b; white-space: nowrap;">${item.date}</td>
+            <td style="padding: 10px 12px;"><span style="background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:6px; font-size:0.75rem; font-weight:700;">${item.zaloGroup}</span></td>
+            <td style="padding: 10px 12px; font-weight: 600; color: #1e293b; max-width: 170px; word-break: break-word;">${item.partner}</td>
+            <td style="padding: 10px 12px; font-size: 0.8rem; color: #475569; max-width: 220px; word-break: break-word;">${item.items}</td>
+            <td style="padding: 10px 12px; text-align: right; font-weight: 600;">${(item.subtotal || 0).toLocaleString()}đ</td>
+            <td style="padding: 10px 12px; text-align: right; font-weight: 600; color: ${isOut ? '#16a34a' : '#ea580c'};">${(item.vatAmount || 0).toLocaleString()}đ <small>(${Math.round(item.vatRate * 100)}%)</small></td>
+            <td style="padding: 10px 12px; text-align: right; font-weight: 800; color: #0f172a;">${(item.total || 0).toLocaleString()}đ</td>
+            <td style="padding: 10px 12px; text-align: center; font-size: 0.76rem; font-weight: 700;">${item.taxStatus}</td>
+            <td style="padding: 10px 12px; text-align: center; white-space: nowrap;">
+              <button type="button" onclick="window.viewInvoiceDetail('${item.id}')" style="background:#f1f5f9; color:#0284c7; border:1px solid #cbd5e1; padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:700; cursor:pointer; margin-right:4px;">👁️ Xem</button>
+              <button type="button" onclick="window.deleteInvoice('${item.id}')" style="background:#fef2f2; color:#dc2626; border:1px solid #fecaca; padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:700; cursor:pointer;">🗑️</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    };
+
+    window.viewInvoiceDetail = function(id) {
+      const list = window.getInvoicesRegistry();
+      const item = list.find(x => x.id === id);
+      if (!item) return;
+
+      const modal = document.getElementById('modalViewInvoiceDetail');
+      const badge = document.getElementById('dtlTypeBadge');
+      const title = document.getElementById('dtlTitle');
+      const body = document.getElementById('dtlContentBody');
+
+      const isOut = item.type === 'OUT';
+      badge.style.background = isOut ? '#f0fdf4' : '#fff7ed';
+      badge.style.color = isOut ? '#16a34a' : '#ea580c';
+      badge.innerText = isOut ? '📤 HÓA ĐƠN RA (DOANH THU)' : '📥 HÓA ĐƠN VÀO (CHI PHÍ)';
+
+      title.innerText = `SỐ HÓA ĐƠN: ${item.invoiceNo}`;
+
+      body.innerHTML = `
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px; margin-bottom:14px;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+            <div><b>Ngày Lập:</b> ${item.date}</div>
+            <div><b>Nhóm Zalo Nguồn:</b> <span style="background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:4px; font-weight:700;">${item.zaloGroup}</span></div>
+            <div><b>Đơn Vị / Đối Tác:</b> ${item.partner}</div>
+            <div><b>Phương Thức TT:</b> ${item.payMethod}</div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <b>Nội Dung / Diễn Giải Mặt Hàng:</b>
+          <div style="background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:10px; margin-top:4px; font-weight:600; color:#1e293b;">
+            ${item.items}
+          </div>
+        </div>
+
+        <div style="background:#fafdfb; border:1px solid #bbf7d0; border-radius:10px; padding:12px; margin-bottom:14px;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span>Tiền hàng chưa thuế:</span>
+            <b>${(item.subtotal || 0).toLocaleString()} VNĐ</b>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px; color:${isOut ? '#16a34a' : '#ea580c'};">
+            <span>Tiền thuế GTGT (${Math.round(item.vatRate * 100)}%):</span>
+            <b>${(item.vatAmount || 0).toLocaleString()} VNĐ</b>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:1.05rem; border-top:1px dashed #cbd5e1; padding-top:6px; margin-top:6px; color:#0f172a;">
+            <span><b>TỔNG THANH TOÁN:</b></span>
+            <span style="font-weight:800; color:#16a34a;">${(item.total || 0).toLocaleString()} VNĐ</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom:10px;">
+          <b>Tình Trạng Hợp Lệ Báo Cáo Thuế:</b>
+          <div style="color:#166534; font-weight:700; margin-top:2px;">${item.taxStatus}</div>
+        </div>
+
+        <div style="background:#fefce8; border:1px solid #fef08a; border-radius:8px; padding:10px; font-size:0.8rem; color:#854d0e;">
+          <b>💡 Hướng Dẫn Đối Soát Thuế:</b> ${item.note || 'Không có ghi chú thêm.'}
+          ${item.file ? `<div style="margin-top:4px;">📎 <b>Tệp hồ sơ lưu trên máy:</b> <code>${item.file}</code></div>` : ''}
+        </div>
+      `;
+
+      modal.style.display = 'flex';
+    };
+
+    window.closeInvoiceDetailModal = function() {
+      const modal = document.getElementById('modalViewInvoiceDetail');
+      if (modal) modal.style.display = 'none';
+    };
+
+    window.openAddInvoiceModal = function() {
+      const modal = document.getElementById('modalAddInvoice');
+      const dInput = document.getElementById('newInvDate');
+      if (dInput) dInput.value = new Date().toISOString().split('T')[0];
+      if (modal) modal.style.display = 'flex';
+    };
+
+    window.closeAddInvoiceModal = function() {
+      const modal = document.getElementById('modalAddInvoice');
+      if (modal) modal.style.display = 'none';
+    };
+
+    window.calcNewInvTotal = function() {
+      const sub = parseFloat(document.getElementById('newInvSubtotal')?.value) || 0;
+      const rate = parseFloat(document.getElementById('newInvVatRate')?.value) || 0;
+      const vat = Math.round(sub * rate);
+      const tot = sub + vat;
+      document.getElementById('newInvVatAmount').value = vat;
+      document.getElementById('newInvTotal').value = tot;
+    };
+
+    window.submitNewInvoiceForm = function(ev) {
+      ev.preventDefault();
+      const list = window.getInvoicesRegistry();
+      const type = document.getElementById('newInvType').value;
+      const sub = parseFloat(document.getElementById('newInvSubtotal').value) || 0;
+      const rate = parseFloat(document.getElementById('newInvVatRate').value) || 0;
+      const vat = Math.round(sub * rate);
+      const tot = sub + vat;
+
+      const newItem = {
+        id: "INV_" + Date.now(),
+        type: type,
+        invoiceNo: document.getElementById('newInvNo').value.trim(),
+        date: document.getElementById('newInvDate').value,
+        zaloGroup: document.getElementById('newInvZaloGroup').value,
+        partner: document.getElementById('newInvPartner').value.trim(),
+        items: document.getElementById('newInvItems').value.trim(),
+        subtotal: sub,
+        vatRate: rate,
+        vatAmount: vat,
+        total: tot,
+        payMethod: document.getElementById('newInvPayMethod').value,
+        taxStatus: type === 'OUT' ? '📤 HÓA ĐƠN DOANH THU ĐẦU RA MỚI' : '✅ ĐÃ NHẬP SỔ CHI PHÍ ĐẦU VÀO',
+        note: `Nhập tay từ nhóm Zalo ${document.getElementById('newInvZaloGroup').value}`,
+        file: ""
+      };
+
+      list.unshift(newItem);
+      localStorage.setItem('HYCHAY_INVOICES_REGISTRY', JSON.stringify(list));
+      window.closeAddInvoiceModal();
+      window.renderInvoicesInOutTable();
+      alert("✅ Đã lưu hóa đơn/đơn mới thành công vào Sổ đối soát!");
+    };
+
+    window.deleteInvoice = function(id) {
+      if (!confirm("Bạn có chắc chắn muốn xóa hóa đơn này khỏi sổ đối soát không?")) return;
+      let list = window.getInvoicesRegistry();
+      list = list.filter(x => x.id !== id);
+      localStorage.setItem('HYCHAY_INVOICES_REGISTRY', JSON.stringify(list));
+      window.renderInvoicesInOutTable();
+    };
+
+    window.exportInvoicesCSV = function() {
+      const list = window.getInvoicesRegistry();
+      let csv = "\uFEFFLoai,So_Hoa_Don,Ngay,Nhom_Zalo,Doi_Tac,Mat_Hang,Tien_Chua_VAT,Thue_VAT,Tong_Thanh_Toan,Trang_Thai_Thue,Ghi_Chu\n";
+      list.forEach(i => {
+        const row = [
+          i.type === 'OUT' ? 'RA (BÁN)' : 'VÀO (MUA)',
+          `"${(i.invoiceNo || '').replace(/"/g, '""')}"`,
+          i.date,
+          `"${(i.zaloGroup || '').replace(/"/g, '""')}"`,
+          `"${(i.partner || '').replace(/"/g, '""')}"`,
+          `"${(i.items || '').replace(/"/g, '""')}"`,
+          i.subtotal,
+          i.vatAmount,
+          i.total,
+          `"${(i.taxStatus || '').replace(/"/g, '""')}"`,
+          `"${(i.note || '').replace(/"/g, '""')}"`
+        ];
+        csv += row.join(',') + '\n';
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `BangKe_HoaDon_VaoRa_Zalo_Q4_2026_${Date.now()}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    };
+
+    window.syncZaloAndPosNewInvoices = function() {
+      // Automatically scan completed orders from ordersCache and add to invoices registry if missing
+      const list = window.getInvoicesRegistry();
+      let added = 0;
+      if (typeof ordersCache === 'object') {
+        Object.keys(ordersCache).forEach(k => {
+          const o = ordersCache[k];
+          if (o && (o.status === 'Đã hoàn tất' || o.status === 'Hoàn thành' || o.paymentVerified)) {
+            const invId = "OUT_ORDER_" + k;
+            if (!list.some(x => x.id === invId)) {
+              const isPre = (o.deliveryTimeMode === 'scheduled' || (o.note || '').includes('HẸN GIAO'));
+              const isShip = (!o.tableNumber || o.tableNumber.startsWith('SHIP'));
+              const zGroup = isPre ? 'ĐƠN ĐẶT TRƯỚC' : (isShip ? 'ĐƠN SHIP 280' : 'XUẤT HĐ GTGT');
+
+              const tot = o.grandTotal || o.total || 0;
+              const sub = Math.round(tot / 1.08);
+              const vat = tot - sub;
+
+              list.push({
+                id: invId,
+                type: "OUT",
+                invoiceNo: "POS-" + (o.orderCode || k.slice(-6)),
+                date: (o.createdAt ? new Date(o.createdAt) : new Date()).toISOString().split('T')[0],
+                zaloGroup: zGroup,
+                partner: o.customerName ? `${o.customerName} (${o.customerPhone || ''})` : `Khách POS Bàn ${o.tableNumber || 'Ship'}`,
+                items: (o.items || []).map(i => `${i.qty || 1}x ${i.name}`).join(', ') || 'Món chay phục vụ tại quán',
+                subtotal: sub,
+                vatRate: 0.08,
+                vatAmount: vat,
+                total: tot,
+                payMethod: o.paymentMethod || 'Tiền mặt',
+                taxStatus: "📤 ĐÃ GHI NHẬN DOANH THU ĐẦU RA",
+                note: `Đơn hoàn tất từ hệ thống POS Hy Chay. Tự động liên kết nhóm ${zGroup}.`,
+                file: ""
+              });
+              added++;
+            }
+          }
+        });
+      }
+      if (added > 0) {
+        localStorage.setItem('HYCHAY_INVOICES_REGISTRY', JSON.stringify(list));
+        window.renderInvoicesInOutTable();
+        alert(`✅ Đã quét và tự động ghi nhận thêm ${added} đơn hoàn tất mới vào Hóa đơn RA!`);
+      } else {
+        alert("✅ Sổ đối soát đã đồng bộ đầy đủ toàn bộ hóa đơn từ 9 nhóm Zalo và POS!");
+      }
+    };
+
+    // Auto-hook completeOrderSafely to record to Invoices Registry immediately
+    if (typeof window.completeOrderSafely === 'function') {
+      const origCompleteOrderSafely = window.completeOrderSafely;
+      window.completeOrderSafely = function(id) {
+        origCompleteOrderSafely(id);
+        setTimeout(window.syncZaloAndPosNewInvoices, 500);
+      };
+    }
+
+    // Initialize Operating Hours UI on load
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        window.initOperatingHoursUI();
+      }, 300);
+    });
+  </script>
+
 </body>
 </html>

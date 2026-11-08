@@ -2429,42 +2429,236 @@ window.addToCart = function(id, name, p) {
       if (c > 0) b.classList.add('active'); else { b.classList.remove('active'); window.closeCheckoutModal(); }
     }
 
+    // =========================================================================
+    // HỆ THỐNG KHUNG GIỜ MỞ BÁN HY CHAY LINH HOẠT CHUẨN GRAB & SHOPEE
+    // Ca 1: 06:30 - 13:00 | Nghỉ giữa ca: 13:00 - 16:00 | Ca 2: 16:00 - 20:15
+    // Hỗ trợ Tự động, Tạm ngưng, Đóng hôm nay, Mở 24/7 và ĐẶT TRƯỚC NGOÀI GIỜ
+    // =========================================================================
+    let hyChayHoursConfig = {
+      shift1Start: "06:30",
+      shift1End: "13:00",
+      shift2Start: "16:00",
+      shift2End: "20:15",
+      mode: "AUTO", // AUTO, PAUSED, CLOSED_TODAY, FORCE_OPEN
+      pauseUntil: null,
+      pauseReason: ""
+    };
+
+    isStoreOpen = false;
+    let isPreorderAllowed = true;
+    let storeClosedStatusReason = "";
+
+    function parseTimeMins(tStr) {
+      if (!tStr || typeof tStr !== 'string') return 0;
+      const parts = tStr.split(':').map(Number);
+      return (parts[0] || 0) * 60 + (parts[1] || 0);
+    }
+
+    function getActiveHoursConfig() {
+      try {
+        const local = localStorage.getItem('HYCHAY_OPERATING_HOURS');
+        if (local) {
+          const parsed = JSON.parse(local);
+          hyChayHoursConfig = Object.assign(hyChayHoursConfig, parsed);
+        }
+      } catch(e){}
+      return hyChayHoursConfig;
+    }
+
     function checkOperatingHours() {
+      const cfg = getActiveHoursConfig();
       const now = new Date();
-      const mins = now.getHours() * 60 + now.getMinutes();
-      const openTime = 6 * 60 + 30;
-      const closeTime = 20 * 60 + 15;
+      const currentMins = now.getHours() * 60 + now.getMinutes();
+
+      const s1Start = parseTimeMins(cfg.shift1Start || "06:30");
+      const s1End = parseTimeMins(cfg.shift1End || "13:00");
+      const s2Start = parseTimeMins(cfg.shift2Start || "16:00");
+      const s2End = parseTimeMins(cfg.shift2End || "20:15");
+
       const st = document.getElementById('openStatusTag');
       const btn = document.getElementById('btnSubmitOrder');
-      if (mins < openTime || mins > closeTime) {
-        isStoreOpen = false;
-        if (st) { st.style.background = "#fee2e2"; st.style.color = "#b91c1c"; st.innerText = "⛔ Quán đóng cửa (Mở: 06:30 - 20:15)"; }
-        if (btn) { btn.disabled = true; btn.innerText = "QUÁN ĐÃ ĐÓNG CỬA"; }
-      } else {
+
+      // 1. Cưỡng chế mở xuyên suốt (FORCE_OPEN)
+      if (cfg.mode === 'FORCE_OPEN') {
         isStoreOpen = true;
-        if (st) { st.style.background = "#dcfce7"; st.style.color = "#166534"; st.innerText = "🟢 Quán đang mở cửa nhận đơn"; }
-        if (btn) { btn.disabled = false; btn.innerText = "XÁC NHẬN GỬI ĐƠN HÀNG"; btn.style.background = "var(--accent)"; }
+        isPreorderAllowed = false;
+        storeClosedStatusReason = "";
+        if (st) {
+          st.style.background = "#dcfce7";
+          st.style.color = "#166534";
+          st.innerText = "🟢 Quán mở xuyên suốt 24/7 nhận đơn";
+        }
+        if (btn) {
+          btn.disabled = false;
+          btn.innerText = "XÁC NHẬN GỬI ĐƠN HÀNG";
+          btn.style.background = "var(--accent)";
+        }
+        return;
+      }
+
+      // 2. Nghỉ bán cả ngày hôm nay (CLOSED_TODAY)
+      if (cfg.mode === 'CLOSED_TODAY') {
+        isStoreOpen = false;
+        isPreorderAllowed = true;
+        storeClosedStatusReason = "Hôm nay quán tạm nghỉ bán để chuẩn bị nguyên liệu tươi mới.";
+        if (st) {
+          st.style.background = "#fee2e2";
+          st.style.color = "#b91c1c";
+          st.innerText = "🔴 Hôm nay quán nghỉ — Nhận Đặt Trước ngày mai";
+        }
+        if (btn) {
+          btn.disabled = false;
+          btn.innerText = "⏰ ĐẶT TRƯỚC CHO NGÀY MAI (Mở 06:30)";
+          btn.style.background = "#0284c7";
+        }
+        return;
+      }
+
+      // 3. Tạm ngưng vài phút vì quá tải (PAUSED)
+      if (cfg.mode === 'PAUSED' && cfg.pauseUntil) {
+        const remMs = cfg.pauseUntil - Date.now();
+        if (remMs > 0) {
+          const remMin = Math.ceil(remMs / 60000);
+          isStoreOpen = false;
+          isPreorderAllowed = true;
+          storeClosedStatusReason = `Quán đang quá tải đơn, tạm ngưng nhận đơn ngay trong ${remMin} phút nữa.`;
+          if (st) {
+            st.style.background = "#fef3c7";
+            st.style.color = "#b45309";
+            st.innerText = `🟡 Tạm ngưng nhận đơn ${remMin}p (Quá tải) — Nhận Đặt Hẹn Giờ`;
+          }
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = `⏰ ĐẶT HẸN GIỜ (Sau ${remMin} phút nữa)`;
+            btn.style.background = "#d97706";
+          }
+          return;
+        } else {
+          // Hết giờ tạm ngưng -> trở về AUTO
+          cfg.mode = 'AUTO';
+          cfg.pauseUntil = null;
+          try { localStorage.setItem('HYCHAY_OPERATING_HOURS', JSON.stringify(cfg)); } catch(e){}
+        }
+      }
+
+      // 4. Chế độ Tự Động theo 2 Ca bán hàng (AUTO)
+      if (currentMins >= s1Start && currentMins <= s1End) {
+        // Trong Ca Sáng (06:30 - 13:00)
+        isStoreOpen = true;
+        isPreorderAllowed = false;
+        storeClosedStatusReason = "";
+        if (st) {
+          st.style.background = "#dcfce7";
+          st.style.color = "#166534";
+          st.innerText = `🟢 Quán đang mở bán (Ca Sáng: ${cfg.shift1Start} - ${cfg.shift1End})`;
+        }
+        if (btn) {
+          btn.disabled = false;
+          btn.innerText = "XÁC NHẬN GỬI ĐƠN HÀNG";
+          btn.style.background = "var(--accent)";
+        }
+      } else if (currentMins > s1End && currentMins < s2Start) {
+        // Nghỉ giữa ca (13:00 - 16:00)
+        isStoreOpen = false;
+        isPreorderAllowed = true;
+        storeClosedStatusReason = `Quán đang trong khung giờ nghỉ giữa ca (${cfg.shift1End} - ${cfg.shift2Start}). Mở lại lúc ${cfg.shift2Start}.`;
+        if (st) {
+          st.style.background = "#fef3c7";
+          st.style.color = "#b45309";
+          st.innerText = `🟡 Nghỉ giữa ca (${cfg.shift1End} - ${cfg.shift2Start}) — Mở lại lúc ${cfg.shift2Start} (Nhận Đặt Trước)`;
+        }
+        if (btn) {
+          btn.disabled = false;
+          btn.innerText = `⏰ ĐẶT TRƯỚC (GIAO CA CHIỀU TỪ ${cfg.shift2Start})`;
+          btn.style.background = "#0284c7";
+        }
+      } else if (currentMins >= s2Start && currentMins <= s2End) {
+        // Trong Ca Chiều / Tối (16:00 - 20:15)
+        isStoreOpen = true;
+        isPreorderAllowed = false;
+        storeClosedStatusReason = "";
+        if (st) {
+          st.style.background = "#dcfce7";
+          st.style.color = "#166534";
+          st.innerText = `🟢 Quán đang mở bán (Ca Chiều: ${cfg.shift2Start} - ${cfg.shift2End})`;
+        }
+        if (btn) {
+          btn.disabled = false;
+          btn.innerText = "XÁC NHẬN GỬI ĐƠN HÀNG";
+          btn.style.background = "var(--accent)";
+        }
+      } else {
+        // Đóng cửa ban đêm (Sau 20:15 hoặc Trước 06:30)
+        isStoreOpen = false;
+        isPreorderAllowed = true;
+        storeClosedStatusReason = `Quán đã hết giờ mở bán hôm nay. Mở cửa lại vào lúc ${cfg.shift1Start} sáng mai.`;
+        if (st) {
+          st.style.background = "#fee2e2";
+          st.style.color = "#b91c1c";
+          st.innerText = `🔴 Quán đã đóng cửa — Mở lại lúc ${cfg.shift1Start} sáng mai (Nhận Đặt Trước)`;
+        }
+        if (btn) {
+          btn.disabled = false;
+          btn.innerText = `⏰ ĐẶT TRƯỚC CHO CA SÁNG MAI (${cfg.shift1Start})`;
+          btn.style.background = "#0284c7";
+        }
       }
     }
 
-// Tạo danh sách các mốc giờ hẹn giao cách nhau 15 phút (từ sau thời점 hiện tại 30 phút đến 20:15)
+    // Tạo danh sách các mốc giờ hẹn giao linh hoạt theo 2 Ca chuẩn Shopee & Grab
     function populateScheduledTimeOptions() {
       const sel = document.getElementById('cusScheduledTime');
       if (!sel) return;
+      const cfg = getActiveHoursConfig();
       const now = new Date();
-      const minTargetMins = now.getHours() * 60 + now.getMinutes() + 30;
-      const startMins = Math.max(7 * 60, Math.ceil(minTargetMins / 15) * 15);
-      const closeMins = 20 * 60 + 15;
+      const currentMins = now.getHours() * 60 + now.getMinutes();
+
+      const s1Start = parseTimeMins(cfg.shift1Start || "06:30");
+      const s1End = parseTimeMins(cfg.shift1End || "13:00");
+      const s2Start = parseTimeMins(cfg.shift2Start || "16:00");
+      const s2End = parseTimeMins(cfg.shift2End || "20:15");
+
       let html = '';
-      for (let m = startMins; m <= closeMins; m += 15) {
+
+      const formatSlot = (m, labelSuffix) => {
         const hh = String(Math.floor(m / 60)).padStart(2, '0');
         const mm = String(m % 60).padStart(2, '0');
-        const isPeakSlot = (m >= 11 * 60 && m <= 13 * 60) || (m >= 17 * 60 && m <= 19 * 60);
-        html += `<option value="${hh}:${mm}">${hh}:${mm}${isPeakSlot ? ' (Cao điểm)' : ''}</option>`;
+        const isPeak = (m >= 11 * 60 && m <= 12 * 60 + 30) || (m >= 17 * 60 + 30 && m <= 19 * 60);
+        return `<option value="${hh}:${mm}${labelSuffix ? ' ' + labelSuffix : ''}">${hh}:${mm}${labelSuffix ? ' (' + labelSuffix + ')' : ''}${isPeak ? ' 🔥 Giờ cao điểm' : ''}</option>`;
+      };
+
+      // Mốc tối thiểu khi đang trong ca là hiện tại + 25 phút
+      const minOrderMins = currentMins + 25;
+
+      // 1. Ca Sáng (s1Start đến s1End)
+      for (let m = Math.max(s1Start + 15, 7 * 60); m <= s1End; m += 15) {
+        if (currentMins < s1End) {
+          if (m >= minOrderMins) {
+            html += formatSlot(m, 'Ca trưa nay');
+          }
+        }
       }
-      if (!html) {
-        html = `<option value="11:00">11:00 (Ngày mai)</option><option value="12:00">12:00 (Ngày mai)</option>`;
+
+      // 2. Ca Chiều (s2Start đến s2End)
+      for (let m = s2Start + 15; m <= s2End; m += 15) {
+        if (currentMins < s2End) {
+          if (m >= minOrderMins) {
+            html += formatSlot(m, 'Ca chiều nay');
+          }
+        }
       }
+
+      // 3. Nếu ngoài giờ hoặc đã quá 20h, gợi ý các mốc Đặt Trước ngày mai
+      if (!html || currentMins > s2End || currentMins < s1Start) {
+        html += `<option value="07:30 (Sáng mai)">07:30 (Sáng mai)</option>`;
+        html += `<option value="08:30 (Sáng mai)">08:30 (Sáng mai)</option>`;
+        html += `<option value="11:15 (Trưa mai)">11:15 (Trưa mai 🔥 Giờ trưa)</option>`;
+        html += `<option value="11:45 (Trưa mai)">11:45 (Trưa mai 🔥 Giờ trưa)</option>`;
+        html += `<option value="12:15 (Trưa mai)">12:15 (Trưa mai)</option>`;
+        html += `<option value="17:30 (Chiều mai)">17:30 (Chiều mai 🔥 Giờ tối)</option>`;
+        html += `<option value="18:30 (Chiều mai)">18:30 (Chiều mai)</option>`;
+      }
+
       sel.innerHTML = html;
     }
 
@@ -2650,7 +2844,25 @@ window.addToCart = function(id, name, p) {
 window.submitOrder = function(e) {
       e.preventDefault();
       checkOperatingHours();
-      if (!isStoreOpen) return alert("Quán hiện đang đóng cửa!");
+      if (!isStoreOpen) {
+        if (isPreorderAllowed) {
+          const confirmPreorder = confirm(`⏰ THÔNG BÁO ĐẶT HÀNG TRƯỚC:
+
+${storeClosedStatusReason || 'Quán hiện đang ngoài giờ mở bán hoặc nghỉ giữa ca.'}
+
+Bạn có muốn gửi ĐƠN ĐẶT TRƯỚC để quán sắp xếp đơn và giao sớm nhất khi vào ca không?`);
+          if (!confirmPreorder) {
+            const btnSubmit = document.getElementById('btnSubmitOrder');
+            if (btnSubmit) { btnSubmit.disabled = false; btnSubmit.dataset.submitting = '0'; checkOperatingHours(); }
+            return;
+          }
+        } else {
+          return alert(`⛔ THÔNG BÁO:
+
+${storeClosedStatusReason || 'Quán hiện chưa mở cửa nhận đơn.'}
+📞 Hotline hỗ trợ: 0903.242.400`);
+        }
+      }
       let sub = 0;
       for (let k in cart) {
         const item = cart[k];
@@ -3305,6 +3517,17 @@ ${clipsXml}
     let remoteStoreStatus = { isManualClosed: false, reason: '', reopenText: '' };
 
     // 1. LẮNG NGHE TRẠNG THÁI ĐÓNG / MỞ QUÁN KHẨN CẤP TỪ ADMIN POS
+    // 0. LẮNG NGHE KHUNG GIỜ MỞ BÁN LINH HOẠT TỪ ADMIN POS (Firebase)
+    onValue(ref(db, 'restaurant_config/operating_hours'), (snap) => {
+      const val = snap.val();
+      if (val) {
+        hyChayHoursConfig = Object.assign(hyChayHoursConfig, val);
+        try { localStorage.setItem('HYCHAY_OPERATING_HOURS', JSON.stringify(hyChayHoursConfig)); } catch(e){}
+      }
+      checkOperatingHours();
+      populateScheduledTimeOptions();
+    });
+
     onValue(ref(db, 'restaurant_config/store_status'), (snap) => {
       remoteStoreStatus = snap.val() || { isManualClosed: false, reason: '', reopenText: '' };
       applyRemoteStoreStatusToCustomerUI();
