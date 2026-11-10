@@ -4,7 +4,7 @@
   "version": "2.4.0",
   "scripts": {
     "dev": "vite",
-    "build": "node vercel_prepare.cjs",
+    "build": "npx vite build",
     "preview": "vite preview"
   },
   "devDependencies": {

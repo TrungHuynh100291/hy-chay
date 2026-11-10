@@ -1,5 +1,19 @@
-.vercel
-.env*
+# Tối ưu bộ nhớ RAM, tránh phình to Git & bảo vệ bí mật môi trường
 node_modules/
 dist/
-fix_index_syntax.py
+.env
+.env*
+.vercel
+.git/
+.codegraph/
+.engram/
+*.bak
+*.log
+*.py
+
+# Chỉ lưu media gốc tại /public/, bỏ qua bản sao tạm ở thư mục gốc (tối ưu CI/CD & RAM)
+/images/
+/*.png
+/*.jpg
+/*.jpeg
+/*.mp4

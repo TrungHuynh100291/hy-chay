@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
@@ -3843,6 +3843,7 @@ window.deleteDishFromMenu = function(id, name) {
 
     onValue(ref(db, 'orders'), (snapshot) => {
       ordersCache = snapshot.val() || {};
+      window.ordersCache = ordersCache;
       rebuildDailyOrderSequenceAndAutoReset();
       renderOrders();
       window.renderShiftReport();
@@ -7870,9 +7871,10 @@ window.openInstallGuideModal = function() {
       // Automatically scan completed orders from ordersCache and add to invoices registry if missing
       const list = window.getInvoicesRegistry();
       let added = 0;
-      if (typeof ordersCache === 'object') {
-        Object.keys(ordersCache).forEach(k => {
-          const o = ordersCache[k];
+      const liveOrders = window.ordersCache || (typeof ordersCache === 'object' ? ordersCache : null);
+      if (liveOrders && typeof liveOrders === 'object') {
+        Object.keys(liveOrders).forEach(k => {
+          const o = liveOrders[k];
           if (o && (o.status === 'Đã hoàn tất' || o.status === 'Hoàn thành' || o.paymentVerified)) {
             const invId = "OUT_ORDER_" + k;
             if (!list.some(x => x.id === invId)) {
@@ -7915,18 +7917,17 @@ window.openInstallGuideModal = function() {
       }
     };
 
-    // Auto-hook completeOrderSafely to record to Invoices Registry immediately
-    if (typeof window.completeOrderSafely === 'function') {
-      const origCompleteOrderSafely = window.completeOrderSafely;
-      window.completeOrderSafely = function(id) {
-        origCompleteOrderSafely(id);
-        setTimeout(window.syncZaloAndPosNewInvoices, 500);
-      };
-    }
-
-    // Initialize Operating Hours UI on load
+    // Auto-hook completeOrderSafely & Initialize Operating Hours UI after Vite ES module loads
     window.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
+        if (typeof window.completeOrderSafely === 'function' && !window.__completeOrderSafelyHooked) {
+          const origCompleteOrderSafely = window.completeOrderSafely;
+          window.completeOrderSafely = function(id) {
+            origCompleteOrderSafely(id);
+            setTimeout(window.syncZaloAndPosNewInvoices, 500);
+          };
+          window.__completeOrderSafelyHooked = true;
+        }
         window.initOperatingHoursUI();
       }, 300);
     });
