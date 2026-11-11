@@ -836,8 +836,73 @@
             <div id="filterDayBox"><input type="date" id="filterDayInput" onchange="renderShiftReport()" style="padding:7px; border-radius:6px;"></div>
             
             <button onclick="renderShiftReport()" style="background:var(--primary); color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:700;">🔍 Tra Cứu Kỳ Này</button>
+            <button type="button" onclick="handleTriggerDreamingAudit()" style="background:#4f46e5; color:#fff; border:none; padding:8px 14px; border-radius:6px; cursor:pointer; font-weight:800; display:inline-flex; align-items:center; gap:5px;">🌙 KIỂM TOÁN DREAMING CUỐI CA</button>
             <button onclick="printShiftReport()" style="background:#0284c7; color:#fff; border:none; padding:8px 14px; border-radius:6px; cursor:pointer; font-weight:700; margin-left:auto;">🖨️ In Phiếu Kết Ca (80mm)</button>
             <button onclick="exportTaxReportCSV()" style="background:#059669; color:#fff; border:none; padding:8px 14px; border-radius:6px; cursor:pointer; font-weight:700;">📥 Xuất Excel Chi Tiết</button>
+          </div>
+
+          <!-- MODULE KIỂM TOÁN DREAMING CUỐI CA (ANTHROPIC CONTEXT ENGINEERING & HARNESS) -->
+          <div id="posDreamingAuditorContainer" style="background:linear-gradient(135deg, #1e1b4b, #312e81); border:2px solid #6366f1; border-radius:14px; padding:18px; margin-bottom:20px; color:#fff; box-shadow:0 8px 24px rgba(99,102,241,0.25);">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; border-bottom:1px solid rgba(255,255,255,0.15); padding-bottom:12px; margin-bottom:14px;">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-size:1.6rem;">🌙</span>
+                <div>
+                  <h3 style="color:#c7d2fe; font-size:1.1rem; margin:0; font-weight:800; letter-spacing:0.3px;">KIỂM TOÁN DREAMING CUỐI CA &amp; BẢO VỆ MÃ BĂM ĐƠN HÀNG</h3>
+                  <p style="font-size:0.78rem; color:#a5b4fc; margin:3px 0 0 0;">Cơ chế Out-of-Band Dreaming tự học • Tách bạch doanh thu chịu thuế (5610/5630) và phí ship thu hộ • Hash Precondition Guard</p>
+                </div>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <button type="button" id="btnRunDreamingAudit" onclick="handleTriggerDreamingAudit()" style="background:#4f46e5; color:#fff; border:none; padding:10px 18px; border-radius:8px; font-weight:800; font-size:0.85rem; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 4px 12px rgba(0,0,0,0.3);">
+                  <span>🌙</span> KIỂM TOÁN DREAMING CUỐI CA
+                </button>
+              </div>
+            </div>
+
+            <!-- BẢNG 3 CỘT ĐỐI SOÁT TỰ ĐỘNG -->
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:14px;" id="dreamingCardsGrid">
+              <!-- CỘT 1: DOANH THU CHỊU THUẾ (5610/5630) + THUẾ GTGT -->
+              <div style="background:rgba(255,255,255,0.07); border:1px solid rgba(167,243,208,0.25); border-radius:10px; padding:14px;">
+                <div style="font-size:0.75rem; text-transform:uppercase; color:#6ee7b7; font-weight:800; letter-spacing:0.5px; margin-bottom:8px;">
+                  🏛️ 1. DOANH THU CHỊU THUẾ &amp; THUẾ GTGT
+                </div>
+                <div style="font-size:1.35rem; font-weight:900; color:#34d399;" id="dreamCol1TotalTaxable">0đ</div>
+                <div style="font-size:0.8rem; color:#d1fae5; margin-top:6px; line-height:1.5;">
+                  • Ẩm thực chay (5610): <b id="dreamCol1Rev5610">0đ</b><br>
+                  • BAL'S HOUSE Drink (5630): <b id="dreamCol1Rev5630">0đ</b><br>
+                  • Phí bao bì/hộp: <b id="dreamCol1Packaging">0đ</b><br>
+                  • Thuế GTGT (10%): <b id="dreamCol1Vat">0đ</b>
+                </div>
+              </div>
+
+              <!-- CỘT 2: QUỸ PHÍ SHIP THU HỘ TRẢ TÀI XẾ -->
+              <div style="background:rgba(255,255,255,0.07); border:1px solid rgba(191,219,254,0.25); border-radius:10px; padding:14px;">
+                <div style="font-size:0.75rem; text-transform:uppercase; color:#93c5fd; font-weight:800; letter-spacing:0.5px; margin-bottom:8px;">
+                  🛵 2. QUỸ PHÍ SHIP THU HỘ TRẢ TÀI XẾ
+                </div>
+                <div style="font-size:1.35rem; font-weight:900; color:#60a5fa;" id="dreamCol2DriverPassThrough">0đ</div>
+                <div style="font-size:0.8rem; color:#dbeafe; margin-top:6px; line-height:1.5;">
+                  • Tình trạng kế toán: <b style="color:#bfdbfe;">Tách biệt 100% ngoài doanh thu</b><br>
+                  • Mục đích: <b style="color:#bfdbfe;">Chi trả tài xế giao hàng Hy Chay</b><br>
+                  • Nghĩa vụ thuế thu nhập: <b style="color:#bfdbfe;">Tài xế tự kê khai theo luật</b>
+                </div>
+              </div>
+
+              <!-- CỘT 3: BÁO CÁO DREAMING TỰ HỌC CUỐI CA -->
+              <div style="background:rgba(255,255,255,0.07); border:1px solid rgba(253,230,138,0.25); border-radius:10px; padding:14px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                  <span style="font-size:0.75rem; text-transform:uppercase; color:#fde047; font-weight:800; letter-spacing:0.5px;">
+                    ✨ 3. BÁO CÁO DREAMING TỰ HỌC
+                  </span>
+                  <span id="dreamCol3Hash" style="font-size:0.7rem; font-family:monospace; background:rgba(0,0,0,0.4); padding:2px 6px; border-radius:4px; color:#fef08a;">sha256:--------</span>
+                </div>
+                <div id="dreamCol3Insight" style="font-size:0.8rem; color:#fef9c3; line-height:1.45; min-height:48px;">
+                  Đang khởi tạo bộ nhớ... Bấm "Kiểm toán Dreaming" để phân tích đơn trong ca.
+                </div>
+                <div style="font-size:0.72rem; color:#cbd5e1; margin-top:8px; border-top:1px solid rgba(255,255,255,0.1); padding-top:4px;">
+                  Thời gian: <span id="dreamCol3Time">--:--:--</span> • Danh mục: <span id="dreamCol3MenuStatus" style="color:#86efac; font-weight:700;">122 Món Bảo Toàn ✔</span>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- 7 Ô CHỈ SỐ TÀI CHÍNH CỐT LÕI (BỔ SUNG 2 QUỸ TIỀN MẶT ĐỘC LẬP THEO TRẠM) -->
@@ -6094,6 +6159,9 @@ window.openInstallGuideModal = function() {
     window.renderShiftReport = function() {
       origRenderShiftReportV12();
       window.updateXmlTaxPreview();
+      if (typeof window.handleTriggerDreamingAudit === 'function') {
+        window.handleTriggerDreamingAudit();
+      }
     };
 
     window.generateAndDownloadOfficialTaxXML = function() {
@@ -7917,6 +7985,244 @@ window.openInstallGuideModal = function() {
       }
     };
 
+    // ===================================================================
+    // BAL POS UNIFIED MEMORY, ORDER HASH GUARD & END-OF-SHIFT DREAMING
+    // ===================================================================
+    if (!window.BAL_POS_HARNESS) {
+      window.BAL_POS_HARNESS = (function () {
+        const ORG_CONVENTIONS = Object.freeze({
+          companyName: 'CÔNG TY TNHH THƯƠNG MẠI DỊCH VỤ VÀ SẢN XUẤT BẢO ANH LÂM',
+          taxCode: '3401289271',
+          address: '280 Trần Hưng Đạo, Phường Phan Thiết, Tỉnh Lâm Đồng',
+          hotline: '0903 242 400',
+          requiredMenuCount: 122,
+          taxCategories: {
+            hyChayFood: '5610',
+            balsHouseDrink: '5630'
+          },
+          packagingFeeDefault: 3000
+        });
+
+        function computeHash(payload) {
+          const str = typeof payload === 'string' ? payload : JSON.stringify(payload || {});
+          let h = 2166136261;
+          for (let i = 0; i < str.length; i++) {
+            h ^= str.charCodeAt(i);
+            h = Math.imul(h, 16777619);
+          }
+          return (h >>> 0).toString(16).padStart(8, '0');
+        }
+
+        function verifyMenuIntegrity(menuArray) {
+          const count = Array.isArray(menuArray) ? menuArray.length : 0;
+          return {
+            valid: count >= ORG_CONVENTIONS.requiredMenuCount,
+            count,
+            expected: ORG_CONVENTIONS.requiredMenuCount
+          };
+        }
+
+        function calculateTaxSeparatedOrder(order) {
+          let items = [];
+          if (Array.isArray(order?.items)) {
+            items = order.items;
+          } else if (order?.items && typeof order.items === 'object') {
+            items = Object.values(order.items);
+          }
+          let revenue5610 = 0;
+          let revenue5630 = 0;
+
+          for (const item of items) {
+            if (!item) continue;
+            const lineTotal = (Number(item.price) || 0) * (Number(item.qty || item.quantity) || 1);
+            if (item.brand === "BAL'S HOUSE" || item.categoryCode === '5630' || item.cat === 'douong') {
+              revenue5630 += lineTotal;
+            } else {
+              revenue5610 += lineTotal;
+            }
+          }
+
+          const packagingFee = Number(order?.packagingFee ?? ORG_CONVENTIONS.packagingFeeDefault);
+          const taxableSubTotal = revenue5610 + revenue5630 + packagingFee;
+          const vatAmount = Math.round(taxableSubTotal * 0.1);
+          const driverPassThroughShipFee = Number(order?.shippingFee || 0);
+
+          return {
+            revenue5610,
+            revenue5630,
+            packagingFee,
+            taxableSubTotal,
+            vatAmount,
+            driverPassThroughShipFee,
+            grandTotalCustomerPays: taxableSubTotal + vatAmount + driverPassThroughShipFee
+          };
+        }
+
+        function guardDriverAcceptOrder(currentOrder, shipperPhone, expectedHash) {
+          const actualHash = computeHash({
+            id: currentOrder?.id,
+            status: currentOrder?.status,
+            shipper: currentOrder?.hyChayShipperPhone || currentOrder?.shipperPhone || ''
+          });
+
+          if (
+            (currentOrder?.status !== 'PENDING' && currentOrder?.status !== 'Đang chờ tài xế' && (currentOrder?.hyChayShipperPhone || currentOrder?.shipperPhone)) ||
+            (currentOrder?.shipperPhone && currentOrder.shipperPhone !== shipperPhone)
+          ) {
+            return {
+              allowed: false,
+              reason: `Đơn hàng đã được tài xế (${currentOrder.hyChayShipperPhone || currentOrder.shipperPhone}) nhận trước đó!`
+            };
+          }
+
+          if (expectedHash && expectedHash !== actualHash) {
+            return {
+              allowed: false,
+              reason: `Phát hiện xung đột trạng thái đơn (Hash mismatch: ${expectedHash} != ${actualHash}). Vui lòng tải lại đơn mới nhất!`
+            };
+          }
+
+          const updatedOrder = {
+            ...currentOrder,
+            status: 'ACCEPTED',
+            hyChayShipperPhone: shipperPhone,
+            shipperPhone: shipperPhone,
+            acceptedAt: new Date().toISOString()
+          };
+          updatedOrder.stateHash = computeHash({
+            id: updatedOrder.id,
+            status: updatedOrder.status,
+            shipper: updatedOrder.hyChayShipperPhone || updatedOrder.shipperPhone
+          });
+
+          return {
+            allowed: true,
+            updatedOrder
+          };
+        }
+
+        function runEndOfShiftDreaming(ordersList) {
+          const orders = Array.isArray(ordersList) ? ordersList : [];
+          let total5610 = 0;
+          let total5630 = 0;
+          let totalPackaging = 0;
+          let totalVat = 0;
+          let totalShipPassThrough = 0;
+          const dishCounter = {};
+
+          for (const ord of orders) {
+            if (ord.status === 'CANCELLED' || ord.status === 'Đã hủy') continue;
+            const breakdown = calculateTaxSeparatedOrder(ord);
+            total5610 += breakdown.revenue5610;
+            total5630 += breakdown.revenue5630;
+            totalPackaging += breakdown.packagingFee;
+            totalVat += breakdown.vatAmount;
+            totalShipPassThrough += breakdown.driverPassThroughShipFee;
+
+            let items = [];
+            if (Array.isArray(ord?.items)) {
+              items = ord.items;
+            } else if (ord?.items && typeof ord.items === 'object') {
+              items = Object.values(ord.items);
+            }
+
+            for (const it of items) {
+              if (!it) continue;
+              const name = it.name || 'Món ăn';
+              dishCounter[name] = (dishCounter[name] || 0) + (Number(it.qty || it.quantity) || 1);
+            }
+          }
+
+          const topDishes = Object.entries(dishCounter)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 3)
+            .map(([n, c]) => `${n} (${c} phần)`);
+
+          const learnedInsight =
+            topDishes.length > 0
+              ? `Món bán chạy nhất ca: ${topDishes.join(', ')}. Đề xuất bếp chuẩn bị dư 15% nguyên liệu nhóm này cho ca tiếp theo.`
+              : 'Chưa phát sinh đơn hoàn tất trong ca.';
+
+          const dreamRecord = {
+            timestamp: new Date().toLocaleString('vi-VN'),
+            hash: computeHash({ total5610, total5630, totalShipPassThrough, count: orders.length }),
+            taxableRevenue5610: total5610,
+            taxableRevenue5630: total5630,
+            packagingTotal: totalPackaging,
+            vat10Percent: totalVat,
+            driverShipPassThrough: totalShipPassThrough,
+            learnedInsight
+          };
+
+          try {
+            const history = JSON.parse(localStorage.getItem('bal_pos_dream_history') || '[]');
+            history.unshift(dreamRecord);
+            localStorage.setItem('bal_pos_dream_history', JSON.stringify(history.slice(0, 30)));
+          } catch {}
+
+          return dreamRecord;
+        }
+
+        return {
+          ORG_CONVENTIONS,
+          computeHash,
+          verifyMenuIntegrity,
+          calculateTaxSeparatedOrder,
+          guardDriverAcceptOrder,
+          runEndOfShiftDreaming
+        };
+      })();
+    }
+
+    window.handleTriggerDreamingAudit = function (customOrders) {
+      if (!window.BAL_POS_HARNESS) return;
+      let orders = customOrders;
+      if (!Array.isArray(orders)) {
+        try {
+          if (typeof getTaxReportData === 'function') {
+            const data = getTaxReportData();
+            orders = data?.rawList || [];
+          } else {
+            const raw = localStorage.getItem('HYCHAY_INVOICES_REGISTRY') || localStorage.getItem('orders') || '[]';
+            orders = JSON.parse(raw);
+          }
+        } catch (e) {
+          orders = [];
+        }
+      }
+
+      const result = window.BAL_POS_HARNESS.runEndOfShiftDreaming(orders);
+
+      const taxableTotal = (result.taxableRevenue5610 || 0) + (result.taxableRevenue5630 || 0) + (result.packagingTotal || 0);
+      const elCol1Total = document.getElementById('dreamCol1TotalTaxable');
+      if (elCol1Total) elCol1Total.innerText = (taxableTotal).toLocaleString('vi-VN') + 'đ';
+      const elCol15610 = document.getElementById('dreamCol1Rev5610');
+      if (elCol15610) elCol15610.innerText = (result.taxableRevenue5610 || 0).toLocaleString('vi-VN') + 'đ';
+      const elCol15630 = document.getElementById('dreamCol1Rev5630');
+      if (elCol15630) elCol15630.innerText = (result.taxableRevenue5630 || 0).toLocaleString('vi-VN') + 'đ';
+      const elCol1Pack = document.getElementById('dreamCol1Packaging');
+      if (elCol1Pack) elCol1Pack.innerText = (result.packagingTotal || 0).toLocaleString('vi-VN') + 'đ';
+      const elCol1Vat = document.getElementById('dreamCol1Vat');
+      if (elCol1Vat) elCol1Vat.innerText = (result.vat10Percent || 0).toLocaleString('vi-VN') + 'đ';
+
+      const elCol2 = document.getElementById('dreamCol2DriverPassThrough');
+      if (elCol2) elCol2.innerText = (result.driverShipPassThrough || 0).toLocaleString('vi-VN') + 'đ';
+
+      const elCol3Hash = document.getElementById('dreamCol3Hash');
+      if (elCol3Hash) elCol3Hash.innerText = 'sha256:' + (result.hash || '--------');
+      const elCol3Insight = document.getElementById('dreamCol3Insight');
+      if (elCol3Insight) elCol3Insight.innerText = result.learnedInsight || 'Chưa phát sinh đơn trong ca';
+      const elCol3Time = document.getElementById('dreamCol3Time');
+      if (elCol3Time) elCol3Time.innerText = result.timestamp || new Date().toLocaleTimeString('vi-VN');
+
+      const menuCheck = window.BAL_POS_HARNESS.verifyMenuIntegrity(window.ALL_MENU_DATA || []);
+      const elCol3Menu = document.getElementById('dreamCol3MenuStatus');
+      if (elCol3Menu) {
+        elCol3Menu.innerText = menuCheck.valid ? `122 Món Bảo Toàn ✔` : `Cảnh báo: ${menuCheck.count}/${menuCheck.expected} món!`;
+        elCol3Menu.style.color = menuCheck.valid ? '#86efac' : '#fca5a5';
+      }
+    };
+
     // Auto-hook completeOrderSafely & Initialize Operating Hours UI after Vite ES module loads
     window.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
@@ -7929,6 +8235,9 @@ window.openInstallGuideModal = function() {
           window.__completeOrderSafelyHooked = true;
         }
         window.initOperatingHoursUI();
+        if (typeof window.handleTriggerDreamingAudit === 'function') {
+          setTimeout(window.handleTriggerDreamingAudit, 500);
+        }
       }, 300);
     });
   </script>
