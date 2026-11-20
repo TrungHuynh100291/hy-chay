@@ -1,16 +1,92 @@
 {
   "rules": {
-    ".read": true,
-    ".write": true,
+    ".read": false,
+    ".write": false,
     "orders": {
-      ".indexOn": ["createdAt", "client_request_id", "phone", "status"]
+      ".read": true,
+      ".write": true,
+      ".indexOn": ["createdAt", "client_request_id", "phone", "status"],
+      "$orderId": {
+        ".validate": "(newData.hasChildren(['client_request_id', 'phone', 'items', 'grandTotal', 'createdAt', 'status']) && newData.child('client_request_id').isString() && newData.child('client_request_id').val().length > 0 && newData.child('phone').isString() && newData.child('phone').val().length >= 9 && newData.child('phone').val().length <= 15 && newData.child('grandTotal').isNumber() && newData.child('grandTotal').val() >= 0 && newData.child('createdAt').isString() && newData.child('status').isString()) || (newData.child('orderType').val() == 'dine_in' && newData.child('phone').val() == 'Tại quán' && newData.hasChildren(['phone', 'items', 'grandTotal', 'createdAt', 'status']) && newData.child('grandTotal').isNumber() && newData.child('grandTotal').val() >= 0 && newData.child('createdAt').isString() && newData.child('status').isString()) || (data.exists() && newData.hasChildren(['items', 'grandTotal', 'createdAt', 'status']) && newData.child('grandTotal').isNumber() && newData.child('grandTotal').val() >= 0 && newData.child('status').isString())"
+      }
+    },
+    "menu_customizations": {
+      ".read": true,
+      ".write": true
+    },
+    "restaurant_config": {
+      ".read": true,
+      ".write": true
+    },
+    "users": {
+      ".read": true,
+      ".write": true
+    },
+    "shippers": {
+      ".read": true,
+      ".write": true
+    },
+    "voice_sync": {
+      ".read": true,
+      ".write": true
+    },
+    "shipper_siren_broadcast": {
+      ".read": true,
+      ".write": true
+    },
+    "admin_users": {
+      ".read": true,
+      ".write": true
     },
     "audit_logs": {
+      ".read": true,
+      ".write": true,
       ".indexOn": ["timestamp"]
+    },
+    "pos_customers": {
+      ".read": true,
+      ".write": true
+    },
+    "bank_webhooks": {
+      ".read": true,
+      ".write": true
+    },
+    "orders_by_station": {
+      ".read": true,
+      ".write": true
+    },
+    "cross_station_alerts": {
+      ".read": true,
+      ".write": true
+    },
+    "service_calls": {
+      ".read": true,
+      ".write": true
     },
     "dinhnhan_car": {
       "orders": {
-        ".indexOn": ["createdAt", "client_request_id", "phone", "status"]
+        ".read": true,
+        ".write": true,
+        ".indexOn": ["createdAt", "client_request_id", "phone", "status"],
+        "$orderId": {
+          ".validate": "(newData.hasChildren(['client_request_id', 'phone', 'items', 'grandTotal', 'createdAt', 'status']) && newData.child('client_request_id').isString() && newData.child('client_request_id').val().length > 0 && newData.child('phone').isString() && newData.child('phone').val().length >= 9 && newData.child('phone').val().length <= 15 && newData.child('grandTotal').isNumber() && newData.child('grandTotal').val() >= 0 && newData.child('createdAt').isString() && newData.child('status').isString()) || (data.exists() && newData.hasChildren(['items', 'grandTotal', 'createdAt', 'status']) && newData.child('grandTotal').isNumber() && newData.child('grandTotal').val() >= 0 && newData.child('status').isString())"
+        }
+      },
+      "menu_customizations": {
+        ".read": true,
+        ".write": true
+      },
+      "config": {
+        ".read": true,
+        ".write": true
+      },
+      "shippers": {
+        ".read": true,
+        ".write": true
+      },
+      "pos_customers": {
+        ".read": true,
+        ".write": true
       }
     }
   }
