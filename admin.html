@@ -4713,7 +4713,8 @@ function getTaxReportData() {
       document.getElementById('repDishTableBody').innerHTML = dishHtml || '<tr><td colspan="3" style="text-align:center; padding:20px;">Chưa có món nào.</td></tr>';
     };
 
-    window.exportTaxReportCSV = function() {
+    window.exportTaxReportCSV = async function() {
+      if (typeof window.ensureTaxOrdersLoaded === 'function') await window.ensureTaxOrdersLoaded();
       const data = getTaxReportData();
       let csv = "\uFEFFCÔNG TY TNHH TMDV VÀ SẢN XUẤT BẢO ANH LÂM\nMST: 3401289271 - 280 Trần Hưng Đạo, P. Phan Thiết, Tỉnh Lâm Đồng\nBẢNG KÊ DOANH THU CHỊU THUẾ (5610, 5630) & SỔ ĐỐI SOÁT TIỀN SHIP THU HỘ TRẢ SHIPPER\n\nSTT,Mã Đơn,Ngày Giờ Đặt,Hình Thức TT,Khách Hàng,Doanh Thu 5610 (Hy Chay),Doanh Thu 5630 (BAL'S HOUSE),TỔNG DOANH THU CHỊU THUẾ (QUÁN),Tiền Ship Thu Hộ (Trả Shipper - Không Tính Thuế)\n";
       data.rawList.forEach((o, i) => {
@@ -4901,7 +4902,8 @@ window.printKitchenTicket = (id, dData = null) => {
       window.print();
     };
 
-    window.printShiftReport = function() {
+    window.printShiftReport = async function() {
+      if (typeof window.ensureTaxOrdersLoaded === 'function') await window.ensureTaxOrdersLoaded();
       const data = getTaxReportData(); let dailyRows = '';
       const widthCSS = printerConfig.paperSize === '58mm' ? '54mm' : '76mm';
       applyDynamicPrintPageStyle(printerConfig.paperSize);
@@ -5964,7 +5966,8 @@ const origHandleAdminLogin = window.handleAdminLogin;
       });
     };
 
-    window.exportHouseholdTaxDeclarationCSV = function() {
+    window.exportHouseholdTaxDeclarationCSV = async function() {
+      if (typeof window.ensureTaxOrdersLoaded === 'function') await window.ensureTaxOrdersLoaded();
       const data = getTaxReportData();
       // Tính toán tham chiếu theo biểu thuế Hộ kinh doanh (Thông tư 40/2021/TT-BTC):
       // Dịch vụ ăn uống (F&B): GTGT 3% + TNCN 1.5% = 4.5% trên doanh thu chịu thuế
@@ -6262,7 +6265,7 @@ window.downloadIOSProfile = function(mode = 'admin') {
       });
     }
 
-    onValue(ref(db, 'orders'), () => {
+    onValue(query(ref(db, 'orders'), limitToLast(window.BAL_POS_GUARD.clampQueryLimit(100))), () => {
       setTimeout(decorateOrderCardsWithScheduleBadge, 80);
     });
     const origSetOrderFilterV12 = window.setOrderStatusFilter;
@@ -6393,7 +6396,8 @@ window.openInstallGuideModal = function() {
       }
     };
 
-    window.generateAndDownloadOfficialTaxXML = function() {
+    window.generateAndDownloadOfficialTaxXML = async function() {
+      if (typeof window.ensureTaxOrdersLoaded === 'function') await window.ensureTaxOrdersLoaded();
       const data = getTaxReportData();
       const model = document.getElementById('xmlTaxModelSelect')?.value || 'DN_01_GTGT';
       const soLan = document.getElementById('xmlFilingTimes')?.value || '0';
@@ -8214,7 +8218,7 @@ window.openInstallGuideModal = function() {
       // Automatically scan completed orders from ordersCache and add to invoices registry if missing
       const list = window.getInvoicesRegistry();
       let added = 0;
-      const liveOrders = window.ordersCache || (typeof ordersCache === 'object' ? ordersCache : null);
+      const liveOrders = window._balTaxOrdersSource || window.ordersCache || (typeof ordersCache === 'object' ? ordersCache : null);
       if (liveOrders && typeof liveOrders === 'object') {
         Object.keys(liveOrders).forEach(k => {
           const o = liveOrders[k];

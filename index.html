@@ -3225,7 +3225,6 @@ ${storeClosedStatusReason || 'Quán hiện chưa mở cửa nhận đơn.'}
     //    KHÔNG ĐÈ ICON, KHÔNG ĐÁ NHAU KHI CÀI TRÊN CÙNG 1 ĐIỆN THOẠI
     // =========================================================
     let deferredCustomerPrompt = null;
-    let apkAvailabilityMap = { '/HyChay_Khach.apk': false, '/HyChay_Shipper.apk': false };
 
     function isRunningStandalone() {
       return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
@@ -3269,13 +3268,7 @@ ${storeClosedStatusReason || 'Quán hiện chưa mở cửa nhận đơn.'}
       return cv.toDataURL('image/png').split(',')[1] || '';
     }
 
-    // Kiểm tra xem trên hosting đã có file .apk chưa
-    ['/HyChay_Khach.apk', '/HyChay_Shipper.apk'].forEach(path => {
-      fetch(path, { method: 'HEAD' }).then(res => {
-        const cType = (res.headers.get('content-type') || '').toLowerCase();
-        if (res.ok && !cType.includes('text/html')) apkAvailabilityMap[path] = true;
-      }).catch(() => {});
-    });
+    // Giữ nguyên hỗ trợ cài đặt PWA & Icon độc lập (gỡ bỏ đường dẫn cài gói Android tĩnh 404)
 
     if (shipperOrderIdParam) {
       document.title = "Ship Hy Chay - Nhận Đơn";
@@ -3439,17 +3432,8 @@ ${clipsXml}
       document.body.removeChild(a);
     };
 
-    window.downloadApkWithFallback = function(apkPath) {
-      const isShp = apkPath.includes('Shipper') || !!shipperOrderIdParam;
-      if (apkAvailabilityMap[apkPath]) {
-        const a = document.createElement('a');
-        a.href = apkPath;
-        a.download = apkPath.replace('/', '');
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        return;
-      }
+    window.downloadApkWithFallback = function(roleOrPath) {
+      const isShp = String(roleOrPath || '').toLowerCase().includes('shipper') || !!shipperOrderIdParam;
       if (deferredCustomerPrompt) {
         window.triggerNativeInstall();
         return;
@@ -3468,7 +3452,7 @@ ${clipsXml}
         window.downloadCustomerIOSProfile(shipperOrderIdParam ? 'shipper' : 'customer');
       } else {
         const isShp = !!shipperOrderIdParam;
-        window.downloadApkWithFallback(isShp ? '/HyChay_Shipper.apk' : '/HyChay_Khach.apk');
+        window.downloadApkWithFallback(isShp ? 'shipper' : 'customer');
       }
     };
 
@@ -3482,7 +3466,7 @@ ${clipsXml}
     window.openSmartInstallPrompt = function(roleMode = 'customer') {
       const isShp = (roleMode === 'shipper' || !!shipperOrderIdParam);
       const appTitle = isShp ? "🛵 App Đội Ship Hy Chay" : "🥗 App Đặt Món Hy Chay";
-      const apkFileName = isShp ? "/HyChay_Shipper.apk" : "/HyChay_Khach.apk";
+      const targetRole = isShp ? 'shipper' : 'customer';
 
       let bannerEl = document.getElementById('smartQrInstallOverlay');
       if (!bannerEl) {
@@ -3499,8 +3483,8 @@ ${clipsXml}
           <h3 style="color:#1e5e3a; font-size:1.15rem; margin-bottom:6px;">Cài Đặt ${appTitle} (Icon Độc Lập)</h3>
           <p style="font-size:0.82rem; color:#475569; margin-bottom:14px;">Đã tách biệt Mã Định Danh (UUID & Scope) — Cài đặt không bị đè lên các App khác:</p>
           <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:12px;">
-            <button type="button" onclick="downloadApkWithFallback('${apkFileName}')" style="width:100%; padding:14px; background:#16a34a; color:#ffffff; border:none; border-radius:12px; font-weight:900; font-size:0.92rem; cursor:pointer;">
-              🤖 1. TẢI & CÀI CHO ANDROID (ICON RIÊNG)
+            <button type="button" onclick="downloadApkWithFallback('${targetRole}')" style="width:100%; padding:14px; background:#16a34a; color:#ffffff; border:none; border-radius:12px; font-weight:900; font-size:0.92rem; cursor:pointer;">
+              🤖 1. CÀI APP PWA CHO ANDROID (ICON RIÊNG)
             </button>
             <button type="button" onclick="downloadCustomerIOSProfile('${isShp ? 'shipper' : 'customer'}')" style="width:100%; padding:14px; background:#0f172a; color:#ffffff; border:none; border-radius:12px; font-weight:800; font-size:0.9rem; cursor:pointer;">
               🍎 2. TẢI ICON NÀY CHO IPHONE (.mobileconfig)

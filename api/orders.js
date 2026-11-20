@@ -135,12 +135,15 @@ function readJsonBody(req) {
 function seedSandboxOrdersIfEmpty() {
   if (sandboxOrdersStore.length > 0) return;
   const todayVN = getVNDateStr();
+  const [yy, mm, dd] = todayVN.split("-").map((v) => parseInt(v, 10));
+  const ymStr = `${yy}-${String(mm).padStart(2, "0")}`;
+  const prevY = mm === 1 ? yy - 1 : yy;
+  const prevM = mm === 1 ? 12 : mm - 1;
+  const prevYmStr = `${prevY}-${String(prevM).padStart(2, "0")}`;
   const baseMs = Date.now();
-  for (let i = 1; i <= 140; i++) {
-    const isToday = i > 35;
-    const createdAt = isToday
-      ? new Date(baseMs - (140 - i) * 1000).toISOString()
-      : new Date(baseMs - (10 + i) * 86400000).toISOString();
+  const todayStartMs = Date.parse(`${todayVN}T00:00:00.000+07:00`);
+
+  const pushSeed = (i, createdAt) => {
     sandboxOrdersStore.push({
       id: `-SANDBOX-HC-${String(i).padStart(4, "0")}`,
       orderType: "delivery",
@@ -159,8 +162,34 @@ function seedSandboxOrdersIfEmpty() {
       client_request_id: `seed-hc-${i}`,
       sandbox: true
     });
+  };
+
+  // 15 đơn thuộc tháng trước (phục vụ kiểm thử khoảng nhiều ngày / 60 ngày, không cộng nhầm vào tháng hiện tại)
+  for (let i = 1; i <= 15; i++) {
+    const prevDay = String(10 + (i % 15)).padStart(2, "0");
+    const createdAt = new Date(`${prevYmStr}-${prevDay}T12:00:00.000+07:00`).toISOString();
+    pushSeed(i, createdAt);
   }
-  void todayVN;
+
+  // 55 đơn rải các ngày trước trong CÙNG tháng hiện tại (+07:00)
+  for (let j = 0; j < 55; j++) {
+    const idx = 16 + j;
+    let createdAt;
+    if (dd > 1) {
+      const targetDay = String(1 + (j % (dd - 1))).padStart(2, "0");
+      createdAt = new Date(`${ymStr}-${targetDay}T12:${String(j % 60).padStart(2, "0")}:00.000+07:00`).toISOString();
+    } else {
+      createdAt = new Date(todayStartMs + (j + 1) * 60000).toISOString();
+    }
+    pushSeed(idx, createdAt);
+  }
+
+  // 110 đơn ngày hôm nay (+07:00) => Tổng tháng hiện tại = 55 + 110 = 165 đơn (> 150)
+  for (let k = 0; k < 110; k++) {
+    const idx = 71 + k;
+    const tsMs = Math.max(todayStartMs, baseMs - (110 - k) * 1000);
+    pushSeed(idx, new Date(tsMs).toISOString());
+  }
 }
 
 module.exports = async function handler(req, res) {
