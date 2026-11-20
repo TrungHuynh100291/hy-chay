@@ -1,0 +1,17 @@
+{
+  "rules": {
+    ".read": true,
+    ".write": true,
+    "orders": {
+      ".indexOn": ["createdAt", "client_request_id", "phone", "status"]
+    },
+    "audit_logs": {
+      ".indexOn": ["timestamp"]
+    },
+    "dinhnhan_car": {
+      "orders": {
+        ".indexOn": ["createdAt", "client_request_id", "phone", "status"]
+      }
+    }
+  }
+}

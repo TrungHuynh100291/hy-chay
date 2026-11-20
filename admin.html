@@ -524,6 +524,9 @@
             <option value="fifo">⏳ Xếp theo thứ tự: Đơn Đặt Trước Làm Trước (FIFO)</option>
             <option value="newest">🆕 Xếp theo thứ tự: Đơn Mới Nhất Lên Đầu</option>
           </select>
+          <label style="display:inline-flex; align-items:center; gap:5px; font-size:0.78rem; font-weight:800; color:#15803d; background:#dcfce7; padding:6px 10px; border-radius:8px; cursor:pointer;">
+            <input type="checkbox" id="posTodayOnlyToggle" checked onchange="renderOrders()" style="width:15px; height:15px;"> 📅 Chỉ Hôm Nay (+07:00)
+          </label>
         </div>
                 <!-- HỘP THÔNG BÁO PHA CHẾ LIÊN TRẠM (GIAO VỀ XE NƯỚC BAL'S HOUSE) -->
         <div id="crossStationAlertsContainer" class="no-print" style="display:none;"></div>
@@ -1848,11 +1851,201 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, onValue, update, remove, set, push, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, onValue, update, remove, set, push, get, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = { apiKey: "AIzaSyB7CH4HUqEozclN38P_iGtSFzDB_w7sOUk", authDomain: "hy-chay.firebaseapp.com", projectId: "hy-chay", storageBucket: "hy-chay.firebasestorage.app", messagingSenderId: "215026977682", appId: "1:215026977682:web:52b136c7f09a62cc488f4b" };
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app, "https://hy-chay-default-rtdb.asia-southeast1.firebasedatabase.app");
+
+    // BAO ANH LAM - POS IDEMPOTENCY 2 LOP, KHOA TRAN 50/100 & BAO TOAN THUE HTKK <= 92 NGAY
+    window.BAL_POS_GUARD = (() => {
+      const DEFAULT_LIMIT = 50;
+      const MAX_LIMIT = 100;
+      const MAX_TAX_RANGE_DAYS = 92;
+      const REQ_ID_TTL_MS = 10 * 60 * 1000;
+      const SIG_TTL_MS = 30 * 1000;
+      const SESSION_REQ_KEY = "bal_hc_pos_client_request_id";
+      const recentPosMap = new Map();
+      let inflightPos = false;
+
+      function genUuid() {
+        if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") return crypto.randomUUID();
+        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+          const r = (Math.random() * 16) | 0;
+          return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+        });
+      }
+
+      function getClientRequestId() {
+        let id = sessionStorage.getItem(SESSION_REQ_KEY);
+        if (!id) { id = genUuid(); sessionStorage.setItem(SESSION_REQ_KEY, id); }
+        return id;
+      }
+
+      function rotateClientRequestId() {
+        const next = genUuid();
+        sessionStorage.setItem(SESSION_REQ_KEY, next);
+        return next;
+      }
+
+      function clampQueryLimit(rawLimit) {
+        if (rawLimit === undefined || rawLimit === null || rawLimit === "") return DEFAULT_LIMIT;
+        const parsed = Number.parseInt(String(rawLimit), 10);
+        if (!Number.isFinite(parsed) || parsed <= 0 || parsed > MAX_LIMIT) return MAX_LIMIT;
+        return parsed;
+      }
+
+      function normPhone(p) {
+        return String(p || "").trim().replace(/\s+/g, "").replace(/^\+84/, "0").replace(/[^0-9]/g, "");
+      }
+
+      function computeSig(order) {
+        const items = order && order.items ? Object.keys(order.items).sort().map((k) => ({
+          k,
+          name: String(order.items[k]?.name || "").trim(),
+          qty: Number(order.items[k]?.qty || 0),
+          price: Number(order.items[k]?.price || 0)
+        })) : [];
+        const scopeTarget = normPhone(order?.phone) || String(order?.table || "TAI_QUAN");
+        return `${scopeTarget}|${Math.round(Number(order?.grandTotal || 0))}|${JSON.stringify(items)}`;
+      }
+
+      function findDuplicateInMemory(orderData) {
+        const reqId = orderData.client_request_id;
+        const sig = computeSig(orderData);
+        const now = Date.now();
+        for (const [k, entry] of recentPosMap.entries()) {
+          if (now - entry.ts > REQ_ID_TTL_MS) { recentPosMap.delete(k); continue; }
+          if (reqId && entry.reqId === reqId) return entry;
+          if (entry.sig === sig && (now - entry.ts) <= SIG_TTL_MS) return entry;
+        }
+        const cache = typeof ordersCache === "object" && ordersCache ? ordersCache : {};
+        for (const [oid, ord] of Object.entries(cache)) {
+          if (!ord || !ord.createdAt) continue;
+          const age = now - new Date(ord.createdAt).getTime();
+          if (reqId && ord.client_request_id === reqId && age <= REQ_ID_TTL_MS) return { orderId: oid, order: ord };
+          if (age >= 0 && age <= SIG_TTL_MS && computeSig(ord) === sig) return { orderId: oid, order: ord };
+        }
+        return null;
+      }
+
+      function recordSubmitted(orderId, orderData) {
+        recentPosMap.set(orderId, { orderId, reqId: orderData.client_request_id, sig: computeSig(orderData), ts: Date.now(), order: orderData });
+      }
+
+      function isBusy() { return inflightPos; }
+      function setBusy(v) { inflightPos = Boolean(v); }
+
+      function validateTaxDateBounds(fromYmd, toYmd) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(fromYmd || "") || !/^\d{4}-\d{2}-\d{2}$/.test(toYmd || "")) {
+          return { ok: false, error: "Bắt buộc chọn khoảng ngày hợp lệ (YYYY-MM-DD)." };
+        }
+        const d1 = new Date(`${fromYmd}T00:00:00Z`);
+        const d2 = new Date(`${toYmd}T00:00:00Z`);
+        const days = Math.floor((d2.getTime() - d1.getTime()) / 86400000) + 1;
+        if (days < 1 || days > MAX_TAX_RANGE_DAYS) {
+          return { ok: false, days, error: `Mỗi lần xuất báo cáo thuế chỉ cho phép tối đa ${MAX_TAX_RANGE_DAYS} ngày (khoảng đang chọn: ${days} ngày).` };
+        }
+        return { ok: true, days, fromYmd, toYmd };
+      }
+
+      return {
+        DEFAULT_LIMIT, MAX_LIMIT, MAX_TAX_RANGE_DAYS,
+        getClientRequestId, rotateClientRequestId, clampQueryLimit,
+        findDuplicateInMemory, recordSubmitted, isBusy, setBusy, validateTaxDateBounds
+      };
+    })();
+
+    window.getSelectedTaxBounds = function() {
+      const todayVN = getVNDateStr();
+      const modeEl = document.getElementById('filterMode');
+      const mode = modeEl ? modeEl.value : 'day';
+      let fromBound = todayVN, toBound = todayVN;
+      if (mode === 'quarter') {
+        const q = parseInt(document.getElementById('filterQuarter')?.value || '1', 10);
+        const qY = parseInt(document.getElementById('filterQuarterYear')?.value || todayVN.slice(0, 4), 10);
+        const startM = String((q - 1) * 3 + 1).padStart(2, '0');
+        const endM = String(q * 3).padStart(2, '0');
+        const endDay = (q === 1 || q === 4) ? '31' : '30';
+        fromBound = `${qY}-${startM}-01`;
+        toBound = `${qY}-${endM}-${endDay}`;
+      } else if (mode === 'month') {
+        const ym = document.getElementById('filterMonthInput')?.value || todayVN.slice(0, 7);
+        const [yy, mm] = ym.split('-');
+        const lastD = String(new Date(parseInt(yy, 10), parseInt(mm, 10), 0).getDate()).padStart(2, '0');
+        fromBound = `${yy}-${mm}-01`;
+        toBound = `${yy}-${mm}-${lastD}`;
+      } else {
+        const dVal = document.getElementById('filterDayInput')?.value || todayVN;
+        fromBound = dVal;
+        toBound = dVal;
+      }
+      return { fromBound, toBound };
+    };
+
+    window._balTaxOrdersSource = null;
+    window._balTaxLoadedAt = 0;
+    window._balTaxLoadedKey = null;
+    window._balTaxFetchingKey = null;
+    window._balTaxInflightPromise = null;
+    window.ensureTaxOrdersLoaded = async function(forceRefresh = false) {
+      const { fromBound, toBound } = window.getSelectedTaxBounds();
+      const taxCheck = window.BAL_POS_GUARD ? window.BAL_POS_GUARD.validateTaxDateBounds(fromBound, toBound) : { ok: true };
+      if (!taxCheck.ok) return typeof ordersCache !== "undefined" ? ordersCache : {};
+
+      const rangeKey = `${fromBound}__${toBound}`;
+      if (!forceRefresh && window._balTaxOrdersSource && window._balTaxLoadedKey === rangeKey && (Date.now() - window._balTaxLoadedAt < 60000)) {
+        return window._balTaxOrdersSource;
+      }
+      if (window._balTaxInflightPromise && window._balTaxFetchingKey === rangeKey) {
+        return window._balTaxInflightPromise;
+      }
+
+      window._balTaxFetchingKey = rangeKey;
+      window._balTaxInflightPromise = (async () => {
+        try {
+          try {
+            const resp = await fetch(`/api/orders?mode=tax_htkk&from_date=${encodeURIComponent(fromBound)}&to_date=${encodeURIComponent(toBound)}`);
+            const cType = resp.headers.get("content-type") || "";
+            if (resp.ok && cType.includes("application/json")) {
+              const json = await resp.json();
+              if (Array.isArray(json.orders)) {
+                const mapped = {};
+                json.orders.forEach((o) => { if (o && o.id) mapped[o.id] = o; });
+                window._balTaxOrdersSource = mapped;
+                window._balTaxLoadedKey = rangeKey;
+                window._balTaxLoadedAt = Date.now();
+                return mapped;
+              }
+            }
+          } catch (apiErr) {
+            console.warn("ensureTaxOrdersLoaded API fallback to RTDB:", apiErr);
+          }
+
+          const snap = await get(ref(db, 'orders'));
+          const all = snap.val() || {};
+          const filtered = {};
+          for (const [id, o] of Object.entries(all)) {
+            if (!o || !o.createdAt) continue;
+            const vnD = getVNDateStr(o.createdAt);
+            if (vnD >= fromBound && vnD <= toBound) filtered[id] = o;
+          }
+          window._balTaxOrdersSource = filtered;
+          window._balTaxLoadedKey = rangeKey;
+          window._balTaxLoadedAt = Date.now();
+          return filtered;
+        } catch (e) {
+          console.warn("ensureTaxOrdersLoaded fallback:", e);
+          return typeof ordersCache !== "undefined" ? ordersCache : {};
+        } finally {
+          if (window._balTaxFetchingKey === rangeKey) {
+            window._balTaxFetchingKey = null;
+            window._balTaxInflightPromise = null;
+          }
+        }
+      })();
+      return window._balTaxInflightPromise;
+    };
 
     // ==========================================
     // 1. HỆ THỐNG XÁC THỰC PHÂN QUYỀN ROOT - MANAGER
@@ -2057,7 +2250,13 @@ const dynamicManifest = {
       
       if (tabName === 'posOrder') window.renderPosDishGrid();
       else if (tabName === 'menuStock') window.renderMenuStockTable();
-      else if (tabName === 'shiftReport') window.renderShiftReport();
+      else if (tabName === 'shiftReport') {
+        window.renderShiftReport();
+        window.ensureTaxOrdersLoaded().then(() => {
+          window.renderShiftReport();
+          if (typeof window.updateXmlTaxPreview === 'function') window.updateXmlTaxPreview();
+        });
+      }
       else if (tabName === 'operatingHours' && typeof window.initOperatingHoursUI === 'function') window.initOperatingHoursUI();
       else if (tabName === 'invoicesInOut' && typeof window.renderInvoicesInOutTable === 'function') window.renderInvoicesInOutTable();
       else if (tabName === 'shippers' && typeof window.renderShippersTable === 'function') window.renderShippersTable();
@@ -2075,9 +2274,9 @@ const dynamicManifest = {
       "VCB": "Vietcombank", "TCB": "Techcombank", "ICB": "VietinBank", "BIDV": "BIDV"
     };
 
-    const tDay = new Date();
-    document.getElementById('filterDayInput').value = tDay.toISOString().split('T')[0];
-    document.getElementById('filterMonthInput').value = tDay.toISOString().slice(0, 7);
+    const tDayVN = new Date(Date.now() + 7 * 60 * 60 * 1000);
+    document.getElementById('filterDayInput').value = tDayVN.toISOString().split('T')[0];
+    document.getElementById('filterMonthInput').value = tDayVN.toISOString().slice(0, 7);
     setInterval(() => {
       document.getElementById('liveClock').innerText = new Date().toLocaleTimeString('vi-VN');
       updatePiPCanvas();
@@ -3723,8 +3922,8 @@ window.deleteDishFromMenu = function(id, name) {
       });
     };
 
-    // Tự động đọc chi tiết Bàn & Món khi có thiết bị khác vừa bấm Order hoặc Khách vừa đặt đơn mới
-    onValue(ref(db, 'orders'), (snap) => {
+    // Tự động đọc chi tiết Bàn & Món khi có thiết bị khác vừa bấm Order hoặc Khách vừa đặt đơn mới (khóa trần 100 đơn)
+    onValue(query(ref(db, 'orders'), limitToLast(window.BAL_POS_GUARD.clampQueryLimit(100))), (snap) => {
       const all = snap.val() || {};
       if (isFirstOrdersLoad) {
         Object.keys(all).forEach(id => {
@@ -3824,8 +4023,8 @@ window.deleteDishFromMenu = function(id, name) {
       });
     };
 
-    // Tự động lắng nghe: Nếu Webhook Ngân hàng (SePay/Casso) hoặc máy khác xác nhận tiền vào -> Loa tự động đọc số tiền!
-    onValue(ref(db, 'orders'), (snap) => {
+    // Tự động lắng nghe: Nếu Webhook Ngân hàng (SePay/Casso) hoặc máy khác xác nhận tiền vào -> Loa tự động đọc số tiền! (khóa trần 100 đơn)
+    onValue(query(ref(db, 'orders'), limitToLast(window.BAL_POS_GUARD.clampQueryLimit(100))), (snap) => {
       const all = snap.val() || {};
       Object.keys(all).forEach(oid => {
         const ord = all[oid];
@@ -3906,7 +4105,7 @@ window.deleteDishFromMenu = function(id, name) {
       }
     }, 30000);
 
-    onValue(ref(db, 'orders'), (snapshot) => {
+    onValue(query(ref(db, 'orders'), limitToLast(window.BAL_POS_GUARD.clampQueryLimit(100))), (snapshot) => {
       ordersCache = snapshot.val() || {};
       window.ordersCache = ordersCache;
       rebuildDailyOrderSequenceAndAutoReset();
@@ -3922,6 +4121,7 @@ window.deleteDishFromMenu = function(id, name) {
 
       let countPending = 0, countCooking = 0, countDelivering = 0, countDoneCancel = 0, countIssue = 0, taxableRevToday = 0, shipRevToday = 0, cardsHtml = '';
       const todayStr = getVNDateStr();
+      const todayOnly = document.getElementById('posTodayOnlyToggle')?.checked !== false;
 
       const allKeys = Object.keys(ordersCache);
       const curStation = localStorage.getItem('BAL_POS_STATION') || 'HC';
@@ -3936,6 +4136,7 @@ window.deleteDishFromMenu = function(id, name) {
         if (curStation === 'BH' && !isBh) return;
 
         const orderDayStr = getVNDateStr(o.createdAt);
+        if (todayOnly && orderDayStr !== todayStr) return;
         if (orderDayStr === todayStr && (o.status === 'Đã hoàn tất' || o.status === 'Đang giao hàng')) {
           taxableRevToday += (o.subtotal || 0);
           shipRevToday += (o.shippingFee || 0);
@@ -3954,7 +4155,12 @@ window.deleteDishFromMenu = function(id, name) {
       });
 
       const sortMode = document.getElementById('orderSortSelect') ? document.getElementById('orderSortSelect').value : 'fifo';
-      const sortedKeys = allKeys.filter(id => ordersCache[id] && !ordersCache[id].archived).sort((a, b) => {
+      const sortedKeys = allKeys.filter(id => {
+        const ord = ordersCache[id];
+        if (!ord || ord.archived) return false;
+        if (todayOnly && getVNDateStr(ord.createdAt) !== todayStr) return false;
+        return true;
+      }).sort((a, b) => {
         const oA = ordersCache[a], oB = ordersCache[b];
         const rank = (st) => st === 'Sự cố Shipper' ? 0 : (st === 'Chờ xác nhận' ? 1 : (st === 'Đang chế biến' || st === 'Tài xế đang đến quán' ? 2 : (st === 'Đang giao hàng' ? 3 : 4)));
         if (rank(oA.status) !== rank(oB.status)) return rank(oA.status) - rank(oB.status);
@@ -4349,9 +4555,18 @@ function getTaxReportData() {
       const mode = document.getElementById('filterMode').value; let labelPeriod = ""; 
       let total5610 = 0, total5630 = 0, totalShip = 0, count = 0, daily = {}, dishStats = {}, rawList = [];
       let cashHC = 0, cashBH = 0;
-      
-      for (let id in ordersCache) {
-        const o = ordersCache[id]; if (!o || o.status !== 'Đã hoàn tất' || !o.createdAt) continue;
+
+      // Bảo toàn 100% dữ liệu kỳ thuế HTKK v5.7.8 (tối đa 92 ngày/lần xuất, không bị khóa trần 100 bản ghi của POS)
+      const { fromBound, toBound } = window.getSelectedTaxBounds();
+      const taxCheck = window.BAL_POS_GUARD ? window.BAL_POS_GUARD.validateTaxDateBounds(fromBound, toBound) : { ok: true };
+      if (!taxCheck.ok) {
+        alert("⚠️ " + taxCheck.error);
+        return { labelPeriod: "Không hợp lệ", total5610: 0, total5630: 0, totalTaxable: 0, totalShip: 0, count: 0, daily: {}, dishStats: {}, rawList: [], cashHC: 0, cashBH: 0 };
+      }
+
+      const taxSource = window._balTaxOrdersSource || ordersCache;
+      for (let id in taxSource) {
+        const o = taxSource[id]; if (!o || o.status !== 'Đã hoàn tất' || !o.createdAt) continue;
         const dStr = getVNDateStr(o.createdAt);
         const y = parseInt(dStr.slice(0, 4)), m = parseInt(dStr.slice(5, 7));
         let match = false;
@@ -4419,6 +4634,20 @@ function getTaxReportData() {
     }
 
     window.renderShiftReport = function() {
+      const viewShiftEl = document.getElementById('viewShiftReport');
+      const isShiftTabVisible = viewShiftEl && viewShiftEl.style.display !== 'none';
+      if (isShiftTabVisible && typeof window.getSelectedTaxBounds === 'function' && typeof window.ensureTaxOrdersLoaded === 'function') {
+        const { fromBound, toBound } = window.getSelectedTaxBounds();
+        const boundsCheck = window.BAL_POS_GUARD ? window.BAL_POS_GUARD.validateTaxDateBounds(fromBound, toBound) : { ok: true };
+        const rangeKey = `${fromBound}__${toBound}`;
+        if (boundsCheck.ok && window._balTaxLoadedKey !== rangeKey && window._balTaxFetchingKey !== rangeKey) {
+          window.ensureTaxOrdersLoaded(true).then(() => {
+            if (window._balTaxLoadedKey === rangeKey) {
+              window.renderShiftReport();
+            }
+          });
+        }
+      }
       const data = getTaxReportData();
       document.getElementById('repTaxable5610').innerText = data.total5610.toLocaleString() + 'đ';
       document.getElementById('repTaxable5630').innerText = data.total5630.toLocaleString() + 'đ';
@@ -5583,8 +5812,8 @@ const origHandleAdminLogin = window.handleAdminLogin;
       if (tbody) tbody.innerHTML = html || '<tr><td colspan="4" style="text-align:center;">Chưa có tài khoản nhân sự nào.</td></tr>';
     });
 
-    // Hiển thị bảng Nhật Ký Chống Gian Lận (Audit Logs) cho Chủ quán
-    onValue(ref(db, 'audit_logs'), (snap) => {
+    // Hiển thị bảng Nhật Ký Chống Gian Lận (Audit Logs) cho Chủ quán (default_limit = 50)
+    onValue(query(ref(db, 'audit_logs'), limitToLast(window.BAL_POS_GUARD.clampQueryLimit(50))), (snap) => {
       const logs = snap.val() || {};
       const tbody = document.getElementById('auditLogsTableBody');
       if (!tbody) return;
@@ -6741,6 +6970,21 @@ window.openInstallGuideModal = function() {
 
     window.submitDineInOrder = function() {
       if (Object.keys(posCart).length === 0) return alert("Vui lòng chọn ít nhất 1 món ăn!");
+      const btnPos = document.getElementById('btnSubmitPosOrderMain');
+      if (window.BAL_POS_GUARD && window.BAL_POS_GUARD.isBusy()) return;
+      if (btnPos && btnPos.disabled) return;
+      if (window.BAL_POS_GUARD) window.BAL_POS_GUARD.setBusy(true);
+      if (btnPos) {
+        btnPos.disabled = true;
+        btnPos.innerText = "⏳ Đang gửi...";
+      }
+      const releasePosBtn = () => {
+        if (window.BAL_POS_GUARD) window.BAL_POS_GUARD.setBusy(false);
+        if (btnPos) {
+          btnPos.disabled = false;
+          btnPos.innerText = "⚡ GỬI BẾP & IN BÁO BẾP";
+        }
+      };
 
       let spokenDishes = [];
       for (let k in posCart) spokenDishes.push(`${posCart[k].qty} ${posCart[k].name}`);
@@ -6757,6 +7001,7 @@ window.openInstallGuideModal = function() {
 
       const nextSeq = getNextDailyOrderSequenceNumber();
       const seqFormatted = String(nextSeq).padStart(2, '0');
+      const posClientRequestId = window.BAL_POS_GUARD ? window.BAL_POS_GUARD.getClientRequestId() : `pos-${Date.now()}`;
 
       if (currentPosOrderMode === 'delivery') {
         const cusName = (document.getElementById('posShipCusName')?.value || '').trim();
@@ -6769,26 +7014,14 @@ window.openInstallGuideModal = function() {
         const autoDispatch = document.getElementById('posAutoDispatchCheck')?.checked !== false;
         const km = Math.max(0.5, parseFloat(document.getElementById('posShipKmInput')?.value || '1.8') || 1.8);
 
-        if (!cusName || !cleanPhone) return alert("⚠️ Vui lòng nhập Tên khách hàng và Số điện thoại!");
-        if (!rawAddr) return alert("⚠️ Vui lòng nhập Địa chỉ giao hàng của khách!");
-
-        const customerRecord = {
-          name: cusName, phone: cleanPhone, ward: ward, province: 'Lâm Đồng',
-          address: fullAddr, fullAddress: fullAddr, km: km, deliveryKm: km,
-          deliveryLat: adminPinnedLat || null, deliveryLng: adminPinnedLng || null,
-          note: rawNote, lastItems: posCart, updatedAt: new Date().toISOString()
-        };
-        update(ref(db, `pos_customers/${cleanPhone}`), customerRecord).catch(() => {});
-        update(ref(db, `users/${cleanPhone}`), customerRecord).catch(() => {});
-
-        const accMap = computeShipperAccountingMap();
-        let candidates = Object.keys(shippersCache).filter(p => shippersCache[p] && shippersCache[p].isActive !== false && shippersCache[p].isOnline === true);
-        candidates.sort((a, b) => ((accMap[a]?.todayOrders || 0) - (accMap[b]?.todayOrders || 0)));
+        if (!cusName || !cleanPhone) { releasePosBtn(); return alert("⚠️ Vui lòng nhập Tên khách hàng và Số điện thoại!"); }
+        if (!rawAddr) { releasePosBtn(); return alert("⚠️ Vui lòng nhập Địa chỉ giao hàng của khách!"); }
 
         const nowIso = new Date().toISOString();
         const paymentCode = payMethod === 'VIETQR' ? ('HC' + Math.floor(1000 + Math.random() * 9000)) : null;
 
         const deliveryOrderData = {
+          client_request_id: posClientRequestId,
           orderType: 'delivery',
           createdByPosAdmin: true,
           dailySeq: nextSeq,
@@ -6816,11 +7049,33 @@ window.openInstallGuideModal = function() {
           paymentStatus: payMethod === 'VIETQR' ? 'Chờ kiểm tra CK' : 'Thu tiền mặt (COD)',
           paymentVerified: false,
           status: 'Đang chế biến',
-          dispatchQueue: autoDispatch ? candidates : [],
-          dispatchResetAt: autoDispatch ? nowIso : null,
+          dispatchQueue: [],
+          dispatchResetAt: null,
           createdAt: nowIso,
           archived: false
         };
+
+        const dupHit = window.BAL_POS_GUARD ? window.BAL_POS_GUARD.findDuplicateInMemory(deliveryOrderData) : null;
+        if (dupHit) {
+          releasePosBtn();
+          alert(`⚠️ Đơn giao đi tương tự vừa được tạo (#HC-${String(dupHit.orderId).slice(-5).toUpperCase()}). Đã chặn tạo đơn trùng!`);
+          return;
+        }
+
+        const customerRecord = {
+          name: cusName, phone: cleanPhone, ward: ward, province: 'Lâm Đồng',
+          address: fullAddr, fullAddress: fullAddr, km: km, deliveryKm: km,
+          deliveryLat: adminPinnedLat || null, deliveryLng: adminPinnedLng || null,
+          note: rawNote, lastItems: posCart, updatedAt: nowIso
+        };
+        update(ref(db, `pos_customers/${cleanPhone}`), customerRecord).catch(() => {});
+        update(ref(db, `users/${cleanPhone}`), customerRecord).catch(() => {});
+
+        const accMap = computeShipperAccountingMap();
+        let candidates = Object.keys(shippersCache).filter(p => shippersCache[p] && shippersCache[p].isActive !== false && shippersCache[p].isOnline === true);
+        candidates.sort((a, b) => ((accMap[a]?.todayOrders || 0) - (accMap[b]?.todayOrders || 0)));
+        deliveryOrderData.dispatchQueue = autoDispatch ? candidates : [];
+        deliveryOrderData.dispatchResetAt = autoDispatch ? nowIso : null;
 
         const newOrderId = `ORD-${orderStation}-SHIP-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`;
         deliveryOrderData.orderCode = newOrderId;
@@ -6830,8 +7085,11 @@ window.openInstallGuideModal = function() {
         if (typeof orderLastVoiceReminderAt !== 'undefined') orderLastVoiceReminderAt[newOrderId] = Date.now();
         ordersCache[newOrderId] = deliveryOrderData;
         dailyOrderSeqMap[newOrderId] = seqFormatted;
+        if (window.BAL_POS_GUARD) window.BAL_POS_GUARD.recordSubmitted(newOrderId, deliveryOrderData);
 
         set(newOrderRef, deliveryOrderData).then(() => {
+          releasePosBtn();
+          if (window.BAL_POS_GUARD) window.BAL_POS_GUARD.rotateClientRequestId();
           set(ref(db, `orders_by_station/${orderStation}/${newOrderId}`), deliveryOrderData).catch(() => {});
           const voiceShipText = `Đơn giao đi số ${seqFormatted} của khách ${cusName} gồm: ${spokenDishes.join(', ')}.${pct > 0 ? ' Ưu đãi giảm ' + pct + ' phần trăm.' : ''}${rawNote ? ' Lưu ý bếp: ' + rawNote : ''}`;
           broadcastAndSpeakKitchenAlert(voiceShipText);
@@ -6844,12 +7102,16 @@ window.openInstallGuideModal = function() {
           updateV19PosTotalsUI();
           renderPosCartUI();
           document.querySelectorAll('.tab-btn')[0].click();
+        }).catch((err) => {
+          releasePosBtn();
+          alert("❌ Lỗi gửi đơn POS: " + err.message);
         });
         return;
       }
 
       const newOrderId = `ORD-${orderStation}-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`;
       const orderData = {
+        client_request_id: posClientRequestId,
         orderType: 'dine_in',
         dailySeq: nextSeq,
         station: orderStation,
@@ -6873,13 +7135,23 @@ window.openInstallGuideModal = function() {
         archived: false
       };
 
+      const dupDineIn = window.BAL_POS_GUARD ? window.BAL_POS_GUARD.findDuplicateInMemory(orderData) : null;
+      if (dupDineIn) {
+        releasePosBtn();
+        alert(`⚠️ Đơn ${finalTable} vừa được gửi cách đây vài giây (#HC-${String(dupDineIn.orderId).slice(-5).toUpperCase()}). Đã chặn tạo trùng!`);
+        return;
+      }
+
       const newOrderRef = ref(db, `orders/${newOrderId}`);
       if (typeof announcedNewOrderIds !== 'undefined') announcedNewOrderIds[newOrderId] = true;
       if (typeof orderLastVoiceReminderAt !== 'undefined') orderLastVoiceReminderAt[newOrderId] = Date.now();
       ordersCache[newOrderId] = orderData;
       dailyOrderSeqMap[newOrderId] = seqFormatted;
+      if (window.BAL_POS_GUARD) window.BAL_POS_GUARD.recordSubmitted(newOrderId, orderData);
 
       set(newOrderRef, orderData).then(() => {
+        releasePosBtn();
+        if (window.BAL_POS_GUARD) window.BAL_POS_GUARD.rotateClientRequestId();
         // GHI LÊN PHÂN HỆ NAMESPACE RIÊNG (orders_by_station) CHỐNG TRÙNG BÀN & ĐÈ DỮ LIỆU
         const safeTable = finalTable.replace(/\s+/g, '_');
         set(ref(db, `orders_by_station/${orderStation}/${newOrderId}`), orderData).catch(() => {});
@@ -6923,6 +7195,9 @@ window.openInstallGuideModal = function() {
         updateV19PosTotalsUI();
         renderPosCartUI();
         document.querySelectorAll('.tab-btn')[0].click();
+      }).catch((err) => {
+        releasePosBtn();
+        alert("❌ Lỗi gửi đơn POS: " + err.message);
       });
     };
 

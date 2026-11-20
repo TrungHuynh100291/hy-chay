@@ -2,11 +2,14 @@ import http from 'http';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const require = createRequire(import.meta.url);
+const ordersApiHandler = require('./api/orders.js');
 
-const PORT = 5173;
+const PORT = Number(process.env.PORT || 5173);
 const ROOT = __dirname;
 
 const MIME = {
@@ -25,6 +28,21 @@ const MIME = {
 
 const server = http.createServer((req, res) => {
   let reqPath = decodeURIComponent(req.url.split('?')[0]);
+  if (reqPath === '/api/orders') {
+    res.status = (code) => {
+      res.statusCode = code;
+      return {
+        json: (obj) => {
+          res.end(JSON.stringify(obj));
+        }
+      };
+    };
+    ordersApiHandler(req, res).catch((err) => {
+      res.statusCode = 500;
+      res.end(JSON.stringify({ error: err.message }));
+    });
+    return;
+  }
   if (reqPath === '/' || reqPath === '') reqPath = '/index.html';
 
   let filePath = path.join(ROOT, reqPath);

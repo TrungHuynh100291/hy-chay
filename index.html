@@ -983,7 +983,7 @@
   <!-- =============================== -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, get, update, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, push, onValue, get, update, set, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyB7CH4HUqEozclN38P_iGtSFzDB_w7sOUk",
@@ -995,6 +995,147 @@
     };
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app, "https://hy-chay-default-rtdb.asia-southeast1.firebasedatabase.app");
+
+    // BAO ANH LAM - IDEMPOTENCY 2 LOP & KHOA TRAN QUERY LIMIT (DEFAULT=50, MAX=100)
+    window.BAL_ORDER_GUARD = (() => {
+      const DEFAULT_LIMIT = 50;
+      const MAX_LIMIT = 100;
+      const REQ_ID_TTL_MS = 10 * 60 * 1000;
+      const SIG_TTL_MS = 30 * 1000;
+      const SESSION_REQ_KEY = "bal_hc_client_request_id";
+      const RECENT_CACHE_KEY = "bal_hc_recent_orders_v1";
+      let inflightPromise = null;
+
+      function generateUuidV4() {
+        if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+          return crypto.randomUUID();
+        }
+        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+          const r = (Math.random() * 16) | 0;
+          const v = c === "x" ? r : (r & 0x3) | 0x8;
+          return v.toString(16);
+        });
+      }
+
+      function getClientRequestId() {
+        let id = sessionStorage.getItem(SESSION_REQ_KEY);
+        if (!id) {
+          id = generateUuidV4();
+          sessionStorage.setItem(SESSION_REQ_KEY, id);
+        }
+        return id;
+      }
+
+      function rotateClientRequestId() {
+        const next = generateUuidV4();
+        sessionStorage.setItem(SESSION_REQ_KEY, next);
+        return next;
+      }
+
+      function clampQueryLimit(rawLimit) {
+        if (rawLimit === undefined || rawLimit === null || rawLimit === "") return DEFAULT_LIMIT;
+        const parsed = Number.parseInt(String(rawLimit), 10);
+        if (!Number.isFinite(parsed) || parsed <= 0 || parsed > MAX_LIMIT) return MAX_LIMIT;
+        return parsed;
+      }
+
+      function normPhone(p) {
+        return String(p || "").trim().replace(/\s+/g, "").replace(/^\+84/, "0").replace(/[^0-9]/g, "");
+      }
+
+      function computeSig(order) {
+        const items = order && order.items ? Object.keys(order.items).sort().map((k) => ({
+          k,
+          name: String(order.items[k]?.name || "").trim(),
+          qty: Number(order.items[k]?.qty || 0),
+          price: Number(order.items[k]?.price || 0)
+        })) : [];
+        return `${normPhone(order?.phone)}|${Math.round(Number(order?.grandTotal || 0))}|${JSON.stringify(items)}`;
+      }
+
+      function loadRecentCache() {
+        try {
+          const arr = JSON.parse(localStorage.getItem(RECENT_CACHE_KEY) || "[]");
+          const now = Date.now();
+          return Array.isArray(arr) ? arr.filter((x) => x && (now - Number(x.ts || 0)) <= REQ_ID_TTL_MS) : [];
+        } catch {
+          return [];
+        }
+      }
+
+      function saveRecentCache(orderId, reqId, sig) {
+        try {
+          const arr = loadRecentCache().filter((x) => x.orderId !== orderId);
+          arr.push({ orderId, reqId, sig, ts: Date.now() });
+          localStorage.setItem(RECENT_CACHE_KEY, JSON.stringify(arr.slice(-30)));
+        } catch {}
+      }
+
+      async function submitWithIdempotency(orderData) {
+        if (inflightPromise) return inflightPromise;
+        const reqId = orderData.client_request_id || getClientRequestId();
+        orderData.client_request_id = reqId;
+        const sig = computeSig(orderData);
+        const now = Date.now();
+
+        const recentLocal = loadRecentCache();
+        const localHit = recentLocal.find((x) =>
+          x.reqId === reqId || (x.sig === sig && (now - x.ts) <= SIG_TTL_MS)
+        );
+        if (localHit) {
+          return { orderId: localHit.orderId, deduplicated: true, reason: "client_recent_guard" };
+        }
+
+        inflightPromise = (async () => {
+          // 1. Uu tien goi Backend API /api/orders tren Vercel (chong trung Server 2 lop + in-flight lock)
+          try {
+            const apiResp = await fetch("/api/orders", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(orderData)
+            });
+            const cType = apiResp.headers.get("content-type") || "";
+            if (apiResp.ok && cType.includes("application/json")) {
+              const json = await apiResp.json();
+              if (json && json.orderId) {
+                saveRecentCache(json.orderId, reqId, sig);
+                return { orderId: json.orderId, deduplicated: Boolean(json.deduplicated), reason: json.reason || "api" };
+              }
+            }
+          } catch (_) {
+            // Fallback sang kiem tra truc tiep Firebase RTDB neu dang chay Vite static dev cuc bo
+          }
+
+          // 2. Fallback Firebase RTDB Idempotency Check (gioi han 100 don gan nhat)
+          const snap = await get(query(ref(db, "orders"), limitToLast(MAX_LIMIT)));
+          const existing = snap.val() || {};
+          for (const [oid, ord] of Object.entries(existing)) {
+            if (!ord || !ord.createdAt) continue;
+            const ageMs = now - new Date(ord.createdAt).getTime();
+            if (ageMs <= REQ_ID_TTL_MS && ord.client_request_id === reqId) {
+              saveRecentCache(oid, reqId, sig);
+              return { orderId: oid, deduplicated: true, reason: "rtdb_client_request_id" };
+            }
+            if (ageMs >= 0 && ageMs <= SIG_TTL_MS && computeSig(ord) === sig) {
+              saveRecentCache(oid, reqId, sig);
+              return { orderId: oid, deduplicated: true, reason: "rtdb_signature_30s" };
+            }
+          }
+
+          const nRef = await push(ref(db, "orders"), orderData);
+          saveRecentCache(nRef.key, reqId, sig);
+          return { orderId: nRef.key, deduplicated: false, reason: "rtdb_created" };
+        })();
+
+        try {
+          return await inflightPromise;
+        } finally {
+          inflightPromise = null;
+        }
+      }
+
+      return { DEFAULT_LIMIT, MAX_LIMIT, getClientRequestId, rotateClientRequestId, clampQueryLimit, submitWithIdempotency };
+    })();
 
     const STORE_LAT = 10.9328;
     const STORE_LON = 108.1025;
@@ -1249,8 +1390,8 @@
       document.getElementById('shipperLoginBox').style.display = 'none';
       document.getElementById('shipperOrderBox').style.display = 'block';
 
-      // Lắng nghe toàn bộ nhánh orders: Tự động bắt ngay đơn hàng đang thuộc về bác tài HOẶC đơn mới vừa được Quán bắn ra!
-      onValue(ref(db, 'orders'), (allSnap) => {
+      // Lắng nghe tối đa 100 đơn hàng gần nhất (khóa trần max_limit = 100 để nhẹ RAM)
+      onValue(query(ref(db, 'orders'), limitToLast(window.BAL_ORDER_GUARD.clampQueryLimit(100))), (allSnap) => {
         const allOrders = allSnap.val() || {};
         // 1. Ưu tiên kiểm tra xem bác tài có đang giao dở đơn nào không
         let myActiveId = null;
@@ -2303,7 +2444,7 @@ const CAT_LABELS_MAP = {
       if (!listEl) return;
       if (historyUnsubscribe) { historyUnsubscribe(); historyUnsubscribe = null; }
 
-      historyUnsubscribe = onValue(ref(db, 'orders'), (snapshot) => {
+      historyUnsubscribe = onValue(query(ref(db, 'orders'), limitToLast(window.BAL_ORDER_GUARD.clampQueryLimit(50))), (snapshot) => {
         const orders = snapshot.val() || {};
         let totalSpent = 0, html = '';
         const matchingIds = Object.keys(orders).filter(id => orders[id] && normalizePhone(orders[id].phone) === normalizePhone(phone));
@@ -2864,6 +3005,21 @@ window.addToCart = function(id, name, p) {
     // ==========================================
 window.submitOrder = function(e) {
       e.preventDefault();
+      const btnSubmit = document.getElementById('btnSubmitOrder');
+      if (btnSubmit) {
+        if (btnSubmit.disabled || btnSubmit.dataset.submitting === '1') return;
+        btnSubmit.dataset.submitting = '1';
+        btnSubmit.disabled = true;
+        btnSubmit.innerText = "⏳ Đang gửi...";
+      }
+      const releaseSubmitBtn = () => {
+        if (btnSubmit) {
+          btnSubmit.dataset.submitting = '0';
+          btnSubmit.disabled = false;
+          btnSubmit.innerText = "XÁC NHẬN GỬI ĐƠN HÀNG";
+        }
+      };
+
       checkOperatingHours();
       if (!isStoreOpen) {
         if (isPreorderAllowed) {
@@ -2873,11 +3029,13 @@ ${storeClosedStatusReason || 'Quán hiện đang ngoài giờ mở bán hoặc n
 
 Bạn có muốn gửi ĐƠN ĐẶT TRƯỚC để quán sắp xếp đơn và giao sớm nhất khi vào ca không?`);
           if (!confirmPreorder) {
-            const btnSubmit = document.getElementById('btnSubmitOrder');
-            if (btnSubmit) { btnSubmit.disabled = false; btnSubmit.dataset.submitting = '0'; checkOperatingHours(); }
+            releaseSubmitBtn();
+            if (typeof checkOperatingHours === 'function') checkOperatingHours();
             return;
           }
         } else {
+          releaseSubmitBtn();
+          if (typeof checkOperatingHours === 'function') checkOperatingHours();
           return alert(`⛔ THÔNG BÁO:
 
 ${storeClosedStatusReason || 'Quán hiện chưa mở cửa nhận đơn.'}
@@ -2889,20 +3047,17 @@ ${storeClosedStatusReason || 'Quán hiện chưa mở cửa nhận đơn.'}
         const item = cart[k];
         const liveCustom = menuCustomCache[item.id] || {};
         if (liveCustom.soldOut) {
+          releaseSubmitBtn();
           return alert(`⚠️ Rất tiếc, món "${item.name}" vừa tạm hết nguyên liệu! Bạn vui lòng xóa món này khỏi giỏ hàng và chọn món khác nhé.`);
         }
         sub += item.price * item.qty;
       }
-      if (sub === 0) return;
-
-      const btnSubmit = document.getElementById('btnSubmitOrder');
-      if (btnSubmit) {
-        if (btnSubmit.dataset.submitting === '1') return;
-        btnSubmit.dataset.submitting = '1';
-        btnSubmit.disabled = true;
-        btnSubmit.innerText = "⏳ ĐANG GỬI ĐƠN HÀNG...";
+      if (sub === 0) {
+        releaseSubmitBtn();
+        return;
       }
 
+      const clientRequestId = window.BAL_ORDER_GUARD.getClientRequestId();
       const payMethod = document.getElementById('paymentMethodSelect').value;
       const name = document.getElementById('cusName').value.trim();
       const phone = document.getElementById('cusPhone').value.trim();
@@ -2920,6 +3075,7 @@ ${storeClosedStatusReason || 'Quán hiện chưa mở cửa nhận đơn.'}
       }
 
       const orderData = {
+        client_request_id: clientRequestId,
         orderType: 'delivery',
         table: null,
         customerName: name,
@@ -2948,25 +3104,21 @@ ${storeClosedStatusReason || 'Quán hiện chưa mở cửa nhận đơn.'}
         archived: false
       };
 
-      push(ref(db, 'orders'), orderData).then((nRef) => {
-        if (btnSubmit) {
-          btnSubmit.dataset.submitting = '0';
-          btnSubmit.disabled = false;
-          btnSubmit.innerText = "XÁC NHẬN GỬI ĐƠN HÀNG";
-        }
-        localStorage.setItem('last_hy_chay_order_id', nRef.key);
-        listenActiveOrderForCustomer(nRef.key);
+      window.BAL_ORDER_GUARD.submitWithIdempotency(orderData).then((res) => {
+        const orderKey = res.orderId;
+        releaseSubmitBtn();
+        localStorage.setItem('last_hy_chay_order_id', orderKey);
+        listenActiveOrderForCustomer(orderKey);
         const schedMsg = scheduledTimeVal ? `\n⏰ Lịch hẹn giao lúc ${scheduledTimeVal} đã được ghi nhận! Bếp sẽ canh nấu sát giờ hẹn để món ăn luôn nóng hổi.` : '';
-        alert(`🎉 Gửi đơn thành công!${schedMsg}`);
+        alert(res.deduplicated
+          ? `✅ Đơn hàng của bạn đã được ghi nhận trước đó (Mã #HC-${orderKey.substring(orderKey.length - 5).toUpperCase()})!${schedMsg}`
+          : `🎉 Gửi đơn thành công!${schedMsg}`);
         cart = {}; saveCartLocal(); updateCartUI(); window.closeCheckoutModal();
+        window.BAL_ORDER_GUARD.rotateClientRequestId();
         document.getElementById('cusNote').value = '';
       }).catch((err) => {
-        if (btnSubmit) {
-          btnSubmit.dataset.submitting = '0';
-          btnSubmit.disabled = false;
-          btnSubmit.innerText = "XÁC NHẬN GỬI ĐƠN HÀNG";
-        }
-        alert("❌ Lỗi kết nối mạng khi gửi đơn: " + err.message + "\nBạn vui lòng bấm gửi lại nhé!");
+        releaseSubmitBtn();
+        alert("❌ Lỗi kết nối mạng khi gửi đơn: " + err.message + "\nBạn vui lòng bấm gửi lại nhé (mã phiên chống trùng được giữ nguyên)!");
       });
     };
 
@@ -3910,7 +4062,7 @@ ${clipsXml}
       }
     }
 
-    onValue(ref(db, 'orders'), (snap) => {
+    onValue(query(ref(db, 'orders'), limitToLast(window.BAL_ORDER_GUARD.clampQueryLimit(100))), (snap) => {
       allOrdersForShipperWatch = snap.val() || {};
       if (shipperOrderIdParam) {
         checkAnyWaitingDeliveryOrdersForSiren();
