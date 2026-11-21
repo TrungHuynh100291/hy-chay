@@ -983,7 +983,7 @@
   <!-- =============================== -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, get, update, set, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, push, onValue, get, update, set, query, limitToLast, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyB7CH4HUqEozclN38P_iGtSFzDB_w7sOUk",
@@ -1547,6 +1547,7 @@
       shipperInterval = setInterval(() => {
         const elapsed = Math.max(0, Date.now() - baseTimestamp);
         const btn = document.getElementById('btnAcceptOrder');
+        if (btn && btn.dataset.accepting === '1') return;
         const msg = document.getElementById('shpStatusMsg');
         const cd = document.getElementById('shpCountdown');
 
@@ -1594,80 +1595,96 @@
       }, 500);
     }
 
-    window.acceptOrderByShipper = function() {
-      stopContinuousShipperAlarm();
-      if (!activeShipperOrderId) return;
-      const phone = localStorage.getItem('hyChayShipperPhone');
-      const name = localStorage.getItem('hyChayShipperName');
-      const btn = document.getElementById('btnAcceptOrder');
-      btn.disabled = true;
-      btn.innerText = "📍 ĐANG ĐỊNH VỊ KHOẢNG CÁCH TỚI QUÁN...";
-
-      const finalizeAccept = (distToStoreKm) => {
-        const etaToStoreMins = Math.max(2, Math.round(distToStoreKm * 2.5 + 1));
-        get(ref(db, `orders/${activeShipperOrderId}`)).then((snap) => {
-          const order = snap.val();
-          if (window.BAL_POS_HARNESS && typeof window.BAL_POS_HARNESS.guardDriverAcceptOrder === 'function') {
-            const guard = window.BAL_POS_HARNESS.guardDriverAcceptOrder(order, phone, order?.stateHash || '');
-            if (!guard.allowed) {
-              alert(`⚠️ ${guard.reason || 'Rất tiếc, đơn hàng này vừa được tài xế khác nhận!'}`);
-              return;
-            }
-          } else if (!order || order.shipperPhone) {
-            alert("⚠️ Rất tiếc, đơn hàng này vừa được tài xế khác nhận!");
-            return;
-          }
-
-          if (order && !order.shipperPhone) {
-            const stateHash = window.BAL_POS_HARNESS
-              ? window.BAL_POS_HARNESS.computeHash({
-                  id: activeShipperOrderId,
-                  status: 'Tài xế đang đến quán',
-                  shipper: phone
-                })
-              : '';
-
-            update(ref(db, `orders/${activeShipperOrderId}`), {
-              status: 'Tài xế đang đến quán',
-              shipperPhone: phone,
-              hyChayShipperPhone: phone,
-              shipperName: name,
-              shipperDistToStoreKm: distToStoreKm,
-              etaToStoreMins: etaToStoreMins,
-              stateHash: stateHash,
-              acceptedAt: new Date().toISOString()
-            }).then(() => {
-              set(ref(db, 'voice_sync/latest'), {
-                text: `Tài xế ${name} đã nhận đơn hàng, dự kiến ${etaToStoreMins} phút sẽ tới quán.`,
-                timestamp: Date.now(),
-                sender: 'shipper'
-              }).catch(() => {});
-              alert(`🎉 Nhận đơn thành công!\n📍 Khoảng cách tới quán: ~${distToStoreKm} km\n⏳ Dự kiến: ~${etaToStoreMins} phút tới quán Hy Chay.`);
-            });
-          } else {
-            alert("⚠️ Rất tiếc, đơn hàng này vừa được tài xế khác nhận!");
-          }
-        });
-      };
-
-      if (navigator.geolocation) {
+    function resolveDistToStoreKm() {
+      return new Promise((resolve) => {
+        if (!navigator.geolocation) return resolve(1.5);
         let gpsResolved = false;
         const gpsTimer = setTimeout(() => {
-          if (!gpsResolved) { gpsResolved = true; finalizeAccept(1.5); }
+          if (!gpsResolved) { gpsResolved = true; resolve(1.5); }
         }, 3500);
-
         navigator.geolocation.getCurrentPosition((pos) => {
           if (!gpsResolved) {
             gpsResolved = true;
             clearTimeout(gpsTimer);
-            const distKm = calcRoadDistanceKm(pos.coords.latitude, pos.coords.longitude, STORE_LAT, STORE_LON);
-            finalizeAccept(distKm);
+            resolve(calcRoadDistanceKm(pos.coords.latitude, pos.coords.longitude, STORE_LAT, STORE_LON));
           }
         }, () => {
-          if (!gpsResolved) { gpsResolved = true; clearTimeout(gpsTimer); finalizeAccept(1.5); }
+          if (!gpsResolved) { gpsResolved = true; clearTimeout(gpsTimer); resolve(1.5); }
         }, { timeout: 3200 });
-      } else {
-        finalizeAccept(1.5);
+      });
+    }
+
+    window.acceptOrderByShipper = async function() {
+      stopContinuousShipperAlarm();
+      if (!activeShipperOrderId) return;
+      const targetOrderId = activeShipperOrderId;
+      const phone = localStorage.getItem('hyChayShipperPhone');
+      const name = localStorage.getItem('hyChayShipperName');
+      if (!phone) return alert("⚠️ Vui lòng đăng nhập lại bằng SĐT tài xế!");
+      const btn = document.getElementById('btnAcceptOrder');
+      if (btn && (btn.disabled || btn.dataset.accepting === '1')) return;
+
+      if (btn) {
+        btn.dataset.accepting = '1';
+        btn.disabled = true;
+        btn.innerText = "📍 ĐANG ĐỊNH VỊ KHOẢNG CÁCH TỚI QUÁN...";
+      }
+
+      try {
+        const distToStoreKm = await resolveDistToStoreKm();
+        const etaToStoreMins = Math.max(2, Math.round(distToStoreKm * 2.5 + 1));
+        if (btn) btn.innerText = "⏳ ĐANG XÁC NHẬN NHẬN ĐƠN...";
+
+        const blockedStatuses = ['Đã hoàn tất', 'Đã hủy', 'CANCELLED', 'COMPLETED', 'Đang giao hàng', 'Tài xế đang đến quán'];
+        const orderRef = ref(db, `orders/${targetOrderId}`);
+        const result = await runTransaction(orderRef, (currentData) => {
+          if (currentData === null) return null;
+          if (currentData.shipperPhone || currentData.hyChayShipperPhone || currentData.archived || blockedStatuses.includes(currentData.status)) {
+            return;
+          }
+          if (window.BAL_POS_HARNESS && typeof window.BAL_POS_HARNESS.guardDriverAcceptOrder === 'function') {
+            const guard = window.BAL_POS_HARNESS.guardDriverAcceptOrder({ ...currentData, id: currentData.id || targetOrderId }, phone, currentData.stateHash || '');
+            if (!guard.allowed) return;
+          }
+          const stateHash = window.BAL_POS_HARNESS
+            ? window.BAL_POS_HARNESS.computeHash({
+                id: targetOrderId,
+                status: 'Tài xế đang đến quán',
+                shipper: phone
+              })
+            : '';
+          return {
+            ...currentData,
+            status: 'Tài xế đang đến quán',
+            shipperPhone: phone,
+            hyChayShipperPhone: phone,
+            shipperName: name,
+            shipperDistToStoreKm: distToStoreKm,
+            etaToStoreMins: etaToStoreMins,
+            stateHash: stateHash,
+            acceptedAt: new Date().toISOString()
+          };
+        }, { applyLocally: false });
+
+        const finalVal = result && result.snapshot ? result.snapshot.val() : null;
+        if (result && result.committed && finalVal && normalizePhone(finalVal.shipperPhone) === normalizePhone(phone)) {
+          set(ref(db, 'voice_sync/latest'), {
+            text: `Tài xế ${name} đã nhận đơn hàng, dự kiến ${etaToStoreMins} phút sẽ tới quán.`,
+            timestamp: Date.now(),
+            sender: 'shipper'
+          }).catch(() => {});
+          alert(`🎉 Nhận đơn thành công!\n📍 Khoảng cách tới quán: ~${distToStoreKm} km\n⏳ Dự kiến: ~${etaToStoreMins} phút tới quán Hy Chay.`);
+        } else {
+          alert("⚠️ Đơn hàng đã có tài xế khác nhận hoặc vừa thay đổi trạng thái!");
+        }
+      } catch (err) {
+        alert("❌ Lỗi kết nối khi nhận đơn: " + (err?.message || err));
+      } finally {
+        if (btn) {
+          btn.dataset.accepting = '0';
+          btn.disabled = false;
+          btn.innerText = "✅ BẤM NHẬN ĐƠN NGAY";
+        }
       }
     };
 
@@ -1775,7 +1792,9 @@
         status: 'Sự cố Shipper',
         shipperIssueNote: `Tài xế ${name} (${phone}) báo sự cố: ${reason || 'Xe hư'}`,
         shipperPhone: null,
+        hyChayShipperPhone: null,
         shipperName: null,
+        stateHash: null,
         etaToStoreMins: null,
         etaToCustomerMins: null,
         dispatchResetAt: new Date().toISOString()

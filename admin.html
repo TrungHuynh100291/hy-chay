@@ -4482,7 +4482,9 @@ window.deleteDishFromMenu = function(id, name) {
       update(ref(db, 'orders/' + id), {
         status: 'Đang chế biến',
         shipperPhone: null,
+        hyChayShipperPhone: null,
         shipperName: null,
+        stateHash: null,
         etaToStoreMins: null,
         etaToCustomerMins: null,
         shipperIssueNote: `Quán thu hồi đơn từ ${oldShp} để đổi tài xế khác`,
