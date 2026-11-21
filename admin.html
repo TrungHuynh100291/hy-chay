@@ -1853,6 +1853,56 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, onValue, update, remove, set, push, get, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
+    // ==== BAL 4G IMAGE OPT: anh cuc bo da chuyen WebP. Du lieu goc 122 mon (defaultImg) GIU NGUYEN, chi doi duong dan luc hien thi ====
+    const BAL_WEBP_MAP = new Map([
+      ["banh canh chay.png", "Banh Canh Chay.webp"],
+      ["banh mi pate hat dieu hy chay.png", "Banh Mi Pate Hat Dieu Hy Chay.webp"],
+      ["bunchagio.png", "BunChaGio.webp"],
+      ["bò kho.png", "Bò Kho.webp"],
+      ["bún mắm nêm.png", "Bún Mắm Nêm.webp"],
+      ["com ga.png", "Com Ga.webp"],
+      ["combo 7 mon chay.png", "combo 7 mon chay.webp"],
+      ["cơm chiên.png", "Cơm Chiên.webp"],
+      ["drink menu hy chay_20251114_142314_0000_1.pdf.png", "DRINK MENU HY CHAY_20251114_142314_0000_1.pdf.webp"],
+      ["food hy vegetarian_20251114_142836_0000.pdf.png", "FOOD HY VEGETARIAN_20251114_142836_0000.pdf.webp"],
+      ["gemini_generated_image_ndg4nindg4nindg4.png", "Gemini_Generated_Image_ndg4nindg4nindg4.webp"],
+      ["gemini_generated_image_op8z9gop8z9gop8z.png", "Gemini_Generated_Image_op8z9gop8z9gop8z.webp"],
+      ["hoanh thanh mi.png", "Hoanh Thanh Mi.webp"],
+      ["hủ tiếu mì.png", "Hủ Tiếu Mì.webp"],
+      ["image aug 6, 2026, 04_28_15 pm.png", "Image Aug 6, 2026, 04_28_15 PM.webp"],
+      ["logo lon.png", "Logo Lon.webp"],
+      ["mam tiec thien vi hy chay.png", "Mam Tiec Thien Vi Hy Chay.webp"],
+      ["menu 1.jpg", "menu 1.webp"],
+      ["menu 2.jpg", "menu 2.webp"],
+      ["menu 3.jpg", "Menu 3.webp"],
+      ["menu 4.jpg", "Menu 4.webp"],
+      ["mi quang chay.png", "Mi Quang Chay.webp"],
+      ["mi spaghetti chay.png", "Mi Spaghetti Chay.webp"],
+      ["nom hoa chuoi.png", "Nom Hoa Chuoi.webp"],
+      ["thiết kế chưa có tên (1).png", "Thiết kế chưa có tên (1).webp"],
+      ["xoi.png", "Xoi.webp"],
+      ["z7199504294850_f4e549c992852b335f07495d0405f2ad.jpg", "z7199504294850_f4e549c992852b335f07495d0405f2ad.webp"],
+      ["z7199504295971_e26acd3ee28e76e317a70a91f2d63a33.jpg", "z7199504295971_e26acd3ee28e76e317a70a91f2d63a33.webp"],
+      ["logo nho.png", "Logo nho.webp"]
+    ]);
+    window.balImg = function (src) {
+      try {
+        if (!src) return src;
+        let s = String(src);
+        if (/^(data:|blob:)/i.test(s)) return s;
+        if (/^https?:\/\//i.test(s)) {
+          const u = new URL(s);
+          if (u.hostname !== location.hostname && u.hostname !== 'hychayfood.vercel.app') return s;
+          s = u.pathname;
+        }
+        s = s.split('?')[0].split('#')[0];
+        let base = s.substring(s.lastIndexOf('/') + 1);
+        try { base = decodeURIComponent(base); } catch (_) {}
+        const hit = BAL_WEBP_MAP.get(base.normalize('NFC').toLowerCase());
+        return hit ? '/' + encodeURIComponent(hit) : src;
+      } catch (_) { return src; }
+    };
+
     const firebaseConfig = { apiKey: "AIzaSyB7CH4HUqEozclN38P_iGtSFzDB_w7sOUk", authDomain: "hy-chay.firebaseapp.com", projectId: "hy-chay", storageBucket: "hy-chay.firebasestorage.app", messagingSenderId: "215026977682", appId: "1:215026977682:web:52b136c7f09a62cc488f4b" };
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app, "https://hy-chay-default-rtdb.asia-southeast1.firebasedatabase.app");
@@ -3039,7 +3089,7 @@ window.deleteDishFromMenu = function(id, name) {
         html += `
           <tr>
             <td>
-              <div class="dish-thumb-box"><img src="${item.image}" onerror="this.onerror=null; this.src='/Logo%20nho.png';"></div>
+              <div class="dish-thumb-box"><img src="${window.balImg(item.image)}" onerror="this.onerror=null; this.src='/Logo%20nho.png';"></div>
               <label class="btn-native-upload">📷 Đổi ảnh<input type="file" accept="image/*" onchange="uploadDishImageDirect(this, '${item.id}')"></label>
             </td>
             <td>
