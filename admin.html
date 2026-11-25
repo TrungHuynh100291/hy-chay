@@ -68,6 +68,23 @@
     .stat-info span { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
     .stat-info h2 { font-size: 1.55rem; font-weight: 800; margin-top: 2px; }
 
+    .hscroll-wrap { display: flex; align-items: center; gap: 6px; max-width: 100%; min-width: 0; }
+    .hscroll-tabs-wrap { border-bottom: 2px solid var(--border); margin-bottom: 16px; padding-bottom: 2px; }
+    .hscroll-kds-wrap { background: #ffffff; padding: 8px 10px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 14px; }
+    .hscroll-btn {
+      width: 32px; height: 32px; min-width: 32px; border-radius: 50%;
+      border: 1.5px solid #cbd5e1; background: #ffffff; color: #0f172a;
+      font-weight: 900; font-size: 0.9rem; line-height: 1; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+      box-shadow: 0 1px 4px rgba(15, 23, 42, 0.12); touch-action: manipulation;
+      transition: opacity 0.2s, background 0.15s, transform 0.1s;
+    }
+    .hscroll-btn:hover:not(:disabled):not(.is-edge) { background: #f1f5f9; border-color: #94a3b8; }
+    .hscroll-btn:active:not(:disabled):not(.is-edge) { transform: scale(0.94); }
+    .hscroll-btn.hscroll-btn-sm { width: 28px; height: 28px; min-width: 28px; font-size: 0.82rem; }
+    .hscroll-btn.hscroll-btn-xs { width: 26px; height: 26px; min-width: 26px; font-size: 0.78rem; }
+    .hscroll-btn.is-edge, .hscroll-btn:disabled { opacity: 0.32; cursor: default; pointer-events: none; }
+
     .tabs-bar { display: flex; gap: 8px; border-bottom: 2px solid var(--border); margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
     .tab-btn { background: none; border: none; padding: 10px 14px; font-size: 0.9rem; font-weight: 700; color: var(--text-muted); cursor: pointer; position: relative; }
     .tab-btn.active { color: var(--primary); }
@@ -239,12 +256,13 @@
       /* MODULE 28: KHOA TRAN NGANG MAN HINH DIEN THOAI 100% & GIAO DIEN GON GANG */
     html, body { max-width: 100vw !important; overflow-x: hidden !important; }
     .dashboard-container { max-width: 100vw; overflow-x: hidden; padding: 0 10px; }
-    .tabs-bar { display: flex; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; gap: 4px; padding-bottom: 4px; max-width: 100%; }
+    .tabs-bar { display: flex; flex: 1; min-width: 0; flex-wrap: nowrap; overflow-x: auto; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; scrollbar-width: none; gap: 4px; padding: 2px 0; margin-bottom: 0; border-bottom: none; max-width: 100%; }
     .tabs-bar::-webkit-scrollbar { display: none; }
     .tab-btn { white-space: nowrap; flex-shrink: 0; padding: 8px 10px; font-size: 0.82rem; }
     .btn-end-shift { white-space: nowrap; flex-shrink: 0; padding: 7px 12px; font-size: 0.8rem; }
-    .kds-filter-bar { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; max-width: 100%; gap: 6px; padding: 8px 10px; }
+    .kds-filter-bar { display: flex; flex: 1; min-width: 0; overflow-x: auto; scroll-behavior: smooth; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; max-width: 100%; gap: 6px; padding: 2px 0; margin-bottom: 0; border: none; background: transparent; border-radius: 0; }
     .kds-filter-bar::-webkit-scrollbar { display: none; }
+    .admin-cat-bar { scroll-behavior: smooth; }
     .kds-filter-btn { white-space: nowrap; flex-shrink: 0; padding: 5px 10px; font-size: 0.78rem; }
     .report-card { overflow-x: auto; max-width: 100%; padding: 14px 12px; }
     .report-table, .menu-mgmt-table { display: block; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -589,40 +607,48 @@
         <div class="stat-card"><div class="stat-info"><span>Tiền Ship Thu Hộ (Hôm Nay)</span><h2 id="kpiShippingRev" style="color: #2563eb;">0đ</h2></div></div>
       </section>
 
-<div class="tabs-bar">
-        <button class="tab-btn active" onclick="switchMainTab('orders', event)">📦 Màn Hình Đơn Hàng <span class="tab-badge badge-danger" id="badgePending">0</span></button>
-        <button class="tab-btn" id="tabBtnPosDineIn" onclick="openPosInMode('dine_in', event)">➕ Order Tại Bàn</button>
-        <button class="tab-btn" id="tabBtnPosDelivery" onclick="openPosInMode('delivery', event)" style="color:#0284c7; font-weight:800;">🛵 Đặt Ship Hộ Khách (Gọi Điện)</button>
-        <button class="tab-btn" onclick="switchMainTab('menuStock', event)">🍽️ Quản Lý Món Ăn</button>
-        <button class="tab-btn" id="tabOperatingHours" onclick="switchMainTab('operatingHours', event)" style="color:#16a34a; font-weight:800;">⏰ Khung Giờ Bán Hàng</button>
-        <button class="tab-btn" id="tabInvoicesInOut" onclick="switchMainTab('invoicesInOut', event)" style="color:#d97706; font-weight:800;">📑 Hóa Đơn Vào - Ra (Zalo)</button>
+      <div class="hscroll-wrap hscroll-tabs-wrap">
+        <button type="button" class="hscroll-btn" data-hscroll-for="mainTabsBar" data-hscroll-dir="-1" aria-label="Cuộn thanh điều hướng sang trái" onclick="scrollHorizontalBar('mainTabsBar', -1)">❮</button>
+        <div id="mainTabsBar" class="tabs-bar">
+          <button class="tab-btn active" onclick="switchMainTab('orders', event)">📦 Màn Hình Đơn Hàng <span class="tab-badge badge-danger" id="badgePending">0</span></button>
+          <button class="tab-btn" id="tabBtnPosDineIn" onclick="openPosInMode('dine_in', event)">➕ Order Tại Bàn</button>
+          <button class="tab-btn" id="tabBtnPosDelivery" onclick="openPosInMode('delivery', event)" style="color:#0284c7; font-weight:800;">🛵 Đặt Ship Hộ Khách (Gọi Điện)</button>
+          <button class="tab-btn" onclick="switchMainTab('menuStock', event)">🍽️ Quản Lý Món Ăn</button>
+          <button class="tab-btn" id="tabOperatingHours" onclick="switchMainTab('operatingHours', event)" style="color:#16a34a; font-weight:800;">⏰ Khung Giờ Bán Hàng</button>
+          <button class="tab-btn" id="tabInvoicesInOut" onclick="switchMainTab('invoicesInOut', event)" style="color:#d97706; font-weight:800;">📑 Hóa Đơn Vào - Ra (Zalo)</button>
 
-        <button class="tab-btn" onclick="switchMainTab('bankConfig', event)">⚙️ Cấu Hình VietQR</button>
-        <button class="tab-btn" id="tabShiftReport" onclick="switchMainTab('shiftReport', event)">📊 Báo Cáo Kế Toán</button>
-        <button class="tab-btn" onclick="switchMainTab('printerConfig', event)">🖨️ Máy In</button>
-        <button class="tab-btn" onclick="switchMainTab('shippers', event)">🛵 Đội Tài Xế</button>
-        <button class="tab-btn" id="tabUsers" onclick="switchMainTab('users', event)" style="color:#2563eb;">👥 Phân Quyền</button>
-        <button class="btn-end-shift" onclick="endShiftAndClearScreen()">🛑 KẾT CA & XÓA MÀN HÌNH</button>
+          <button class="tab-btn" onclick="switchMainTab('bankConfig', event)">⚙️ Cấu Hình VietQR</button>
+          <button class="tab-btn" id="tabShiftReport" onclick="switchMainTab('shiftReport', event)">📊 Báo Cáo Kế Toán</button>
+          <button class="tab-btn" onclick="switchMainTab('printerConfig', event)">🖨️ Máy In</button>
+          <button class="tab-btn" onclick="switchMainTab('shippers', event)">🛵 Đội Tài Xế</button>
+          <button class="tab-btn" id="tabUsers" onclick="switchMainTab('users', event)" style="color:#2563eb;">👥 Phân Quyền</button>
+          <button class="btn-end-shift" onclick="endShiftAndClearScreen()">🛑 KẾT CA & XÓA MÀN HÌNH</button>
+        </div>
+        <button type="button" class="hscroll-btn" data-hscroll-for="mainTabsBar" data-hscroll-dir="1" aria-label="Cuộn thanh điều hướng sang phải" onclick="scrollHorizontalBar('mainTabsBar', 1)">❯</button>
       </div>
 
       <!-- VIEW 1: ĐƠN HÀNG & BÁO BẾP THU GỌN -->
       <div id="viewOrders">
-        <div class="kds-filter-bar">
-          <button class="kds-filter-btn active" onclick="setOrderStatusFilter('active_only', this)">🔥 Cần Xử Lý Tại Quán (<span id="cntActiveOnly">0</span>)</button>
-          <button class="kds-filter-btn" onclick="setOrderStatusFilter('Chờ xác nhận', this)">🔴 Chờ Nhận (<span id="cntFilterPending">0</span>)</button>
-          <button class="kds-filter-btn" onclick="setOrderStatusFilter('Đang chế biến', this)">🟠 Bếp Đang Làm (<span id="cntFilterCooking">0</span>)</button>
-          <button class="kds-filter-btn" onclick="setOrderStatusFilter('scheduled_only', this)" style="border-color:#7c3aed; color:#6d28d9; background:#f5f3ff;">⏰ Đơn Hẹn Giờ (<span id="cntFilterScheduled">0</span>)</button>
-          <button class="kds-filter-btn" onclick="setOrderStatusFilter('shipper_delivering', this)" style="border-color:#0284c7; color:#0369a1; background:#f0f9ff;">🛵 Shipper Đang Giao (<span id="cntFilterDelivering">0</span>)</button>
-          <button class="kds-filter-btn" onclick="setOrderStatusFilter('done_cancel', this)">✅ Đã Xong / Hủy (<span id="cntFilterDone">0</span>)</button>
-          <button class="kds-filter-btn" onclick="setOrderStatusFilter('all', this)">📋 Tất Cả</button>
-          
-          <select id="orderSortSelect" class="kds-sort-select" onchange="renderOrders()">
-            <option value="fifo">⏳ Xếp theo thứ tự: Đơn Đặt Trước Làm Trước (FIFO)</option>
-            <option value="newest">🆕 Xếp theo thứ tự: Đơn Mới Nhất Lên Đầu</option>
-          </select>
-          <label style="display:inline-flex; align-items:center; gap:5px; font-size:0.78rem; font-weight:800; color:#15803d; background:#dcfce7; padding:6px 10px; border-radius:8px; cursor:pointer;">
-            <input type="checkbox" id="posTodayOnlyToggle" checked onchange="renderOrders()" style="width:15px; height:15px;"> 📅 Chỉ Hôm Nay (+07:00)
-          </label>
+        <div class="hscroll-wrap hscroll-kds-wrap">
+          <button type="button" class="hscroll-btn hscroll-btn-sm" data-hscroll-for="kdsFilterBar" data-hscroll-dir="-1" aria-label="Cuộn bộ lọc đơn sang trái" onclick="scrollHorizontalBar('kdsFilterBar', -1)">❮</button>
+          <div id="kdsFilterBar" class="kds-filter-bar">
+            <button class="kds-filter-btn active" onclick="setOrderStatusFilter('active_only', this)">🔥 Cần Xử Lý Tại Quán (<span id="cntActiveOnly">0</span>)</button>
+            <button class="kds-filter-btn" onclick="setOrderStatusFilter('Chờ xác nhận', this)">🔴 Chờ Nhận (<span id="cntFilterPending">0</span>)</button>
+            <button class="kds-filter-btn" onclick="setOrderStatusFilter('Đang chế biến', this)">🟠 Bếp Đang Làm (<span id="cntFilterCooking">0</span>)</button>
+            <button class="kds-filter-btn" onclick="setOrderStatusFilter('scheduled_only', this)" style="border-color:#7c3aed; color:#6d28d9; background:#f5f3ff;">⏰ Đơn Hẹn Giờ (<span id="cntFilterScheduled">0</span>)</button>
+            <button class="kds-filter-btn" onclick="setOrderStatusFilter('shipper_delivering', this)" style="border-color:#0284c7; color:#0369a1; background:#f0f9ff;">🛵 Shipper Đang Giao (<span id="cntFilterDelivering">0</span>)</button>
+            <button class="kds-filter-btn" onclick="setOrderStatusFilter('done_cancel', this)">✅ Đã Xong / Hủy (<span id="cntFilterDone">0</span>)</button>
+            <button class="kds-filter-btn" onclick="setOrderStatusFilter('all', this)">📋 Tất Cả</button>
+            
+            <select id="orderSortSelect" class="kds-sort-select" onchange="renderOrders()">
+              <option value="fifo">⏳ Xếp theo thứ tự: Đơn Đặt Trước Làm Trước (FIFO)</option>
+              <option value="newest">🆕 Xếp theo thứ tự: Đơn Mới Nhất Lên Đầu</option>
+            </select>
+            <label style="display:inline-flex; align-items:center; gap:5px; font-size:0.78rem; font-weight:800; color:#15803d; background:#dcfce7; padding:6px 10px; border-radius:8px; cursor:pointer; white-space:nowrap; flex-shrink:0;">
+              <input type="checkbox" id="posTodayOnlyToggle" checked onchange="renderOrders()" style="width:15px; height:15px;"> 📅 Chỉ Hôm Nay (+07:00)
+            </label>
+          </div>
+          <button type="button" class="hscroll-btn hscroll-btn-sm" data-hscroll-for="kdsFilterBar" data-hscroll-dir="1" aria-label="Cuộn bộ lọc đơn sang phải" onclick="scrollHorizontalBar('kdsFilterBar', 1)">❯</button>
         </div>
                 <!-- HỘP THÔNG BÁO PHA CHẾ LIÊN TRẠM (GIAO VỀ XE NƯỚC BAL'S HOUSE) -->
         <div id="crossStationAlertsContainer" class="no-print" style="display:none;"></div>
@@ -771,9 +797,9 @@
             <label style="font-weight:700; font-size:0.85rem; color:#64748b; display:block; margin-bottom:6px;">CHỌN HẠNG MỤC & MÓN ĂN:</label>
             <input type="text" id="posSearchInput" placeholder="🔍 Tìm nhanh tên món ăn, nước uống, topping..." style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:8px; font-size:0.85rem;" oninput="renderPosDishGrid()">
             
-            <div style="display:flex; align-items:center; gap:4px; margin-bottom:8px;">
-              <button type="button" onclick="document.getElementById('posCatFilterBar').scrollBy({left:-220,behavior:'smooth'})" style="border:1px solid #cbd5e1; background:#fff; border-radius:50%; width:28px; height:28px; font-weight:900; cursor:pointer; flex-shrink:0;">❮</button>
-              <div id="posCatFilterBar" class="admin-cat-bar" style="margin-bottom:0; flex:1;">
+            <div class="hscroll-wrap" style="margin-bottom:8px;">
+              <button type="button" class="hscroll-btn hscroll-btn-sm" data-hscroll-for="posCatFilterBar" data-hscroll-dir="-1" aria-label="Cuộn danh mục món sang trái" onclick="scrollHorizontalBar('posCatFilterBar', -1)">❮</button>
+              <div id="posCatFilterBar" class="admin-cat-bar" style="margin-bottom:0; flex:1; min-width:0;">
                 <button type="button" class="admin-cat-chip active" onclick="setPosCategory('all', this)">Tất Cả</button>
                 <button type="button" class="admin-cat-chip" onclick="setPosCategory('bun', this)">🍜 Món Bún</button>
                 <button type="button" class="admin-cat-chip" onclick="setPosCategory('mi_pho', this)">🥢 Mì - Phở</button>
@@ -784,13 +810,13 @@
                 <button type="button" class="admin-cat-chip" onclick="setPosCategory('douong', this)">🥤 Đồ Uống (54)</button>
                 <button type="button" class="admin-cat-chip" style="border-color:#f59e0b; color:#b45309; background:#fffbeb;" onclick="setPosCategory('topping', this)">➕ Thêm / Topping</button>
               </div>
-              <button type="button" onclick="document.getElementById('posCatFilterBar').scrollBy({left:220,behavior:'smooth'})" style="border:1px solid #cbd5e1; background:#fff; border-radius:50%; width:28px; height:28px; font-weight:900; cursor:pointer; flex-shrink:0;">❯</button>
+              <button type="button" class="hscroll-btn hscroll-btn-sm" data-hscroll-for="posCatFilterBar" data-hscroll-dir="1" aria-label="Cuộn danh mục món sang phải" onclick="scrollHorizontalBar('posCatFilterBar', 1)">❯</button>
             </div>
 
             <!-- THANH LỌC CON 7 NHÓM ĐỒ UỐNG CÓ NÚT QUA LẠI -->
-            <div id="posDrinkSubCatWrap" style="display:none; align-items:center; gap:4px; background:#eff6ff; padding:6px 8px; border-radius:10px; border:1px solid #bfdbfe; margin-bottom:10px;">
-              <button type="button" onclick="document.getElementById('posDrinkSubCatBar').scrollBy({left:-200,behavior:'smooth'})" style="border:1px solid #93c5fd; background:#fff; border-radius:50%; width:26px; height:26px; font-weight:900; cursor:pointer; flex-shrink:0;">❮</button>
-              <div id="posDrinkSubCatBar" class="admin-cat-bar" style="margin-bottom:0; padding-bottom:0; flex:1;">
+            <div id="posDrinkSubCatWrap" class="hscroll-wrap" style="display:none; background:#eff6ff; padding:6px 8px; border-radius:10px; border:1px solid #bfdbfe; margin-bottom:10px;">
+              <button type="button" class="hscroll-btn hscroll-btn-xs" data-hscroll-for="posDrinkSubCatBar" data-hscroll-dir="-1" aria-label="Cuộn nhóm đồ uống sang trái" onclick="scrollHorizontalBar('posDrinkSubCatBar', -1)" style="border-color:#93c5fd;">❮</button>
+              <div id="posDrinkSubCatBar" class="admin-cat-bar" style="margin-bottom:0; padding-bottom:0; flex:1; min-width:0;">
                 <button type="button" class="admin-cat-chip active" onclick="setPosDrinkSubCat('all_drink', this)">Tất Cả Nước (54)</button>
                 <button type="button" class="admin-cat-chip" onclick="setPosDrinkSubCat('cafe_cacao', this)">☕ Cafe & Cacao (8)</button>
                 <button type="button" class="admin-cat-chip" onclick="setPosDrinkSubCat('latte', this)">🍵 Latte & Kem Trứng (6)</button>
@@ -800,7 +826,7 @@
                 <button type="button" class="admin-cat-chip" onclick="setPosDrinkSubCat('soda', this)">🫧 Soda (9)</button>
                 <button type="button" class="admin-cat-chip" onclick="setPosDrinkSubCat('giaikhat', this)">🎋 Nước Mía & Ngọt (4)</button>
               </div>
-              <button type="button" onclick="document.getElementById('posDrinkSubCatBar').scrollBy({left:200,behavior:'smooth'})" style="border:1px solid #93c5fd; background:#fff; border-radius:50%; width:26px; height:26px; font-weight:900; cursor:pointer; flex-shrink:0;">❯</button>
+              <button type="button" class="hscroll-btn hscroll-btn-xs" data-hscroll-for="posDrinkSubCatBar" data-hscroll-dir="1" aria-label="Cuộn nhóm đồ uống sang phải" onclick="scrollHorizontalBar('posDrinkSubCatBar', 1)" style="border-color:#93c5fd;">❯</button>
             </div>
 
             <div class="pos-dish-grid" id="posDishGrid"></div>
@@ -1366,9 +1392,9 @@
               <input type="text" id="editModalSearchDish" placeholder="🔍 Tìm món ăn, nước uống, topping..." style="width:100%; padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.82rem; margin-bottom:8px;" oninput="renderEditModalDishPicker()">
               
               <!-- Thanh danh mục chính có nút ❮ ❯ -->
-              <div style="display:flex; align-items:center; gap:4px; margin-bottom:8px;">
-                <button type="button" onclick="document.getElementById('editModalCatBar').scrollBy({left:-180,behavior:'smooth'})" style="border:1px solid #cbd5e1; background:#fff; border-radius:50%; width:26px; height:26px; font-weight:900; cursor:pointer; flex-shrink:0;">❮</button>
-                <div id="editModalCatBar" class="admin-cat-bar" style="margin-bottom:0; padding-bottom:0; flex:1;">
+              <div class="hscroll-wrap" style="margin-bottom:8px;">
+                <button type="button" class="hscroll-btn hscroll-btn-xs" data-hscroll-for="editModalCatBar" data-hscroll-dir="-1" aria-label="Cuộn danh mục sửa đơn sang trái" onclick="scrollHorizontalBar('editModalCatBar', -1)">❮</button>
+                <div id="editModalCatBar" class="admin-cat-bar" style="margin-bottom:0; padding-bottom:0; flex:1; min-width:0;">
                   <button type="button" class="admin-cat-chip active" onclick="setEditModalCategory('all', this)">Tất Cả</button>
                   <button type="button" class="admin-cat-chip" onclick="setEditModalCategory('bun', this)">Bún</button>
                   <button type="button" class="admin-cat-chip" onclick="setEditModalCategory('mi_pho', this)">Mì/Phở</button>
@@ -1379,13 +1405,13 @@
                   <button type="button" class="admin-cat-chip" onclick="setEditModalCategory('douong', this)">Đồ Uống</button>
                   <button type="button" class="admin-cat-chip" style="border-color:#f59e0b; color:#b45309; background:#fffbeb;" onclick="setEditModalCategory('topping', this)">➕ Topping</button>
                 </div>
-                <button type="button" onclick="document.getElementById('editModalCatBar').scrollBy({left:180,behavior:'smooth'})" style="border:1px solid #cbd5e1; background:#fff; border-radius:50%; width:26px; height:26px; font-weight:900; cursor:pointer; flex-shrink:0;">❯</button>
+                <button type="button" class="hscroll-btn hscroll-btn-xs" data-hscroll-for="editModalCatBar" data-hscroll-dir="1" aria-label="Cuộn danh mục sửa đơn sang phải" onclick="scrollHorizontalBar('editModalCatBar', 1)">❯</button>
               </div>
 
               <!-- Thanh danh mục con 7 nhóm Đồ Uống có nút ❮ ❯ -->
-              <div id="editModalDrinkSubWrap" style="display:none; align-items:center; gap:4px; background:#eff6ff; padding:4px 6px; border-radius:8px; border:1px solid #bfdbfe; margin-bottom:8px;">
-                <button type="button" onclick="document.getElementById('editModalDrinkSubBar').scrollBy({left:-160,behavior:'smooth'})" style="border:1px solid #93c5fd; background:#fff; border-radius:50%; width:24px; height:24px; font-weight:900; cursor:pointer; flex-shrink:0;">❮</button>
-                <div id="editModalDrinkSubBar" class="admin-cat-bar" style="margin-bottom:0; padding-bottom:0; flex:1;">
+              <div id="editModalDrinkSubWrap" class="hscroll-wrap" style="display:none; background:#eff6ff; padding:4px 6px; border-radius:8px; border:1px solid #bfdbfe; margin-bottom:8px;">
+                <button type="button" class="hscroll-btn hscroll-btn-xs" data-hscroll-for="editModalDrinkSubBar" data-hscroll-dir="-1" aria-label="Cuộn nhóm nước sửa đơn sang trái" onclick="scrollHorizontalBar('editModalDrinkSubBar', -1)" style="border-color:#93c5fd;">❮</button>
+                <div id="editModalDrinkSubBar" class="admin-cat-bar" style="margin-bottom:0; padding-bottom:0; flex:1; min-width:0;">
                   <button type="button" class="admin-cat-chip active" onclick="setEditModalDrinkSub('all_drink', this)">Tất Cả Nước</button>
                   <button type="button" class="admin-cat-chip" onclick="setEditModalDrinkSub('cafe_cacao', this)">Cafe/Cacao</button>
                   <button type="button" class="admin-cat-chip" onclick="setEditModalDrinkSub('latte', this)">Latte</button>
@@ -1395,7 +1421,7 @@
                   <button type="button" class="admin-cat-chip" onclick="setEditModalDrinkSub('soda', this)">Soda</button>
                   <button type="button" class="admin-cat-chip" onclick="setEditModalDrinkSub('giaikhat', this)">Mía/Ngọt</button>
                 </div>
-                <button type="button" onclick="document.getElementById('editModalDrinkSubBar').scrollBy({left:160,behavior:'smooth'})" style="border:1px solid #93c5fd; background:#fff; border-radius:50%; width:24px; height:24px; font-weight:900; cursor:pointer; flex-shrink:0;">❯</button>
+                <button type="button" class="hscroll-btn hscroll-btn-xs" data-hscroll-for="editModalDrinkSubBar" data-hscroll-dir="1" aria-label="Cuộn nhóm nước sửa đơn sang phải" onclick="scrollHorizontalBar('editModalDrinkSubBar', 1)" style="border-color:#93c5fd;">❯</button>
               </div>
 
               <div id="editModalDishPickerList" style="max-height:35vh; overflow-y:auto;"></div>
@@ -2574,6 +2600,71 @@
     // ==========================================
     // 4. ĐIỀU HƯỚNG TAB & BIẾN TOÀN CỤC
     // ==========================================
+    const HSCROLL_BAR_IDS = [
+      'mainTabsBar',
+      'kdsFilterBar',
+      'posCatFilterBar',
+      'posDrinkSubCatBar',
+      'editModalCatBar',
+      'editModalDrinkSubBar'
+    ];
+
+    window.updateHorizontalScrollButtons = function(targetIds) {
+      const ids = Array.isArray(targetIds)
+        ? targetIds
+        : (typeof targetIds === 'string' && targetIds ? [targetIds] : HSCROLL_BAR_IDS);
+
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        const leftBtn = document.querySelector(`.hscroll-btn[data-hscroll-for="${id}"][data-hscroll-dir="-1"]`);
+        const rightBtn = document.querySelector(`.hscroll-btn[data-hscroll-for="${id}"][data-hscroll-dir="1"]`);
+        if (!el) return;
+
+        const maxScroll = Math.max(0, Math.round(el.scrollWidth - el.clientWidth));
+        const curLeft = Math.round(el.scrollLeft || 0);
+        const atStart = curLeft <= 2;
+        const atEnd = maxScroll <= 2 || curLeft >= maxScroll - 2;
+
+        if (leftBtn) {
+          leftBtn.classList.toggle('is-edge', atStart);
+          leftBtn.disabled = atStart;
+        }
+        if (rightBtn) {
+          rightBtn.classList.toggle('is-edge', atEnd);
+          rightBtn.disabled = atEnd;
+        }
+      });
+    };
+
+    window.scrollHorizontalBar = function(elId, direction = 1) {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      const step = Math.max(180, Math.round((el.clientWidth || 300) * 0.68));
+      const delta = (Number(direction) >= 0 ? 1 : -1) * step;
+      if (typeof el.scrollBy === 'function') {
+        el.scrollBy({ left: delta, behavior: 'smooth' });
+      } else {
+        el.scrollLeft = (el.scrollLeft || 0) + delta;
+      }
+      window.updateHorizontalScrollButtons(elId);
+      setTimeout(() => window.updateHorizontalScrollButtons(elId), 120);
+      setTimeout(() => window.updateHorizontalScrollButtons(elId), 340);
+    };
+
+    window.initAllHorizontalScrollBars = function() {
+      HSCROLL_BAR_IDS.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el || el.dataset.hscrollBound === '1') return;
+        el.dataset.hscrollBound = '1';
+        el.addEventListener('scroll', () => window.updateHorizontalScrollButtons(id), { passive: true });
+      });
+      if (!window.__hscrollResizeBound) {
+        window.__hscrollResizeBound = true;
+        window.addEventListener('resize', () => window.updateHorizontalScrollButtons());
+      }
+      window.updateHorizontalScrollButtons();
+    };
+
     window.switchMainTab = function(tabName, ev) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       if (ev && ev.currentTarget) ev.currentTarget.classList.add('active');
@@ -2608,6 +2699,7 @@
       else if (tabName === 'shippers' && typeof window.renderShippersTable === 'function') window.renderShippersTable();
 
       if (typeof window.updatePosStickyCartBar === 'function') window.updatePosStickyCartBar();
+      setTimeout(() => window.updateHorizontalScrollButtons(), 60);
     };
 
     let ordersCache = {}; let menuCustomCache = {}; let isAudioActive = false; let targetCancelOrderId = null; let selectedTable = "HC-01"; let posCart = {};
@@ -2662,8 +2754,21 @@
     let audioContext = null;
     let cachedVietnameseVoice = null;
     let silentCarrierAudio = null;
+    const BAL_TTS_PLAYBACK_RATE = 1.25;
     let ttsAudioPlayer = new Audio();
     ttsAudioPlayer.referrerPolicy = "no-referrer";
+    ttsAudioPlayer.preservesPitch = true;
+    ttsAudioPlayer.mozPreservesPitch = true;
+    ttsAudioPlayer.webkitPreservesPitch = true;
+    let activeTtsBlobUrl = null;
+    window.ttsAudioPlayer = ttsAudioPlayer;
+    window.BAL_TTS_SETTINGS = {
+      voice: 'vi-VN-HoaiMyNeural',
+      rate: '+25%',
+      pitch: '+6Hz',
+      playbackRate: BAL_TTS_PLAYBACK_RATE,
+      preservesPitch: true
+    };
 
     // Tạo file WAV tần số siêu trầm (1 giây lặp vô tận) để giữ trình duyệt thức 100% như ứng dụng nghe nhạc khi tắt màn hình
     function createSilentWavDataUri() {
@@ -2737,8 +2842,14 @@
     function findVietnameseVoice() {
       if (!('speechSynthesis' in window)) return null;
       const voices = window.speechSynthesis.getVoices() || [];
-      let vn = voices.find(v => v.lang && (v.lang.toLowerCase() === 'vi-vn' || v.lang.toLowerCase() === 'vi_vn' || v.lang.toLowerCase().startsWith('vi')));
-      if (!vn) vn = voices.find(v => v.name && (v.name.toLowerCase().includes('viet') || v.name.toLowerCase().includes('tiếng việt') || v.name.toLowerCase().includes('linh') || v.name.toLowerCase().includes('an')));
+      const vnVoices = voices.filter(v => {
+        const lang = (v.lang || '').toLowerCase();
+        const name = (v.name || '').toLowerCase();
+        return lang === 'vi-vn' || lang === 'vi_vn' || lang.startsWith('vi') || name.includes('viet') || name.includes('tiếng việt');
+      });
+      let vn = vnVoices.find(v => (v.name || '').toLowerCase().includes('hoaimy') || (v.name || '').toLowerCase().includes('hoài my'));
+      if (!vn) vn = vnVoices.find(v => (v.name || '').toLowerCase().includes('linh'));
+      if (!vn) vn = vnVoices[0] || voices.find(v => v.name && v.name.toLowerCase().includes('an'));
       cachedVietnameseVoice = vn || null;
       return cachedVietnameseVoice;
     }
@@ -2777,12 +2888,26 @@
       } catch (e) {}
     }
 
-// Hàng đợi phát giọng nói Tiếng Việt (Giúp đọc danh sách nhiều món dài không bị ngắt chữ hoặc đè câu)
+    // Hàng đợi phát giọng nói Tiếng Việt (Giọng nữ miền Nam 1.25x, chuẩn hóa từ viết tắt trước khi đọc)
     let voiceSpeechQueue = [];
     let isPlayingVoiceQueue = false;
 
-    function splitTextIntoVoiceChunks(text, maxLen = 165) {
-      const clean = String(text || '').replace(/\s+/g, ' ').trim();
+    window.formatNaturalVietnameseSpeech = function(text) {
+      let s = String(text || '');
+      s = s.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, ' ');
+      s = s.replace(/\bHC[\s-]?0*(\d+)\b/gi, (_, n) => `bàn số ${parseInt(n, 10)}`);
+      s = s.replace(/\bXM[\s-]?0*(\d+)\b/gi, (_, n) => `thẻ số ${parseInt(n, 10)}`);
+      s = s.replace(/#\s*0*(\d+)\b/g, (_, n) => `số ${parseInt(n, 10)}`);
+      s = s.replace(/\b(\d+)\s*[x×]\b/gi, '$1 phần');
+      s = s.replace(/\bCK\b/gi, 'chuyển khoản');
+      s = s.replace(/\bVNĐ\b|\bVND\b/gi, 'đồng');
+      s = s.replace(/(\d)đ\b/gi, '$1 đồng');
+      return s.replace(/\s+/g, ' ').trim();
+    };
+
+    function splitTextIntoVoiceChunks(text, maxLen = 180) {
+      const clean = window.formatNaturalVietnameseSpeech(text);
+      if (!clean) return [];
       if (clean.length <= maxLen) return [clean];
       const parts = clean.split(/(?<=[.,;!?])\s+/);
       const chunks = [];
@@ -2799,37 +2924,105 @@
       return chunks.length > 0 ? chunks : [clean.slice(0, maxLen)];
     }
 
-    function processNextVoiceChunk() {
+    function speakWithWebSpeechFallback(chunkText, onDone) {
+      if (!('speechSynthesis' in window)) {
+        if (typeof onDone === 'function') onDone();
+        return;
+      }
+      try {
+        const msg = new SpeechSynthesisUtterance(chunkText);
+        const vnVoice = findVietnameseVoice() || cachedVietnameseVoice;
+        if (vnVoice) msg.voice = vnVoice;
+        msg.lang = 'vi-VN';
+        msg.volume = 1.0;
+        msg.rate = BAL_TTS_PLAYBACK_RATE;
+        msg.pitch = 1.1;
+        msg.onend = () => { if (typeof onDone === 'function') onDone(); };
+        msg.onerror = () => { if (typeof onDone === 'function') onDone(); };
+        window.speechSynthesis.speak(msg);
+      } catch (_) {
+        if (typeof onDone === 'function') onDone();
+      }
+    }
+
+    function revokeActiveTtsBlob() {
+      if (activeTtsBlobUrl) {
+        try { URL.revokeObjectURL(activeTtsBlobUrl); } catch (_) {}
+        activeTtsBlobUrl = null;
+      }
+    }
+
+    function playGoogleTranslateAudioFallback(chunkText, advanceQueue) {
+      revokeActiveTtsBlob();
+      const ttsUrl = `https://translate.googleapis.com/translate_tts?client=gtx&ie=UTF-8&tl=vi&dt=t&q=${encodeURIComponent(chunkText)}`;
+      ttsAudioPlayer.src = ttsUrl;
+      ttsAudioPlayer.volume = 1.0;
+      ttsAudioPlayer.playbackRate = BAL_TTS_PLAYBACK_RATE;
+      ttsAudioPlayer.preservesPitch = true;
+      ttsAudioPlayer.dataset.effectiveRate = String(BAL_TTS_PLAYBACK_RATE);
+      ttsAudioPlayer.onended = () => setTimeout(advanceQueue, 90);
+      ttsAudioPlayer.onerror = () => speakWithWebSpeechFallback(chunkText, advanceQueue);
+      const p = ttsAudioPlayer.play();
+      if (p && typeof p.catch === 'function') {
+        p.catch(() => speakWithWebSpeechFallback(chunkText, advanceQueue));
+      }
+    }
+
+    async function processNextVoiceChunk() {
       if (!isAudioActive || voiceSpeechQueue.length === 0) {
         isPlayingVoiceQueue = false;
         return;
       }
       isPlayingVoiceQueue = true;
       const nextChunk = voiceSpeechQueue.shift();
-      const ttsUrl = `https://translate.googleapis.com/translate_tts?client=gtx&ie=UTF-8&tl=vi&dt=t&q=${encodeURIComponent(nextChunk)}`;
-      ttsAudioPlayer.src = ttsUrl;
-      ttsAudioPlayer.volume = 1.0;
-      ttsAudioPlayer.onended = () => setTimeout(processNextVoiceChunk, 120);
-      ttsAudioPlayer.onerror = () => {
-        if ('speechSynthesis' in window) {
-          const msg = new SpeechSynthesisUtterance(nextChunk);
-          const vnVoice = cachedVietnameseVoice || findVietnameseVoice();
-          if (vnVoice) msg.voice = vnVoice;
-          msg.lang = 'vi-VN'; msg.volume = 1.0; msg.rate = 0.95;
-          msg.onend = () => processNextVoiceChunk();
-          msg.onerror = () => processNextVoiceChunk();
-          window.speechSynthesis.speak(msg);
-        } else {
-          processNextVoiceChunk();
+      const advanceQueue = () => setTimeout(processNextVoiceChunk, 90);
+
+      let timerId = null;
+      try {
+        const controller = new AbortController();
+        timerId = setTimeout(() => controller.abort(), 2800);
+        const res = await fetch(`/api/tts?text=${encodeURIComponent(nextChunk)}`, {
+          signal: controller.signal
+        });
+        clearTimeout(timerId);
+        timerId = null;
+
+        const cType = (res.headers.get('content-type') || '').toLowerCase();
+        if (!res.ok || !cType.startsWith('audio/')) {
+          throw new Error(`TTS API HTTP ${res.status}`);
         }
-      };
-      ttsAudioPlayer.play().catch(() => ttsAudioPlayer.onerror());
+        const serverRate = res.headers.get('x-tts-rate') || '1.25';
+        const audioBlob = await res.blob();
+        if (!audioBlob || !audioBlob.size) throw new Error('Empty audio blob');
+
+        revokeActiveTtsBlob();
+        activeTtsBlobUrl = URL.createObjectURL(audioBlob);
+        ttsAudioPlayer.src = activeTtsBlobUrl;
+        ttsAudioPlayer.volume = 1.0;
+        ttsAudioPlayer.preservesPitch = true;
+        // Edge Neural da tong hop san o toc do +25% (1.25x); fallback thi tang playbackRate len 1.25x
+        const playerRate = serverRate === '1.25' ? 1.0 : BAL_TTS_PLAYBACK_RATE;
+        ttsAudioPlayer.playbackRate = playerRate;
+        ttsAudioPlayer.dataset.effectiveRate = String(BAL_TTS_PLAYBACK_RATE);
+        ttsAudioPlayer.onended = () => {
+          revokeActiveTtsBlob();
+          advanceQueue();
+        };
+        ttsAudioPlayer.onerror = () => {
+          revokeActiveTtsBlob();
+          playGoogleTranslateAudioFallback(nextChunk, advanceQueue);
+        };
+        await ttsAudioPlayer.play();
+      } catch (_) {
+        if (timerId) clearTimeout(timerId);
+        playGoogleTranslateAudioFallback(nextChunk, advanceQueue);
+      }
     }
 
     function playOnlineVietnameseTTS(text) {
       const chunks = splitTextIntoVoiceChunks(text);
       chunks.forEach(c => voiceSpeechQueue.push(c));
-      if (!isPlayingVoiceQueue) {
+      if (!isPlayingVoiceQueue && voiceSpeechQueue.length > 0) {
         processNextVoiceChunk();
       }
       return Promise.resolve();
@@ -2915,7 +3108,7 @@ window.forceUnlockBackgroundAudio = function(silentWelcome = false) {
 
     window.testVietnameseVoice = function() {
       window.forceUnlockBackgroundAudio(true);
-      speakAlert("Xin chào Giám đốc Bảo Anh Lâm! Hệ thống đồng bộ giọng nói Tiếng Việt trên tất cả tài khoản đã hoạt động hoàn hảo.", true);
+      speakAlert("Xin chào Giám đốc Bảo Anh Lâm! Hệ thống Hy Chay giọng nữ miền Nam tốc độ 1 phẩy 25 lần đã sẵn sàng phục vụ đơn số 1 gồm 2 phần bún thái tại bàn số 5.", true);
     };
 
     // ==========================================
@@ -3612,6 +3805,9 @@ window.deleteDishFromMenu = function(id, name) {
       const subBar = document.getElementById('posDrinkSubCatWrap') || document.getElementById('posDrinkSubCatBar');
       if (subBar) subBar.style.display = (cat === 'douong') ? 'flex' : 'none';
       window.renderPosDishGrid();
+      if (typeof window.updateHorizontalScrollButtons === 'function') {
+        setTimeout(() => window.updateHorizontalScrollButtons(['posCatFilterBar', 'posDrinkSubCatBar']), 60);
+      }
     };
 
     window.setPosDrinkSubCat = function(subCat, btn) {
@@ -4056,6 +4252,9 @@ window.deleteDishFromMenu = function(id, name) {
       renderEditModalCurrentItems();
       window.renderEditModalDishPicker();
       document.getElementById('editOrderModal').classList.add('active');
+      if (typeof window.updateHorizontalScrollButtons === 'function') {
+        setTimeout(() => window.updateHorizontalScrollButtons(['editModalCatBar', 'editModalDrinkSubBar']), 60);
+      }
     };
 
     window.closeEditOrderModal = function() {
@@ -5858,6 +6057,9 @@ window.deleteShipperPermanently = function(phone) {
       if (typeof renderCrossStationAlertsUI === 'function') {
         try { renderCrossStationAlertsUI(); } catch(e) { console.warn(e); }
       }
+      if (typeof window.updateHorizontalScrollButtons === 'function') {
+        setTimeout(() => window.updateHorizontalScrollButtons(), 80);
+      }
 
       // 6. Tách lọc menu Quán 280 (Đủ 122 món) vs Xe Nước Điểm Mới (54 Đồ Uống)
       applyMenuFilterUiForAppMode(mode);
@@ -5984,6 +6186,9 @@ window.setEditModalCategory = function(cat, btn) {
       const subWrap = document.getElementById('editModalDrinkSubWrap') || document.getElementById('editModalDrinkSubBar');
       if (subWrap) subWrap.style.display = (cat === 'douong') ? 'flex' : 'none';
       window.renderEditModalDishPicker();
+      if (typeof window.updateHorizontalScrollButtons === 'function') {
+        setTimeout(() => window.updateHorizontalScrollButtons(['editModalCatBar', 'editModalDrinkSubBar']), 60);
+      }
     };
 
     window.setEditModalDrinkSub = function(subCat, btn) {
@@ -7846,8 +8051,10 @@ const origHandleAdminLogin = window.handleAdminLogin;
       manualPosShipFeeOverride = false; recalcPosDeliveryTotals(); window.closeAdminPosMapModal();
     };
 
-    // --- BỘ NÃO GIỌNG NÓI AI V5 ---
-    let isStaffBigMode = false, speechRecognizer = null, isVoiceListening = false, lastVoiceCartSnapshot = null;
+    // --- BỘ NÃO GIỌNG NÓI AI V6 (ĐA GIỌNG 3 MIỀN BẮC - TRUNG - NAM & FUZZY PHONETIC MATCHER) ---
+    let isStaffBigMode = true, speechRecognizer = null, isVoiceListening = false, lastVoiceCartSnapshot = null;
+    let voiceAutoRestartTimer = null, voiceConsecutiveErrors = 0;
+
     window.toggleStaffBigMode = function() {
       isStaffBigMode = !isStaffBigMode;
       const viewEl = document.getElementById('viewPosOrder');
@@ -7860,12 +8067,86 @@ const origHandleAdminLogin = window.handleAdminLogin;
       }
       window.toggleVoiceOrderRecognition();
     };
+
     function normNoAccentV5(str) {
-      return String(str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\u0111/g, 'd').replace(/\u0110/g, 'D').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+      return String(str || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\u0111/g, 'd')
+        .replace(/\u0110/g, 'D')
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
     }
+
+    // Tạo khóa ngữ âm đồng nhất biến âm Bắc - Trung - Nam - Tây Nam Bộ (giữ phân biệt 'đ' vs 'd/gi/r/v')
+    function toVietnamesePhoneticKey(wordOrPhrase) {
+      const rawWords = String(wordOrPhrase || '')
+        .replace(/\u0111/g, 'đ')
+        .replace(/\u0110/g, 'đ')
+        .toLowerCase()
+        .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean);
+
+      return rawWords.map(w => {
+        const hasDStroke = w.startsWith('đ');
+        let k = w.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        if (hasDStroke) {
+          k = 'dd' + k.slice(1);
+        } else {
+          if (k.startsWith('tr')) k = 'ch' + k.slice(2);
+          else if (k.startsWith('x')) k = 's' + k.slice(1);
+          else if (k.startsWith('gi')) k = 'z' + k.slice(2);
+          else if (k.startsWith('v') || k.startsWith('d') || k.startsWith('r')) k = 'z' + k.slice(1);
+          else if (k.startsWith('n') && !k.startsWith('ng') && !k.startsWith('nh')) k = 'l' + k.slice(1);
+          else if (k.startsWith('qu')) k = 'w' + k.slice(2);
+        }
+        // Vần cuối hay đọc lệch giữa các miền
+        if (k.endsWith('nh')) k = k.slice(0, -2) + 'n';
+        else if (k.endsWith('ng')) k = k.slice(0, -2) + 'n';
+        else if (k.endsWith('t')) k = k.slice(0, -1) + 'c';
+        return k;
+      }).join(' ');
+    }
+
+    function voiceLevenshtein(a, b) {
+      if (a === b) return 0;
+      const m = a.length, n = b.length;
+      if (!m) return n;
+      if (!n) return m;
+      const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+      for (let i = 0; i <= m; i++) dp[i][0] = i;
+      for (let j = 0; j <= n; j++) dp[0][j] = j;
+      for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+          const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+          dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost);
+        }
+      }
+      return dp[m][n];
+    }
+
+    function phoneticWordSimilarity(w1, w2) {
+      if (w1 === w2) return 1.0;
+      const p1 = toVietnamesePhoneticKey(w1);
+      const p2 = toVietnamesePhoneticKey(w2);
+      if (p1 === p2) return 0.96;
+      const n1 = normNoAccentV5(w1);
+      const n2 = normNoAccentV5(w2);
+      if (n1 === n2) return 0.94;
+      const maxLen = Math.max(p1.length, p2.length);
+      if (maxLen <= 1) return 0;
+      const dist = voiceLevenshtein(p1, p2);
+      const ratio = 1 - dist / maxLen;
+      return ratio >= 0.7 ? ratio * 0.9 : 0;
+    }
+
     window.aiSelfThinkingRewriteTranscript = function(rawSpeech) {
       let s = ' ' + String(rawSpeech || '').toLowerCase() + ' ';
-      s = s.replace(/\b(bàn|ban)\s*(?:số|so)?\s*([1-9])4\b/gi, ' bàn $2 lấy 1 bún ');
+      s = s.replace(/\b(bàn|bàng|bạn|bản|ban|bang)\s*(?:số|so)?\s*([1-9])4\b/gi, ' bàn $2 lấy 1 bún ');
       s = s.replace(/\b([1-9])41\b/gi, ' $1 bún mọc ');
       s = s.replace(/\b(?:41|4\s+1|bốn\s+một|bún\s+1|bún\s+một)\b/gi, ' 1 bún mọc ');
       s = s.replace(/\b([1-9])45\s*nêm\b/gi, ' $1 bún mắm nêm ');
@@ -7875,68 +8156,535 @@ const origHandleAdminLogin = window.handleAdminLogin;
       s = s.replace(/\b(cháo|rau\s*củ|kem|chả|chân|chà\s*bông)\s*(?:5|năm)\b/gi, ' $1 nấm ');
       s = s.replace(/\bcơm\s*(?:8|tám)\b/gi, ' cơm tấm ');
       s = s.replace(/\b(trà|suối)\s*(?:8|tám)\b/gi, ' $1 tắc ');
-      s = s.replace(/\b(chả\s*giò|bào\s*ngư|khoai\s*tây|phô\s*mai|hoành\s*thánh|đậu\s*hũ|cơm|nấm)\s*(?:9|chín)\b/gi, ' $1 chiên ');
+      s = s.replace(/\b(chả\s*giò|bào\s*ngư|khoai\s*tây|phô\s*mai|hoành\s*thánh|đậu\s*hũ|đậu\s*hủ|cơm|nấm)\s*(?:9|chín)\b/gi, ' $1 chiên ');
       s = s.replace(/\b(cafe|cà\s*phê|cacao|ca\s*cao)\s*(?:10|mười|múi)\b/gi, ' $1 muối ');
       return s.replace(/\s+/g, ' ').trim();
     };
-    window.parseAndExecuteVoiceOrder = function(rawTranscript) {
-      if (!rawTranscript || !rawTranscript.trim()) return;
-      lastVoiceCartSnapshot = JSON.parse(JSON.stringify(posCart));
-      const rewritten = window.aiSelfThinkingRewriteTranscript(rawTranscript);
-      const noAcc = normNoAccentV5(rewritten);
-      const manualInp = document.getElementById('voiceManualTranscriptInput');
-      if (manualInp) manualInp.value = rewritten;
 
-      let detectedTable = null, speechWithoutTable = rewritten;
-      const tblMatch = speechWithoutTable.match(/\b(?:bàn|ban|vip)\s*(?:số|so)?\s*(\d{1,2})\b/i);
-      if (tblMatch) {
-        const num = tblMatch[1];
-        detectedTable = (tablesListCache || []).find(t => normNoAccentV5(t) === 'ban ' + num) || ('Bàn ' + num);
-        speechWithoutTable = speechWithoutTable.replace(tblMatch[0], ' ');
+    window.normalizeRegionalVietnamese = function(rawText) {
+      let s = ' ' + String(rawText || '').toLowerCase() + ' ';
+      // Bảo toàn 'việt quất' để không bị biến thành 'việt tắc'
+      s = s.replace(/\bviệt\s+quất\b/gi, ' __viet_quat__ ');
+
+      const phraseSynonyms = [
+        [/\bxì\s+pa\s+ghét\s+ti\b|\bsi\s+pa\s+ghet\s+ti\b|\bxì\s+pa\s+ghe\s+ti\b|\bsì\s+pa\s+ghét\s+ti\b|\bspaghetti\b/gi, ' mì ý sốt bò bằm '],
+        [/\bchả\s+ram\b|\bnem\s+rán\b|\bram\b/gi, ' chả giò chiên giòn '],
+        [/\bvằn\s+thắn\b/gi, ' hoành thánh '],
+        [/\bsữa\s+chua\b|\bda\s+ua\b|\bya\s+ua\b|\byaua\b|\bza\s+ua\b|\bgia\s+ua\b/gi, ' yaourt '],
+        [/\bđen\s+đá\b|\bcà\s+phê\s+đen\b|\bcafe\s+đen\b/gi, ' cafe đá '],
+        [/\bnâu\s+đá\b|\bcà\s+phê\s+nâu\b|\bcafe\s+nâu\b|\bcà\s+phê\s+sữa\b/gi, ' cafe sữa '],
+        [/\bbạc\s+sỉu\b|\bbạc\s+sửu\b/gi, ' bạc xỉu '],
+        [/\bbò\s+húc\b|\bred\s*bull\b|\bbò\s+cụng\b/gi, ' bò húc thái '],
+        [/\bnước\s+lọc\b|\blavie\b|\baquafina\b|\bnước\s+suối(?!\s*tắc)\b/gi, ' nước khoáng '],
+        [/\bhủ\s+tíu\b|\bhủ\s+tiểu\b|\bhũ\s+tiếu\b|\bhũ\s+tíu\b|\bhủ\s+tiêu\b/gi, ' hủ tiếu '],
+        [/\btrà\s+quất\b|\bnước\s+quất\b/gi, ' trà tắc '],
+        [/\bquất\b/gi, ' tắc '],
+        [/\bdứa\b|\bkhóm\b/gi, ' thơm '],
+        [/\bcà\s+phê\b|\bca\s+phe\b|\bcà\s+phơ\b/gi, ' cafe '],
+        [/\bca\s+cao\b/gi, ' cacao '],
+        [/\bđậu\s+phụ\b|\bđậu\s+hủ\b|\btàu\s+hũ\b|\btàu\s+hủ\b/gi, ' đậu hũ '],
+        [/\bphợ\b|\bphớ\b/gi, ' phở '],
+        [/\bnước\s+ép\b/gi, ' ép ']
+      ];
+      phraseSynonyms.forEach(([re, rep]) => {
+        s = s.replace(re, rep);
+      });
+      s = s.replace(/__viet_quat__/g, ' việt quất ');
+      return s.replace(/\s+/g, ' ').trim();
+    };
+
+    const VN_SPOKEN_NUM_MAP = {
+      'một': 1, 'mốt': 1, 'hai': 2, 'ha': 2, 'ba': 3, 'bốn': 4, 'tư': 4,
+      'năm': 5, 'lăm': 5, 'nhăm': 5, 'sáu': 6, 'bảy': 7, 'bẩy': 7, 'tám': 8,
+      'chín': 9, 'mười': 10, 'chục': 10
+    };
+
+    function convertSpokenVietnameseNumbers(text) {
+      let s = ' ' + String(text || '') + ' ';
+      s = s.replace(/\bhai\s+mươi\b/gi, ' 20 ');
+      s = s.replace(/\bmười\s+(một|mốt|hai|ba|bốn|tư|năm|lăm|sáu|bảy|bẩy|tám|chín)\b/gi, (_, u) => ` ${10 + (VN_SPOKEN_NUM_MAP[u.toLowerCase()] || 0)} `);
+      const numWordsRe = new RegExp(`(?<!cô\\s+)\\b(${Object.keys(VN_SPOKEN_NUM_MAP).join('|')})\\b`, 'gi');
+      s = s.replace(numWordsRe, (m) => ` ${VN_SPOKEN_NUM_MAP[m.toLowerCase()] || m} `);
+      s = s.replace(/\b(\d+)\s*(?:kg|ký|lít|phần|tô|bát|ly|cốc)?\s*rưỡi\b/gi, (_, n) => ` ${parseFloat(n) + 0.5} `);
+      return s.replace(/\s+/g, ' ').trim();
+    }
+
+    const VOICE_NOTE_PHRASES = [
+      'không hành', 'ít hành', 'nhiều hành',
+      'không cay', 'ít cay', 'cay nhiều',
+      'không đá', 'ít đá', 'nhiều đá', 'đá riêng',
+      'không đường', 'ít đường', 'ít ngọt',
+      'để riêng', 'mang về để riêng', 'nóng'
+    ];
+
+    function resolveVoiceTableTarget(rawNum, prefixHint) {
+      const n = parseInt(rawNum, 10);
+      if (isNaN(n) || n <= 0) return null;
+      const padded = String(n).padStart(2, '0');
+      const curMode = window.getCurrentAppMode ? window.getCurrentAppMode() : 'QUAN_280';
+
+      if (prefixHint === 'XM' || curMode === 'XE_DIEM_MOI') {
+        const xmTarget = `XM-${padded}`;
+        return (tablesListCache || []).find(t => t === xmTarget) || xmTarget;
       }
-      if (detectedTable) {
-        selectedTable = detectedTable;
-        if (document.getElementById('currentSelectedTable')) document.getElementById('currentSelectedTable').innerText = detectedTable;
-        syncActivePosCartFromTable();
+      if (prefixHint === 'HC' || curMode === 'QUAN_280' || curMode === 'ALL') {
+        const hcTarget = `HC-${padded}`;
+        const exact = (tablesListCache || []).find(t => t === hcTarget || normNoAccentV5(t) === `ban ${n}`);
+        return exact || hcTarget;
       }
-      const workNoAcc = normNoAccentV5(speechWithoutTable);
-      const addedSummary = [];
-      getUnifiedMenuList().forEach(item => {
-        const al = normNoAccentV5(item.name).replace(/\b(chay)\b/g, '').trim();
-        if (al.length >= 4 && workNoAcc.includes(al)) {
-          window.addToPosCart(item.name, item.price, item.cat);
-          addedSummary.push(`1x ${item.name}`);
+      return `Bàn ${n}`;
+    }
+
+    function extractTableAndNotesFromSpeech(text) {
+      let s = String(text || '');
+      let detectedTable = null;
+      let explicitStationHint = null;
+
+      // 1. Khớp tên trạm/thẻ đặc trưng (hắt xê 3 -> HC-03, ích mờ 2 -> XM-02)
+      const hcMatch = s.match(/\b(?:hắt\s*xê|hát\s*xê|hắc\s*xê|hc)\s*[-]?\s*(?:số\s*)?(\d{1,2})\b/i);
+      if (hcMatch) {
+        detectedTable = resolveVoiceTableTarget(hcMatch[1], 'HC');
+        explicitStationHint = 'QUAN_280';
+        s = s.replace(hcMatch[0], ' ');
+      }
+      if (!detectedTable) {
+        const xmMatch = s.match(/\b(?:ích\s*mờ|ít\s*mờ|x\s*mờ|xm|thẻ)\s*[-]?\s*(?:số\s*)?(\d{1,2})\b/i);
+        if (xmMatch) {
+          detectedTable = resolveVoiceTableTarget(xmMatch[1], 'XM');
+          explicitStationHint = 'XE_DIEM_MOI';
+          s = s.replace(xmMatch[0], ' ');
+        }
+      }
+      if (!detectedTable) {
+        const banMatch = s.match(/\b(?:bàn|bàng|bạn|bản|ban|bang|vip)\s*(?:số|so)?\s*(\d{1,2})\b/i);
+        if (banMatch) {
+          detectedTable = resolveVoiceTableTarget(banMatch[1], null);
+          s = s.replace(banMatch[0], ' ');
+        }
+      }
+      if (!detectedTable && /\b(?:mang\s*về|đem\s*về|gói\s*về|mua\s*về)\b/i.test(s)) {
+        const curMode = window.getCurrentAppMode ? window.getCurrentAppMode() : 'QUAN_280';
+        detectedTable = (curMode === 'XE_DIEM_MOI') ? 'Mang Về Điểm Mới' : 'Mang Về';
+        s = s.replace(/\b(?:mang\s*về|đem\s*về|gói\s*về|mua\s*về)\b/gi, ' ');
+      }
+
+      const foundNotes = [];
+      VOICE_NOTE_PHRASES.forEach(np => {
+        const re = new RegExp(`\\b${np.replace(/\s+/g, '\\s+')}\\b`, 'gi');
+        if (re.test(s)) {
+          foundNotes.push(np);
+          s = s.replace(re, ' ');
         }
       });
-      updateV19PosTotalsUI();
-    };
-    window.processVoiceOrderInputBox = function() {
-      const inp = document.getElementById('voiceManualTranscriptInput');
-      if (inp && inp.value.trim()) window.parseAndExecuteVoiceOrder(inp.value.trim());
-    };
-    window.toggleVoiceOrderRecognition = function() {
-      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRec) return alert("Hãy bấm biểu tượng Micro trên bàn phím để đọc món!");
-      if (isVoiceListening) {
-        isVoiceListening = false;
-        if (speechRecognizer) { try { speechRecognizer.stop(); } catch (_) {} }
-        return;
+
+      return { cleanText: s.replace(/\s+/g, ' ').trim(), detectedTable, explicitStationHint, notes: foundNotes };
+    }
+
+    function splitSpeechIntoDishClauses(cleanText) {
+      const UNIT_SET = new Set([
+        'bát', 'tô', 'dĩa', 'đĩa', 'ly', 'cốc', 'phần', 'suất', 'chai', 'lon', 'ổ', 'gói', 'túi', 'cái', 'nồi'
+      ]);
+      const FILLER_SET = new Set(['cho', 'lấy', 'làm', 'gửi', 'thêm', 'giùm', 'với', 'và', 'nhé', 'nha', 'ạ', 'ơi']);
+
+      let s = String(cleanText || '').replace(/[;.|/]+/g, ',').replace(/\s+(?:và|với)\s+/gi, ',');
+      const rawChunks = s.split(',').map(x => x.trim()).filter(Boolean);
+      const clauses = [];
+
+      rawChunks.forEach(chunk => {
+        const tokens = chunk.split(/\s+/).filter(Boolean);
+        if (!tokens.length) return;
+
+        const isNumericTok = (tok) => /^\d+(?:\.\d+)?$/.test(tok);
+        const firstIsNum = isNumericTok(tokens[0]);
+        let lastNumIdx = -1;
+        for (let i = tokens.length - 1; i >= 0; i--) {
+          if (isNumericTok(tokens[i])) { lastNumIdx = i; break; }
+        }
+        const trailingPostfix = !firstIsNum && lastNumIdx >= 1 && (
+          lastNumIdx === tokens.length - 1 ||
+          (lastNumIdx === tokens.length - 2 && UNIT_SET.has(tokens[tokens.length - 1].toLowerCase()))
+        );
+
+        if (trailingPostfix) {
+          let buf = [];
+          for (let i = 0; i < tokens.length; i++) {
+            const tok = tokens[i];
+            if (isNumericTok(tok)) {
+              const qty = parseFloat(tok) || 1;
+              if (i + 1 < tokens.length && UNIT_SET.has(tokens[i + 1].toLowerCase())) i++;
+              const phrase = buf.join(' ').trim();
+              if (phrase) clauses.push({ qty, phrase });
+              buf = [];
+            } else if (!FILLER_SET.has(tok.toLowerCase()) || buf.length > 0) {
+              if (FILLER_SET.has(tok.toLowerCase()) && buf.length === 0) continue;
+              buf.push(tok);
+            }
+          }
+          if (buf.length) clauses.push({ qty: 1, phrase: buf.join(' ').trim() });
+          return;
+        }
+
+        let curQty = 1;
+        let curWords = [];
+        for (let i = 0; i < tokens.length; i++) {
+          const tok = tokens[i];
+          const low = tok.toLowerCase();
+          if (isNumericTok(tok)) {
+            if (curWords.length > 0) {
+              clauses.push({ qty: curQty, phrase: curWords.join(' ').trim() });
+              curWords = [];
+            }
+            curQty = parseFloat(tok) || 1;
+            if (i + 1 < tokens.length && UNIT_SET.has(tokens[i + 1].toLowerCase())) {
+              const unitNext = tokens[i + 1].toLowerCase();
+              const next2 = (tokens[i + 2] || '').toLowerCase();
+              if (!(unitNext === 'tô' && next2 === 'giấy') && !(unitNext === 'nồi' && next2 === 'lớn')) {
+                i++;
+              }
+            }
+          } else {
+            if (FILLER_SET.has(low) && curWords.length === 0) {
+              if (low === 'thêm' && i + 1 < tokens.length && ['cơm', 'bún', 'mì', 'chả', 'hoành', 'rau', 'nước', 'topping', 'tô'].includes(tokens[i + 1].toLowerCase())) {
+                curWords.push(tok);
+              }
+              continue;
+            }
+            curWords.push(tok);
+          }
+        }
+        if (curWords.length > 0) {
+          clauses.push({ qty: curQty, phrase: curWords.join(' ').trim() });
+        }
+      });
+
+      return clauses;
+    }
+
+    function buildMenuItemAliases(item) {
+      const aliases = new Set();
+      const raw = String(item.name || '').trim();
+      aliases.add(raw);
+      const noParen = raw.replace(/\([^)]*\)/g, ' ').replace(/\s+/g, ' ').trim();
+      aliases.add(noParen);
+      aliases.add(noParen.replace(/\bchay\b/gi, '').replace(/\s+/g, ' ').trim());
+      noParen.split('/').forEach(part => {
+        const p = part.trim();
+        if (p) {
+          aliases.add(p);
+          aliases.add(p.replace(/\bchay\b/gi, '').replace(/\s+/g, ' ').trim());
+        }
+      });
+      if (item.id === 'chagiochien') aliases.add('chả giò');
+      if (item.id === 'hoanhthanhchien') aliases.add('hoành thánh chiên');
+      if (item.id === 'hoanhthanhmi') { aliases.add('hoành thánh mì'); aliases.add('hoành thánh'); }
+      if (item.id === 'mispaghetti') aliases.add('mì ý sốt bò bằm');
+      if (item.id === 'nuockhoangsuoigas') { aliases.add('nước khoáng'); aliases.add('nước suối'); }
+      if (item.id === 'trataximuoi') aliases.add('trà tắc');
+      if (item.id === 'phoboga') { aliases.add('phở bò'); aliases.add('phở gà'); aliases.add('phở'); }
+      return Array.from(aliases).filter(a => a.length >= 2);
+    }
+
+    function matchBestMenuDishForClause(phrase, menuList) {
+      const qWords = phrase.split(/\s+/).filter(Boolean);
+      if (!qWords.length) return null;
+      const qNoAcc = normNoAccentV5(phrase);
+      const qPhon = toVietnamesePhoneticKey(phrase);
+      const wantsRawOrPack = /\b(chưa chiên|chua chien|sống|song|ăn liền|an lien|sơ chế|so che|gói|goi)\b/i.test(phrase);
+      const wantsTopping = /\b(thêm|them|topping|tô giấy|to giay|hộp mang về|hop mang ve)\b/i.test(phrase);
+
+      let best = null;
+      menuList.forEach(item => {
+        if (item.isSoldOut) return;
+        const aliases = buildMenuItemAliases(item);
+        let topAliasScore = 0;
+
+        aliases.forEach(alias => {
+          const aNoAcc = normNoAccentV5(alias);
+          const aPhon = toVietnamesePhoneticKey(alias);
+          if (!aNoAcc) return;
+
+          if (qNoAcc === aNoAcc || qPhon === aPhon) {
+            topAliasScore = Math.max(topAliasScore, 1.0);
+            return;
+          }
+
+          const aWords = alias.split(/\s+/).filter(Boolean);
+          let matchedScoreSum = 0;
+          let matchedCount = 0;
+
+          qWords.forEach(qw => {
+            let bestTok = 0;
+            aWords.forEach(aw => {
+              const sim = phoneticWordSimilarity(qw, aw);
+              if (sim > bestTok) bestTok = sim;
+            });
+            if (bestTok >= 0.7) {
+              matchedScoreSum += bestTok;
+              matchedCount++;
+            }
+          });
+
+          if (!matchedCount) return;
+          const precision = matchedScoreSum / qWords.length;
+          const recall = matchedScoreSum / aWords.length;
+          let f1 = (2 * precision * recall) / Math.max(0.01, precision + recall);
+          if (qNoAcc.includes(aNoAcc) || qPhon.includes(aPhon)) f1 = Math.max(f1, 0.91);
+          topAliasScore = Math.max(topAliasScore, f1);
+        });
+
+        if (topAliasScore < 0.62) return;
+
+        let adjustedScore = topAliasScore;
+        if (item.cat === 'soche' && !wantsRawOrPack) adjustedScore -= 0.25;
+        if (item.cat === 'topping' && !wantsTopping) adjustedScore -= 0.28;
+        if (item.id === 'trataximuoi' && (qPhon === 'cha tac' || qNoAcc === 'tra tac')) adjustedScore += 0.08;
+
+        if (!best || adjustedScore > best.score) {
+          best = { item, score: adjustedScore };
+        }
+      });
+
+      return (best && best.score >= 0.6) ? best : null;
+    }
+
+    window.parseAndExecuteVoiceOrder = function(rawTranscript, options = {}) {
+      if (!rawTranscript || !String(rawTranscript).trim()) {
+        return { table: null, items: [], note: '', unmatched: [], score: 0, transcript: '' };
       }
-      isVoiceListening = true;
-      speechRecognizer = new SpeechRec();
-      speechRecognizer.lang = 'vi-VN';
-      speechRecognizer.onresult = (ev) => {
-        const tr = ev.results[ev.results.length - 1][0].transcript;
-        window.parseAndExecuteVoiceOrder(tr);
+      const dryRun = !!options.dryRun;
+      const rewritten = window.aiSelfThinkingRewriteTranscript(rawTranscript);
+      const regionalNormalized = window.normalizeRegionalVietnamese(rewritten);
+      const withDigits = convertSpokenVietnameseNumbers(regionalNormalized);
+      const { cleanText, detectedTable, explicitStationHint, notes } = extractTableAndNotesFromSpeech(withDigits);
+
+      let candidateMenu = getUnifiedMenuList();
+      const curMode = window.getCurrentAppMode ? window.getCurrentAppMode() : 'QUAN_280';
+      if (curMode === 'XE_DIEM_MOI' || explicitStationHint === 'XE_DIEM_MOI') {
+        candidateMenu = candidateMenu.filter(it => it.cat === 'douong');
+      }
+
+      const clauses = splitSpeechIntoDishClauses(cleanText);
+      const matchedItems = [];
+      const unmatched = [];
+      let totalScore = 0;
+
+      clauses.forEach(cl => {
+        const res = matchBestMenuDishForClause(cl.phrase, candidateMenu);
+        if (res) {
+          matchedItems.push({ item: res.item, qty: cl.qty, score: res.score });
+          totalScore += res.score;
+        } else if (cl.phrase) {
+          unmatched.push(cl.phrase);
+        }
+      });
+
+      if (!dryRun) {
+        const manualInp = document.getElementById('voiceManualTranscriptInput');
+        if (manualInp) manualInp.value = String(rawTranscript).trim();
+
+        lastVoiceCartSnapshot = JSON.parse(JSON.stringify(posCart || {}));
+
+        if (detectedTable && typeof window.selectTable === 'function') {
+          window.selectTable(detectedTable);
+        }
+
+        if (matchedItems.length > 0) {
+          syncActivePosCartFromTable();
+          matchedItems.forEach(({ item, qty }) => {
+            const key = safeItemKey(item.name);
+            if (posCart[key]) posCart[key].qty += qty;
+            else posCart[key] = { name: item.name, price: item.price, qty, cat: item.cat };
+          });
+          persistPosCartByTable();
+          if (typeof renderPosCartUI === 'function') renderPosCartUI();
+          if (typeof renderDynamicTablePills === 'function') renderDynamicTablePills();
+          if (typeof updateV19PosTotalsUI === 'function') updateV19PosTotalsUI();
+          if (typeof window.updatePosStickyCartBar === 'function') window.updatePosStickyCartBar();
+        }
+
+        if (notes.length > 0) {
+          const noteInp = document.getElementById('posOrderNote');
+          if (noteInp) {
+            const existing = (noteInp.value || '').trim();
+            const toAdd = notes.filter(n => !existing.toLowerCase().includes(n.toLowerCase()));
+            if (toAdd.length) noteInp.value = [existing, toAdd.join(', ')].filter(Boolean).join(', ');
+          }
+        }
+
+        const fb = document.getElementById('voiceOrderFeedbackBox');
+        if (fb) {
+          fb.style.display = 'block';
+          if (matchedItems.length > 0) {
+            fb.style.background = '#dcfce7';
+            fb.style.borderColor = '#86efac';
+            fb.style.color = '#166534';
+            const dishTxt = matchedItems.map(m => `${m.qty}x ${m.item.name}`).join(', ');
+            const tblTxt = detectedTable ? `[${detectedTable}] ` : '';
+            const noteTxt = notes.length ? ` • Ghi chú: ${notes.join(', ')}` : '';
+            const warnTxt = unmatched.length ? ` (Chưa rõ: ${unmatched.join(', ')})` : '';
+            fb.innerText = `✅ Đã nhặt vào giỏ ${tblTxt}: ${dishTxt}${noteTxt}${warnTxt}`;
+          } else {
+            fb.style.background = '#fef2f2';
+            fb.style.borderColor = '#fecaca';
+            fb.style.color = '#b91c1c';
+            fb.innerText = `⚠️ Chưa khớp được món trong menu từ câu: "${rawTranscript}". Hãy đọc rõ tên món (VD: Bàn 2 hai bún thái một cafe muối).`;
+          }
+        }
+      }
+
+      const finalScore = totalScore + (detectedTable ? 0.5 : 0) + (matchedItems.length * 0.2);
+      return {
+        table: detectedTable,
+        items: matchedItems.map(m => ({ id: m.item.id, name: m.item.name, qty: m.qty, price: m.item.price, cat: m.item.cat })),
+        note: notes.join(', '),
+        unmatched,
+        score: Number(finalScore.toFixed(3)),
+        transcript: rawTranscript
       };
-      try { speechRecognizer.start(); } catch (_) {}
     };
 
-    // KHỞI CHẠY CHẾ ĐỘ 3 APP ĐỘC LẬP & TRẠM POS NGAY KHI TẢI TRANG
+    window.processVoiceOrderInputBox = function() {
+      const inp = document.getElementById('voiceManualTranscriptInput');
+      if (inp && inp.value.trim()) return window.parseAndExecuteVoiceOrder(inp.value.trim());
+      return null;
+    };
+
+    function updateVoiceMicUiState(active, interimText = '') {
+      const btn = document.getElementById('btnStartVoiceOrder');
+      const txt = document.getElementById('voiceMicBtnText');
+      const liveBar = document.getElementById('voiceLiveInterimBar');
+      const liveText = document.getElementById('voiceLiveInterimText');
+      if (btn) btn.classList.toggle('listening', !!active);
+      if (txt) {
+        txt.innerText = active
+          ? '🔴 ĐANG NGHE LIÊN TỤC (BẤM ĐỂ DỪNG)'
+          : 'BẤM VÀO ĐÂY ĐỂ BẮT ĐẦU ĐỌC MÓN (NGHE LIÊN TỤC)';
+      }
+      if (liveBar) liveBar.style.display = active ? 'block' : 'none';
+      if (liveText && interimText) liveText.innerText = interimText;
+    }
+
+    window.toggleVoiceOrderRecognition = function() {
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const fb = document.getElementById('voiceOrderFeedbackBox');
+      if (!SpeechRec) {
+        if (fb) {
+          fb.style.display = 'block';
+          fb.style.background = '#fffbeb';
+          fb.style.borderColor = '#fcd34d';
+          fb.style.color = '#92400e';
+          fb.innerText = '⚠️ Trình duyệt không hỗ trợ Web Speech API. Hãy gõ hoặc bấm Micro bàn phím điện thoại rồi bấm Nhặt Món.';
+        }
+        return;
+      }
+
+      if (isVoiceListening) {
+        isVoiceListening = false;
+        if (voiceAutoRestartTimer) { clearTimeout(voiceAutoRestartTimer); voiceAutoRestartTimer = null; }
+        if (speechRecognizer) { try { speechRecognizer.stop(); } catch (_) {} }
+        updateVoiceMicUiState(false);
+        return;
+      }
+
+      isVoiceListening = true;
+      voiceConsecutiveErrors = 0;
+      updateVoiceMicUiState(true, 'Đang chờ giọng nói...');
+
+      const startRecognizerInstance = () => {
+        if (!isVoiceListening) return;
+        speechRecognizer = new SpeechRec();
+        speechRecognizer.lang = 'vi-VN';
+        speechRecognizer.continuous = true;
+        speechRecognizer.interimResults = true;
+        speechRecognizer.maxAlternatives = 5;
+
+        speechRecognizer.onresult = (ev) => {
+          voiceConsecutiveErrors = 0;
+          const res = ev.results[ev.results.length - 1];
+          if (!res) return;
+          if (!res.isFinal) {
+            const interim = (res[0] && res[0].transcript) || '';
+            updateVoiceMicUiState(true, interim);
+            return;
+          }
+
+          let bestChoice = null;
+          const altCount = Math.min(res.length || 1, 5);
+          for (let i = 0; i < altCount; i++) {
+            const alt = res[i];
+            if (!alt || !alt.transcript) continue;
+            const parsed = window.parseAndExecuteVoiceOrder(alt.transcript, { dryRun: true });
+            const altScore = (parsed.score || 0) + (alt.confidence || 0) * 0.15;
+            if (!bestChoice || altScore > bestChoice.altScore) {
+              bestChoice = { transcript: alt.transcript, altScore };
+            }
+          }
+          if (bestChoice) {
+            updateVoiceMicUiState(true, bestChoice.transcript);
+            window.parseAndExecuteVoiceOrder(bestChoice.transcript, { dryRun: false });
+          }
+        };
+
+        speechRecognizer.onerror = (ev) => {
+          const code = (ev && ev.error) || 'unknown';
+          if (code === 'not-allowed' || code === 'service-not-allowed' || code === 'audio-capture') {
+            isVoiceListening = false;
+            updateVoiceMicUiState(false);
+            if (fb) {
+              fb.style.display = 'block';
+              fb.style.background = '#fef2f2';
+              fb.style.borderColor = '#fecaca';
+              fb.style.color = '#b91c1c';
+              fb.innerText = code === 'audio-capture'
+                ? '⛔ Không tìm thấy micro trên thiết bị. Kiểm tra lại tai nghe/micro.'
+                : '⛔ Trình duyệt chưa cấp quyền Micro. Vui lòng bật quyền Micro trong cài đặt trang.';
+            }
+            return;
+          }
+          voiceConsecutiveErrors++;
+          if (fb && (code === 'no-speech' || code === 'network')) {
+            fb.style.display = 'block';
+            fb.style.background = '#fffbeb';
+            fb.style.borderColor = '#fcd34d';
+            fb.style.color = '#92400e';
+            fb.innerText = code === 'network'
+              ? '⚠️ Mất kết nối mạng cho nhận diện giọng nói. Đang thử nối lại...'
+              : '🎙️ Chưa nghe thấy giọng nói, hãy đọc to rõ tên bàn và món ăn...';
+          }
+        };
+
+        speechRecognizer.onend = () => {
+          if (isVoiceListening && voiceConsecutiveErrors < 5) {
+            if (voiceAutoRestartTimer) clearTimeout(voiceAutoRestartTimer);
+            voiceAutoRestartTimer = setTimeout(() => {
+              if (isVoiceListening) startRecognizerInstance();
+            }, 200);
+          } else {
+            isVoiceListening = false;
+            updateVoiceMicUiState(false);
+          }
+        };
+
+        try {
+          speechRecognizer.start();
+        } catch (err) {
+          isVoiceListening = false;
+          updateVoiceMicUiState(false);
+        }
+      };
+
+      startRecognizerInstance();
+    };
+
+    if (typeof window.initAllHorizontalScrollBars === 'function') {
+      window.initAllHorizontalScrollBars();
+    }
+
+    // KHỞI CHẠY CHẾ ĐỘ 2 APP ĐỘC LẬP & TRẠM POS NGAY KHI TẢI TRANG
     if (typeof window.initAppModeFromUrl === 'function') {
       window.initAppModeFromUrl();
     } else {
-      const savedStation = localStorage.getItem('BAL_POS_STATION') || 'HC';
+      const savedStation = localStorage.getItem('BAL_POS_STATION') || 'QUAN_280';
       if (typeof window.setPosStation === 'function') window.setPosStation(savedStation);
     }
   </script>
