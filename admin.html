@@ -8161,35 +8161,45 @@ const origHandleAdminLogin = window.handleAdminLogin;
       return s.replace(/\s+/g, ' ').trim();
     };
 
+    function replaceVnBoundary(text, patternBody, replacer) {
+      let s = ' ' + String(text || '') + ' ';
+      const re = new RegExp(`([\\s,;.|/()\\-])(?:${patternBody})(?=$|[\\s,;.|/()\\-])`, 'gi');
+      s = s.replace(re, (m, sep, ...rest) => {
+        if (typeof replacer === 'function') return replacer(m, sep, ...rest);
+        return `${sep}${replacer}`;
+      });
+      return s.replace(/\s+/g, ' ').trim();
+    }
+
     window.normalizeRegionalVietnamese = function(rawText) {
-      let s = ' ' + String(rawText || '').toLowerCase() + ' ';
+      let s = String(rawText || '').toLowerCase();
       // Bảo toàn 'việt quất' để không bị biến thành 'việt tắc'
-      s = s.replace(/\bviệt\s+quất\b/gi, ' __viet_quat__ ');
+      s = replaceVnBoundary(s, 'việt\\s+quất|viet\\s+quat', '__viet_quat__');
 
       const phraseSynonyms = [
-        [/\bxì\s+pa\s+ghét\s+ti\b|\bsi\s+pa\s+ghet\s+ti\b|\bxì\s+pa\s+ghe\s+ti\b|\bsì\s+pa\s+ghét\s+ti\b|\bspaghetti\b/gi, ' mì ý sốt bò bằm '],
-        [/\bchả\s+ram\b|\bnem\s+rán\b|\bram\b/gi, ' chả giò chiên giòn '],
-        [/\bvằn\s+thắn\b/gi, ' hoành thánh '],
-        [/\bsữa\s+chua\b|\bda\s+ua\b|\bya\s+ua\b|\byaua\b|\bza\s+ua\b|\bgia\s+ua\b/gi, ' yaourt '],
-        [/\bđen\s+đá\b|\bcà\s+phê\s+đen\b|\bcafe\s+đen\b/gi, ' cafe đá '],
-        [/\bnâu\s+đá\b|\bcà\s+phê\s+nâu\b|\bcafe\s+nâu\b|\bcà\s+phê\s+sữa\b/gi, ' cafe sữa '],
-        [/\bbạc\s+sỉu\b|\bbạc\s+sửu\b/gi, ' bạc xỉu '],
-        [/\bbò\s+húc\b|\bred\s*bull\b|\bbò\s+cụng\b/gi, ' bò húc thái '],
-        [/\bnước\s+lọc\b|\blavie\b|\baquafina\b|\bnước\s+suối(?!\s*tắc)\b/gi, ' nước khoáng '],
-        [/\bhủ\s+tíu\b|\bhủ\s+tiểu\b|\bhũ\s+tiếu\b|\bhũ\s+tíu\b|\bhủ\s+tiêu\b/gi, ' hủ tiếu '],
-        [/\btrà\s+quất\b|\bnước\s+quất\b/gi, ' trà tắc '],
-        [/\bquất\b/gi, ' tắc '],
-        [/\bdứa\b|\bkhóm\b/gi, ' thơm '],
-        [/\bcà\s+phê\b|\bca\s+phe\b|\bcà\s+phơ\b/gi, ' cafe '],
-        [/\bca\s+cao\b/gi, ' cacao '],
-        [/\bđậu\s+phụ\b|\bđậu\s+hủ\b|\btàu\s+hũ\b|\btàu\s+hủ\b/gi, ' đậu hũ '],
-        [/\bphợ\b|\bphớ\b/gi, ' phở '],
-        [/\bnước\s+ép\b/gi, ' ép ']
+        ['xì\\s+pa\\s+ghét\\s+ti|si\\s+pa\\s+ghet\\s+ti|xì\\s+pa\\s+ghe\\s+ti|sì\\s+pa\\s+ghét\\s+ti|spaghetti', 'mì ý sốt bò bằm'],
+        ['chả\\s+ram|nem\\s+rán|ram', 'chả giò chiên giòn'],
+        ['vằn\\s+thắn', 'hoành thánh'],
+        ['sữa\\s+chua|da\\s+ua|ya\\s+ua|yaua|za\\s+ua|gia\\s+ua', 'yaourt'],
+        ['đen\\s+đá|cà\\s+phê\\s+đen|cafe\\s+đen', 'cafe đá'],
+        ['nâu\\s+đá|cà\\s+phê\\s+nâu|cafe\\s+nâu|cà\\s+phê\\s+sữa', 'cafe sữa'],
+        ['bạc\\s+sỉu|bạc\\s+sửu', 'bạc xỉu'],
+        ['bò\\s+húc|red\\s*bull|bò\\s+cụng', 'bò húc thái'],
+        ['nước\\s+lọc|lavie|aquafina|nước\\s+suối(?!\\s*tắc)', 'nước khoáng'],
+        ['hủ\\s+tíu|hủ\\s+tiểu|hũ\\s+tiếu|hũ\\s+tíu|hủ\\s+tiêu', 'hủ tiếu'],
+        ['trà\\s+quất|nước\\s+quất', 'trà tắc'],
+        ['quất', 'tắc'],
+        ['dứa|khóm', 'thơm'],
+        ['cà\\s+phê|ca\\s+phe|cà\\s+phơ', 'cafe'],
+        ['ca\\s+cao', 'cacao'],
+        ['đậu\\s+phụ|đậu\\s+hủ|tàu\\s+hũ|tàu\\s+hủ', 'đậu hũ'],
+        ['phợ|phớ', 'phở'],
+        ['nước\\s+ép', 'ép']
       ];
-      phraseSynonyms.forEach(([re, rep]) => {
-        s = s.replace(re, rep);
+      phraseSynonyms.forEach(([pat, rep]) => {
+        s = replaceVnBoundary(s, pat, rep);
       });
-      s = s.replace(/__viet_quat__/g, ' việt quất ');
+      s = s.replace(/__viet_quat__/g, 'việt quất');
       return s.replace(/\s+/g, ' ').trim();
     };
 
@@ -8200,12 +8210,20 @@ const origHandleAdminLogin = window.handleAdminLogin;
     };
 
     function convertSpokenVietnameseNumbers(text) {
-      let s = ' ' + String(text || '') + ' ';
-      s = s.replace(/\bhai\s+mươi\b/gi, ' 20 ');
-      s = s.replace(/\bmười\s+(một|mốt|hai|ba|bốn|tư|năm|lăm|sáu|bảy|bẩy|tám|chín)\b/gi, (_, u) => ` ${10 + (VN_SPOKEN_NUM_MAP[u.toLowerCase()] || 0)} `);
-      const numWordsRe = new RegExp(`(?<!cô\\s+)\\b(${Object.keys(VN_SPOKEN_NUM_MAP).join('|')})\\b`, 'gi');
-      s = s.replace(numWordsRe, (m) => ` ${VN_SPOKEN_NUM_MAP[m.toLowerCase()] || m} `);
-      s = s.replace(/\b(\d+)\s*(?:kg|ký|lít|phần|tô|bát|ly|cốc)?\s*rưỡi\b/gi, (_, n) => ` ${parseFloat(n) + 0.5} `);
+      let s = replaceVnBoundary(text, 'hai\\s+mươi', '20');
+      const unitPattern = 'một|mốt|hai|ba|bốn|tư|năm|lăm|sáu|bảy|bẩy|tám|chín';
+      s = replaceVnBoundary(s, `mười\\s+(${unitPattern})`, (_, sep, unit) => {
+        return `${sep}${10 + (VN_SPOKEN_NUM_MAP[(unit || '').toLowerCase()] || 0)}`;
+      });
+      const singlePattern = Object.keys(VN_SPOKEN_NUM_MAP).join('|');
+      s = replaceVnBoundary(s, `(${singlePattern})`, (fullMatch, sep, word, offset) => {
+        const before = (' ' + s + ' ').slice(Math.max(0, offset - 4), offset).trim().toLowerCase();
+        if (before.endsWith('cô')) return fullMatch;
+        return `${sep}${VN_SPOKEN_NUM_MAP[(word || '').toLowerCase()] || word}`;
+      });
+      s = replaceVnBoundary(s, '(\\d+)\\s*(?:kg|ký|lít|phần|tô|bát|ly|cốc)?\\s*rưỡi', (_, sep, n) => {
+        return `${sep}${parseFloat(n) + 0.5}`;
+      });
       return s.replace(/\s+/g, ' ').trim();
     }
 
@@ -8236,44 +8254,45 @@ const origHandleAdminLogin = window.handleAdminLogin;
     }
 
     function extractTableAndNotesFromSpeech(text) {
-      let s = String(text || '');
+      let s = ' ' + String(text || '') + ' ';
       let detectedTable = null;
       let explicitStationHint = null;
 
       // 1. Khớp tên trạm/thẻ đặc trưng (hắt xê 3 -> HC-03, ích mờ 2 -> XM-02)
-      const hcMatch = s.match(/\b(?:hắt\s*xê|hát\s*xê|hắc\s*xê|hc)\s*[-]?\s*(?:số\s*)?(\d{1,2})\b/i);
+      const hcMatch = s.match(/([\s,;.|])((?:hắt\s*xê|hát\s*xê|hắc\s*xê|hc)\s*[-]?\s*(?:số\s*)?(\d{1,2}))(?=$|[\s,;.|])/i);
       if (hcMatch) {
-        detectedTable = resolveVoiceTableTarget(hcMatch[1], 'HC');
+        detectedTable = resolveVoiceTableTarget(hcMatch[3], 'HC');
         explicitStationHint = 'QUAN_280';
-        s = s.replace(hcMatch[0], ' ');
+        s = s.replace(hcMatch[0], hcMatch[1]);
       }
       if (!detectedTable) {
-        const xmMatch = s.match(/\b(?:ích\s*mờ|ít\s*mờ|x\s*mờ|xm|thẻ)\s*[-]?\s*(?:số\s*)?(\d{1,2})\b/i);
+        const xmMatch = s.match(/([\s,;.|])((?:ích\s*mờ|ít\s*mờ|x\s*mờ|xm|thẻ)\s*[-]?\s*(?:số\s*)?(\d{1,2}))(?=$|[\s,;.|])/i);
         if (xmMatch) {
-          detectedTable = resolveVoiceTableTarget(xmMatch[1], 'XM');
+          detectedTable = resolveVoiceTableTarget(xmMatch[3], 'XM');
           explicitStationHint = 'XE_DIEM_MOI';
-          s = s.replace(xmMatch[0], ' ');
+          s = s.replace(xmMatch[0], xmMatch[1]);
         }
       }
       if (!detectedTable) {
-        const banMatch = s.match(/\b(?:bàn|bàng|bạn|bản|ban|bang|vip)\s*(?:số|so)?\s*(\d{1,2})\b/i);
+        const banMatch = s.match(/([\s,;.|])((?:bàn|bàng|bạn|bản|ban|bang|vip)\s*(?:số|so)?\s*(\d{1,2}))(?=$|[\s,;.|])/i);
         if (banMatch) {
-          detectedTable = resolveVoiceTableTarget(banMatch[1], null);
-          s = s.replace(banMatch[0], ' ');
+          detectedTable = resolveVoiceTableTarget(banMatch[3], null);
+          s = s.replace(banMatch[0], banMatch[1]);
         }
       }
-      if (!detectedTable && /\b(?:mang\s*về|đem\s*về|gói\s*về|mua\s*về)\b/i.test(s)) {
+      if (!detectedTable && /([\s,;.|])(?:mang\s*về|đem\s*về|gói\s*về|mua\s*về)(?=$|[\s,;.|])/i.test(s)) {
         const curMode = window.getCurrentAppMode ? window.getCurrentAppMode() : 'QUAN_280';
         detectedTable = (curMode === 'XE_DIEM_MOI') ? 'Mang Về Điểm Mới' : 'Mang Về';
-        s = s.replace(/\b(?:mang\s*về|đem\s*về|gói\s*về|mua\s*về)\b/gi, ' ');
+        s = replaceVnBoundary(s, 'mang\\s*về|đem\\s*về|gói\\s*về|mua\\s*về', ' ');
       }
 
       const foundNotes = [];
       VOICE_NOTE_PHRASES.forEach(np => {
-        const re = new RegExp(`\\b${np.replace(/\s+/g, '\\s+')}\\b`, 'gi');
+        const pat = np.replace(/\s+/g, '\\s+');
+        const re = new RegExp(`([\\s,;.|])(${pat})(?=$|[\\s,;.|])`, 'gi');
         if (re.test(s)) {
           foundNotes.push(np);
-          s = s.replace(re, ' ');
+          s = replaceVnBoundary(s, pat, ' ');
         }
       });
 
@@ -8286,7 +8305,8 @@ const origHandleAdminLogin = window.handleAdminLogin;
       ]);
       const FILLER_SET = new Set(['cho', 'lấy', 'làm', 'gửi', 'thêm', 'giùm', 'với', 'và', 'nhé', 'nha', 'ạ', 'ơi']);
 
-      let s = String(cleanText || '').replace(/[;.|/]+/g, ',').replace(/\s+(?:và|với)\s+/gi, ',');
+      let s = String(cleanText || '').replace(/[;.|/]+/g, ',');
+      s = replaceVnBoundary(s, 'và|với', ',');
       const rawChunks = s.split(',').map(x => x.trim()).filter(Boolean);
       const clauses = [];
 
@@ -8366,35 +8386,29 @@ const origHandleAdminLogin = window.handleAdminLogin;
       aliases.add(raw);
       const noParen = raw.replace(/\([^)]*\)/g, ' ').replace(/\s+/g, ' ').trim();
       aliases.add(noParen);
-      aliases.add(noParen.replace(/\bchay\b/gi, '').replace(/\s+/g, ' ').trim());
-      noParen.split('/').forEach(part => {
-        const p = part.trim();
-        if (p) {
-          aliases.add(p);
-          aliases.add(p.replace(/\bchay\b/gi, '').replace(/\s+/g, ' ').trim());
-        }
-      });
+      aliases.add(replaceVnBoundary(noParen, 'chay', ''));
+      if (item.id === 'hutieudai') { aliases.add('hủ tiếu dai'); aliases.add('hủ tiếu mì'); }
+      if (item.id === 'nuockhoangsuoigas') { aliases.add('nước khoáng'); aliases.add('suối gas'); aliases.add('nước suối'); }
+      if (item.id === 'phoboga') { aliases.add('phở bò'); aliases.add('phở gà'); aliases.add('phở'); }
       if (item.id === 'chagiochien') aliases.add('chả giò');
       if (item.id === 'hoanhthanhchien') aliases.add('hoành thánh chiên');
       if (item.id === 'hoanhthanhmi') { aliases.add('hoành thánh mì'); aliases.add('hoành thánh'); }
       if (item.id === 'mispaghetti') aliases.add('mì ý sốt bò bằm');
-      if (item.id === 'nuockhoangsuoigas') { aliases.add('nước khoáng'); aliases.add('nước suối'); }
       if (item.id === 'trataximuoi') aliases.add('trà tắc');
-      if (item.id === 'phoboga') { aliases.add('phở bò'); aliases.add('phở gà'); aliases.add('phở'); }
       return Array.from(aliases).filter(a => a.length >= 2);
     }
 
-    function matchBestMenuDishForClause(phrase, menuList) {
+    function matchBestMenuDishForClause(phrase, menuList, includeSoldOut = false) {
       const qWords = phrase.split(/\s+/).filter(Boolean);
       if (!qWords.length) return null;
       const qNoAcc = normNoAccentV5(phrase);
       const qPhon = toVietnamesePhoneticKey(phrase);
-      const wantsRawOrPack = /\b(chưa chiên|chua chien|sống|song|ăn liền|an lien|sơ chế|so che|gói|goi)\b/i.test(phrase);
-      const wantsTopping = /\b(thêm|them|topping|tô giấy|to giay|hộp mang về|hop mang ve)\b/i.test(phrase);
+      const wantsRawOrPack = /(?:chưa\s*chiên|chua\s*chien|sống|song|ăn\s*liền|an\s*lien|sơ\s*chế|so\s*che|gói|goi)/i.test(phrase);
+      const wantsTopping = /(?:thêm|them|topping|tô\s*giấy|to\s*giay|hộp\s*mang\s*về|hop\s*mang\s*ve)/i.test(phrase);
 
       let best = null;
       menuList.forEach(item => {
-        if (item.isSoldOut) return;
+        if (!includeSoldOut && item.isSoldOut) return;
         const aliases = buildMenuItemAliases(item);
         let topAliasScore = 0;
 
@@ -8452,6 +8466,7 @@ const origHandleAdminLogin = window.handleAdminLogin;
         return { table: null, items: [], note: '', unmatched: [], score: 0, transcript: '' };
       }
       const dryRun = !!options.dryRun;
+      const includeSoldOut = !!options.includeSoldOut;
       const rewritten = window.aiSelfThinkingRewriteTranscript(rawTranscript);
       const regionalNormalized = window.normalizeRegionalVietnamese(rewritten);
       const withDigits = convertSpokenVietnameseNumbers(regionalNormalized);
@@ -8469,7 +8484,7 @@ const origHandleAdminLogin = window.handleAdminLogin;
       let totalScore = 0;
 
       clauses.forEach(cl => {
-        const res = matchBestMenuDishForClause(cl.phrase, candidateMenu);
+        const res = matchBestMenuDishForClause(cl.phrase, candidateMenu, includeSoldOut);
         if (res) {
           matchedItems.push({ item: res.item, qty: cl.qty, score: res.score });
           totalScore += res.score;
