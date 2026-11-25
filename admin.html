@@ -2900,8 +2900,8 @@
       s = s.replace(/#\s*0*(\d+)\b/g, (_, n) => `số ${parseInt(n, 10)}`);
       s = s.replace(/\b(\d+)\s*[x×]\b/gi, '$1 phần');
       s = s.replace(/\bCK\b/gi, 'chuyển khoản');
-      s = s.replace(/\bVNĐ\b|\bVND\b/gi, 'đồng');
-      s = s.replace(/(\d)đ\b/gi, '$1 đồng');
+      s = s.replace(/(^|[\s,.;:(\-])(?:VNĐ|VND)(?=$|[\s,.;:)\-])/gi, '$1đồng');
+      s = s.replace(/(\d)\s*đ(?=$|[\s,.;:)\-])/gi, '$1 đồng');
       return s.replace(/\s+/g, ' ').trim();
     };
 
