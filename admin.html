@@ -116,11 +116,12 @@
     .pay-qr-wait { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
     .pay-qr-done { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
 
-    .items-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 0.83rem; }
-    .items-table tr { border-bottom: 1px dashed var(--border); cursor: pointer; transition: background 0.15s; }
+    .items-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 0.85rem; }
+    .items-table tr { border-bottom: 1px dashed var(--border); cursor: pointer; transition: background 0.15s; min-height: 36px; touch-action: manipulation; user-select: none; -webkit-tap-highlight-color: transparent; }
     .items-table tr:hover { background: #f1f5f9; }
-    .items-table tr.dish-done td { text-decoration: line-through; color: #16a34a; opacity: 0.75; }
-    .items-table td { padding: 4px 2px; }
+    .items-table tr.dish-done td { text-decoration: line-through; color: #16a34a; opacity: 0.78; background: #f0fdf4; }
+    .items-table td { padding: 8px 4px; vertical-align: middle; min-height: 36px; }
+    #ordersContainer { padding-bottom: 96px; }
     
     .financial-split-box { background: #fafafa; border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; font-size: 0.76rem; }
     .fin-row { display: flex; justify-content: space-between; margin-bottom: 2px; }
@@ -396,19 +397,14 @@
       color: #ffffff;
       border-color: #94a3b8;
     }
+    .station-btn.active[data-station="QUAN_280"],
     .station-btn.active[data-station="HC"] {
       background: #15803d;
       color: #ffffff;
       border-color: #ffd800;
       box-shadow: 0 0 12px rgba(34,197,94,0.45);
     }
-    .station-btn.active[data-station="BH"],
-    .station-btn.active[data-station="BH_QUAN"] {
-      background: #d97706;
-      color: #ffffff;
-      border-color: #ffd800;
-      box-shadow: 0 0 12px rgba(245,158,11,0.45);
-    }
+    .station-btn.active[data-station="XE_DIEM_MOI"],
     .station-btn.active[data-station="BH_DIEM_MOI"] {
       background: #7c3aed;
       color: #ffffff;
@@ -475,63 +471,47 @@
     <div id="installGuideModal" class="install-modal-overlay" onclick="if(event.target===this) closeInstallGuideModal()">
       <div class="install-modal-box" style="max-width: 560px; max-height: 90vh; overflow-y: auto; padding: 20px;">
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:10px; margin-bottom:12px;">
-          <h3 style="color:var(--primary); font-size:1.08rem; margin:0;">📲 Cài Đặt 3 App POS Độc Lập Lên Màn Hình Chính</h3>
+          <h3 style="color:var(--primary); font-size:1.08rem; margin:0;">📲 Cài Đặt 2 App POS Độc Lập Lên Màn Hình Chính</h3>
           <button type="button" onclick="closeInstallGuideModal()" style="background:#ef4444; color:#fff; border:none; padding:6px 12px; border-radius:8px; font-weight:800; font-size:0.82rem; cursor:pointer;">✖ ĐÓNG</button>
         </div>
 
-        <p style="font-size:0.82rem; color:#475569; margin-bottom:12px;">Chọn đúng 1 trong 3 App POS độc lập bên dưới để cài Icon riêng biệt ngoài màn hình chính điện thoại (iOS/Android) hoặc máy tính Windows:</p>
+        <p style="font-size:0.82rem; color:#475569; margin-bottom:12px;">Chọn đúng 1 trong 2 App POS bên dưới để cài Icon riêng biệt ngoài màn hình chính điện thoại (iOS/Android) hoặc máy tính Windows:</p>
 
         <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:14px;">
-          <!-- APP 1: BẾP HY CHAY -->
-          <div style="background:#f0fdf4; border:2px solid #16a34a; border-radius:12px; padding:11px 12px;">
+          <!-- APP 1: QUÁN HY CHAY 280 (GỘP ĐỒ CHAY + NƯỚC) -->
+          <div style="background:#f0fdf4; border:2px solid #16a34a; border-radius:12px; padding:12px;">
             <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px;">
               <div>
-                <b style="color:#15803d; font-size:0.92rem;">🏠 1. POS Bếp Hy Chay (Món Chay 5610)</b>
-                <div style="font-size:0.74rem; color:#166534;">Chỉ hiện món chay, sơ đồ HC-01 → HC-20 • <code>/admin.html?app=food</code></div>
+                <b style="color:#15803d; font-size:0.94rem;">🏠 1. POS Quán Hy Chay 280 (Đồ Chay &amp; Nước)</b>
+                <div style="font-size:0.74rem; color:#166534;">Đầy đủ 122 món (5610 + 5630), bàn HC-01 → HC-20 • <code>/admin.html?station=QUAN_280</code></div>
               </div>
-              <span style="background:#16a34a; color:#fff; padding:2px 8px; border-radius:999px; font-size:0.7rem; font-weight:900;">BẾP CHAY</span>
+              <span style="background:#16a34a; color:#fff; padding:2px 8px; border-radius:999px; font-size:0.7rem; font-weight:900;">QUÁN 280</span>
             </div>
             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px;">
-              <button type="button" onclick="downloadIOSProfile('pos_food')" style="padding:8px 6px; background:#0f172a; color:#fff; border:none; border-radius:8px; font-weight:800; font-size:0.75rem; cursor:pointer;">🍎 iPhone</button>
-              <button type="button" onclick="downloadWindowsInstaller('pos_food')" style="padding:8px 6px; background:#0284c7; color:#fff; border:none; border-radius:8px; font-weight:800; font-size:0.75rem; cursor:pointer;">💻 Windows</button>
-              <button type="button" onclick="navigator.clipboard.writeText(window.location.origin + '/admin.html?app=food').then(()=>alert('✅ Đã copy Link App Bếp Hy Chay!'))" style="padding:8px 6px; background:#ffffff; color:#15803d; border:1px solid #86efac; border-radius:8px; font-weight:800; font-size:0.75rem; cursor:pointer;">🔗 Copy Link</button>
+              <button type="button" onclick="downloadIOSProfile('pos_quan_280')" style="padding:8px 6px; background:#0f172a; color:#fff; border:none; border-radius:8px; font-weight:800; font-size:0.75rem; cursor:pointer;">🍎 iPhone</button>
+              <button type="button" onclick="downloadWindowsInstaller('pos_quan_280')" style="padding:8px 6px; background:#0284c7; color:#fff; border:none; border-radius:8px; font-weight:800; font-size:0.75rem; cursor:pointer;">💻 Windows</button>
+              <button type="button" onclick="navigator.clipboard.writeText(window.location.origin + '/admin.html?station=QUAN_280').then(()=>alert('✅ Đã copy Link POS Quán Hy Chay 280!'))" style="padding:8px 6px; background:#ffffff; color:#15803d; border:1px solid #86efac; border-radius:8px; font-weight:800; font-size:0.75rem; cursor:pointer;">🔗 Copy Link</button>
             </div>
           </div>
 
-          <!-- APP 2: XE NƯỚC QUÁN 280 -->
-          <div style="background:#fffbeb; border:2px solid #d97706; border-radius:12px; padding:11px 12px;">
+          <!-- APP 2: XE NƯỚC ĐIỂM MỚI -->
+          <div style="background:#f5f3ff; border:2px solid #7c3aed; border-radius:12px; padding:12px;">
             <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px;">
               <div>
-                <b style="color:#b45309; font-size:0.92rem;">🧋 2. POS Xe Nước Quán 280 (BAL'S HOUSE)</b>
-                <div style="font-size:0.74rem; color:#92400e;">Chỉ 54 món nước, bàn HC-01..20 &amp; Mang Về Quán • <code>?app=drink&amp;branch=BH_QUAN</code></div>
-              </div>
-              <span style="background:#d97706; color:#fff; padding:2px 8px; border-radius:999px; font-size:0.7rem; font-weight:900;">XE 280</span>
-            </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px;">
-              <button type="button" onclick="downloadIOSProfile('pos_bh_quan')" style="padding:8px 6px; background:#0f172a; color:#fff; border:none; border-radius:8px; font-weight:800; font-size:0.75rem; cursor:pointer;">🍎 iPhone</button>
-              <button type="button" onclick="downloadWindowsInstaller('pos_bh_quan')" style="padding:8px 6px; background:#0284c7; color:#fff; border:none; border-radius:8px; font-weight:800; font-size:0.75rem; cursor:pointer;">💻 Windows</button>
-              <button type="button" onclick="navigator.clipboard.writeText(window.location.origin + '/admin.html?app=drink&branch=BH_QUAN').then(()=>alert('✅ Đã copy Link App Xe Nước Quán 280!'))" style="padding:8px 6px; background:#ffffff; color:#b45309; border:1px solid #fcd34d; border-radius:8px; font-weight:800; font-size:0.75rem; cursor:pointer;">🔗 Copy Link</button>
-            </div>
-          </div>
-
-          <!-- APP 3: XE NƯỚC ĐIỂM MỚI -->
-          <div style="background:#f5f3ff; border:2px solid #7c3aed; border-radius:12px; padding:11px 12px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px;">
-              <div>
-                <b style="color:#6d28d9; font-size:0.92rem;">🚀 3. POS Xe Nước Điểm Mới (Độc Lập)</b>
-                <div style="font-size:0.74rem; color:#5b21b6;">Chỉ 54 món nước, bàn DM-01..15, tách ca &amp; quỹ riêng • <code>?app=drink&amp;branch=BH_DIEM_MOI</code></div>
+                <b style="color:#6d28d9; font-size:0.94rem;">🚀 2. POS Xe Nước Điểm Mới (BAL'S HOUSE)</b>
+                <div style="font-size:0.74rem; color:#5b21b6;">Chỉ 54 món nước (5630), thẻ XM-01..15, tách ca &amp; quỹ riêng • <code>/admin.html?station=XE_DIEM_MOI</code></div>
               </div>
               <span style="background:#7c3aed; color:#fff; padding:2px 8px; border-radius:999px; font-size:0.7rem; font-weight:900;">ĐIỂM MỚI</span>
             </div>
             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px;">
-              <button type="button" onclick="downloadIOSProfile('pos_bh_diem_moi')" style="padding:8px 6px; background:#0f172a; color:#fff; border:none; border-radius:8px; font-weight:800; font-size:0.75rem; cursor:pointer;">🍎 iPhone</button>
-              <button type="button" onclick="downloadWindowsInstaller('pos_bh_diem_moi')" style="padding:8px 6px; background:#0284c7; color:#fff; border:none; border-radius:8px; font-weight:800; font-size:0.75rem; cursor:pointer;">💻 Windows</button>
-              <button type="button" onclick="navigator.clipboard.writeText(window.location.origin + '/admin.html?app=drink&branch=BH_DIEM_MOI').then(()=>alert('✅ Đã copy Link App Xe Nước Điểm Mới!'))" style="padding:8px 6px; background:#ffffff; color:#6d28d9; border:1px solid #c4b5fd; border-radius:8px; font-weight:800; font-size:0.75rem; cursor:pointer;">🔗 Copy Link</button>
+              <button type="button" onclick="downloadIOSProfile('pos_xe_diem_moi')" style="padding:8px 6px; background:#0f172a; color:#fff; border:none; border-radius:8px; font-weight:800; font-size:0.75rem; cursor:pointer;">🍎 iPhone</button>
+              <button type="button" onclick="downloadWindowsInstaller('pos_xe_diem_moi')" style="padding:8px 6px; background:#0284c7; color:#fff; border:none; border-radius:8px; font-weight:800; font-size:0.75rem; cursor:pointer;">💻 Windows</button>
+              <button type="button" onclick="navigator.clipboard.writeText(window.location.origin + '/admin.html?station=XE_DIEM_MOI').then(()=>alert('✅ Đã copy Link POS Xe Nước Điểm Mới!'))" style="padding:8px 6px; background:#ffffff; color:#6d28d9; border:1px solid #c4b5fd; border-radius:8px; font-weight:800; font-size:0.75rem; cursor:pointer;">🔗 Copy Link</button>
             </div>
           </div>
 
           <button type="button" onclick="triggerAndroidInstall('admin')" style="width:100%; padding:11px 12px; background:#16a34a; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:0.84rem; cursor:pointer; text-align:left; display:flex; justify-content:space-between; align-items:center;">
-            <span>🤖 Cài App Đang Mở Cho Điện Thoại Android (Mở đúng link 1 trong 3 App rồi bấm)</span>
+            <span>🤖 Cài App Đang Mở Cho Điện Thoại Android (Mở đúng 1 trong 2 link rồi bấm)</span>
             <span style="background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:6px; font-size:0.74rem;">PWA</span>
           </button>
 
@@ -573,15 +553,12 @@
     <!-- ========================================================= -->
     <div class="pos-station-switcher-bar no-print" id="posStationSwitcherBar">
       <div class="station-switcher-group" id="stationSwitcherGroup">
-        <span class="station-badge-title">🏢 TRẠM POS:</span>
-        <button type="button" class="station-btn active" data-station="HC" onclick="setPosStation('HC')">
-          🏠 BẾP HY CHAY (5610) <small style="opacity:0.85;">(HC-01→HC-20)</small>
+        <span class="station-badge-title">🏢 ĐIỂM BÁN POS:</span>
+        <button type="button" class="station-btn active" data-station="QUAN_280" onclick="setPosStation('QUAN_280')">
+          🏠 QUÁN HY CHAY 280 (Đồ Chay &amp; Nước) <small style="opacity:0.85;">(122 món)</small>
         </button>
-        <button type="button" class="station-btn" data-station="BH_QUAN" onclick="setPosStation('BH_QUAN')">
-          🧋 XE NƯỚC QUÁN 280 (5630) <small style="opacity:0.85;">(HC + Mang Về)</small>
-        </button>
-        <button type="button" class="station-btn" data-station="BH_DIEM_MOI" onclick="setPosStation('BH_DIEM_MOI')">
-          🚀 XE NƯỚC ĐIỂM MỚI (5630) <small style="opacity:0.85;">(DM-01→DM-15)</small>
+        <button type="button" class="station-btn" data-station="XE_DIEM_MOI" onclick="setPosStation('XE_DIEM_MOI')">
+          🚀 XE NƯỚC ĐIỂM MỚI (5630) <small style="opacity:0.85;">(XM-01→XM-15)</small>
         </button>
         <button type="button" class="station-btn" data-station="ALL" onclick="setPosStation('ALL')">
           👑 GIÁM ĐỐC XEM TẤT CẢ <small style="opacity:0.85;">(All)</small>
@@ -590,7 +567,7 @@
       <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
         <span id="stationLockBadge" style="display:none; background:#334155; color:#fde047; padding:5px 10px; border-radius:8px; font-size:0.76rem; font-weight:800;">🔒 Chế độ App Cố Định</span>
         <div class="station-current-indicator" id="currentStationBadge">
-          Đang trực: <b style="color:#22c55e;">🏠 Bếp Hy Chay (5610) (HC-01 → HC-20)</b>
+          Đang trực: <b style="color:#22c55e;">🏠 Quán Hy Chay 280 (Đồ Chay &amp; Nước)</b>
         </div>
       </div>
     </div>
@@ -873,8 +850,8 @@
             <button type="button" id="btnStickySendKitchen" class="pos-sticky-btn-send" onclick="submitDineInOrder()">⚡ Gửi Bếp</button>
           </div>
         </div>
-        <div id="posAddToast" class="pos-add-toast no-print"></div>
       </div>
+      <div id="posAddToast" class="pos-add-toast no-print"></div>
 
       <!-- VIEW 3: QUẢN LÝ MÓN ĂN & UPLOAD ẢNH NATIVE -->
       <div id="viewMenuStock" style="display: none;">
@@ -973,9 +950,8 @@
             <div id="filterDayBox"><input type="date" id="filterDayInput" onchange="renderShiftReport()" style="padding:7px; border-radius:6px;"></div>
             <select id="filterBranchSelect" onchange="renderShiftReport()" style="padding:8px; border-radius:6px; border:1px solid #cbd5e1; font-weight:700;">
               <option value="all" selected>🏢 Tất Cả Điểm Bán (Toàn Công Ty)</option>
-              <option value="HC">🏠 Bếp Hy Chay (5610)</option>
-              <option value="BH_QUAN">🧋 Xe Nước Quán 280 (BH_QUAN)</option>
-              <option value="BH_DIEM_MOI">🚀 Xe Nước Điểm Mới (BH_DIEM_MOI)</option>
+              <option value="QUAN_280">🏠 Quán Hy Chay 280 (5610 + 5630)</option>
+              <option value="XE_DIEM_MOI">🚀 Xe Nước Điểm Mới (XE_DIEM_MOI)</option>
             </select>
             
             <button onclick="renderShiftReport()" style="background:var(--primary); color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:700;">🔍 Tra Cứu Kỳ Này</button>
@@ -1048,11 +1024,10 @@
             </div>
           </div>
 
-          <!-- 8 Ô CHỈ SỐ TÀI CHÍNH CỐT LÕI (BỔ SUNG 3 QUỸ TIỀN MẶT ĐỘC LẬP THEO TRẠM / ĐIỂM BÁN) -->
+          <!-- 7 Ô CHỈ SỐ TÀI CHÍNH CỐT LÕI (TÁCH ĐỘC LẬP 2 QUỸ TIỀN MẶT: QUÁN 280 & XE NƯỚC ĐIỂM MỚI) -->
           <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:10px; margin-bottom:20px;">
-            <div class="rep-box" style="border-left:4px solid #16a34a; background:#f0fdf4;"><span>💵 QUỸ BẾP HY CHAY (HC)</span><h3 id="repCashHC" style="color:#16a34a;">0đ</h3></div>
-            <div class="rep-box" style="border-left:4px solid #d97706; background:#fffbeb;"><span>🧋 QUỸ XE NƯỚC QUÁN 280 (BH_QUAN)</span><h3 id="repCashBHQuan" style="color:#d97706;">0đ</h3></div>
-            <div class="rep-box" style="border-left:4px solid #7c3aed; background:#f5f3ff;"><span>🚀 QUỸ XE NƯỚC ĐIỂM MỚI (BH_DIEM_MOI)</span><h3 id="repCashBHDiemMoi" style="color:#7c3aed;">0đ</h3></div>
+            <div class="rep-box" style="border-left:4px solid #16a34a; background:#f0fdf4;"><span>💵 QUỸ TIỀN MẶT QUÁN 280 (QUAN_280)</span><h3 id="repCashQuan280" style="color:#16a34a;">0đ</h3></div>
+            <div class="rep-box" style="border-left:4px solid #7c3aed; background:#f5f3ff;"><span>🚀 QUỸ TIỀN MẶT XE NƯỚC ĐIỂM MỚI (XE_DIEM_MOI)</span><h3 id="repCashXeDiemMoi" style="color:#7c3aed;">0đ</h3></div>
             <div class="rep-box"><span>DT 5610 (HY CHAY)</span><h3 id="repTaxable5610" style="color:var(--primary);">0đ</h3></div>
             <div class="rep-box"><span>DT 5630 (BAL'S HOUSE)</span><h3 id="repTaxable5630" style="color:#d97706;">0đ</h3></div>
             <div class="rep-box" style="background:#ecfdf5; border-color:#86efac;"><span>TỔNG DT CHỊU THUẾ (QUÁN)</span><h3 id="repTotalTaxable" style="color:#15803d;">0đ</h3></div>
@@ -1822,6 +1797,19 @@
           </main>
   </div> <!-- HẾT mainAppWrapper -->
 
+  <!-- MODAL XÁC NHẬN NỘI BỘ HTML (THAY THẾ WINDOW.CONFIRM TRÊN MOBILE PWA) -->
+  <div id="posConfirmModal" class="cancel-modal-overlay" style="z-index: 10050;" onclick="if(event.target===this) closePosConfirmModal()">
+    <div class="cancel-modal-box" style="max-width: 440px;">
+      <h3 id="posConfirmTitle" style="color:#0f172a; margin-bottom:10px; font-size:1.1rem;">Xác Nhận Thao Tác</h3>
+      <div id="posConfirmMessage" style="font-size:0.88rem; color:#334155; line-height:1.5; margin-bottom:16px;"></div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <button type="button" id="posConfirmPrimaryBtn" style="width:100%; padding:11px 14px; background:#16a34a; color:#fff; border:none; border-radius:9px; font-weight:900; font-size:0.9rem; cursor:pointer;">Xác Nhận</button>
+        <button type="button" id="posConfirmSecondaryBtn" style="display:none; width:100%; padding:10px 14px; background:#f59e0b; color:#0f172a; border:none; border-radius:9px; font-weight:800; font-size:0.86rem; cursor:pointer;">Tùy Chọn Phụ</button>
+        <button type="button" id="posConfirmCancelBtn" onclick="closePosConfirmModal()" style="width:100%; padding:9px 14px; background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; border-radius:9px; font-weight:800; font-size:0.84rem; cursor:pointer;">Đóng / Hủy</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL ĐIỀU PHỐI SHIPPER -->
   <div id="dispatchModal" class="cancel-modal-overlay">
     <div class="cancel-modal-box">
@@ -2384,40 +2372,29 @@
     });
 
     // ==========================================
-    // 3. CẤU HÌNH 3 APP POS ĐỘC LẬP & ICON/MANIFEST RIÊNG BIỆT
+    // 3. CẤU HÌNH 2 APP POS ĐỘC LẬP (QUAN_280 & XE_DIEM_MOI) & MODAL XÁC NHẬN NỘI BỘ
     // ==========================================
     const BAL_APP_MODES_CONFIG = {
-      HC: {
-        mode: 'HC', branchId: 'HC', station: 'HC', appType: 'food',
-        title: "HY CHAY POS - BẾP CHAY (5610)",
-        headerTitle: "HY CHAY - BẾP CHAY (5610)",
-        headerSub: "280 Trần Hưng Đạo • Menu Món Chay (HC-01 → HC-20)",
-        shortName: "POS Bếp Hy Chay",
-        iconBg: "#ffd800", iconAccent: "#15803d", iconTag: "BẾP CHAY",
-        badgeHtml: 'Đang trực: <b style="color:#22c55e;">🏠 Bếp Hy Chay 5610 (HC-01 → HC-20)</b>',
-        path: "/admin.html?app=food",
+      QUAN_280: {
+        mode: 'QUAN_280', branchId: 'QUAN_280', station: 'QUAN_280', appType: 'all',
+        title: "HY CHAY 280 POS (ĐỒ CHAY & NƯỚC)",
+        headerTitle: "QUÁN HY CHAY 280",
+        headerSub: "280 Trần Hưng Đạo • Đủ 122 Món Chay & Nước (5610 + 5630)",
+        shortName: "POS Quán Hy Chay 280",
+        iconBg: "#ffd800", iconAccent: "#15803d", iconTag: "QUÁN 280",
+        badgeHtml: 'Đang trực: <b style="color:#22c55e;">🏠 Quán Hy Chay 280 (Đồ Chay &amp; Nước)</b>',
+        path: "/admin.html?station=QUAN_280",
         uuid: "33333333-AAAA-4333-8333-333333333301"
       },
-      BH_QUAN: {
-        mode: 'BH_QUAN', branchId: 'BH_QUAN', station: 'BH', appType: 'drink',
-        title: "BAL'S HOUSE - XE NƯỚC QUÁN 280",
-        headerTitle: "XE NƯỚC QUÁN 280 (5630)",
-        headerSub: "280 Trần Hưng Đạo • 54 Đồ Uống BAL'S HOUSE",
-        shortName: "Xe Nước Quán 280",
-        iconBg: "#fef3c7", iconAccent: "#d97706", iconTag: "XE 280",
-        badgeHtml: 'Đang trực: <b style="color:#f59e0b;">🧋 Xe Nước Quán 280 (HC-01→HC-20 & Mang Về)</b>',
-        path: "/admin.html?app=drink&branch=BH_QUAN",
-        uuid: "33333333-AAAA-4333-8333-333333333302"
-      },
-      BH_DIEM_MOI: {
-        mode: 'BH_DIEM_MOI', branchId: 'BH_DIEM_MOI', station: 'BH', appType: 'drink',
+      XE_DIEM_MOI: {
+        mode: 'XE_DIEM_MOI', branchId: 'XE_DIEM_MOI', station: 'XE_DIEM_MOI', appType: 'drink',
         title: "BAL'S HOUSE - XE NƯỚC ĐIỂM MỚI",
         headerTitle: "XE NƯỚC ĐIỂM MỚI (5630)",
-        headerSub: "Điểm Bán Độc Lập • 54 Đồ Uống (DM-01 → DM-15)",
+        headerSub: "Điểm Bán Độc Lập • 54 Đồ Uống (XM-01 → XM-15)",
         shortName: "Xe Nước Điểm Mới",
         iconBg: "#ede9fe", iconAccent: "#7c3aed", iconTag: "ĐIỂM MỚI",
-        badgeHtml: 'Đang trực: <b style="color:#c084fc;">🚀 Xe Nước Điểm Mới (DM-01 → DM-15 & Mang Về)</b>',
-        path: "/admin.html?app=drink&branch=BH_DIEM_MOI",
+        badgeHtml: 'Đang trực: <b style="color:#c084fc;">🚀 Xe Nước Điểm Mới (XM-01 → XM-15 &amp; Mang Về)</b>',
+        path: "/admin.html?station=XE_DIEM_MOI",
         uuid: "33333333-AAAA-4333-8333-333333333303"
       },
       ALL: {
@@ -2427,29 +2404,28 @@
         headerSub: "280 Trần Hưng Đạo, P. Phan Thiết, T. Lâm Đồng",
         shortName: "POS Hy Chay",
         iconBg: "#ffd800", iconAccent: "#1e5e3a", iconTag: "QUẢN TRỊ",
-        badgeHtml: 'Đang trực: <b style="color:#a855f7;">👑 Giám Đốc Xem Tất Cả (All Stations)</b>',
+        badgeHtml: 'Đang trực: <b style="color:#a855f7;">👑 Giám Đốc Xem Tất Cả (Quán 280 &amp; Điểm Mới)</b>',
         path: "/admin.html",
         uuid: "33333333-AAAA-4333-8333-333333333300"
       }
     };
 
     window.normalizePosStationMode = function(st) {
-      if (st === 'BH' || st === 'BH_QUAN') return 'BH_QUAN';
-      if (st === 'BH_DIEM_MOI' || st === 'ALL' || st === 'HC') return st;
-      return 'HC';
+      if (st === 'XE_DIEM_MOI' || st === 'BH_DIEM_MOI') return 'XE_DIEM_MOI';
+      if (st === 'ALL') return 'ALL';
+      return 'QUAN_280';
     };
 
     window.getUrlAppModeInfo = function() {
       const params = new URLSearchParams(window.location.search);
+      const stationParam = (params.get('station') || '').toUpperCase();
       const appParam = (params.get('app') || '').toLowerCase();
       const branchParam = (params.get('branch') || '').toUpperCase();
-      if (appParam === 'food') return { mode: 'HC', locked: true, appType: 'food' };
-      if (appParam === 'drink') {
-        const mode = (branchParam === 'BH_DIEM_MOI') ? 'BH_DIEM_MOI' : 'BH_QUAN';
-        return { mode, locked: true, appType: 'drink' };
+      if (stationParam === 'XE_DIEM_MOI' || branchParam === 'BH_DIEM_MOI' || branchParam === 'XE_DIEM_MOI') {
+        return { mode: 'XE_DIEM_MOI', locked: true, appType: 'drink' };
       }
-      if (branchParam === 'BH_DIEM_MOI' || branchParam === 'BH_QUAN') {
-        return { mode: branchParam, locked: true, appType: 'drink' };
+      if (stationParam === 'QUAN_280' || appParam === 'food' || branchParam === 'BH_QUAN' || branchParam === 'QUAN_280') {
+        return { mode: 'QUAN_280', locked: true, appType: 'all' };
       }
       return { mode: null, locked: false, appType: 'all' };
     };
@@ -2460,20 +2436,26 @@
       if (urlInfo.locked && role !== 'root') return urlInfo.mode;
       const saved = localStorage.getItem('BAL_POS_STATION');
       if (saved) return window.normalizePosStationMode(saved);
-      return urlInfo.mode || 'HC';
+      return urlInfo.mode || 'QUAN_280';
     };
 
     window.resolveOrderBranchId = function(o, orderId) {
-      if (!o) return 'HC';
+      if (!o) return 'QUAN_280';
       const tbl = String(o.table || '');
       const oid = String(orderId || o.id || '');
-      if (o.branch_id === 'BH_DIEM_MOI' || tbl.startsWith('DM-') || tbl === 'Mang Về Điểm Mới' || oid.includes('-BH_DIEM_MOI-')) {
-        return 'BH_DIEM_MOI';
+      if (
+        o.branch_id === 'XE_DIEM_MOI' ||
+        o.station === 'XE_DIEM_MOI' ||
+        o.branch_id === 'BH_DIEM_MOI' ||
+        tbl.startsWith('XM-') ||
+        tbl.startsWith('DM-') ||
+        tbl === 'Mang Về Điểm Mới' ||
+        oid.includes('-XE_DIEM_MOI-') ||
+        oid.includes('-BH_DIEM_MOI-')
+      ) {
+        return 'XE_DIEM_MOI';
       }
-      if (o.branch_id === 'BH_QUAN' || o.station === 'BH' || tbl.startsWith('BH-') || tbl === 'Mang Về Quán' || tbl === 'Mang Về (BH)' || oid.includes('-BH-') || oid.includes('-BH_QUAN-')) {
-        return 'BH_QUAN';
-      }
-      return 'HC';
+      return 'QUAN_280';
     };
 
     function createDistinctAppIconDataUrl(cfg) {
@@ -2486,7 +2468,7 @@
       ctx.fillStyle = '#ffffff'; ctx.font = '900 32px Montserrat, Arial, sans-serif';
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('POS', 96, 49);
       ctx.fillStyle = '#0f172a'; ctx.font = '900 22px Montserrat, Arial, sans-serif';
-      ctx.fillText(cfg.mode === 'HC' ? 'HY CHAY' : "BAL'S HOUSE", 96, 112);
+      ctx.fillText(cfg.mode === 'XE_DIEM_MOI' ? "BAL'S HOUSE" : 'HY CHAY 280', 96, 112);
       ctx.font = '800 18px Inter, Arial, sans-serif';
       ctx.fillStyle = cfg.iconAccent || '#0f172a';
       ctx.fillText(cfg.iconTag || 'QUẢN TRỊ', 96, 148);
@@ -2525,12 +2507,80 @@
     }
     setupDistinctAdminAppIdentity();
 
+    let posConfirmPrimaryHandler = null;
+    let posConfirmSecondaryHandler = null;
+
+    window.closePosConfirmModal = function() {
+      const modal = document.getElementById('posConfirmModal');
+      if (modal) {
+        modal.classList.remove('active');
+        modal.style.display = 'none';
+      }
+      posConfirmPrimaryHandler = null;
+      posConfirmSecondaryHandler = null;
+    };
+
+    window.openPosConfirmModal = function({
+      title = 'Xác Nhận Thao Tác',
+      messageHtml = '',
+      confirmText = 'Xác Nhận',
+      confirmColor = '#16a34a',
+      secondaryText = '',
+      secondaryColor = '#f59e0b',
+      onConfirm = null,
+      onSecondary = null
+    }) {
+      const modal = document.getElementById('posConfirmModal');
+      if (!modal) return;
+      const titleEl = document.getElementById('posConfirmTitle');
+      const msgEl = document.getElementById('posConfirmMessage');
+      const pBtn = document.getElementById('posConfirmPrimaryBtn');
+      const sBtn = document.getElementById('posConfirmSecondaryBtn');
+
+      if (titleEl) titleEl.innerText = title;
+      if (msgEl) msgEl.innerHTML = messageHtml;
+      posConfirmPrimaryHandler = onConfirm;
+      posConfirmSecondaryHandler = onSecondary;
+
+      if (pBtn) {
+        pBtn.innerText = confirmText;
+        pBtn.style.background = confirmColor;
+        pBtn.onclick = () => {
+          const fn = posConfirmPrimaryHandler;
+          window.closePosConfirmModal();
+          if (typeof fn === 'function') fn();
+        };
+      }
+      if (sBtn) {
+        if (secondaryText && typeof onSecondary === 'function') {
+          sBtn.style.display = 'block';
+          sBtn.innerText = secondaryText;
+          sBtn.style.background = secondaryColor;
+          sBtn.onclick = () => {
+            const fn = posConfirmSecondaryHandler;
+            window.closePosConfirmModal();
+            if (typeof fn === 'function') fn();
+          };
+        } else {
+          sBtn.style.display = 'none';
+          sBtn.onclick = null;
+        }
+      }
+
+      modal.classList.add('active');
+      modal.style.display = 'flex';
+    };
+
     // ==========================================
     // 4. ĐIỀU HƯỚNG TAB & BIẾN TOÀN CỤC
     // ==========================================
     window.switchMainTab = function(tabName, ev) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       if (ev && ev.currentTarget) ev.currentTarget.classList.add('active');
+      else {
+        const autoTab = document.querySelector(`.tab-btn[onclick*="'${tabName}'"]`);
+        if (autoTab) autoTab.classList.add('active');
+      }
       ['viewOrders','viewPosOrder','viewMenuStock','viewBankConfig','viewPrinterConfig','viewShippers','viewShiftReport','viewUsers','viewDispatch','viewOperatingHours','viewInvoicesInOut'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
@@ -2544,6 +2594,7 @@
         if (typeof renderPosCartUI === 'function') renderPosCartUI();
         if (typeof window.renderExistingTableOrdersBox === 'function') window.renderExistingTableOrdersBox(selectedTable);
       }
+      else if (tabName === 'orders' && typeof renderOrders === 'function') renderOrders();
       else if (tabName === 'menuStock') window.renderMenuStockTable();
       else if (tabName === 'shiftReport') {
         window.renderShiftReport();
@@ -3502,14 +3553,14 @@ window.deleteDishFromMenu = function(id, name) {
         return;
       }
       const tbl = tableName || selectedTable;
-      const curMode = window.getCurrentAppMode ? window.getCurrentAppMode() : 'HC';
+      const curMode = window.getCurrentAppMode ? window.getCurrentAppMode() : 'QUAN_280';
       const openOrders = [];
       Object.keys(ordersCache || {}).forEach(id => {
         const o = ordersCache[id];
         if (!o || o.archived || o.orderType !== 'dine_in') return;
         if (o.status === 'Đã hoàn tất' || o.status === 'Đã hủy') return;
         if (o.table !== tbl) return;
-        const ordBranch = window.resolveOrderBranchId ? window.resolveOrderBranchId(o, id) : 'HC';
+        const ordBranch = window.resolveOrderBranchId ? window.resolveOrderBranchId(o, id) : 'QUAN_280';
         if (curMode !== 'ALL' && ordBranch !== curMode) return;
         openOrders.push({ id, ...o });
       });
@@ -3548,9 +3599,8 @@ window.deleteDishFromMenu = function(id, name) {
     };
 
     window.setPosCategory = function(cat, btn) {
-      const curMode = window.getCurrentAppMode ? window.getCurrentAppMode() : 'HC';
-      if (curMode === 'HC' && cat === 'douong') cat = 'all';
-      if (curMode === 'BH_QUAN' || curMode === 'BH_DIEM_MOI') cat = 'douong';
+      const curMode = window.getCurrentAppMode ? window.getCurrentAppMode() : 'QUAN_280';
+      if (curMode === 'XE_DIEM_MOI') cat = 'douong';
       currentPosCatFilter = cat;
       document.querySelectorAll('#posCatFilterBar .admin-cat-chip').forEach(b => b.classList.remove('active'));
       if (btn) {
@@ -3573,20 +3623,16 @@ window.deleteDishFromMenu = function(id, name) {
 
     window.renderPosDishGrid = function() {
       const grid = document.getElementById('posDishGrid'); if (!grid) return;
-      const curMode = window.getCurrentAppMode ? window.getCurrentAppMode() : 'HC';
-      const isDrinkApp = (curMode === 'BH_QUAN' || curMode === 'BH_DIEM_MOI');
-      const isFoodApp = (curMode === 'HC');
-      if (isDrinkApp && currentPosCatFilter !== 'douong') {
+      const curMode = window.getCurrentAppMode ? window.getCurrentAppMode() : 'QUAN_280';
+      const isDrinkOnlyApp = (curMode === 'XE_DIEM_MOI');
+      if (isDrinkOnlyApp && currentPosCatFilter !== 'douong') {
         currentPosCatFilter = 'douong';
-      } else if (isFoodApp && currentPosCatFilter === 'douong') {
-        currentPosCatFilter = 'all';
       }
 
       const kw = (document.getElementById('posSearchInput')?.value || '').toLowerCase().trim();
       let html = '';
       getUnifiedMenuList().forEach(item => {
-        if (isDrinkApp && item.cat !== 'douong') return;
-        if (isFoodApp && item.cat === 'douong') return;
+        if (isDrinkOnlyApp && item.cat !== 'douong') return;
         if (currentPosCatFilter !== 'all' && item.cat !== currentPosCatFilter) return;
         if (currentPosCatFilter === 'douong' && currentPosDrinkSubCat !== 'all_drink') {
           if (typeof getDrinkSubCat === 'function' && getDrinkSubCat(item.id, item.name) !== currentPosDrinkSubCat) return;
@@ -4196,13 +4242,24 @@ window.deleteDishFromMenu = function(id, name) {
     let orderLastVoiceReminderAt = {};
     const KITCHEN_REMIND_INTERVAL_MS = 5 * 60 * 1000; // Chu kỳ 5 phút (300.000 ms)
 
+    function normalizeCheckedMap(raw) {
+      if (!raw) return {};
+      if (Array.isArray(raw)) {
+        const map = {};
+        raw.forEach((v, idx) => { if (v) map[String(idx)] = true; });
+        return map;
+      }
+      if (typeof raw === 'object') return raw;
+      return {};
+    }
+
     // Hàm bóc tách danh sách món của 1 đơn (Lấy tất cả món HOẶC chỉ lấy những món CHƯA TÍCH CHỌN làm)
     function getOrderDishesVoiceInfo(order, onlyUncooked = false) {
       if (!order || !order.items) return { label: 'Đơn hàng', list: [], total: 0, uncooked: 0 };
       const isDineIn = order.orderType === 'dine_in';
       const seqText = order.dailySeq ? `số ${String(order.dailySeq).padStart(2, '0')}` : '';
       const label = isDineIn ? (order.table || 'Tại bàn') : `Đơn giao đi ${seqText} của khách ${order.customerName || ''}`;
-      const checkedMap = order.checkedItems || {};
+      const checkedMap = normalizeCheckedMap(order.checkedItems);
       let list = [];
       let total = 0;
       let uncooked = 0;
@@ -4222,6 +4279,15 @@ window.deleteDishFromMenu = function(id, name) {
     window.toggleDishCooked = function(orderId, itemKey, currentState) {
       const cleanK = safeItemKey(itemKey);
       const nextState = !currentState;
+      const ord = ordersCache[orderId];
+      let prevChecked = null;
+      if (ord) {
+        prevChecked = ord.checkedItems ? JSON.parse(JSON.stringify(ord.checkedItems)) : {};
+        const nextCheckedMap = Object.assign({}, normalizeCheckedMap(ord.checkedItems));
+        nextCheckedMap[cleanK] = nextState;
+        ord.checkedItems = nextCheckedMap;
+        if (typeof renderOrders === 'function') renderOrders();
+      }
       update(ref(db, `orders/${orderId}/checkedItems`), { [cleanK]: nextState }).then(() => {
         const o = ordersCache[orderId];
         if (!o) return;
@@ -4232,6 +4298,14 @@ window.deleteDishFromMenu = function(id, name) {
           if (isAudioActive) {
             speakAlert(`Đã làm xong đủ tất cả các món của ${info.label}!`, false);
           }
+        }
+      }).catch((err) => {
+        if (ordersCache[orderId] && prevChecked !== null) {
+          ordersCache[orderId].checkedItems = prevChecked;
+          if (typeof renderOrders === 'function') renderOrders();
+        }
+        if (typeof window.showPosAddToast === 'function') {
+          window.showPosAddToast('❌ Lỗi lưu trạng thái món: ' + (err?.message || 'Mất kết nối'));
         }
       });
     };
@@ -4439,13 +4513,13 @@ window.deleteDishFromMenu = function(id, name) {
       const todayOnly = document.getElementById('posTodayOnlyToggle')?.checked !== false;
 
       const allKeys = Object.keys(ordersCache);
-      const curStation = window.getCurrentAppMode ? window.getCurrentAppMode() : window.normalizePosStationMode(localStorage.getItem('BAL_POS_STATION') || 'HC');
+      const curStation = window.getCurrentAppMode ? window.getCurrentAppMode() : window.normalizePosStationMode(localStorage.getItem('BAL_POS_STATION') || 'QUAN_280');
       allKeys.forEach(id => {
         const o = ordersCache[id];
         if (!o || !o.createdAt) return;
 
-        // LỌC THEO TRẠM / CHI NHÁNH ĐỘC LẬP (HC vs BH_QUAN vs BH_DIEM_MOI vs ALL)
-        const ordBranch = window.resolveOrderBranchId ? window.resolveOrderBranchId(o, id) : 'HC';
+        // LỌC THEO 2 ĐIỂM BÁN ĐỘC LẬP (QUAN_280 vs XE_DIEM_MOI vs ALL)
+        const ordBranch = window.resolveOrderBranchId ? window.resolveOrderBranchId(o, id) : 'QUAN_280';
         if (curStation !== 'ALL' && ordBranch !== curStation) return;
 
         const orderDayStr = getVNDateStr(o.createdAt);
@@ -4491,8 +4565,8 @@ window.deleteDishFromMenu = function(id, name) {
         const isDone = order.status === 'Đã hoàn tất';
         const isCanceled = order.status === 'Đã hủy';
 
-        // LỌC ĐƠN THEO TRẠM / CHI NHÁNH ĐỘC LẬP (HC vs BH_QUAN vs BH_DIEM_MOI vs ALL)
-        const ordBranch = window.resolveOrderBranchId ? window.resolveOrderBranchId(order, id) : 'HC';
+        // LỌC ĐƠN THEO 2 ĐIỂM BÁN ĐỘC LẬP (QUAN_280 vs XE_DIEM_MOI vs ALL)
+        const ordBranch = window.resolveOrderBranchId ? window.resolveOrderBranchId(order, id) : 'QUAN_280';
         if (curStation !== 'ALL' && ordBranch !== curStation) return;
 
         if (currentOrderStatusFilter === 'active_only' && !isPending && !isShipperIssue && !isCooking && !isDriverToStore) return;
@@ -4516,7 +4590,7 @@ window.deleteDishFromMenu = function(id, name) {
           waitBadgeHtml = `<span class="wait-timer ${wClass}">⏳ ${waitMins}p</span>`;
         }
 
-        const checkedMap = order.checkedItems || {};
+        const checkedMap = normalizeCheckedMap(order.checkedItems);
         let totalDishesCount = 0, cookedDishesCount = 0, itemsRows = '';
         for (let k in order.items) {
           totalDishesCount++;
@@ -4524,9 +4598,9 @@ window.deleteDishFromMenu = function(id, name) {
           const isChecked = !!(checkedMap[cleanK] || checkedMap[k]);
           if (isChecked) cookedDishesCount++;
           itemsRows += `
-            <tr class="${isChecked ? 'dish-done' : ''}" onclick="toggleDishCooked('${id}', '${cleanK.replace(/'/g, "\\'")}', ${isChecked})">
-              <td><b>${isChecked ? '☑️ ' : '⬜ '}${order.items[k].qty}x ${order.items[k].name}</b></td>
-              <td style="text-align:right;">${(order.items[k].price * order.items[k].qty).toLocaleString()}đ</td>
+            <tr class="${isChecked ? 'dish-done' : ''}" data-order-id="${id}" data-item-key="${cleanK.replace(/"/g, '&quot;')}" onclick="event.stopPropagation(); toggleDishCooked('${id}', '${cleanK.replace(/'/g, "\\'")}', ${isChecked})" style="cursor:pointer;">
+              <td style="padding:8px 4px;"><b style="display:inline-flex; align-items:center; gap:6px;"><span>${isChecked ? '☑️' : '⬜'}</span><span>${order.items[k].qty}x ${order.items[k].name}</span></b></td>
+              <td style="text-align:right; padding:8px 4px; white-space:nowrap;">${(order.items[k].price * order.items[k].qty).toLocaleString()}đ</td>
             </tr>`;
         }
 
@@ -4716,21 +4790,89 @@ window.deleteDishFromMenu = function(id, name) {
       container.innerHTML = cardsHtml || '<p style="text-align:center; padding:35px; grid-column:1/-1; color:#64748b; background:#fff; border-radius:12px; border:1px dashed #cbd5e1;">Hiện không có đơn hàng nào trong mục này.</p>';
     }
 
-    window.updateOrderStatus = (id, s) => update(ref(db, 'orders/' + id), { status: s });
+    window.updateOrderStatus = (id, s) => {
+      if (ordersCache[id]) {
+        ordersCache[id].status = s;
+        if (typeof renderOrders === 'function') renderOrders();
+      }
+      return update(ref(db, 'orders/' + id), { status: s });
+    };
+
+    function executeCompleteOrder(id, markQrVerified = false) {
+      const o = ordersCache[id];
+      if (!o) return;
+      const nowIso = new Date().toISOString();
+      const prevStatus = o.status;
+      const prevPayVerified = o.paymentVerified;
+      const prevPayStatus = o.paymentStatus;
+      const prevCompletedAt = o.completedAt;
+
+      const payload = {
+        status: 'Đã hoàn tất',
+        completedAt: nowIso
+      };
+      if (markQrVerified) {
+        payload.paymentVerified = true;
+        payload.paymentStatus = 'Đã nhận CK';
+        payload.paymentVerifiedAt = nowIso;
+      }
+
+      // Cập nhật lạc quan 0ms trên ordersCache & UI trước khi ghi Firebase
+      Object.assign(o, payload);
+      if (typeof renderOrders === 'function') renderOrders();
+      if (typeof window.renderShiftReport === 'function') window.renderShiftReport();
+      if (typeof window.renderExistingTableOrdersBox === 'function') window.renderExistingTableOrdersBox(selectedTable);
+
+      update(ref(db, 'orders/' + id), payload).then(() => {
+        if (typeof window.showPosAddToast === 'function') {
+          window.showPosAddToast(`✅ Đã hoàn tất đơn ${o.customerName || o.table || ''}!`);
+        }
+        if (typeof window.syncZaloAndPosNewInvoices === 'function') {
+          setTimeout(() => { try { window.syncZaloAndPosNewInvoices(); } catch (_) {} }, 350);
+        }
+      }).catch((err) => {
+        o.status = prevStatus;
+        o.paymentVerified = prevPayVerified;
+        o.paymentStatus = prevPayStatus;
+        o.completedAt = prevCompletedAt;
+        if (typeof renderOrders === 'function') renderOrders();
+        if (typeof window.showPosAddToast === 'function') {
+          window.showPosAddToast('❌ Lỗi hoàn tất đơn: ' + (err?.message || 'Mất kết nối'));
+        }
+      });
+    }
 
     window.completeOrderSafely = function(id) {
       const o = ordersCache[id];
       if (!o) return;
+      const orderTitle = o.customerName || o.table || `#${String(id).slice(-5)}`;
+      const totalAmt = Number(o.grandTotal || o.subtotal || 0);
+
       if (o.paymentMethod === 'VIETQR' && !o.paymentVerified) {
-        const ok = confirm(`⚠️ CẢNH BÁO ĐỐI SOÁT CHUYỂN KHOẢN:\n\nĐơn này chọn Chuyển khoản QR (Mã: ${o.paymentCode || 'QR'} - Số tiền: ${(o.grandTotal || 0).toLocaleString()}đ) nhưng chưa được bấm "Đã Nhận Tiền".\n\nGiám đốc / Thu ngân đã kiểm tra thấy tiền vào tài khoản ngân hàng chưa?`);
-        if (!ok) return;
-        update(ref(db, 'orders/' + id), { status: 'Đã hoàn tất', paymentVerified: true, paymentStatus: 'Đã nhận CK', completedAt: new Date().toISOString() });
+        window.openPosConfirmModal({
+          title: '⚠️ Xác Nhận Tiền Chuyển Khoản VietQR',
+          messageHtml: `
+            <p>Đơn <b>${orderTitle}</b> chọn <b>Chuyển khoản QR</b> (Mã: <b>${o.paymentCode || 'QR'}</b> — Tổng: <b style="color:#dc2626;">${totalAmt.toLocaleString()}đ</b>) nhưng chưa bấm <i>"Đã Nhận Tiền"</i>.</p>
+            <p style="margin-top:8px;">Xác nhận đã thấy tiền vào tài khoản và chốt <b>Hoàn tất đơn</b>?</p>
+          `,
+          confirmText: '✅ Đã Nhận Đủ Tiền & Hoàn Tất',
+          confirmColor: '#16a34a',
+          onConfirm: () => executeCompleteOrder(id, true)
+        });
       } else {
-        update(ref(db, 'orders/' + id), { status: 'Đã hoàn tất', completedAt: new Date().toISOString() });
+        window.openPosConfirmModal({
+          title: '🚀 Xác Nhận Hoàn Tất Đơn',
+          messageHtml: `
+            <p>Hoàn tất đơn <b>${orderTitle}</b> — Tổng thanh toán: <b style="color:#15803d;">${totalAmt.toLocaleString()}đ</b> (${o.paymentMethod === 'VIETQR' ? 'VietQR Đã CK' : 'Tiền mặt / Tại bàn'})?</p>
+          `,
+          confirmText: '🚀 Xác Nhận Hoàn Tất Đơn',
+          confirmColor: '#16a34a',
+          onConfirm: () => executeCompleteOrder(id, false)
+        });
       }
     };
 
-// XỬ LÝ LOGIC 1: QUÁN CHỐT HOÀN TẤT THAY SHIPPER (KHI SHIPPER VỀ THẲNG NHÀ / QUÊN CHỤP ẢNH / NGHỈ LUÔN)
+// XỬ LÝ LOGIC 1: QUÁN CHỐT HOÀN TẤT THAY SHIPPER (DÙNG MODAL HTML NỘI BỘ, KHÔNG DÙNG WINDOW.CONFIRM)
     window.forceCompleteDeliveringOrder = function(id) {
       const o = ordersCache[id];
       if (!o) return;
@@ -4739,46 +4881,81 @@ window.deleteDishFromMenu = function(id, name) {
       const foodAmt = o.subtotal || 0;
       const totalAmt = o.grandTotal || 0;
 
-      if (isQR && !o.paymentVerified) {
-        const okQr = confirm(`⚠️ ĐƠN CHUYỂN KHOẢN QR (${totalAmt.toLocaleString()}đ):\nBạn đã kiểm tra thấy tiền vào tài khoản ngân hàng của quán chưa?`);
-        if (!okQr) return;
-      }
+      const executeForceComplete = (settledNow) => {
+        const nowIso = new Date().toISOString();
+        const prevSnapshot = {
+          status: o.status,
+          completedAt: o.completedAt,
+          deliveryCompletedAt: o.deliveryCompletedAt,
+          completedByAdminOverride: o.completedByAdminOverride,
+          paymentVerified: o.paymentVerified,
+          paymentStatus: o.paymentStatus,
+          shipperSettled: o.shipperSettled,
+          shipperSettledAt: o.shipperSettledAt,
+          note: o.note
+        };
+        const payload = {
+          status: 'Đã hoàn tất',
+          completedAt: nowIso,
+          deliveryCompletedAt: nowIso,
+          completedByAdminOverride: true,
+          paymentVerified: isQR ? true : (o.paymentVerified || false),
+          paymentStatus: isQR ? 'Đã nhận CK' : (o.paymentStatus || 'Thu tiền mặt (COD)'),
+          shipperSettled: settledNow ? true : (o.shipperSettled || false),
+          shipperSettledAt: settledNow ? nowIso : null,
+          note: (o.note ? o.note + ' | ' : '') + `[Quán chốt hoàn tất thay Shipper ${shpName} - ${settledNow ? 'Đã thu tiền' : 'Ghi sổ nợ Shipper'}]`
+        };
 
-      let settledNow = false;
+        Object.assign(o, payload);
+        if (typeof renderOrders === 'function') renderOrders();
+        if (typeof window.renderShiftReport === 'function') window.renderShiftReport();
+
+        update(ref(db, 'orders/' + id), payload).then(() => {
+          if (typeof writeAuditLog === 'function') {
+            writeAuditLog(
+              "CHỐT ĐƠN ĐANG GIAO THAY SHIPPER",
+              `Đơn #HC-${id.substring(id.length - 5).toUpperCase()} | Shipper: ${shpName} | Tiền món: ${foodAmt.toLocaleString()}đ | Công nợ: ${settledNow ? 'Đã thu tiền mặt' : 'Ghi nợ vào sổ Shipper'}`,
+              "WARN"
+            );
+          }
+          if (typeof window.showPosAddToast === 'function') {
+            window.showPosAddToast(`✅ Đã chốt hoàn tất thay ${shpName}!`);
+          }
+        }).catch((err) => {
+          Object.assign(o, prevSnapshot);
+          if (typeof renderOrders === 'function') renderOrders();
+          if (typeof window.showPosAddToast === 'function') {
+            window.showPosAddToast('❌ Lỗi chốt đơn thay Shipper: ' + (err?.message || 'Mất kết nối'));
+          }
+        });
+      };
+
       if (!isQR && o.orderType !== 'dine_in') {
-        const askCash = confirm(
-          `🛵 CHỐT ĐƠN THAY TÀI XẾ [${shpName}]:\n` +
-          `• Tổng thu khách (COD): ${totalAmt.toLocaleString()}đ\n` +
-          `• Tiền món phải nộp về quán: ${foodAmt.toLocaleString()}đ\n\n` +
-          `👉 Bấm [OK] nếu Shipper ĐÃ NỘP ĐỦ tiền mặt cho quán.\n` +
-          `👉 Bấm [Hủy / Cancel] nếu Shipper CHƯA NỘP TIỀN (Đã về nhà/nghỉ) -> Hệ thống vẫn Hoàn tất đơn và GHI NỢ ${foodAmt.toLocaleString()}đ vào sổ tài xế ${shpName} để đòi sau!`
-        );
-        settledNow = askCash;
+        window.openPosConfirmModal({
+          title: `🛵 Chốt Đơn Thay Tài Xế [${shpName}]`,
+          messageHtml: `
+            <p>• Tổng thu khách (COD): <b>${totalAmt.toLocaleString()}đ</b></p>
+            <p>• Tiền món phải nộp về quán: <b style="color:#dc2626;">${foodAmt.toLocaleString()}đ</b></p>
+            <p style="margin-top:8px;">Chọn trạng thái tiền mặt của tài xế:</p>
+          `,
+          confirmText: `✅ Shipper Đã Nộp Đủ (${foodAmt.toLocaleString()}đ)`,
+          confirmColor: '#16a34a',
+          secondaryText: `📝 Chưa Nộp — Hoàn Tất & Ghi Nợ ${foodAmt.toLocaleString()}đ`,
+          secondaryColor: '#d97706',
+          onConfirm: () => executeForceComplete(true),
+          onSecondary: () => executeForceComplete(false)
+        });
       } else {
-        if (!confirm(`✅ Xác nhận chốt HOÀN TẤT đơn hàng này thay cho tài xế ${shpName}?`)) return;
+        window.openPosConfirmModal({
+          title: `✅ Chốt Hoàn Tất Thay Tài Xế [${shpName}]`,
+          messageHtml: isQR && !o.paymentVerified
+            ? `<p>Đơn <b>Chuyển khoản QR (${totalAmt.toLocaleString()}đ)</b> chưa xác nhận CK. Xác nhận đã nhận tiền và chốt hoàn tất đơn?</p>`
+            : `<p>Xác nhận chốt <b>Hoàn tất đơn hàng</b> (${totalAmt.toLocaleString()}đ) thay cho tài xế <b>${shpName}</b>?</p>`,
+          confirmText: '✅ Xác Nhận Hoàn Tất',
+          confirmColor: '#16a34a',
+          onConfirm: () => executeForceComplete(true)
+        });
       }
-
-      const nowIso = new Date().toISOString();
-      update(ref(db, 'orders/' + id), {
-        status: 'Đã hoàn tất',
-        completedAt: nowIso,
-        deliveryCompletedAt: nowIso,
-        completedByAdminOverride: true,
-        paymentVerified: isQR ? true : (o.paymentVerified || false),
-        paymentStatus: isQR ? 'Đã nhận CK' : (o.paymentStatus || 'Thu tiền mặt (COD)'),
-        shipperSettled: settledNow ? true : (o.shipperSettled || false),
-        shipperSettledAt: settledNow ? nowIso : null,
-        note: (o.note ? o.note + ' | ' : '') + `[Quán chốt hoàn tất thay Shipper ${shpName} - ${settledNow ? 'Đã thu tiền' : 'Ghi sổ nợ Shipper'}]`
-      }).then(() => {
-        if (typeof writeAuditLog === 'function') {
-          writeAuditLog(
-            "CHỐT ĐƠN ĐANG GIAO THAY SHIPPER",
-            `Đơn #HC-${id.substring(id.length - 5).toUpperCase()} | Shipper: ${shpName} | Tiền món: ${foodAmt.toLocaleString()}đ | Công nợ: ${settledNow ? 'Đã thu tiền mặt' : 'Ghi nợ vào sổ Shipper'}`,
-            "WARN"
-          );
-        }
-        alert(`✅ Đã chốt hoàn tất đơn hàng! ${!isQR && !settledNow ? `\n📌 Khoản tiền ${foodAmt.toLocaleString()}đ đã được giữ nguyên trong Sổ Công Nợ của tài xế ${shpName} ở tab Đội Tài Xế.` : ''}`);
-      });
     };
 
     // XỬ LÝ LOGIC 2: THU HỒI ĐƠN TỪ SHIPPER BỎ CUỘC ĐỂ BẮN CHO TÀI XẾ KHÁC HOẶC GRAB
@@ -4867,14 +5044,14 @@ window.deleteDishFromMenu = function(id, name) {
       const branchFilterEl = document.getElementById('filterBranchSelect');
       const branchFilter = (!options.ignoreBranchFilter && branchFilterEl) ? branchFilterEl.value : 'all';
       let total5610 = 0, total5630 = 0, totalShip = 0, count = 0, daily = {}, dishStats = {}, rawList = [];
-      let cashHC = 0, cashBHQuan = 0, cashBHDiemMoi = 0;
+      let cashQuan280 = 0, cashXeDiemMoi = 0;
 
       // Bảo toàn 100% dữ liệu kỳ thuế HTKK v5.7.8 (tối đa 92 ngày/lần xuất, không bị khóa trần 100 bản ghi của POS)
       const { fromBound, toBound } = window.getSelectedTaxBounds();
       const taxCheck = window.BAL_POS_GUARD ? window.BAL_POS_GUARD.validateTaxDateBounds(fromBound, toBound) : { ok: true };
       if (!taxCheck.ok) {
         alert("⚠️ " + taxCheck.error);
-        return { labelPeriod: "Không hợp lệ", total5610: 0, total5630: 0, totalTaxable: 0, totalShip: 0, count: 0, daily: {}, dishStats: {}, rawList: [], cashHC: 0, cashBH: 0, cashBHQuan: 0, cashBHDiemMoi: 0 };
+        return { labelPeriod: "Không hợp lệ", total5610: 0, total5630: 0, totalTaxable: 0, totalShip: 0, count: 0, daily: {}, dishStats: {}, rawList: [], cashQuan280: 0, cashXeDiemMoi: 0, cashHC: 0, cashBH: 0 };
       }
 
       const taxSource = window._balTaxOrdersSource || ordersCache;
@@ -4888,7 +5065,7 @@ window.deleteDishFromMenu = function(id, name) {
         else if (mode === 'day') { labelPeriod = `Ngày ${document.getElementById('filterDayInput').value}`; if (dStr === document.getElementById('filterDayInput').value) match = true; }
 
         if (match) {
-          const ordBranch = window.resolveOrderBranchId ? window.resolveOrderBranchId(o, id) : 'HC';
+          const ordBranch = window.resolveOrderBranchId ? window.resolveOrderBranchId(o, id) : 'QUAN_280';
           if (branchFilter !== 'all' && ordBranch !== branchFilter) continue;
 
           count++; let ship = o.shippingFee || 0; totalShip += ship;
@@ -4931,13 +5108,12 @@ window.deleteDishFromMenu = function(id, name) {
           o.branch_id = ordBranch;
           rawList.push(o);
 
-          // TÁCH BIỆT 3 QUỸ TIỀN MẶT CUỐI NGÀY: QUÁN (HC) / XE NƯỚC 280 (BH_QUAN) / ĐIỂM MỚI (BH_DIEM_MOI)
+          // TÁCH BIỆT 2 QUỸ TIỀN MẶT CUỐI NGÀY: QUÁN 280 (QUAN_280) vs XE NƯỚC ĐIỂM MỚI (XE_DIEM_MOI)
           const isCash = (o.paymentMethod === 'COD' || o.paymentMethod !== 'VIETQR');
           if (isCash) {
             const cashAmt = (o.subtotal !== undefined ? Number(o.subtotal) : o.calcTaxable) || 0;
-            if (ordBranch === 'BH_DIEM_MOI') cashBHDiemMoi += cashAmt;
-            else if (ordBranch === 'BH_QUAN') cashBHQuan += cashAmt;
-            else cashHC += cashAmt;
+            if (ordBranch === 'XE_DIEM_MOI') cashXeDiemMoi += cashAmt;
+            else cashQuan280 += cashAmt;
           }
         }
       }
@@ -4956,10 +5132,10 @@ window.deleteDishFromMenu = function(id, name) {
         daily,
         dishStats,
         rawList,
-        cashHC,
-        cashBHQuan,
-        cashBHDiemMoi,
-        cashBH: cashBHQuan + cashBHDiemMoi
+        cashQuan280,
+        cashXeDiemMoi,
+        cashHC: cashQuan280,
+        cashBH: cashXeDiemMoi
       };
     }
 
@@ -4984,9 +5160,8 @@ window.deleteDishFromMenu = function(id, name) {
       if (document.getElementById('repTotalTaxable')) document.getElementById('repTotalTaxable').innerText = data.totalTaxable.toLocaleString() + 'đ';
       document.getElementById('repDeliveryRev').innerText = data.totalShip.toLocaleString() + 'đ';
       document.getElementById('repDoneCount').innerText = data.count + ' đơn';
-      if (document.getElementById('repCashHC')) document.getElementById('repCashHC').innerText = (data.cashHC || 0).toLocaleString() + 'đ';
-      if (document.getElementById('repCashBHQuan')) document.getElementById('repCashBHQuan').innerText = (data.cashBHQuan || 0).toLocaleString() + 'đ';
-      if (document.getElementById('repCashBHDiemMoi')) document.getElementById('repCashBHDiemMoi').innerText = (data.cashBHDiemMoi || 0).toLocaleString() + 'đ';
+      if (document.getElementById('repCashQuan280')) document.getElementById('repCashQuan280').innerText = (data.cashQuan280 || 0).toLocaleString() + 'đ';
+      if (document.getElementById('repCashXeDiemMoi')) document.getElementById('repCashXeDiemMoi').innerText = (data.cashXeDiemMoi || 0).toLocaleString() + 'đ';
 
       // 0. Render Bảng Đơn Hàng Doanh Thu Cao Nhất Lên Đầu
       const topOrdersEl = document.getElementById('repTopOrdersBody');
@@ -5247,9 +5422,8 @@ window.printKitchenTicket = (id, dData = null) => {
           ${buildPrintHeaderHtml(`BẢNG KẾT CA (${data.labelPeriod})`)}
           <div style="margin:3px 0; font-size:13px; font-weight:800;">Số đơn: ${data.count} | In lúc: ${new Date().toLocaleTimeString('vi-VN')}</div>
           <div style="border-top:2px solid #000; border-bottom:2px solid #000; margin:6px 0; padding:6px 0; font-size:14px; font-weight:800;">
-            <div style="display:flex; justify-content:space-between; color:#15803d; font-weight:900;"><span>💵 Quỹ Bếp Hy Chay (HC):</span><span>${(data.cashHC || 0).toLocaleString()}đ</span></div>
-            <div style="display:flex; justify-content:space-between; color:#b45309; font-weight:900;"><span>🧋 Quỹ Xe Nước Quán 280 (BH_QUAN):</span><span>${(data.cashBHQuan || 0).toLocaleString()}đ</span></div>
-            <div style="display:flex; justify-content:space-between; color:#6d28d9; font-weight:900; margin-bottom:4px;"><span>🚀 Quỹ Xe Nước Điểm Mới (BH_DIEM_MOI):</span><span>${(data.cashBHDiemMoi || 0).toLocaleString()}đ</span></div>
+            <div style="display:flex; justify-content:space-between; color:#15803d; font-weight:900;"><span>💵 Quỹ Tiền Mặt Quán 280 (QUAN_280):</span><span>${(data.cashQuan280 || 0).toLocaleString()}đ</span></div>
+            <div style="display:flex; justify-content:space-between; color:#6d28d9; font-weight:900; margin-bottom:4px;"><span>🚀 Quỹ Tiền Mặt Xe Nước Điểm Mới (XE_DIEM_MOI):</span><span>${(data.cashXeDiemMoi || 0).toLocaleString()}đ</span></div>
             <div style="display:flex; justify-content:space-between;"><span>DT 5610 (Hy Chay):</span><span>${data.total5610.toLocaleString()}đ</span></div>
             <div style="display:flex; justify-content:space-between;"><span>DT 5630 (BAL'S HOUSE):</span><span>${data.total5630.toLocaleString()}đ</span></div>
             <div style="display:flex; justify-content:space-between; font-weight:900; font-size:16px; margin-top:4px; border-top:1.5px dashed #000; padding-top:4px;"><span>TỔNG DT CHỊU THUẾ:</span><span>${data.totalTaxable.toLocaleString()}đ</span></div>
@@ -5571,25 +5745,21 @@ window.deleteShipperPermanently = function(phone) {
     let currentEditDrinkSubCat = 'all_drink';
     let isTableDeleteMode = false;
 
-    // ĐỊNH DANH DANH SÁCH BÀN ĐỘC LẬP THEO TRẠM / CHI NHÁNH:
-    // - HC (App Bếp Chay 5610): HC-01..HC-20, Mang Về (HC)
-    // - BH_QUAN (App Xe Nước Quán 280): HC-01..HC-20, Mang Về Quán
-    // - BH_DIEM_MOI (App Xe Nước Điểm Mới): DM-01..DM-15, Mang Về Điểm Mới
+    // ĐỊNH DANH DANH SÁCH BÀN ĐỘC LẬP 2 ĐIỂM BÁN:
+    // - QUAN_280 (Quán Hy Chay 280 - Gộp Đồ Chay 5610 + Nước 5630): HC-01..HC-20, Mang Về
+    // - XE_DIEM_MOI (Xe Nước Điểm Mới 5630): XM-01..XM-15, Mang Về Điểm Mới
     window.getStationTableList = function(st) {
-      const mode = window.normalizePosStationMode(st || (window.getCurrentAppMode ? window.getCurrentAppMode() : localStorage.getItem('BAL_POS_STATION')) || 'HC');
+      const mode = window.normalizePosStationMode(st || (window.getCurrentAppMode ? window.getCurrentAppMode() : localStorage.getItem('BAL_POS_STATION')) || 'QUAN_280');
       const hcTables = Array.from({ length: 20 }, (_, i) => `HC-${String(i + 1).padStart(2, '0')}`);
-      const dmTables = Array.from({ length: 15 }, (_, i) => `DM-${String(i + 1).padStart(2, '0')}`);
+      const xmTables = Array.from({ length: 15 }, (_, i) => `XM-${String(i + 1).padStart(2, '0')}`);
 
-      if (mode === 'BH_DIEM_MOI') {
-        return [...dmTables, 'Mang Về Điểm Mới'];
-      }
-      if (mode === 'BH_QUAN') {
-        return [...hcTables, 'Mang Về Quán'];
+      if (mode === 'XE_DIEM_MOI') {
+        return [...xmTables, 'Mang Về Điểm Mới'];
       }
       if (mode === 'ALL') {
-        return [...hcTables, 'Mang Về (HC)', 'Mang Về Quán', ...dmTables, 'Mang Về Điểm Mới'];
+        return [...hcTables, 'Mang Về', ...xmTables, 'Mang Về Điểm Mới'];
       }
-      return [...hcTables, 'Mang Về (HC)'];
+      return [...hcTables, 'Mang Về'];
     };
 
     let tablesListCache = window.getStationTableList();
@@ -5597,7 +5767,7 @@ window.deleteShipperPermanently = function(phone) {
     window.applyAppModeSwitcherVisibility = function() {
       const urlInfo = window.getUrlAppModeInfo ? window.getUrlAppModeInfo() : { locked: false, mode: null };
       const role = localStorage.getItem('hy_chay_active_role') || '';
-      const activeMode = window.getCurrentAppMode ? window.getCurrentAppMode() : 'HC';
+      const activeMode = window.getCurrentAppMode ? window.getCurrentAppMode() : 'QUAN_280';
       const isLockedView = !!(urlInfo.locked && role !== 'root');
 
       const lockBadge = document.getElementById('stationLockBadge');
@@ -5618,28 +5788,24 @@ window.deleteShipperPermanently = function(phone) {
       chips.forEach(chip => {
         const oc = chip.getAttribute('onclick') || '';
         const isDrinkChip = oc.includes("'douong'");
-        if (mode === 'HC') {
-          chip.style.display = isDrinkChip ? 'none' : '';
-        } else if (mode === 'BH_QUAN' || mode === 'BH_DIEM_MOI') {
+        if (mode === 'XE_DIEM_MOI') {
           chip.style.display = isDrinkChip ? '' : 'none';
         } else {
           chip.style.display = '';
         }
       });
 
-      if (mode === 'BH_QUAN' || mode === 'BH_DIEM_MOI') {
+      if (mode === 'XE_DIEM_MOI') {
         const drinkChip = document.querySelector('#posCatFilterBar .admin-cat-chip[onclick*="\'douong\'"]');
         window.setPosCategory('douong', drinkChip);
-      } else if (mode === 'HC') {
-        const targetCat = (currentPosCatFilter === 'douong') ? 'all' : (currentPosCatFilter || 'all');
+      } else {
+        const targetCat = currentPosCatFilter || 'all';
         const targetChip = document.querySelector(`#posCatFilterBar .admin-cat-chip[onclick*="'${targetCat}'"]`) || chips[0];
         window.setPosCategory(targetCat, targetChip);
-      } else {
-        window.setPosCategory(currentPosCatFilter || 'all');
       }
     }
 
-    // HÀM CHUYỂN ĐỔI TRẠM POS CHÍNH THỨC (BẾP HY CHAY / XE NƯỚC QUÁN 280 / XE NƯỚC ĐIỂM MỚI / GIÁM ĐỐC)
+    // HÀM CHUYỂN ĐỔI TRẠM POS CHÍNH THỨC (QUÁN HY CHAY 280 / XE NƯỚC ĐIỂM MỚI / GIÁM ĐỐC)
     window.setPosStation = function(st) {
       const urlInfo = window.getUrlAppModeInfo ? window.getUrlAppModeInfo() : { locked: false, mode: null };
       const role = localStorage.getItem('hy_chay_active_role') || '';
@@ -5649,7 +5815,7 @@ window.deleteShipperPermanently = function(phone) {
 
       localStorage.setItem('BAL_POS_STATION', mode);
 
-      const cfg = BAL_APP_MODES_CONFIG[mode] || BAL_APP_MODES_CONFIG.HC;
+      const cfg = BAL_APP_MODES_CONFIG[mode] || BAL_APP_MODES_CONFIG.QUAN_280;
 
       // 0. Cập nhật tiêu đề & header thương hiệu theo App đang chạy
       document.title = cfg.title;
@@ -5673,7 +5839,7 @@ window.deleteShipperPermanently = function(phone) {
       // 3. Cập nhật sơ đồ bàn ăn ngay lập tức & nạp giỏ hàng theo bàn
       tablesListCache = window.getStationTableList(mode);
       if (!tablesListCache.includes(selectedTable)) {
-        selectedTable = tablesListCache[0] || (mode === 'BH_DIEM_MOI' ? 'DM-01' : 'HC-01');
+        selectedTable = tablesListCache[0] || (mode === 'XE_DIEM_MOI' ? 'XM-01' : 'HC-01');
       }
       if (document.getElementById('currentSelectedTable') && currentPosOrderMode !== 'delivery') {
         document.getElementById('currentSelectedTable').innerText = selectedTable;
@@ -5688,19 +5854,19 @@ window.deleteShipperPermanently = function(phone) {
         try { renderOrders(); } catch(e) { console.warn(e); }
       }
 
-      // 5. Cập nhật giao diện cảnh báo đồ uống bắn chéo trạm (CHỈ BH_QUAN / ALL)
+      // 5. Cập nhật ẩn hộp cảnh báo liên trạm (Quán 280 đã gộp chung)
       if (typeof renderCrossStationAlertsUI === 'function') {
         try { renderCrossStationAlertsUI(); } catch(e) { console.warn(e); }
       }
 
-      // 6. Tách lọc menu Món Chay (5610) vs 54 Món Nước BAL'S HOUSE (5630)
+      // 6. Tách lọc menu Quán 280 (Đủ 122 món) vs Xe Nước Điểm Mới (54 Đồ Uống)
       applyMenuFilterUiForAppMode(mode);
       if (typeof window.updatePosStickyCartBar === 'function') window.updatePosStickyCartBar();
     };
 
     window.initAppModeFromUrl = function() {
       const urlInfo = window.getUrlAppModeInfo ? window.getUrlAppModeInfo() : { locked: false, mode: null };
-      const startMode = urlInfo.mode || window.normalizePosStationMode(localStorage.getItem('BAL_POS_STATION') || 'HC');
+      const startMode = urlInfo.mode || window.normalizePosStationMode(localStorage.getItem('BAL_POS_STATION') || 'QUAN_280');
       window.setPosStation(startMode);
     };
 
@@ -5775,123 +5941,13 @@ window.deleteShipperPermanently = function(phone) {
     };
 
     // ==========================================
-    // 16.2. CƠ CHẾ ĐỊNH TUYẾN ĐỒ UỐNG LIÊN TRẠM (CROSS-STATION DRINK ROUTING)
+    // 16.2. GỘP QUÁN 280 THÀNH 1 TRẠM DUY NHẤT (ĐÃ BỎ THÔNG BÁO LIÊN TRẠM CŨ)
     // ==========================================
-    let crossStationAlertsCache = {};
-    let alertedDrinkIds = {};
-
-    onValue(ref(db, 'cross_station_alerts'), (snap) => {
-      crossStationAlertsCache = snap.val() || {};
-      const currentStation = window.getCurrentAppMode ? window.getCurrentAppMode() : window.normalizePosStationMode(localStorage.getItem('BAL_POS_STATION') || 'HC');
-
-      // CHỈ phát âm thanh chuông liên trạm tại Xe Nước Quán 280 (BH_QUAN) hoặc Giám Đốc (ALL) — Điểm Mới tách biệt 100%
-      Object.keys(crossStationAlertsCache).forEach(aId => {
-        const a = crossStationAlertsCache[aId];
-        if (a && a.status === 'pending' && !alertedDrinkIds[aId]) {
-          alertedDrinkIds[aId] = true;
-          if (currentStation === 'BH_QUAN' || currentStation === 'ALL') {
-            try { playHardwareBeep(); } catch(e) {}
-            if (typeof speakAlert === 'function') {
-              speakAlert(`Có đồ uống từ bàn ${a.table} cần pha chế giao về quán`, false);
-            }
-          }
-        }
-      });
-
-      renderCrossStationAlertsUI();
-    });
-
     window.renderCrossStationAlertsUI = function() {
       const container = document.getElementById('crossStationAlertsContainer');
-      if (!container) return;
-      const currentStation = window.getCurrentAppMode ? window.getCurrentAppMode() : window.normalizePosStationMode(localStorage.getItem('BAL_POS_STATION') || 'HC');
-
-      // Chỉ hiển thị trên màn hình Xe Nước Quán 280 (BH_QUAN) hoặc Giám Đốc (ALL)
-      if (currentStation !== 'BH_QUAN' && currentStation !== 'ALL') {
+      if (container) {
         container.innerHTML = '';
         container.style.display = 'none';
-        return;
-      }
-
-      const pending = Object.keys(crossStationAlertsCache)
-        .map(k => ({ id: k, ...crossStationAlertsCache[k] }))
-        .filter(a => a && a.status === 'pending');
-
-      if (pending.length === 0) {
-        container.innerHTML = '';
-        container.style.display = 'none';
-        return;
-      }
-
-      container.style.display = 'block';
-      let html = `
-        <div style="background:#fffbeb; border:2px solid #f59e0b; border-radius:14px; padding:12px 16px; margin-bottom:14px; box-shadow:0 4px 14px rgba(245,158,11,0.18);">
-          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; border-bottom:1px dashed #fcd34d; padding-bottom:6px;">
-            <b style="color:#b45309; font-size:0.95rem; display:flex; align-items:center; gap:8px;">
-              <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#ef4444; box-shadow:0 0 8px #ef4444;"></span>
-              🧋 DANH SÁCH ĐỒ UỐNG BẮN TỪ BÀN QUÁN HY CHAY (${pending.length} YÊU CẦU ĐANG CHỜ PHA CHẾ)
-            </b>
-            <span style="font-size:0.78rem; font-weight:700; color:#78350f;">Trạm Xe Nước BAL\'S HOUSE</span>
-          </div>
-      `;
-
-      pending.forEach(a => {
-        const timeStr = a.createdAt ? new Date(a.createdAt).toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'}) : '';
-        const itemsList = (a.items || []).map(it => `
-          <div style="display:inline-block; background:#ffffff; border:1.5px solid #fcd34d; border-radius:8px; padding:5px 10px; margin:3px 4px; font-weight:800; color:#0f172a; box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-            <span style="color:#d97706; font-size:1.05rem; font-weight:900;">${it.qty}x</span> ${it.name}
-          </div>
-        `).join('');
-
-        html += `
-          <div class="cross-station-alert-card" style="margin-bottom:10px; background:#ffffff; border:1.5px solid #f59e0b; border-radius:10px; padding:12px 14px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-              <div style="display:flex; align-items:center; gap:8px;">
-                <span style="background:#dc2626; color:#ffffff; padding:3px 8px; border-radius:6px; font-weight:900; font-size:0.75rem;">🔔 LIÊN TRẠM</span>
-                <b style="color:#92400e; font-size:1.05rem;">[PHA CHẾ GIAO VỀ QUÁN - BÀN ${a.table}]</b>
-              </div>
-              <span style="font-size:0.8rem; font-weight:700; color:#78350f;">Gửi lúc: ${timeStr} | Đơn: #${(a.orderId || '').slice(-6)}</span>
-            </div>
-            <div style="margin:8px 0; padding:8px 10px; background:#fffbeb; border-radius:8px;">
-              ${itemsList}
-              ${a.note ? `<div style="margin-top:6px; font-size:0.82rem; color:#475569;">📝 <i>Ghi chú: ${a.note}</i></div>` : ''}
-            </div>
-            <div style="display:flex; justify-content:flex-end;">
-              <button type="button" onclick="completeCrossStationAlert('${a.id}')" style="background:#16a34a; color:#ffffff; border:none; padding:8px 18px; border-radius:8px; font-weight:900; font-size:0.88rem; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 3px 8px rgba(22,163,74,0.35);">
-                ✅ Đã pha xong & Giao về quán
-              </button>
-            </div>
-          </div>
-        `;
-      });
-
-      html += `</div>`;
-      container.innerHTML = html;
-    };
-
-    window.completeCrossStationAlert = function(alertId) {
-      const a = crossStationAlertsCache[alertId];
-      if (!a) return;
-      const nowIso = new Date().toISOString();
-      update(ref(db, `cross_station_alerts/${alertId}`), {
-        status: 'completed',
-        completedAt: nowIso,
-        completedBy: 'BAL_HOUSE_STAFF'
-      }).then(() => {
-        try { playHardwareBeep(); } catch(e) {}
-        if (typeof speakAlert === 'function') {
-          speakAlert(`Đã xác nhận giao đồ uống về bàn ${a.table}`, false);
-        }
-      });
-      update(ref(db, `orders_by_station/BH/pending_cross/${alertId}`), {
-        status: 'completed',
-        completedAt: nowIso
-      }).catch(() => {});
-      if (a.orderId) {
-        update(ref(db, `orders/${a.orderId}`), {
-          drinksStatus: 'Đã pha xong & Giao về quán',
-          drinksDeliveredAt: nowIso
-        }).catch(() => {});
       }
     };
 
@@ -6071,7 +6127,9 @@ window.setEditModalCategory = function(cat, btn) {
         if (kpiTaxableBox) kpiTaxableBox.style.display = 'none';
         if (kpiShipBox) kpiShipBox.style.display = 'none';
       }
-      if (typeof window.applyAppModeSwitcherVisibility === 'function') {
+      if (typeof window.initAppModeFromUrl === 'function') {
+        window.initAppModeFromUrl();
+      } else if (typeof window.applyAppModeSwitcherVisibility === 'function') {
         window.applyAppModeSwitcherVisibility();
       }
     }
@@ -6359,34 +6417,24 @@ const origHandleAdminLogin = window.handleAdminLogin;
 
     function getInstallerConfigByMode(mode = 'admin') {
       const originUrl = window.location.origin;
-      if (mode === 'pos_food') {
-        const c = BAL_APP_MODES_CONFIG.HC;
+      if (mode === 'pos_quan_280' || mode === 'pos_food' || mode === 'pos_bh_quan') {
+        const c = BAL_APP_MODES_CONFIG.QUAN_280;
         return {
-          modeKey: 'HC', url: originUrl + c.path, winName: 'Hy Chay POS Bep Chay',
-          batFile: 'Cai_Dat_HyChay_POS_BepChay.bat', label: c.shortName,
-          desc: c.title, identifier: 'vn.baoanhlam.hychay.webclip.food',
+          modeKey: 'QUAN_280', url: originUrl + c.path, winName: 'Hy Chay POS Quan 280',
+          batFile: 'Cai_Dat_HyChay_POS_Quan280.bat', label: c.shortName,
+          desc: c.title, identifier: 'vn.baoanhlam.hychay.webclip.quan280',
           uuid: c.uuid, profileUuid: '33333333-BBBB-4333-8333-333333333311',
-          profileFile: 'POS_HyChay_BepChay_5610.mobileconfig', cfg: c
+          profileFile: 'POS_Quan_HyChay_280.mobileconfig', cfg: c
         };
       }
-      if (mode === 'pos_bh_quan') {
-        const c = BAL_APP_MODES_CONFIG.BH_QUAN;
+      if (mode === 'pos_xe_diem_moi' || mode === 'pos_bh_diem_moi') {
+        const c = BAL_APP_MODES_CONFIG.XE_DIEM_MOI;
         return {
-          modeKey: 'BH_QUAN', url: originUrl + c.path, winName: 'BAL House Xe Nuoc Quan 280',
-          batFile: 'Cai_Dat_BAL_XeNuoc_Quan280.bat', label: c.shortName,
-          desc: c.title, identifier: 'vn.baoanhlam.hychay.webclip.bhquan',
-          uuid: c.uuid, profileUuid: '33333333-BBBB-4333-8333-333333333312',
-          profileFile: 'POS_XeNuoc_Quan280_BH_QUAN.mobileconfig', cfg: c
-        };
-      }
-      if (mode === 'pos_bh_diem_moi') {
-        const c = BAL_APP_MODES_CONFIG.BH_DIEM_MOI;
-        return {
-          modeKey: 'BH_DIEM_MOI', url: originUrl + c.path, winName: 'BAL House Xe Nuoc Diem Moi',
+          modeKey: 'XE_DIEM_MOI', url: originUrl + c.path, winName: 'BAL House Xe Nuoc Diem Moi',
           batFile: 'Cai_Dat_BAL_XeNuoc_DiemMoi.bat', label: c.shortName,
-          desc: c.title, identifier: 'vn.baoanhlam.hychay.webclip.bhdiemmoi',
+          desc: c.title, identifier: 'vn.baoanhlam.hychay.webclip.xediemmoi',
           uuid: c.uuid, profileUuid: '33333333-BBBB-4333-8333-333333333313',
-          profileFile: 'POS_XeNuoc_DiemMoi_BH_DIEM_MOI.mobileconfig', cfg: c
+          profileFile: 'POS_XeNuoc_DiemMoi.mobileconfig', cfg: c
         };
       }
       if (mode === 'admin') {
@@ -6396,10 +6444,10 @@ const origHandleAdminLogin = window.handleAdminLogin;
           batFile: 'Cai_Dat_HyChay_POS_Admin_Windows.bat', label: 'POS Hy Chay',
           desc: 'Trung Tâm Điều Hành POS Hy Chay', identifier: 'vn.baoanhlam.hychay.webclip.admin',
           uuid: c.uuid, profileUuid: '33333333-BBBB-4333-8333-333333333302',
-          profileFile: '3_App_POS_QuanLy_HyChay.mobileconfig', cfg: c
+          profileFile: 'POS_QuanLy_HyChay.mobileconfig', cfg: c
         };
       }
-      const c = BAL_APP_MODES_CONFIG.HC;
+      const c = BAL_APP_MODES_CONFIG.QUAN_280;
       return {
         modeKey: 'customer', url: originUrl + (mode === 'shipper' ? '/index.html?shipper=hub' : '/index.html'),
         winName: mode === 'shipper' ? 'Hy Chay Bac Tai' : 'Hy Chay Dat Mon',
@@ -7375,15 +7423,14 @@ const origHandleAdminLogin = window.handleAdminLogin;
       const discTag = pct > 0 ? `[Ưu đãi giảm ${pct}% (-${discAmt.toLocaleString()}đ)]` : '';
       const noteVal = [discTag, rawNote].filter(Boolean).join(' ');
 
-      const curMode = window.getCurrentAppMode ? window.getCurrentAppMode() : window.normalizePosStationMode(localStorage.getItem('BAL_POS_STATION') || 'HC');
-      let finalTable = selectedTable || (curMode === 'BH_DIEM_MOI' ? 'DM-01' : 'HC-01');
+      const curMode = window.getCurrentAppMode ? window.getCurrentAppMode() : window.normalizePosStationMode(localStorage.getItem('BAL_POS_STATION') || 'QUAN_280');
+      let finalTable = selectedTable || (curMode === 'XE_DIEM_MOI' ? 'XM-01' : 'HC-01');
       let activeBranchId = curMode;
       if (activeBranchId === 'ALL') {
-        if (finalTable.startsWith('DM-') || finalTable === 'Mang Về Điểm Mới') activeBranchId = 'BH_DIEM_MOI';
-        else if (finalTable.startsWith('BH-') || finalTable === 'Mang Về Quán' || finalTable === 'Mang Về (BH)') activeBranchId = 'BH_QUAN';
-        else activeBranchId = 'HC';
+        if (finalTable.startsWith('XM-') || finalTable.startsWith('DM-') || finalTable === 'Mang Về Điểm Mới') activeBranchId = 'XE_DIEM_MOI';
+        else activeBranchId = 'QUAN_280';
       }
-      const orderStation = (activeBranchId === 'HC') ? 'HC' : 'BH';
+      const orderStation = activeBranchId;
 
       const nextSeq = getNextDailyOrderSequenceNumber();
       const seqFormatted = String(nextSeq).padStart(2, '0');
@@ -7405,13 +7452,14 @@ const origHandleAdminLogin = window.handleAdminLogin;
 
         const nowIso = new Date().toISOString();
         const paymentCode = payMethod === 'VIETQR' ? ('HC' + Math.floor(1000 + Math.random() * 9000)) : null;
+        const itemsCopy = JSON.parse(JSON.stringify(posCart));
 
         const deliveryOrderData = {
           client_request_id: posClientRequestId,
           orderType: 'delivery',
           createdByPosAdmin: true,
           dailySeq: nextSeq,
-          station: orderStation,
+          station: activeBranchId,
           branch_id: activeBranchId,
           table: null,
           customerName: cusName,
@@ -7425,7 +7473,7 @@ const origHandleAdminLogin = window.handleAdminLogin;
           deliveryTimeMode: (document.getElementById('posShipTimeMode')?.value || 'immediate'),
           scheduledTime: (document.getElementById('posShipTimeMode')?.value === 'scheduled' ? (document.getElementById('posShipScheduledTimeInput')?.value || null) : null),
           note: noteVal ? `[Quán đặt hộ khách] ${noteVal}` : '[Quán đặt hộ khách qua ĐT]',
-          items: posCart,
+          items: itemsCopy,
           rawSubtotal: rawSub,
           discountPercent: pct,
           discount: discAmt,
@@ -7446,7 +7494,9 @@ const origHandleAdminLogin = window.handleAdminLogin;
         const dupHit = window.BAL_POS_GUARD ? window.BAL_POS_GUARD.findDuplicateInMemory(deliveryOrderData) : null;
         if (dupHit) {
           releasePosBtn();
-          alert(`⚠️ Đơn giao đi tương tự vừa được tạo (#HC-${String(dupHit.orderId).slice(-5).toUpperCase()}). Đã chặn tạo đơn trùng!`);
+          if (typeof window.showPosAddToast === 'function') {
+            window.showPosAddToast(`⚠️ Đơn tương tự vừa tạo (#HC-${String(dupHit.orderId).slice(-5).toUpperCase()})!`);
+          }
           return;
         }
 
@@ -7454,7 +7504,7 @@ const origHandleAdminLogin = window.handleAdminLogin;
           name: cusName, phone: cleanPhone, ward: ward, province: 'Lâm Đồng',
           address: fullAddr, fullAddress: fullAddr, km: km, deliveryKm: km,
           deliveryLat: adminPinnedLat || null, deliveryLng: adminPinnedLng || null,
-          note: rawNote, lastItems: posCart, updatedAt: nowIso
+          note: rawNote, lastItems: itemsCopy, updatedAt: nowIso
         };
         update(ref(db, `pos_customers/${cleanPhone}`), customerRecord).catch(() => {});
         update(ref(db, `users/${cleanPhone}`), customerRecord).catch(() => {});
@@ -7474,43 +7524,52 @@ const origHandleAdminLogin = window.handleAdminLogin;
         dailyOrderSeqMap[newOrderId] = seqFormatted;
         if (window.BAL_POS_GUARD) window.BAL_POS_GUARD.recordSubmitted(newOrderId, deliveryOrderData);
 
+        // Hiển thị ngay 0ms trên màn hình Đơn Hàng trước khi đợi mạng Firebase
+        clearActivePosCart();
+        v19_posDiscountPercent = 0;
+        document.getElementById('posOrderNote').value = '';
+        window.clearPosDeliveryCustomerForm();
+        updateV19PosTotalsUI();
+        renderPosCartUI();
+        if (typeof renderDynamicTablePills === 'function') renderDynamicTablePills();
+        if (typeof renderOrders === 'function') renderOrders();
+        window.switchMainTab('orders');
+        if (typeof window.showPosAddToast === 'function') {
+          window.showPosAddToast(`🚀 Đã gửi đơn Ship ${cusName} (#${seqFormatted})!`);
+        }
+
         set(newOrderRef, deliveryOrderData).then(() => {
           releasePosBtn();
           if (window.BAL_POS_GUARD) window.BAL_POS_GUARD.rotateClientRequestId();
           set(ref(db, `orders_by_station/${activeBranchId}/${newOrderId}`), deliveryOrderData).catch(() => {});
           const voiceShipText = `Đơn giao đi số ${seqFormatted} của khách ${cusName} gồm: ${spokenDishes.join(', ')}.${pct > 0 ? ' Ưu đãi giảm ' + pct + ' phần trăm.' : ''}${rawNote ? ' Lưu ý bếp: ' + rawNote : ''}`;
-          broadcastAndSpeakKitchenAlert(voiceShipText);
-          if (autoDispatch) window.triggerShipperSirenBroadcast(newOrderId, deliveryOrderData);
-          window.printKitchenTicket(newOrderId, deliveryOrderData);
-          clearActivePosCart();
-          v19_posDiscountPercent = 0;
-          document.getElementById('posOrderNote').value = '';
-          window.clearPosDeliveryCustomerForm();
-          updateV19PosTotalsUI();
-          renderPosCartUI();
-          if (typeof renderDynamicTablePills === 'function') renderDynamicTablePills();
-          document.querySelectorAll('.tab-btn')[0].click();
+          try { broadcastAndSpeakKitchenAlert(voiceShipText); } catch (_) {}
+          if (autoDispatch) try { window.triggerShipperSirenBroadcast(newOrderId, deliveryOrderData); } catch (_) {}
+          try { window.printKitchenTicket(newOrderId, deliveryOrderData); } catch (_) {}
         }).catch((err) => {
           releasePosBtn();
-          alert("❌ Lỗi gửi đơn POS: " + err.message);
+          if (typeof window.showPosAddToast === 'function') {
+            window.showPosAddToast("❌ Lỗi gửi đơn POS: " + (err?.message || 'Mất kết nối'));
+          }
         });
         return;
       }
 
+      const itemsCopyDineIn = JSON.parse(JSON.stringify(posCart));
       const newOrderId = `ORD-${activeBranchId}-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`;
       const orderData = {
         client_request_id: posClientRequestId,
         orderType: 'dine_in',
         dailySeq: nextSeq,
-        station: orderStation,
+        station: activeBranchId,
         branch_id: activeBranchId,
         orderCode: newOrderId,
         table: finalTable,
         customerName: finalTable,
         phone: 'Tại quán',
-        address: activeBranchId === 'BH_DIEM_MOI' ? 'Điểm Bán Mới (BAL)' : '280 Trần Hưng Đạo',
+        address: activeBranchId === 'XE_DIEM_MOI' ? 'Điểm Bán Mới (BAL)' : '280 Trần Hưng Đạo',
         note: noteVal,
-        items: posCart,
+        items: itemsCopyDineIn,
         rawSubtotal: rawSub,
         discountPercent: pct,
         discount: discAmt,
@@ -7527,7 +7586,9 @@ const origHandleAdminLogin = window.handleAdminLogin;
       const dupDineIn = window.BAL_POS_GUARD ? window.BAL_POS_GUARD.findDuplicateInMemory(orderData) : null;
       if (dupDineIn) {
         releasePosBtn();
-        alert(`⚠️ Đơn ${finalTable} vừa được gửi cách đây vài giây (#HC-${String(dupDineIn.orderId).slice(-5).toUpperCase()}). Đã chặn tạo trùng!`);
+        if (typeof window.showPosAddToast === 'function') {
+          window.showPosAddToast(`⚠️ Đơn ${finalTable} vừa được gửi (#HC-${String(dupDineIn.orderId).slice(-5).toUpperCase()})!`);
+        }
         return;
       }
 
@@ -7538,57 +7599,35 @@ const origHandleAdminLogin = window.handleAdminLogin;
       dailyOrderSeqMap[newOrderId] = seqFormatted;
       if (window.BAL_POS_GUARD) window.BAL_POS_GUARD.recordSubmitted(newOrderId, orderData);
 
+      // Cập nhật ngay lập tức 0ms trên ordersCache & Màn hình Đơn hàng + xóa giỏ bàn
+      clearActivePosCart();
+      v19_posDiscountPercent = 0;
+      document.getElementById('posOrderNote').value = '';
+      updateV19PosTotalsUI();
+      renderPosCartUI();
+      if (typeof renderDynamicTablePills === 'function') renderDynamicTablePills();
+      if (typeof window.renderExistingTableOrdersBox === 'function') window.renderExistingTableOrdersBox(finalTable);
+      if (typeof renderOrders === 'function') renderOrders();
+      window.switchMainTab('orders');
+      if (typeof window.showPosAddToast === 'function') {
+        window.showPosAddToast(`✅ Đã gửi đơn ${finalTable} (#${seqFormatted})!`);
+      }
+
       set(newOrderRef, orderData).then(() => {
         releasePosBtn();
         if (window.BAL_POS_GUARD) window.BAL_POS_GUARD.rotateClientRequestId();
-        // GHI LÊN PHÂN HỆ NAMESPACE RIÊNG (orders_by_station) CHỐNG TRÙNG BÀN & ĐÈ DỮ LIỆU
         const safeTable = finalTable.replace(/\s+/g, '_');
         set(ref(db, `orders_by_station/${activeBranchId}/${newOrderId}`), orderData).catch(() => {});
         set(ref(db, `orders_by_station/${activeBranchId}/${safeTable}`), orderData).catch(() => {});
 
-        // ĐỊNH TUYẾN ĐỒ UỐNG LIÊN TRẠM: CHỈ Bàn Bếp Quán 280 (HC) gọi đồ uống -> Bắn sang Xe Nước Quán 280 (BH_QUAN)
-        const drinkItems = [];
-        const unified = typeof getUnifiedMenuList === 'function' ? getUnifiedMenuList() : ALL_MENU_DATA;
-        for (let k in posCart) {
-          const it = posCart[k];
-          const dishBase = unified.find(d => d.name === it.name || d.id === k);
-          if (it.cat === 'douong' || (dishBase && dishBase.cat === 'douong')) {
-            drinkItems.push({ name: it.name, qty: it.qty, price: it.price });
-          }
-        }
-
-        if (drinkItems.length > 0 && activeBranchId === 'HC') {
-          const alertId = `XALERT-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`;
-          const crossData = {
-            id: alertId,
-            orderId: newOrderId,
-            table: finalTable,
-            sourceStation: 'HC',
-            targetStation: 'BH_QUAN',
-            status: 'pending',
-            items: drinkItems,
-            note: noteVal,
-            createdAt: new Date().toISOString()
-          };
-          set(ref(db, `cross_station_alerts/${alertId}`), crossData).catch(() => {});
-          set(ref(db, `orders_by_station/BH/pending_cross/${alertId}`), crossData).catch(() => {});
-        }
-
         const voiceOrderText = `Order mới ${finalTable} gồm: ${spokenDishes.join(', ')}.${pct > 0 ? ' Ưu đãi giảm ' + pct + ' phần trăm.' : ''}${rawNote ? ' Lưu ý bếp: ' + rawNote : ''}`;
-        broadcastAndSpeakKitchenAlert(voiceOrderText);
-        window.printKitchenTicket(newOrderId, orderData);
-        alert(`✅ Đã gửi đơn ${finalTable} (#${seqFormatted}) xuống bếp!`);
-        clearActivePosCart();
-        v19_posDiscountPercent = 0;
-        document.getElementById('posOrderNote').value = '';
-        updateV19PosTotalsUI();
-        renderPosCartUI();
-        if (typeof renderDynamicTablePills === 'function') renderDynamicTablePills();
-        if (typeof window.renderExistingTableOrdersBox === 'function') window.renderExistingTableOrdersBox(finalTable);
-        document.querySelectorAll('.tab-btn')[0].click();
+        try { broadcastAndSpeakKitchenAlert(voiceOrderText); } catch (_) {}
+        try { window.printKitchenTicket(newOrderId, orderData); } catch (_) {}
       }).catch((err) => {
         releasePosBtn();
-        alert("❌ Lỗi gửi đơn POS: " + err.message);
+        if (typeof window.showPosAddToast === 'function') {
+          window.showPosAddToast("❌ Lỗi gửi đơn POS: " + (err?.message || 'Mất kết nối'));
+        }
       });
     };
 
@@ -8890,17 +8929,9 @@ const origHandleAdminLogin = window.handleAdminLogin;
       }
     };
 
-    // Auto-hook completeOrderSafely & Initialize Operating Hours UI after Vite ES module loads
+    // Initialize Operating Hours UI after Vite ES module loads
     window.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
-        if (typeof window.completeOrderSafely === 'function' && !window.__completeOrderSafelyHooked) {
-          const origCompleteOrderSafely = window.completeOrderSafely;
-          window.completeOrderSafely = function(id) {
-            origCompleteOrderSafely(id);
-            setTimeout(window.syncZaloAndPosNewInvoices, 500);
-          };
-          window.__completeOrderSafelyHooked = true;
-        }
         window.initOperatingHoursUI();
         if (typeof window.handleTriggerDreamingAudit === 'function') {
           setTimeout(window.handleTriggerDreamingAudit, 500);
