@@ -659,7 +659,7 @@
         <div class="divider"></div>
       </div>
           <div style="max-width: 520px; margin: 0 auto 14px;">
-        <input type="search" id="customerMenuSearchInput" name="search_dish_q" autocomplete="off" readonly onfocus="this.removeAttribute('readonly');" placeholder="🔍 Tìm nhanh tên món ăn hoặc đồ uống (113 món)..." oninput="renderFullMenu()" style="width:100%; padding:11px 16px; border:2px solid var(--primary); border-radius:24px; font-size:0.95rem; outline:none; background:#f8fafc;">
+        <input type="search" id="customerMenuSearchInput" name="search_dish_q" autocomplete="off" readonly onfocus="this.removeAttribute('readonly');" placeholder="🔍 Tìm nhanh tên món ăn hoặc đồ uống (122 món)..." oninput="renderFullMenu()" style="width:100%; padding:11px 16px; border:2px solid var(--primary); border-radius:24px; font-size:0.95rem; outline:none; background:#f8fafc;">
       </div>
 <!-- THANH DANH MỤC CHÍNH CÓ NÚT BẤM QUA LẠI CHO LAPTOP & ĐIỆN THOẠI -->
       <div class="filter-nav-wrap">
@@ -960,22 +960,45 @@
       </div>
     </div>
 
+    <!-- MODAL XÁC NHẬN NỘI BỘ CHO KHÁCH HÀNG (THAY THẾ window.confirm TRÊN iOS PWA & ZALO) -->
+    <div id="customerConfirmModal" class="modal-overlay" style="z-index: 9500;" onclick="if(event.target===this) closeCustomerConfirmModal()">
+      <div class="modal-content" style="max-width:440px; text-align:center;">
+        <span class="modal-close" onclick="closeCustomerConfirmModal()">&times;</span>
+        <h3 id="customerConfirmTitle" style="color:var(--primary); margin-bottom:10px; font-size:1.12rem;">Thông Báo Xác Nhận</h3>
+        <div id="customerConfirmMessage" style="font-size:0.92rem; color:#334155; line-height:1.55; margin-bottom:18px; text-align:left; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px;"></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <button type="button" id="customerConfirmCancelBtn" onclick="closeCustomerConfirmModal()" style="padding:12px; border:1px solid #cbd5e1; background:#f1f5f9; color:#334155; border-radius:10px; font-weight:700; cursor:pointer;">Để Sau</button>
+          <button type="button" id="customerConfirmOkBtn" class="btn-primary" style="padding:12px;">Đồng Ý</button>
+        </div>
+      </div>
+    </div>
+
     <div class="floating-contact">
       <a href="https://zalo.me/0903242400" target="_blank" class="float-btn float-zalo" title="Chat Zalo">Zalo</a>
       <a href="tel:0903242400" class="float-btn float-call" title="Gọi Hotline" style="background:#16a34a;">📞</a>
     </div>
 
-    <footer>
-      <div class="footer-grid">
-        <div class="footer-col"><h4>HY CHAY</h4><p>Đơn vị chủ quản: <strong>CTY TNHH TMDV & SẢN XUẤT BẢO ANH LÂM</strong></p><p>MST: <strong>3401289271</strong> | 280 Trần Hưng Đạo, P. Phan Thiết, Tỉnh Lâm Đồng</p></div>
-        <div class="footer-col"><h4>GIỜ MỞ CỬA</h4><p><strong>06:30 - 20:15</strong> (Tất cả các ngày)</p></div>
-        <div class="footer-col">
-          <h4>LIÊN HỆ</h4>
-          <p>Hotline / Zalo: <a href="tel:0903242400" style="color:var(--accent); font-weight:bold;">0903.242.400</a></p>
-          <p style="margin-top: 6px;">Facebook: <a href="https://www.facebook.com/people/HY-CHAY/61582410750653/" target="_blank" style="color:var(--accent); text-decoration:underline; font-weight:bold;">Hy Chay Official</a></p>
+    <!-- FOOTER PHÁP NHÂN CHÍNH THỨC CÔNG TY BẢO ANH LÂM (MST: 3401289271) -->
+    <footer class="company-legal-footer">
+      <div style="max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;flex-wrap:wrap;gap:20px;text-align:left;">
+        <div style="flex:1;min-width:280px;">
+          <h4 style="color:var(--hychay-accent);font-size:1.15rem;margin-bottom:8px;">🪷 HY CHAY — ẨM THỰC CHAY THANH TỊNH</h4>
+          <p>📍 <b>Địa chỉ:</b> 280 Trần Hưng Đạo, khu phố 2, Phường Phan Thiết, Tỉnh Lâm Đồng</p>
+          <p>🏢 <b>Đơn vị chủ quản:</b> CÔNG TY TNHH TMDV VÀ SẢN XUẤT BẢO ANH LÂM</p>
+          <p>📑 <b>Mã số thuế:</b> <b>3401289271</b> (Cấp ngày 01/06/2026)</p>
+          <p>👤 <b>Đại diện pháp luật:</b> Giám đốc <b>Hoàng Huỳnh Huy Bảo</b></p>
+        </div>
+        <div style="flex:1;min-width:240px;">
+          <h4 style="color:var(--hychay-accent);font-size:1rem;margin-bottom:8px;">⏰ GIỜ PHỤC VỤ &amp; ĐẶT MÓN</h4>
+          <p>• Ca Sáng &amp; Trưa: <b>06:30 – 13:00</b> (Điểm tâm &amp; Cơm trưa)</p>
+          <p>• Ca Chiều &amp; Tối: <b>16:00 – 20:15</b> (Lẩu chay &amp; Món gia đình)</p>
+          <p>📞 <b>Hotline / Zalo:</b> <a href="tel:0903242400" style="color:var(--hychay-accent);font-weight:bold;">0903.242.400</a></p>
+          <p>📘 <b>Fanpage:</b> <a href="https://www.facebook.com/people/HY-CHAY/61582410750653/" target="_blank" style="color:var(--hychay-accent);text-decoration:underline;font-weight:bold;">Hy Chay Official</a></p>
         </div>
       </div>
-      <div class="footer-bottom">© 2026 HY CHAY - BẢO ANH LÂM. All rights reserved.</div>
+      <div style="margin-top:24px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.15);font-size:0.8rem;color:#a7f3d0;">
+        © 2026 Công ty TNHH TMDV và Sản xuất Bảo Anh Lâm. All rights reserved. Cam kết 100% nguyên liệu thuần thực vật.
+      </div>
     </footer>
   </div> <!-- Hết customerAppWrapper -->
 <!-- =============================== -->
@@ -984,7 +1007,7 @@
   <!-- =============================== -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, get, update, set, query, limitToLast, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, push, onValue, get, update, set, query, limitToLast, orderByChild, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     // ==== BAL 4G IMAGE OPT: anh cuc bo da chuyen WebP. Du lieu goc 122 mon (defaultImg) GIU NGUYEN, chi doi duong dan luc hien thi ====
     const BAL_WEBP_MAP = new Map([
@@ -1157,7 +1180,7 @@
             // Fallback sang kiem tra truc tiep Firebase RTDB neu dang chay Vite static dev cuc bo
           }
 
-          // 2. Fallback Firebase RTDB Idempotency Check (gioi han 100 don gan nhat)
+          // 2. Fallback Firebase RTDB Idempotency Check (gioi han 100 don gan nhat theo $key ORD-Z-)
           const snap = await get(query(ref(db, "orders"), limitToLast(MAX_LIMIT)));
           const existing = snap.val() || {};
           for (const [oid, ord] of Object.entries(existing)) {
@@ -1173,9 +1196,11 @@
             }
           }
 
-          const nRef = await push(ref(db, "orders"), orderData);
-          saveRecentCache(nRef.key, reqId, sig);
-          return { orderId: nRef.key, deduplicated: false, reason: "rtdb_created" };
+          const stationTag = String(orderData.station || orderData.branch_id || "QUAN_280").trim().toUpperCase().replace(/[^A-Z0-9_]/g, "") || "QUAN_280";
+          const unifiedOrderId = `ORD-Z-${Date.now()}-${stationTag}-${Math.floor(10000 + Math.random() * 90000)}`;
+          await set(ref(db, `orders/${unifiedOrderId}`), orderData);
+          saveRecentCache(unifiedOrderId, reqId, sig);
+          return { orderId: unifiedOrderId, deduplicated: false, reason: "rtdb_created" };
         })();
 
         try {
@@ -2437,40 +2462,35 @@ const CAT_LABELS_MAP = {
 
     window.handleLogin = function() {
       const rawInput = (document.getElementById('lPhone').value || '').trim();
-      const lowerInput = rawInput.toLowerCase();
       const cleanPhone = normalizePhone(rawInput);
       const pass = (document.getElementById('lPass').value || '').trim();
       const errBox = document.getElementById('lError');
       errBox.style.display = 'none';
       if (!rawInput || !pass) {
-        errBox.innerText = "Vui lòng nhập Số điện thoại / Email và Mật khẩu!";
+        errBox.innerText = "Vui lòng nhập Số điện thoại và Mật khẩu!";
         errBox.style.display = 'block';
         return;
       }
 
-      if ((lowerInput === "balshousevn@gmail.com" && pass === "hychayfood") ||
-          (lowerInput === "hobaoanhpt@gmail.com" && pass === "hychayfood") ||
-          (lowerInput === "admin" && (pass === "baochay2026" || pass === "hychayfood")) ||
-          (lowerInput === "trunghuynh100291@gmail.com" && (pass === "Trung100291#" || pass === "hychayfood")) ||
-          (lowerInput === "huynhthanhtutram@gmail.com" && pass === "hychayfood") ||
-          (lowerInput === "tramanhhoang478@gmail.com" && pass === "hychayfood")) {
-        localStorage.setItem('hy_chay_active_user', lowerInput);
-        localStorage.setItem('hy_chay_active_role', 'root');
-        applyCustomerAuthSession('0903242400');
-        return;
-      }
-
-      if (!cleanPhone) {
-        errBox.innerText = "Sai số điện thoại hoặc mật khẩu!";
+      if (!cleanPhone || cleanPhone.length < 9) {
+        errBox.innerText = "Vui lòng nhập Số điện thoại khách hàng hợp lệ!";
         errBox.style.display = 'block';
         return;
       }
 
       get(ref(db, `users/${cleanPhone}`)).then((snap) => {
-        if (snap.exists() && (!snap.val().password || String(snap.val().password).trim() === String(pass))) {
-          if (!snap.val().password) {
-            update(ref(db, `users/${cleanPhone}`), { password: pass }).catch(() => {});
-          }
+        if (!snap.exists()) {
+          errBox.innerText = "Số điện thoại chưa đăng ký! Vui lòng chuyển sang tab Đăng Ký.";
+          errBox.style.display = 'block';
+          return;
+        }
+        const storedPass = snap.val().password ? String(snap.val().password).trim() : '';
+        if (!storedPass) {
+          errBox.innerText = "Tài khoản chưa có mật khẩu! Vui lòng sang tab Đăng Ký để tạo mật khẩu bảo mật.";
+          errBox.style.display = 'block';
+          return;
+        }
+        if (storedPass === String(pass)) {
           applyCustomerAuthSession(cleanPhone);
         } else {
           errBox.innerText = "Sai số điện thoại hoặc mật khẩu!";
@@ -3075,6 +3095,63 @@ window.addToCart = function(id, name, p) {
     // ==========================================
     // 7. GỬI ĐƠN HÀNG (HỖ TRỢ ĐƠN HẸN GIỜ GIAO) & LẮNG NGHE TRẠNG THÁI TRỰC TIẾP
     // ==========================================
+    let customerConfirmPrimaryCb = null;
+    let customerConfirmCancelCb = null;
+
+    window.closeCustomerConfirmModal = function() {
+      const m = document.getElementById('customerConfirmModal');
+      if (m) {
+        m.classList.remove('active');
+        m.style.display = 'none';
+      }
+      const cancelCb = customerConfirmCancelCb;
+      customerConfirmPrimaryCb = null;
+      customerConfirmCancelCb = null;
+      if (typeof cancelCb === 'function') cancelCb();
+    };
+
+    window.openCustomerConfirmModal = function({
+      title = 'Xác Nhận Đặt Món',
+      messageHtml = '',
+      confirmText = 'Đồng Ý',
+      cancelText = 'Để Sau',
+      onConfirm = null,
+      onCancel = null
+    }) {
+      const m = document.getElementById('customerConfirmModal');
+      if (!m) {
+        if (typeof onConfirm === 'function') onConfirm();
+        return;
+      }
+      const titleEl = document.getElementById('customerConfirmTitle');
+      const msgEl = document.getElementById('customerConfirmMessage');
+      const okBtn = document.getElementById('customerConfirmOkBtn');
+      const cancelBtn = document.getElementById('customerConfirmCancelBtn');
+
+      if (titleEl) titleEl.innerText = title;
+      if (msgEl) msgEl.innerHTML = messageHtml;
+      customerConfirmPrimaryCb = onConfirm;
+      customerConfirmCancelCb = onCancel;
+
+      if (okBtn) {
+        okBtn.innerText = confirmText;
+        okBtn.onclick = () => {
+          const fn = customerConfirmPrimaryCb;
+          customerConfirmCancelCb = null;
+          customerConfirmPrimaryCb = null;
+          m.classList.remove('active');
+          m.style.display = 'none';
+          if (typeof fn === 'function') fn();
+        };
+      }
+      if (cancelBtn) {
+        cancelBtn.innerText = cancelText;
+      }
+
+      m.classList.add('active');
+      m.style.display = 'flex';
+    };
+
 window.submitOrder = function(e) {
       e.preventDefault();
       const btnSubmit = document.getElementById('btnSubmitOrder');
@@ -3092,106 +3169,122 @@ window.submitOrder = function(e) {
         }
       };
 
+      const executeSubmitOrderCore = () => {
+        let sub = 0;
+        for (let k in cart) {
+          const item = cart[k];
+          const liveCustom = menuCustomCache[item.id] || {};
+          if (liveCustom.soldOut) {
+            releaseSubmitBtn();
+            return alert(`⚠️ Rất tiếc, món "${item.name}" vừa tạm hết nguyên liệu! Bạn vui lòng xóa món này khỏi giỏ hàng và chọn món khác nhé.`);
+          }
+          sub += item.price * item.qty;
+        }
+        if (sub === 0) {
+          releaseSubmitBtn();
+          return;
+        }
+
+        const clientRequestId = window.BAL_ORDER_GUARD.getClientRequestId();
+        const payMethod = document.getElementById('paymentMethodSelect').value;
+        const name = document.getElementById('cusName').value.trim();
+        const phone = document.getElementById('cusPhone').value.trim();
+        const addr = document.getElementById('cusAddress').value.trim();
+        const ward = document.getElementById('cusWard')?.value || 'Phường Phan Thiết';
+        const house = document.getElementById('cusHouse')?.value || '';
+        const delivMode = document.querySelector('input[name="deliveryTimeMode"]:checked')?.value || 'immediate';
+        const scheduledTimeVal = delivMode === 'scheduled' ? (document.getElementById('cusScheduledTime')?.value || null) : null;
+        const rawNote = document.getElementById('cusNote').value.trim();
+        const finalNote = scheduledTimeVal ? `[⏰ HẸN GIAO LÚC ${scheduledTimeVal}] ${rawNote}`.trim() : rawNote;
+
+        const toValidCoord = (v) => {
+          if (v === null || v === undefined || v === '') return null;
+          const n = Number(v);
+          return Number.isFinite(n) && n !== 0 ? n : null;
+        };
+        const deliveryLat = toValidCoord(window.customerPinnedLat) ?? toValidCoord(mapSelectedLat);
+        const deliveryLng = toValidCoord(window.customerPinnedLng) ?? toValidCoord(mapSelectedLng);
+
+        window.saveCheckoutDraft();
+        if (!localStorage.getItem('hyChayUserProfile')) {
+          localStorage.setItem('hyChayUserProfile', JSON.stringify({ name, phone, house, ward, province: 'Lâm Đồng', address: addr, birthday: '' }));
+        }
+
+        const orderData = {
+          client_request_id: clientRequestId,
+          orderType: 'delivery',
+          station: 'QUAN_280',
+          branch_id: 'QUAN_280',
+          table: null,
+          customerName: name,
+          phone: phone,
+          ward: ward,
+          province: 'Lâm Đồng',
+          address: addr,
+          deliveryKm: calculatedKm,
+          deliveryLat: deliveryLat,
+          deliveryLng: deliveryLng,
+          deliveryTimeMode: delivMode,
+          scheduledTime: scheduledTimeVal,
+          note: finalNote,
+          items: cart,
+          rawSubtotal: sub,
+          subtotal: Math.max(0, sub - birthdayDiscountAmt),
+          shippingFee: shippingFee,
+          discount: birthdayDiscountAmt,
+          grandTotal: Math.max(0, sub - birthdayDiscountAmt) + shippingFee,
+          paymentMethod: payMethod,
+          paymentCode: payMethod === 'VIETQR' ? currentPaymentCode : null,
+          paymentBank: payMethod === 'VIETQR' ? (bankConfig.bankId || 'MB') : null,
+          customerSelectedBank: payMethod === 'VIETQR' ? BANK_NAMES_MAP[document.getElementById('customerBankSelect').value] : null,
+          paymentStatus: payMethod === 'VIETQR' ? 'Chờ kiểm tra CK' : 'Thu tiền mặt (COD)',
+          paymentVerified: false,
+          status: 'Chờ xác nhận',
+          createdAt: new Date().toISOString(),
+          archived: false
+        };
+
+        window.BAL_ORDER_GUARD.submitWithIdempotency(orderData).then((res) => {
+          const orderKey = res.orderId;
+          releaseSubmitBtn();
+          localStorage.setItem('last_hy_chay_order_id', orderKey);
+          listenActiveOrderForCustomer(orderKey);
+          const schedMsg = scheduledTimeVal ? `\n⏰ Lịch hẹn giao lúc ${scheduledTimeVal} đã được ghi nhận! Bếp sẽ canh nấu sát giờ hẹn để món ăn luôn nóng hổi.` : '';
+          alert(res.deduplicated
+            ? `✅ Đơn hàng của bạn đã được ghi nhận trước đó (Mã #HC-${orderKey.substring(orderKey.length - 5).toUpperCase()})!${schedMsg}`
+            : `🎉 Gửi đơn thành công!${schedMsg}`);
+          cart = {}; saveCartLocal(); updateCartUI(); window.closeCheckoutModal();
+          window.BAL_ORDER_GUARD.rotateClientRequestId();
+          document.getElementById('cusNote').value = '';
+        }).catch((err) => {
+          releaseSubmitBtn();
+          alert("❌ Lỗi kết nối mạng khi gửi đơn: " + err.message + "\nBạn vui lòng bấm gửi lại nhé (mã phiên chống trùng được giữ nguyên)!");
+        });
+      };
+
       checkOperatingHours();
       if (!isStoreOpen) {
         if (isPreorderAllowed) {
-          const confirmPreorder = confirm(`⏰ THÔNG BÁO ĐẶT HÀNG TRƯỚC:
-
-${storeClosedStatusReason || 'Quán hiện đang ngoài giờ mở bán hoặc nghỉ giữa ca.'}
-
-Bạn có muốn gửi ĐƠN ĐẶT TRƯỚC để quán sắp xếp đơn và giao sớm nhất khi vào ca không?`);
-          if (!confirmPreorder) {
-            releaseSubmitBtn();
-            if (typeof checkOperatingHours === 'function') checkOperatingHours();
-            return;
-          }
+          window.openCustomerConfirmModal({
+            title: '⏰ Thông Báo Đặt Hàng Trước',
+            messageHtml: `<p style="margin-bottom:8px;"><b>${storeClosedStatusReason || 'Quán hiện đang ngoài giờ mở bán hoặc nghỉ giữa ca.'}</b></p><p>Bạn có muốn gửi <b>ĐƠN ĐẶT TRƯỚC</b> để quán sắp xếp đơn và giao sớm nhất khi vào ca không?</p>`,
+            confirmText: '✅ Gửi Đơn Đặt Trước',
+            cancelText: 'Hủy Bỏ',
+            onConfirm: () => executeSubmitOrderCore(),
+            onCancel: () => {
+              releaseSubmitBtn();
+              if (typeof checkOperatingHours === 'function') checkOperatingHours();
+            }
+          });
+          return;
         } else {
           releaseSubmitBtn();
           if (typeof checkOperatingHours === 'function') checkOperatingHours();
-          return alert(`⛔ THÔNG BÁO:
-
-${storeClosedStatusReason || 'Quán hiện chưa mở cửa nhận đơn.'}
-📞 Hotline hỗ trợ: 0903.242.400`);
+          return alert(`⛔ THÔNG BÁO:\n\n${storeClosedStatusReason || 'Quán hiện chưa mở cửa nhận đơn.'}\n📞 Hotline hỗ trợ: 0903.242.400`);
         }
       }
-      let sub = 0;
-      for (let k in cart) {
-        const item = cart[k];
-        const liveCustom = menuCustomCache[item.id] || {};
-        if (liveCustom.soldOut) {
-          releaseSubmitBtn();
-          return alert(`⚠️ Rất tiếc, món "${item.name}" vừa tạm hết nguyên liệu! Bạn vui lòng xóa món này khỏi giỏ hàng và chọn món khác nhé.`);
-        }
-        sub += item.price * item.qty;
-      }
-      if (sub === 0) {
-        releaseSubmitBtn();
-        return;
-      }
 
-      const clientRequestId = window.BAL_ORDER_GUARD.getClientRequestId();
-      const payMethod = document.getElementById('paymentMethodSelect').value;
-      const name = document.getElementById('cusName').value.trim();
-      const phone = document.getElementById('cusPhone').value.trim();
-      const addr = document.getElementById('cusAddress').value.trim();
-      const ward = document.getElementById('cusWard')?.value || 'Phường Phan Thiết';
-      const house = document.getElementById('cusHouse')?.value || '';
-      const delivMode = document.querySelector('input[name="deliveryTimeMode"]:checked')?.value || 'immediate';
-      const scheduledTimeVal = delivMode === 'scheduled' ? (document.getElementById('cusScheduledTime')?.value || null) : null;
-      const rawNote = document.getElementById('cusNote').value.trim();
-      const finalNote = scheduledTimeVal ? `[⏰ HẸN GIAO LÚC ${scheduledTimeVal}] ${rawNote}`.trim() : rawNote;
-
-      window.saveCheckoutDraft();
-      if (!localStorage.getItem('hyChayUserProfile')) {
-        localStorage.setItem('hyChayUserProfile', JSON.stringify({ name, phone, house, ward, province: 'Lâm Đồng', address: addr, birthday: '' }));
-      }
-
-      const orderData = {
-        client_request_id: clientRequestId,
-        orderType: 'delivery',
-        table: null,
-        customerName: name,
-        phone: phone,
-        ward: ward,
-        province: 'Lâm Đồng',
-        address: addr,
-        deliveryKm: calculatedKm,
-        deliveryTimeMode: delivMode,
-        scheduledTime: scheduledTimeVal,
-        note: finalNote,
-        items: cart,
-        rawSubtotal: sub,
-        subtotal: Math.max(0, sub - birthdayDiscountAmt),
-        shippingFee: shippingFee,
-        discount: birthdayDiscountAmt,
-        grandTotal: Math.max(0, sub - birthdayDiscountAmt) + shippingFee,
-        paymentMethod: payMethod,
-        paymentCode: payMethod === 'VIETQR' ? currentPaymentCode : null,
-        paymentBank: payMethod === 'VIETQR' ? (bankConfig.bankId || 'MB') : null,
-        customerSelectedBank: payMethod === 'VIETQR' ? BANK_NAMES_MAP[document.getElementById('customerBankSelect').value] : null,
-        paymentStatus: payMethod === 'VIETQR' ? 'Chờ kiểm tra CK' : 'Thu tiền mặt (COD)',
-        paymentVerified: false,
-        status: 'Chờ xác nhận',
-        createdAt: new Date().toISOString(),
-        archived: false
-      };
-
-      window.BAL_ORDER_GUARD.submitWithIdempotency(orderData).then((res) => {
-        const orderKey = res.orderId;
-        releaseSubmitBtn();
-        localStorage.setItem('last_hy_chay_order_id', orderKey);
-        listenActiveOrderForCustomer(orderKey);
-        const schedMsg = scheduledTimeVal ? `\n⏰ Lịch hẹn giao lúc ${scheduledTimeVal} đã được ghi nhận! Bếp sẽ canh nấu sát giờ hẹn để món ăn luôn nóng hổi.` : '';
-        alert(res.deduplicated
-          ? `✅ Đơn hàng của bạn đã được ghi nhận trước đó (Mã #HC-${orderKey.substring(orderKey.length - 5).toUpperCase()})!${schedMsg}`
-          : `🎉 Gửi đơn thành công!${schedMsg}`);
-        cart = {}; saveCartLocal(); updateCartUI(); window.closeCheckoutModal();
-        window.BAL_ORDER_GUARD.rotateClientRequestId();
-        document.getElementById('cusNote').value = '';
-      }).catch((err) => {
-        releaseSubmitBtn();
-        alert("❌ Lỗi kết nối mạng khi gửi đơn: " + err.message + "\nBạn vui lòng bấm gửi lại nhé (mã phiên chống trùng được giữ nguyên)!");
-      });
+      executeSubmitOrderCore();
     };
 
     let cancelUnsubscribe = null;
@@ -4160,7 +4253,7 @@ ${clipsXml}
             hyChayFood: '5610',
             balsHouseDrink: '5630'
           },
-          packagingFeeDefault: 3000
+          packagingFeeDefault: 0
         });
 
         function computeHash(payload) {
@@ -4189,22 +4282,28 @@ ${clipsXml}
           } else if (order?.items && typeof order.items === 'object') {
             items = Object.values(order.items);
           }
-          let revenue5610 = 0;
-          let revenue5630 = 0;
+          let raw5610 = 0;
+          let raw5630 = 0;
 
           for (const item of items) {
             if (!item) continue;
             const lineTotal = (Number(item.price) || 0) * (Number(item.qty || item.quantity) || 1);
             if (item.brand === "BAL'S HOUSE" || item.categoryCode === '5630' || item.cat === 'douong') {
-              revenue5630 += lineTotal;
+              raw5630 += lineTotal;
             } else {
-              revenue5610 += lineTotal;
+              raw5610 += lineTotal;
             }
           }
 
-          const packagingFee = Number(order?.packagingFee ?? ORG_CONVENTIONS.packagingFeeDefault);
+          const rawItemSum = raw5610 + raw5630;
+          const netOrderSub = order?.subtotal !== undefined ? Math.max(0, Number(order.subtotal) || 0) : Math.max(0, rawItemSum - (Number(order?.discount) || 0));
+          const discRatio = (rawItemSum > 0 && netOrderSub < rawItemSum) ? (netOrderSub / rawItemSum) : 1;
+
+          const revenue5610 = Math.round(raw5610 * discRatio);
+          const revenue5630 = (discRatio < 1) ? Math.max(0, netOrderSub - revenue5610) : raw5630;
+          const packagingFee = Number(order?.packagingFee || 0);
           const taxableSubTotal = revenue5610 + revenue5630 + packagingFee;
-          const vatAmount = Math.round(taxableSubTotal * 0.1);
+          const vatAmount = 0;
           const driverPassThroughShipFee = Number(order?.shippingFee || 0);
 
           return {
@@ -4214,7 +4313,7 @@ ${clipsXml}
             taxableSubTotal,
             vatAmount,
             driverPassThroughShipFee,
-            grandTotalCustomerPays: taxableSubTotal + vatAmount + driverPassThroughShipFee
+            grandTotalCustomerPays: taxableSubTotal + driverPassThroughShipFee
           };
         }
 
@@ -4334,27 +4433,5 @@ ${clipsXml}
       })();
     }
   </script>
-  <!-- FOOTER PHÁP NHÂN CHÍNH THỨC CÔNG TY BẢO ANH LÂM (MST: 3401289271) -->
-  <footer class="company-legal-footer">
-    <div style="max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;flex-wrap:wrap;gap:20px;text-align:left;">
-      <div style="flex:1;min-width:280px;">
-        <h4 style="color:var(--hychay-accent);font-size:1.15rem;margin-bottom:8px;">🪷 HY CHAY — ẨM THỰC CHAY THANH TỊNH</h4>
-        <p>📍 <b>Địa chỉ:</b> 280 Trần Hưng Đạo, khu phố 2, Phường Phan Thiết, Tỉnh Lâm Đồng</p>
-        <p>🏢 <b>Đơn vị chủ quản:</b> CÔNG TY TNHH TMDV VÀ SẢN XUẤT BẢO ANH LÂM</p>
-        <p>📑 <b>Mã số thuế:</b> <b>3401289271</b> (Cấp ngày 01/06/2026)</p>
-        <p>👤 <b>Đại diện pháp luật:</b> Giám đốc <b>Hoàng Huỳnh Huy Bảo</b></p>
-      </div>
-      <div style="flex:1;min-width:240px;">
-        <h4 style="color:var(--hychay-accent);font-size:1rem;margin-bottom:8px;">⏰ GIỜ PHỤC VỤ & ĐẶT MÓN</h4>
-        <p>• Sáng: 06:00 – 13:30 (Cơm trưa & Điểm tâm)</p>
-        <p>• Chiều: 16:00 – 21:00 (Lẩu chay & Món ăn gia đình)</p>
-        <p>📞 <b>Hotline Đặt Món & Đặt Bàn:</b> <b>0903.242.400</b></p>
-        <p>📘 <b>Fanpage:</b> <a href="https://www.facebook.com/profile.php?id=61582410750653" target="_blank" style="color:var(--hychay-accent);text-decoration:underline;">Hy Chay Phan Thiết</a></p>
-      </div>
-    </div>
-    <div style="margin-top:24px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.15);font-size:0.8rem;color:#a7f3d0;">
-      © 2026 Công ty TNHH TMDV và Sản xuất Bảo Anh Lâm. Đã đăng ký bản quyền. Cam kết 100% nguyên liệu thuần thực vật.
-    </div>
-  </footer>
 </body>
 </html>

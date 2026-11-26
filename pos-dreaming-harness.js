@@ -10,7 +10,7 @@ window.BAL_POS_HARNESS = (function () {
       hyChayFood: '5610',
       balsHouseDrink: '5630'
     },
-    packagingFeeDefault: 3000
+    packagingFeeDefault: 0
   });
 
   function computeHash(payload) {
@@ -41,22 +41,28 @@ window.BAL_POS_HARNESS = (function () {
     } else if (order?.items && typeof order.items === 'object') {
       items = Object.values(order.items);
     }
-    let revenue5610 = 0;
-    let revenue5630 = 0;
+    let raw5610 = 0;
+    let raw5630 = 0;
 
     for (const item of items) {
       if (!item) continue;
       const lineTotal = (Number(item.price) || 0) * (Number(item.qty || item.quantity) || 1);
       if (item.brand === "BAL'S HOUSE" || item.categoryCode === '5630' || item.cat === 'douong') {
-        revenue5630 += lineTotal;
+        raw5630 += lineTotal;
       } else {
-        revenue5610 += lineTotal;
+        raw5610 += lineTotal;
       }
     }
 
-    const packagingFee = Number(order?.packagingFee ?? ORG_CONVENTIONS.packagingFeeDefault);
+    const rawItemSum = raw5610 + raw5630;
+    const netOrderSub = order?.subtotal !== undefined ? Math.max(0, Number(order.subtotal) || 0) : Math.max(0, rawItemSum - (Number(order?.discount) || 0));
+    const discRatio = (rawItemSum > 0 && netOrderSub < rawItemSum) ? (netOrderSub / rawItemSum) : 1;
+
+    const revenue5610 = Math.round(raw5610 * discRatio);
+    const revenue5630 = (discRatio < 1) ? Math.max(0, netOrderSub - revenue5610) : raw5630;
+    const packagingFee = Number(order?.packagingFee || 0);
     const taxableSubTotal = revenue5610 + revenue5630 + packagingFee;
-    const vatAmount = Math.round(taxableSubTotal * 0.1);
+    const vatAmount = 0;
     const driverPassThroughShipFee = Number(order?.shippingFee || 0);
 
     return {
@@ -66,7 +72,7 @@ window.BAL_POS_HARNESS = (function () {
       taxableSubTotal,
       vatAmount,
       driverPassThroughShipFee,
-      grandTotalCustomerPays: taxableSubTotal + vatAmount + driverPassThroughShipFee
+      grandTotalCustomerPays: taxableSubTotal + driverPassThroughShipFee
     };
   }
 

@@ -589,6 +589,16 @@
         </div>
       </div>
     </div>
+    <!-- DẢI CẢNH BÁO ĐỎ KHI CÓ ĐƠN KHÁCH ĐẶT CHỜ XÁC NHẬN TẠI QUÁN 280 (HIỂN THỊ DÙ ĐANG XEM TRẠM KHÁC) -->
+    <div id="quan280PendingAlertBanner" class="no-print" style="display:none; background:linear-gradient(90deg, #b91c1c, #dc2626); color:#ffffff; padding:10px 18px; border-bottom:3px solid #ffd800; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; font-weight:800; font-size:0.88rem; position:sticky; top:0; z-index:99;">
+      <div id="quan280PendingAlertText">
+        🚨 CẢNH BÁO ĐƠN MỚI QUÁN 280: Hiện có <span id="quan280PendingAlertCount">0</span> đơn khách đặt đang CHỜ XÁC NHẬN tại QUAN_280!
+      </div>
+      <button type="button" onclick="if(typeof setPosStation==='function'){setPosStation('QUAN_280');} if(typeof switchMainTab==='function'){switchMainTab('orders');}" style="background:#ffd800; color:#7f1d1d; border:2px solid #ffffff; padding:6px 14px; border-radius:8px; font-weight:900; font-size:0.82rem; cursor:pointer; white-space:nowrap;">
+        ⚡ MỞ QUÁN 280 XỬ LÝ NGAY
+      </button>
+    </div>
+
     <!-- DẢI BĂNG CẢNH BÁO KHI QUÁN ĐANG BẬT CHẾ ĐỘ TẠM NGHỈ (KHÓA ĐẶT ĐƠN ONLINE) -->
     <div id="adminStoreClosedBanner" class="store-closed-admin-banner no-print">
       <div>
@@ -1014,8 +1024,8 @@
                 <div style="font-size:0.8rem; color:#d1fae5; margin-top:6px; line-height:1.5;">
                   • Ẩm thực chay (5610): <b id="dreamCol1Rev5610">0đ</b><br>
                   • BAL'S HOUSE Drink (5630): <b id="dreamCol1Rev5630">0đ</b><br>
-                  • Phí bao bì/hộp: <b id="dreamCol1Packaging">0đ</b><br>
-                  • Thuế GTGT (10%): <b id="dreamCol1Vat">0đ</b>
+                  • Phí bao bì/hộp (nếu có): <b id="dreamCol1Packaging">0đ</b><br>
+                  • Thuế GTGT (đã gồm trong giá): <b id="dreamCol1Vat">0đ</b>
                 </div>
               </div>
 
@@ -2006,7 +2016,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, onValue, update, remove, set, push, get, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, onValue, update, remove, set, push, get, query, limitToLast, orderByChild } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     // ==== BAL 4G IMAGE OPT: anh cuc bo da chuyen WebP. Du lieu goc 122 mon (defaultImg) GIU NGUYEN, chi doi duong dan luc hien thi ====
     const BAL_WEBP_MAP = new Map([
@@ -2253,15 +2263,10 @@
     };
 
     // ==========================================
-    // 1. HỆ THỐNG XÁC THỰC PHÂN QUYỀN ROOT - MANAGER
+    // 1. HỆ THỐNG XÁC THỰC PHÂN QUYỀN SERVER-SIDE (/api/admin-auth)
     // ==========================================
-    const ROOT_USER = "balshousevn@gmail.com";
-    const ROOT_PASS = "hychayfood";
-    const LEGACY_ROOT_USER = "admin";
-    const LEGACY_ROOT_PASS = "baochay2026";
-
     function sanitizeUser(username) {
-      return (username || '').trim().replace(/\./g, '_').replace(/[#$\[\]\/]/g, '-');
+      return (username || '').trim().toLowerCase().replace(/\./g, '_').replace(/[#$\[\]\/]/g, '-');
     }
 
     function safeItemKey(keyName) {
@@ -2304,25 +2309,47 @@
     document.addEventListener('click', autoUnlockHandler, { once: true });
     document.addEventListener('touchstart', autoUnlockHandler, { once: true });
 
-    window.handleAdminLogin = function(e) {
-      e.preventDefault();
-      const rawUser = document.getElementById('adminEmail').value.trim(); 
-      const pass = document.getElementById('adminPassword').value;
+    window.handleAdminLogin = async function(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      const rawUser = (document.getElementById('adminEmail').value || '').trim();
+      const pass = (document.getElementById('adminPassword').value || '').trim();
       const btn = document.getElementById('btnLoginSubmit');
       const errBox = document.getElementById('loginErrorMsg');
-      
-      errBox.style.display = 'none';
-      btn.innerText = "ĐANG XÁC THỰC..."; btn.disabled = true;
 
-      if ((rawUser === ROOT_USER && pass === ROOT_PASS) || (rawUser === LEGACY_ROOT_USER && pass === LEGACY_ROOT_PASS)) {
-        loginSuccess(rawUser, 'root');
+      errBox.style.display = 'none';
+      if (!rawUser || !pass) {
+        showLoginError("Vui lòng nhập tên đăng nhập và mật khẩu!", btn, errBox);
         return;
+      }
+      btn.innerText = "ĐANG XÁC THỰC...";
+      btn.disabled = true;
+
+      try {
+        const resp = await fetch('/api/admin-auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: rawUser, password: pass })
+        });
+        const cType = resp.headers.get('content-type') || '';
+        if (cType.includes('application/json')) {
+          const json = await resp.json();
+          if (resp.ok && json && json.ok) {
+            loginSuccess(json.user || rawUser, json.role || 'manager');
+            return;
+          }
+          if (resp.status === 400 || resp.status === 401 || resp.status === 403) {
+            showLoginError(json?.error || "Sai tên đăng nhập hoặc mật khẩu!", btn, errBox);
+            return;
+          }
+        }
+      } catch (_) {
+        // Fallback sang nhánh admin_users trên RTDB nếu chạy static local không có serverless API
       }
 
       const safeUser = sanitizeUser(rawUser);
       get(ref(db, 'admin_users/' + safeUser)).then((snap) => {
-        if (snap.exists() && String(snap.val().password) === String(pass)) {
-          loginSuccess(rawUser, 'manager');
+        if (snap.exists() && snap.val().password && String(snap.val().password).trim() !== '' && String(snap.val().password).trim() === String(pass)) {
+          loginSuccess(snap.val().originalName || rawUser, snap.val().role || 'cashier');
         } else {
           showLoginError("Sai tên đăng nhập hoặc mật khẩu!", btn, errBox);
         }
@@ -2333,17 +2360,21 @@
       localStorage.setItem('hy_chay_active_user', user);
       localStorage.setItem('hy_chay_active_role', role);
       applyRoleUI(role);
+      try { if (typeof enforceGranularRolePermissions === 'function') enforceGranularRolePermissions(); } catch (_) {}
 
       // Lợi dụng trực tiếp cú click nút "VÀO HỆ THỐNG POS" để kích hoạt luôn âm thanh chạy ngầm
-      window.forceUnlockBackgroundAudio(false);
+      try { window.forceUnlockBackgroundAudio(false); } catch (_) {}
 
-      document.getElementById('adminLoginOverlay').style.opacity = '0';
-      setTimeout(() => {
-        document.getElementById('adminLoginOverlay').style.display = 'none';
-        document.getElementById('mainAppWrapper').style.display = 'block';
-        document.getElementById('btnLoginSubmit').innerText = "VÀO HỆ THỐNG POS";
-        document.getElementById('btnLoginSubmit').disabled = false;
-      }, 300);
+      const overlay = document.getElementById('adminLoginOverlay');
+      if (overlay) {
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+          overlay.style.display = 'none';
+          document.getElementById('mainAppWrapper').style.display = 'block';
+          document.getElementById('btnLoginSubmit').innerText = "VÀO HỆ THỐNG POS";
+          document.getElementById('btnLoginSubmit').disabled = false;
+        }, 250);
+      }
     }
 
     function showLoginError(msg, btn, errBox) {
@@ -2352,11 +2383,17 @@
     }
 
     window.logoutAdmin = function() {
-      if (confirm("Bạn có chắc chắn muốn kết thúc ca trực?")) {
-        localStorage.removeItem('hy_chay_active_user');
-        localStorage.removeItem('hy_chay_active_role');
-        location.reload();
-      }
+      window.openPosConfirmModal({
+        title: '🚪 Kết Thúc Ca Trực',
+        messageHtml: '<p>Bạn có chắc chắn muốn đăng xuất khỏi hệ thống POS &amp; kết thúc ca trực?</p>',
+        confirmText: '🚪 Đăng Xuất',
+        confirmColor: '#dc2626',
+        onConfirm: () => {
+          localStorage.removeItem('hy_chay_active_user');
+          localStorage.removeItem('hy_chay_active_role');
+          location.reload();
+        }
+      });
     };
 
     // ==========================================
@@ -2366,7 +2403,7 @@
       const rawUser = document.getElementById('newUsername').value.trim();
       const pass = document.getElementById('newPassword').value.trim();
       if (!rawUser || !pass) return alert("Vui lòng nhập đủ Tên đăng nhập và Mật khẩu!");
-      if (rawUser === ROOT_USER || rawUser === LEGACY_ROOT_USER) return alert("Không được dùng trùng tên với tài khoản Gốc!");
+      if (rawUser.toLowerCase() === 'admin') return alert("Không được dùng trùng tên với tài khoản Quản trị Gốc!");
 
       const safeUser = sanitizeUser(rawUser);
       set(ref(db, 'admin_users/' + safeUser), { 
@@ -2382,9 +2419,13 @@
     };
 
     window.deleteSubAccount = function(userKey) {
-      if (confirm("⚠️ Xóa vĩnh viễn tài khoản phụ này?")) {
-        remove(ref(db, 'admin_users/' + userKey));
-      }
+      window.openPosConfirmModal({
+        title: '🗑️ Xóa Tài Khoản Phụ',
+        messageHtml: `<p>Xóa vĩnh viễn tài khoản nhân sự <b>${userKey}</b> khỏi hệ thống?</p>`,
+        confirmText: '🗑️ Xóa Tài Khoản',
+        confirmColor: '#dc2626',
+        onConfirm: () => remove(ref(db, 'admin_users/' + userKey))
+      });
     };
 
     onValue(ref(db, 'admin_users'), (snap) => {
@@ -2710,6 +2751,18 @@
     } catch (_) { posCartByTable = {}; }
     let currentPosDrinkSubCat = 'all_drink';
     let aiVoiceInterval = null; let lastSpokenCallId = null; let lastSyncedVoiceTimestamp = 0;
+    const BAL_VOICE_DEVICE_ID = (() => {
+      try {
+        let id = sessionStorage.getItem('bal_voice_device_id');
+        if (!id) {
+          id = 'dev_' + Math.random().toString(36).slice(2, 10) + '_' + Date.now().toString(36);
+          sessionStorage.setItem('bal_voice_device_id', id);
+        }
+        return id;
+      } catch {
+        return 'dev_' + Math.random().toString(36).slice(2, 10);
+      }
+    })();
     let currentOrderStatusFilter = 'active_only';
     let banksMapCache = {};
     let editingOrderId = null;
@@ -2975,7 +3028,34 @@
       }
       isPlayingVoiceQueue = true;
       const nextChunk = voiceSpeechQueue.shift();
-      const advanceQueue = () => setTimeout(processNextVoiceChunk, 90);
+
+      let settled = false;
+      let watchdogTimer = null;
+      const advanceQueue = () => {
+        if (settled) return;
+        settled = true;
+        if (watchdogTimer) {
+          clearTimeout(watchdogTimer);
+          watchdogTimer = null;
+        }
+        ttsAudioPlayer.onended = null;
+        ttsAudioPlayer.onerror = null;
+        if (voiceSpeechQueue.length === 0) {
+          isPlayingVoiceQueue = false;
+          return;
+        }
+        setTimeout(processNextVoiceChunk, 90);
+      };
+
+      // Watchdog timeout 12 giây: tự giải phóng hàng đợi nếu audio bị OS tạm ngưng
+      watchdogTimer = setTimeout(() => {
+        if (settled) return;
+        try { ttsAudioPlayer.pause(); } catch (_) {}
+        try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch (_) {}
+        revokeActiveTtsBlob();
+        isPlayingVoiceQueue = false;
+        advanceQueue();
+      }, 12000);
 
       let timerId = null;
       try {
@@ -2995,6 +3075,7 @@
         const audioBlob = await res.blob();
         if (!audioBlob || !audioBlob.size) throw new Error('Empty audio blob');
 
+        if (settled) return;
         revokeActiveTtsBlob();
         activeTtsBlobUrl = URL.createObjectURL(audioBlob);
         ttsAudioPlayer.src = activeTtsBlobUrl;
@@ -3015,7 +3096,7 @@
         await ttsAudioPlayer.play();
       } catch (_) {
         if (timerId) clearTimeout(timerId);
-        playGoogleTranslateAudioFallback(nextChunk, advanceQueue);
+        if (!settled) playGoogleTranslateAudioFallback(nextChunk, advanceQueue);
       }
     }
 
@@ -3036,6 +3117,7 @@ function speakAlert(text, broadcastToOtherDevices = false) {
         set(ref(db, 'voice_sync/latest'), {
           text: text,
           timestamp: Date.now(),
+          deviceId: BAL_VOICE_DEVICE_ID,
           sender: localStorage.getItem('hy_chay_active_user') || 'system'
         }).catch(() => {});
       }
@@ -3054,10 +3136,11 @@ function speakAlert(text, broadcastToOtherDevices = false) {
       }
     }
 
-    // Lắng nghe kênh đồng bộ giọng nói giữa tài khoản chính và các tài khoản phụ
+    // Lắng nghe kênh đồng bộ giọng nói giữa các tab/thiết bị (bỏ qua sự kiện của chính tab này)
     onValue(ref(db, 'voice_sync/latest'), (snap) => {
       const data = snap.val();
       if (!data || !data.timestamp) return;
+      if (data.deviceId && data.deviceId === BAL_VOICE_DEVICE_ID) return;
       if (Date.now() - data.timestamp < 8000 && data.timestamp > lastSyncedVoiceTimestamp) {
         lastSyncedVoiceTimestamp = data.timestamp;
         if (isAudioActive) {
@@ -3569,12 +3652,19 @@ window.deleteDishFromMenu = function(id, name) {
       if (localStorage.getItem('hy_chay_active_role') !== 'root') {
         return alert("⛔ Chỉ Chủ quán (Giám đốc) mới có quyền xóa món khỏi thực đơn!");
       }
-      if (!confirm(`⚠️ Bạn có chắc chắn muốn XÓA món "${name}" khỏi thực đơn bán hàng?`)) return;
-      update(ref(db, `menu_customizations/${id}`), {
-        isDeleted: true,
-        updatedAt: new Date().toISOString()
-      }).then(() => {
-        if (typeof writeAuditLog === 'function') writeAuditLog("XÓA MÓN KHỎI MENU", `Đã xóa món: ${name} (${id})`, "WARN");
+      window.openPosConfirmModal({
+        title: '🗑️ Xóa Món Khỏi Thực Đơn',
+        messageHtml: `<p>Bạn có chắc chắn muốn <b>XÓA</b> món <b>${name}</b> khỏi thực đơn bán hàng?</p>`,
+        confirmText: '🗑️ Xóa Món',
+        confirmColor: '#dc2626',
+        onConfirm: () => {
+          update(ref(db, `menu_customizations/${id}`), {
+            isDeleted: true,
+            updatedAt: new Date().toISOString()
+          }).then(() => {
+            if (typeof writeAuditLog === 'function') writeAuditLog("XÓA MÓN KHỎI MENU", `Đã xóa món: ${name} (${id})`, "WARN");
+          });
+        }
       });
     };
 
@@ -4509,38 +4599,8 @@ window.deleteDishFromMenu = function(id, name) {
       });
     };
 
-    // Tự động đọc chi tiết Bàn & Món khi có thiết bị khác vừa bấm Order hoặc Khách vừa đặt đơn mới (khóa trần 100 đơn)
-    onValue(query(ref(db, 'orders'), limitToLast(window.BAL_POS_GUARD.clampQueryLimit(100))), (snap) => {
-      const all = snap.val() || {};
-      if (isFirstOrdersLoad) {
-        Object.keys(all).forEach(id => {
-          announcedNewOrderIds[id] = true;
-          if (all[id] && all[id].createdAt) {
-            orderLastVoiceReminderAt[id] = new Date(all[id].createdAt).getTime();
-          }
-        });
-        isFirstOrdersLoad = false;
-        return;
-      }
-
-      Object.keys(all).forEach(id => {
-        const o = all[id];
-        if (!o || o.archived) return;
-        if (!announcedNewOrderIds[id]) {
-          announcedNewOrderIds[id] = true;
-          orderLastVoiceReminderAt[id] = Date.now();
-          const createdAgeMs = Date.now() - new Date(o.createdAt).getTime();
-          // Chỉ đọc đơn mới phát sinh trong vòng 60 giây gần nhất
-          if (createdAgeMs < 60000 && isAudioActive) {
-            const info = getOrderDishesVoiceInfo(o, false);
-            if (info.list.length > 0) {
-              const notePart = o.note ? `. Lưu ý: ${o.note}` : '';
-              speakAlert(`Order mới ${info.label} gồm: ${info.list.join(', ')}${notePart}`, false);
-            }
-          }
-        }
-      });
-    });
+    // Lắng nghe đơn hàng bằng 1 luồng duy nhất theo createdAt (hạn chế giới hạn $key khi có nhiều đơn POS)
+    // Dải cảnh báo đỏ đơn Chờ xác nhận ở QUAN_280 luôn được cập nhật dù đang ở trạm nào.
 
     // BỘ ĐẾM THỜI GIAN THỰC: CỨ ĐÚNG 5 PHÚT NHẮC LẠI CÁC MÓN CHƯA TÍCH CHỌN CỦA TỪNG BÀN
     function checkAndRemindUncookedDishesEvery5Mins() {
@@ -4610,23 +4670,7 @@ window.deleteDishFromMenu = function(id, name) {
       });
     };
 
-    // Tự động lắng nghe: Nếu Webhook Ngân hàng (SePay/Casso) hoặc máy khác xác nhận tiền vào -> Loa tự động đọc số tiền! (khóa trần 100 đơn)
-    onValue(query(ref(db, 'orders'), limitToLast(window.BAL_POS_GUARD.clampQueryLimit(100))), (snap) => {
-      const all = snap.val() || {};
-      Object.keys(all).forEach(oid => {
-        const ord = all[oid];
-        if (!ord || ord.archived) return;
-        if (ord.paymentMethod === 'VIETQR' && ord.paymentVerified && !announcedPaidOrdersMap[oid]) {
-          announcedPaidOrdersMap[oid] = true;
-          // Chỉ phát loa nếu đơn vừa được xác nhận trong vòng 60 giây gần nhất
-          const verTime = ord.paymentVerifiedAt ? new Date(ord.paymentVerifiedAt).getTime() : 0;
-          if (verTime && (Date.now() - verTime < 60000) && isAudioActive) {
-            const seqBadge = typeof getOrderSeqBadgeText === 'function' ? getOrderSeqBadgeText(oid) : '';
-            speakAlert(`Ting ting! Tài khoản quán vừa nhận thành công ${(ord.grandTotal || 0).toLocaleString('vi-VN')} đồng của đơn số ${seqBadge.replace('#', '')}!`, false);
-          }
-        }
-      });
-    });
+    // Đã hợp nhất vào listener orders chính (orderByChild('createdAt')) để tránh mở nhiều kết nối trùng lặp.
 
     // Tự động khớp biến động số dư nếu có giao dịch đẩy vào nhánh bank_webhooks (SePay / Casso / VietQR)
     onValue(ref(db, 'bank_webhooks'), (snap) => {
@@ -4693,21 +4737,73 @@ window.deleteDishFromMenu = function(id, name) {
     }, 30000);
 
     onValue(query(ref(db, 'orders'), limitToLast(window.BAL_POS_GUARD.clampQueryLimit(100))), (snapshot) => {
-      ordersCache = snapshot.val() || {};
+      const all = snapshot.val() || {};
+      let announcedNewOrderInBatch = false;
+
+      if (isFirstOrdersLoad) {
+        Object.keys(all).forEach(id => {
+          announcedNewOrderIds[id] = true;
+          const ord = all[id];
+          if (ord && ord.paymentMethod === 'VIETQR' && ord.paymentVerified) {
+            announcedPaidOrdersMap[id] = true;
+          }
+          if (ord && ord.createdAt) {
+            orderLastVoiceReminderAt[id] = new Date(ord.createdAt).getTime();
+          }
+        });
+        isFirstOrdersLoad = false;
+      } else {
+        const nowMs = Date.now();
+        Object.keys(all).forEach(id => {
+          const o = all[id];
+          if (!o || o.archived) return;
+
+          if (!announcedNewOrderIds[id]) {
+            announcedNewOrderIds[id] = true;
+            orderLastVoiceReminderAt[id] = nowMs;
+            const createdMs = new Date(o.createdAt).getTime();
+            const createdAgeMs = Number.isFinite(createdMs) ? Math.abs(nowMs - createdMs) : 0;
+            // Nới ngưỡng đọc đơn mới từ 60s lên 180s để chống lệch đồng hồ điện thoại khách
+            if (createdAgeMs <= 180000 && isAudioActive) {
+              const info = getOrderDishesVoiceInfo(o, false);
+              if (info.list.length > 0) {
+                const notePart = o.note ? `. Lưu ý: ${o.note}` : '';
+                speakAlert(`Order mới ${info.label} gồm: ${info.list.join(', ')}${notePart}`, false);
+                announcedNewOrderInBatch = true;
+              }
+            }
+          }
+
+          if (o.paymentMethod === 'VIETQR' && o.paymentVerified && !announcedPaidOrdersMap[id]) {
+            announcedPaidOrdersMap[id] = true;
+            const verTime = o.paymentVerifiedAt ? new Date(o.paymentVerifiedAt).getTime() : 0;
+            if (verTime && Math.abs(nowMs - verTime) <= 180000 && isAudioActive) {
+              const seqBadge = typeof getOrderSeqBadgeText === 'function' ? getOrderSeqBadgeText(id) : '';
+              speakAlert(`Ting ting! Tài khoản quán vừa nhận thành công ${(o.grandTotal || 0).toLocaleString('vi-VN')} đồng của đơn số ${seqBadge.replace('#', '')}!`, false);
+            }
+          }
+        });
+      }
+
+      ordersCache = all;
       window.ordersCache = ordersCache;
       rebuildDailyOrderSequenceAndAutoReset();
-      renderOrders();
+      renderOrders(announcedNewOrderInBatch);
       window.renderShiftReport();
       if (typeof window.renderShippersTable === 'function') window.renderShippersTable();
       if (typeof window.renderExistingTableOrdersBox === 'function') window.renderExistingTableOrdersBox(selectedTable);
+      if (typeof decorateOrderCardsWithScheduleBadge === 'function') {
+        setTimeout(decorateOrderCardsWithScheduleBadge, 80);
+      }
     });
 
-    function renderOrders() {
+    function renderOrders(skipNewOrderSpeech = false) {
       const container = document.getElementById('ordersContainer');
       if (!container) return;
       rebuildDailyOrderSequenceAndAutoReset();
 
       let countPending = 0, countCooking = 0, countDelivering = 0, countDoneCancel = 0, countIssue = 0, taxableRevToday = 0, shipRevToday = 0, cardsHtml = '';
+      let quan280PendingCount = 0;
       const todayStr = getVNDateStr();
       const todayOnly = document.getElementById('posTodayOnlyToggle')?.checked !== false;
 
@@ -4717,11 +4813,19 @@ window.deleteDishFromMenu = function(id, name) {
         const o = ordersCache[id];
         if (!o || !o.createdAt) return;
 
-        // LỌC THEO 2 ĐIỂM BÁN ĐỘC LẬP (QUAN_280 vs XE_DIEM_MOI vs ALL)
         const ordBranch = window.resolveOrderBranchId ? window.resolveOrderBranchId(o, id) : 'QUAN_280';
+        const orderDayStr = getVNDateStr(o.createdAt);
+
+        // Luôn đếm đơn khách Chờ xác nhận / Sự cố tại QUAN_280 bất kể đang xem trạm nào
+        if (!o.archived && ordBranch === 'QUAN_280' && (!todayOnly || orderDayStr === todayStr)) {
+          if (o.status === 'Chờ xác nhận' || o.status === 'Sự cố Shipper') {
+            quan280PendingCount++;
+          }
+        }
+
+        // LỌC THEO 2 ĐIỂM BÁN ĐỘC LẬP (QUAN_280 vs XE_DIEM_MOI vs ALL)
         if (curStation !== 'ALL' && ordBranch !== curStation) return;
 
-        const orderDayStr = getVNDateStr(o.createdAt);
         if (todayOnly && orderDayStr !== todayStr) return;
         if (orderDayStr === todayStr && (o.status === 'Đã hoàn tất' || o.status === 'Đang giao hàng')) {
           taxableRevToday += (o.subtotal || 0);
@@ -4739,6 +4843,23 @@ window.deleteDishFromMenu = function(id, name) {
           countDoneCancel++;
         }
       });
+
+      const q280AlertBanner = document.getElementById('quan280PendingAlertBanner');
+      const q280AlertCountEl = document.getElementById('quan280PendingAlertCount');
+      const q280AlertTextEl = document.getElementById('quan280PendingAlertText');
+      if (q280AlertBanner) {
+        if (quan280PendingCount > 0) {
+          q280AlertBanner.style.display = 'flex';
+          if (q280AlertCountEl) q280AlertCountEl.innerText = quan280PendingCount;
+          if (q280AlertTextEl) {
+            q280AlertTextEl.innerHTML = curStation === 'QUAN_280'
+              ? `🚨 QUÁN 280 CÓ <b>${quan280PendingCount}</b> ĐƠN CHỜ XÁC NHẬN — Bấm "TIẾP NHẬN & CHUYỂN BẾP" ngay!`
+              : `🚨 CẢNH BÁO LIÊN TRẠM: QUÁN 280 ĐANG CÓ <b>${quan280PendingCount}</b> ĐƠN KHÁCH ĐẶT CHỜ XÁC NHẬN (bạn đang xem ${curStation})!`;
+          }
+        } else {
+          q280AlertBanner.style.display = 'none';
+        }
+      }
 
       const sortMode = document.getElementById('orderSortSelect') ? document.getElementById('orderSortSelect').value : 'fifo';
       const sortedKeys = allKeys.filter(id => {
@@ -4962,7 +5083,7 @@ window.deleteDishFromMenu = function(id, name) {
       if (document.getElementById('cntFilterDelivering')) document.getElementById('cntFilterDelivering').innerText = countDelivering;
       if (document.getElementById('cntFilterDone')) document.getElementById('cntFilterDone').innerText = countDoneCancel;
 
-      if (countPending > previousPendingCount && isAudioActive) {
+      if (!skipNewOrderSpeech && countPending > previousPendingCount && isAudioActive) {
         if (countIssue > 0) {
           speakAlert(`Cảnh báo khẩn cấp! Có đơn hàng bị sự cố tài xế hủy chuyến, vui lòng bắn lại link cho tài xế khác!`, true);
         } else {
@@ -5162,23 +5283,29 @@ window.deleteDishFromMenu = function(id, name) {
       const o = ordersCache[id];
       if (!o) return;
       const oldShp = o.shipperName || o.shipperPhone || 'Tài xế cũ';
-      if (!confirm(`🔄 THU HỒI ĐƠN & ĐỔI TÀI XẾ:\nTài xế [${oldShp}] không giao được hoặc đã nghỉ ngang?\n\nHệ thống sẽ gỡ tên [${oldShp}] khỏi đơn này và mở lại bảng Điều Phối để bạn bắn đơn cho tài xế khác!`)) return;
-
-      update(ref(db, 'orders/' + id), {
-        status: 'Đang chế biến',
-        shipperPhone: null,
-        hyChayShipperPhone: null,
-        shipperName: null,
-        stateHash: null,
-        etaToStoreMins: null,
-        etaToCustomerMins: null,
-        shipperIssueNote: `Quán thu hồi đơn từ ${oldShp} để đổi tài xế khác`,
-        dispatchResetAt: new Date().toISOString()
-      }).then(() => {
-        if (typeof writeAuditLog === 'function') {
-          writeAuditLog("THU HỒI ĐƠN ĐANG GIAO ĐỔI TÀI XẾ", `Đơn #HC-${id.substring(id.length - 5).toUpperCase()} thu hồi từ ${oldShp}`, "WARN");
+      window.openPosConfirmModal({
+        title: '🔄 Thu Hồi Đơn & Đổi Tài Xế',
+        messageHtml: `<p>Tài xế <b>${oldShp}</b> không giao được hoặc đã nghỉ ngang?</p><p style="margin-top:6px;">Hệ thống sẽ gỡ tên <b>${oldShp}</b> khỏi đơn này và mở lại bảng Điều Phối để bắn đơn cho tài xế khác.</p>`,
+        confirmText: '🔄 Thu Hồi & Đổi Tài Xế',
+        confirmColor: '#0284c7',
+        onConfirm: () => {
+          update(ref(db, 'orders/' + id), {
+            status: 'Đang chế biến',
+            shipperPhone: null,
+            hyChayShipperPhone: null,
+            shipperName: null,
+            stateHash: null,
+            etaToStoreMins: null,
+            etaToCustomerMins: null,
+            shipperIssueNote: `Quán thu hồi đơn từ ${oldShp} để đổi tài xế khác`,
+            dispatchResetAt: new Date().toISOString()
+          }).then(() => {
+            if (typeof writeAuditLog === 'function') {
+              writeAuditLog("THU HỒI ĐƠN ĐANG GIAO ĐỔI TÀI XẾ", `Đơn #HC-${id.substring(id.length - 5).toUpperCase()} thu hồi từ ${oldShp}`, "WARN");
+            }
+            window.openDispatchModal(id);
+          });
         }
-        window.openDispatchModal(id);
       });
     };
 
@@ -5192,39 +5319,56 @@ window.deleteDishFromMenu = function(id, name) {
         }
       }
 
+      const executeEndShiftCleanup = () => {
+        window.openPosConfirmModal({
+          title: '🛑 Xác Nhận Kết Ca & Dọn Sạch Màn Hình',
+          messageHtml: '<p>Hệ thống sẽ lưu trữ toàn bộ đơn đã hoàn tất / đã hủy và xuất phiếu tổng kết ca hôm nay.</p>',
+          confirmText: '🛑 Kết Ca & In Tổng Kết',
+          confirmColor: '#dc2626',
+          onConfirm: () => {
+            for (let id in ordersCache) {
+              let o = ordersCache[id];
+              if ((o.status === 'Đã hoàn tất' || o.status === 'Đã hủy') && !o.archived) {
+                update(ref(db, 'orders/' + id), { archived: true });
+              }
+            }
+            alert("✅ Đã kết ca và dọn dẹp màn hình thành công!");
+            document.getElementById('filterMode').value = 'day';
+            document.getElementById('filterDayInput').value = getVNDateStr();
+            window.onFilterModeChange();
+            setTimeout(() => { window.printShiftReport(); }, 500);
+          }
+        });
+      };
+
       if (stuckDeliveringIds.length > 0) {
-        const resolveStuck = confirm(
-          `⚠️ PHÁT HIỆN CÒN ${stuckDeliveringIds.length} ĐƠN "SHIPPER ĐANG GIAO" CHƯA CHỤP ẢNH HOÀN TẤT!\n\n` +
-          `Bấm [OK] để hệ thống TỰ ĐỘNG CHỐT HOÀN TẤT ${stuckDeliveringIds.length} đơn này (cộng vào doanh thu ca hôm nay và tự động ghi nợ tiền mặt vào sổ Shipper để đòi sau).\n` +
-          `Bấm [Hủy] nếu bạn muốn giữ lại trên màn hình để kiểm tra từng đơn.`
-        );
-        if (resolveStuck) {
-          const nowIso = new Date().toISOString();
-          stuckDeliveringIds.forEach(id => {
-            ordersCache[id].status = 'Đã hoàn tất';
-            ordersCache[id].archived = true;
-            update(ref(db, 'orders/' + id), {
-              status: 'Đã hoàn tất',
-              completedAt: nowIso,
-              completedByAdminOverride: true,
-              archived: true
+        window.openPosConfirmModal({
+          title: `⚠️ Còn ${stuckDeliveringIds.length} Đơn Shipper Đang Giao`,
+          messageHtml: `<p>Phát hiện còn <b>${stuckDeliveringIds.length} đơn "Shipper đang giao"</b> chưa chụp ảnh hoàn tất.</p><p style="margin-top:6px;">Chọn <b>Chốt Tự Động</b> để hoàn tất các đơn này (cộng doanh thu ca &amp; ghi nợ Shipper), hoặc <b>Giữ Lại</b> để kiểm tra tiếp trước khi kết ca.</p>`,
+          confirmText: `✅ Chốt Tự Động (${stuckDeliveringIds.length} đơn) & Kết Ca`,
+          confirmColor: '#16a34a',
+          secondaryText: '⏭️ Giữ Lại Đơn Đang Giao & Tiếp Tục Kết Ca',
+          secondaryColor: '#d97706',
+          onConfirm: () => {
+            const nowIso = new Date().toISOString();
+            stuckDeliveringIds.forEach(id => {
+              ordersCache[id].status = 'Đã hoàn tất';
+              ordersCache[id].archived = true;
+              update(ref(db, 'orders/' + id), {
+                status: 'Đã hoàn tất',
+                completedAt: nowIso,
+                completedByAdminOverride: true,
+                archived: true
+              });
             });
-          });
-        }
+            executeEndShiftCleanup();
+          },
+          onSecondary: () => executeEndShiftCleanup()
+        });
+        return;
       }
 
-      if (!confirm("🛑 XÁC NHẬN KẾT CA & DỌN SẠCH MÀN HÌNH?\n\nHệ thống sẽ lưu trữ toàn bộ đơn đã hoàn tất / đã hủy và xuất phiếu tổng kết ca hôm nay.")) return;
-      for (let id in ordersCache) {
-        let o = ordersCache[id];
-        if ((o.status === 'Đã hoàn tất' || o.status === 'Đã hủy') && !o.archived) {
-          update(ref(db, 'orders/' + id), { archived: true });
-        }
-      }
-      alert("✅ Đã kết ca và dọn dẹp màn hình thành công!");
-      document.getElementById('filterMode').value = 'day';
-      document.getElementById('filterDayInput').value = getVNDateStr();
-      window.onFilterModeChange();
-      setTimeout(() => { window.printShiftReport(); }, 500);
+      executeEndShiftCleanup();
     };
 
     // ==========================================
@@ -5695,32 +5839,43 @@ window.deleteShipperPermanently = function(phone) {
         const net = st.codFoodHeld - st.qrShipOwed;
         return alert(`⛔ KHÔNG THỂ XÓA TÀI XẾ NÀY!\n\nTài xế (${phone}) hiện còn ${st.unsettledCount} đơn hàng chưa tất toán công nợ (${net > 0 ? 'Đang cầm của quán: ' + net.toLocaleString() + 'đ' : 'Quán còn nợ ship: ' + Math.abs(net).toLocaleString() + 'đ'}).\n\n👉 Vui lòng bấm nút [💰 Chốt & Tất Toán] trước khi xóa tài xế!`);
       }
-      if (confirm(`⚠️ Xóa vĩnh viễn tài xế (${phone}) khỏi danh sách đội xe?`)) {
-        remove(ref(db, `shippers/${phone}`));
-      }
+      window.openPosConfirmModal({
+        title: '🗑️ Xóa Tài Xế Khỏi Đội Xe',
+        messageHtml: `<p>Xóa vĩnh viễn tài xế (<b>${phone}</b>) khỏi danh sách đội xe?</p>`,
+        confirmText: '🗑️ Xóa Vĩnh Viễn',
+        confirmColor: '#dc2626',
+        onConfirm: () => remove(ref(db, `shippers/${phone}`))
+      });
     };
 
     // Chốt và Tất toán toàn bộ đơn chưa đối soát của 1 bác tài về 0đ chỉ bằng 1 chạm
     window.settleAllOrdersForShipper = function(phone, netAmount, shipperName) {
-      const msg = netAmount > 0
-        ? `💰 XÁC NHẬN THU TIỀN TÀI XẾ:\n\nTài xế ${shipperName} đã nộp đủ ${netAmount.toLocaleString()}đ tiền mặt (đã trừ cấn tiền ship các đơn chuyển khoản) về cho quán?`
+      const msgHtml = netAmount > 0
+        ? `<p><b>💰 XÁC NHẬN THU TIỀN TÀI XẾ:</b></p><p style="margin-top:6px;">Tài xế <b>${shipperName}</b> đã nộp đủ <b style="color:#dc2626;">${netAmount.toLocaleString()}đ</b> tiền mặt (đã trừ cấn tiền ship các đơn chuyển khoản) về cho quán?</p>`
         : (netAmount < 0
-            ? `💸 XÁC NHẬN TRẢ TIỀN SHIP CHO TÀI XẾ:\n\nQuán đã trả đủ ${Math.abs(netAmount).toLocaleString()}đ tiền ship (của các đơn khách chuyển khoản) cho tài xế ${shipperName}?`
-            : `✅ Xác nhận chốt sổ cân bằng (0đ) cho tài xế ${shipperName}?`);
-      if (!confirm(msg)) return;
+            ? `<p><b>💸 XÁC NHẬN TRẢ TIỀN SHIP CHO TÀI XẾ:</b></p><p style="margin-top:6px;">Quán đã trả đủ <b style="color:#0284c7;">${Math.abs(netAmount).toLocaleString()}đ</b> tiền ship (của các đơn khách chuyển khoản) cho tài xế <b>${shipperName}</b>?</p>`
+            : `<p>Xác nhận chốt sổ cân bằng (0đ) cho tài xế <b>${shipperName}</b>?</p>`);
 
-      const updates = {};
-      const nowIso = new Date().toISOString();
-      for (let oid in ordersCache) {
-        const o = ordersCache[oid];
-        if (!o || !o.shipperPhone) continue;
-        if (normalizeShipperPhone(o.shipperPhone) === phone && !o.shipperSettled && (o.status === 'Đã hoàn tất' || o.status === 'Đang giao hàng')) {
-          updates[`orders/${oid}/shipperSettled`] = true;
-          updates[`orders/${oid}/shipperSettledAt`] = nowIso;
+      window.openPosConfirmModal({
+        title: '💰 Chốt & Tất Toán Công Nợ Tài Xế',
+        messageHtml: msgHtml,
+        confirmText: '✅ Xác Nhận Tất Toán 0đ',
+        confirmColor: '#16a34a',
+        onConfirm: () => {
+          const updates = {};
+          const nowIso = new Date().toISOString();
+          for (let oid in ordersCache) {
+            const o = ordersCache[oid];
+            if (!o || !o.shipperPhone) continue;
+            if (normalizeShipperPhone(o.shipperPhone) === phone && !o.shipperSettled && (o.status === 'Đã hoàn tất' || o.status === 'Đang giao hàng')) {
+              updates[`orders/${oid}/shipperSettled`] = true;
+              updates[`orders/${oid}/shipperSettledAt`] = nowIso;
+            }
+          }
+          update(ref(db), updates).then(() => {
+            alert(`✅ Đã tất toán công nợ cho tài xế ${shipperName} về 0đ!`);
+          });
         }
-      }
-      update(ref(db), updates).then(() => {
-        alert(`✅ Đã tất toán công nợ cho tài xế ${shipperName} về 0đ!`);
       });
     };
 
@@ -6048,9 +6203,9 @@ window.deleteShipperPermanently = function(phone) {
       if (typeof renderPosCartUI === 'function') renderPosCartUI();
       if (typeof window.renderExistingTableOrdersBox === 'function') window.renderExistingTableOrdersBox(selectedTable);
 
-      // 4. Lọc lại màn hình đơn hàng theo trạm/chi nhánh ngay lập tức
+      // 4. Lọc lại màn hình đơn hàng theo trạm/chi nhánh ngay lập tức (im lặng không đọc lại loa)
       if (typeof renderOrders === 'function') {
-        try { renderOrders(); } catch(e) { console.warn(e); }
+        try { renderOrders(true); } catch(e) { console.warn(e); }
       }
 
       // 5. Cập nhật ẩn hộp cảnh báo liên trạm (Quán 280 đã gộp chung)
@@ -6135,10 +6290,17 @@ window.deleteShipperPermanently = function(phone) {
       const targetName = tablesListCache[idx];
       if (!targetName) return;
       if (tablesListCache.length <= 1) return alert("Phải giữ lại ít nhất 1 vị trí bàn!");
-      if (!confirm(`⚠️ Xác nhận xóa "${targetName}" khỏi sơ đồ bàn?`)) return;
-      const updated = tablesListCache.filter((_, i) => i !== idx);
-      set(ref(db, 'restaurant_config/tables'), updated).then(() => {
-        writeAuditLog("XÓA BÀN ĂN", `Đã xóa bàn: ${targetName}`, "WARN");
+      window.openPosConfirmModal({
+        title: '🗑️ Xóa Bàn Khỏi Sơ Đồ',
+        messageHtml: `<p>Xác nhận xóa vị trí <b>${targetName}</b> khỏi sơ đồ bàn?</p>`,
+        confirmText: '🗑️ Xóa Bàn',
+        confirmColor: '#dc2626',
+        onConfirm: () => {
+          const updated = tablesListCache.filter((_, i) => i !== idx);
+          set(ref(db, 'restaurant_config/tables'), updated).then(() => {
+            writeAuditLog("XÓA BÀN ĂN", `Đã xóa bàn: ${targetName}`, "WARN");
+          });
+        }
       });
     };
 
@@ -6293,9 +6455,9 @@ window.setEditModalCategory = function(cat, btn) {
     }
 
     function enforceGranularRolePermissions() {
-      const user = localStorage.getItem('hy_chay_active_user') || '';
-      const isRootUser = (user === "balshousevn@gmail.com" || user === "admin");
-      const role = isRootUser ? 'root' : (localStorage.getItem('hy_chay_active_role') || 'root');
+      const storedRole = localStorage.getItem('hy_chay_active_role') || '';
+      const isRootUser = (storedRole === 'root');
+      const role = isRootUser ? 'root' : (storedRole || 'cashier');
       const allTabBtns = document.querySelectorAll('.tabs-bar .tab-btn');
       // Thứ tự 9 tab hiện tại:
       // 0:Đơn hàng, 1:Order tại bàn, 2:Đặt Ship Hộ Khách, 3:Quản lý món, 4:VietQR, 5:Báo cáo, 6:Máy in, 7:Đội tài xế, 8:Phân quyền
@@ -6361,69 +6523,7 @@ window.setEditModalCategory = function(cat, btn) {
       });
     };
 
-// Cập nhật đăng nhập nhận diện đúng Role (Không phân biệt chữ Hoa/Thường ở tên đăng nhập & Không bị kẹt nút)
-const origHandleAdminLogin = window.handleAdminLogin;
-    window.handleAdminLogin = function(e) {
-      if (e && e.preventDefault) e.preventDefault();
-      const rawUser = (document.getElementById('adminEmail').value || '').trim();
-      const lowerUser = rawUser.toLowerCase();
-      const pass = (document.getElementById('adminPassword').value || '').trim();
-      const btn = document.getElementById('btnLoginSubmit');
-      const errBox = document.getElementById('loginErrorMsg');
-      errBox.style.display = 'none';
-      btn.innerText = "ĐANG XÁC THỰC...";
-      btn.disabled = true;
-
-      const finishAdminLogin = (userStr, roleStr) => {
-        localStorage.setItem('hy_chay_active_user', userStr);
-        localStorage.setItem('hy_chay_active_role', roleStr);
-        const overlay = document.getElementById('adminLoginOverlay');
-        if (overlay) {
-          overlay.style.opacity = '0';
-          overlay.style.display = 'none';
-        }
-        const wrapper = document.getElementById('mainAppWrapper');
-        if (wrapper) wrapper.style.display = 'block';
-        btn.innerText = "VÀO HỆ THỐNG POS";
-        btn.disabled = false;
-        try { if (typeof applyRoleUI === 'function') applyRoleUI(roleStr); } catch (_) {}
-        try { if (typeof enforceGranularRolePermissions === 'function') enforceGranularRolePermissions(); } catch (_) {}
-        try { if (typeof window.forceUnlockBackgroundAudio === 'function') window.forceUnlockBackgroundAudio(false); } catch (_) {}
-      };
-
-      if ((lowerUser === "balshousevn@gmail.com" && pass === "hychayfood") ||
-          (lowerUser === "hobaoanhpt@gmail.com" && pass === "hychayfood") ||
-          (lowerUser === "admin" && (pass === "baochay2026" || pass === "hychayfood")) ||
-          (lowerUser === "trunghuynh100291@gmail.com" && (pass === "Trung100291#" || pass === "hychayfood")) ||
-          (lowerUser === "0903242400" && (pass === "baochay2026" || pass === "hychayfood"))) {
-        finishAdminLogin(lowerUser, 'root');
-        return;
-      }
-
-      if ((lowerUser === "huynhthanhtutram@gmail.com" && pass === "hychayfood") ||
-          (lowerUser === "tramanhhoang478@gmail.com" && pass === "hychayfood")) {
-        finishAdminLogin(lowerUser, 'manager');
-        return;
-      }
-
-      const safeUser = lowerUser.replace(/\./g, '_').replace(/[#\$\[\]\/]/g, '-');
-      get(ref(db, 'admin_users/' + safeUser)).then((snap) => {
-        if (snap.exists() && String(snap.val().password).trim() === String(pass)) {
-          const assignedRole = snap.val().role || 'cashier';
-          finishAdminLogin(rawUser, assignedRole);
-        } else {
-          errBox.style.display = 'block';
-          errBox.innerText = "Sai tên đăng nhập hoặc mật khẩu!";
-          btn.innerText = "VÀO HỆ THỐNG POS";
-          btn.disabled = false;
-        }
-      }).catch((err) => {
-        errBox.style.display = 'block';
-        errBox.innerText = "Lỗi kết nối máy chủ: " + (err.message || "Vui lòng kiểm tra mạng!");
-        btn.innerText = "VÀO HỆ THỐNG POS";
-        btn.disabled = false;
-      });
-    };
+    // Sử dụng duy nhất hàm handleAdminLogin gọi /api/admin-auth ở phần 1 (không lưu mật khẩu cứng ở client).
 
     onValue(ref(db, 'admin_users'), (snap) => {
       const users = snap.val() || {}; let html = '';
@@ -6464,9 +6564,13 @@ const origHandleAdminLogin = window.handleAdminLogin;
 
     window.clearAuditLogsByRoot = function() {
       if (localStorage.getItem('hy_chay_active_role') !== 'root') return alert("⛔ Chỉ Chủ quán (Root) mới có quyền xóa Nhật ký kiểm toán!");
-      if (confirm("Xác nhận dọn dẹp lịch sử Nhật ký kiểm toán?")) {
-        remove(ref(db, 'audit_logs'));
-      }
+      window.openPosConfirmModal({
+        title: '🗑️ Dọn Dẹp Nhật Ký Kiểm Toán',
+        messageHtml: '<p>Xác nhận xóa toàn bộ lịch sử Nhật ký kiểm toán hệ thống?</p>',
+        confirmText: '🗑️ Xác Nhận Xóa',
+        confirmColor: '#dc2626',
+        onConfirm: () => remove(ref(db, 'audit_logs'))
+      });
     };
 
     // KHÓA CHỐNG GIAN LẬN KHI IN BILL, SỬA GIẢM TIỀN HOẶC HỦY ĐƠN SAU KHI IN BILL
@@ -6507,9 +6611,25 @@ const origHandleAdminLogin = window.handleAdminLogin;
       origSaveBankConfig();
     };
 
+    async function verifyRootPinViaApi(pin) {
+      if (!pin) return false;
+      try {
+        const resp = await fetch('/api/admin-auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mode: 'verify_root_pin', pin: String(pin) })
+        });
+        if (!resp.ok) return false;
+        const data = await resp.json().catch(() => null);
+        return Boolean(data && data.ok);
+      } catch {
+        return false;
+      }
+    }
+
     // Giám sát chặt chẽ hành vi Sửa giảm tiền đơn hàng hoặc Hủy đơn sau khi đã In Bill
     const origSaveEditedOrderChanges = window.saveEditedOrderChanges;
-    window.saveEditedOrderChanges = function() {
+    window.saveEditedOrderChanges = async function() {
       if (!editingOrderId) return;
       const role = localStorage.getItem('hy_chay_active_role') || 'staff';
       if (role === 'staff') return alert("⛔ Nhân viên không có quyền sửa đơn hàng!");
@@ -6533,7 +6653,8 @@ const origHandleAdminLogin = window.handleAdminLogin;
       if (isBillPrinted || isMoneyReduced) {
         if (role === 'cashier') {
           const managerPin = prompt(`🔒 KHÓA CHỐNG GIAN LẬN:\nĐơn này ${isBillPrinted ? 'ĐÃ IN BILL TÍNH TIỀN' : 'đang bị giảm tổng tiền'} (${oldSub.toLocaleString()}đ -> ${newRawSub.toLocaleString()}đ).\nThu ngân không được tự ý giảm món. Vui lòng nhập Mật khẩu Chủ quán để mở khóa (Thao tác sẽ được ghi vào Nhật ký kiểm toán):`);
-          if (managerPin !== "hychayfood" && managerPin !== "baochay2026") {
+          const pinValid = await verifyRootPinViaApi(managerPin);
+          if (!pinValid) {
             writeAuditLog("THU NGÂN TỰ Ý GIẢM MÓN BỊ CHẶN", `Đơn #HC-${editingOrderId.substring(editingOrderId.length - 5).toUpperCase()}: Định giảm từ ${oldSub.toLocaleString()}đ xuống ${newRawSub.toLocaleString()}đ (Đã in bill: ${o.billPrintedCount || 0} lần)`, "DANGER");
             return alert("❌ Mật khẩu Chủ quán không đúng! Hệ thống đã ghi nhận thao tác vào Nhật ký chống gian lận.");
           }
@@ -6548,7 +6669,7 @@ const origHandleAdminLogin = window.handleAdminLogin;
     };
 
     const origConfirmCancelOrderWithReason = window.confirmCancelOrderWithReason;
-    window.confirmCancelOrderWithReason = function() {
+    window.confirmCancelOrderWithReason = async function() {
       if (!targetCancelOrderId) return;
       const role = localStorage.getItem('hy_chay_active_role') || 'staff';
       if (role === 'staff') return alert("⛔ Nhân viên không có quyền hủy đơn!");
@@ -6557,7 +6678,8 @@ const origHandleAdminLogin = window.handleAdminLogin;
 
       if (role === 'cashier') {
         const rootPin = prompt(`🔒 KHÓA CHỐNG GIAN LẬN:\nThu ngân không được tự ý hủy đơn hàng (#HC-${targetCancelOrderId.substring(targetCancelOrderId.length - 5).toUpperCase()} - ${(o.grandTotal || 0).toLocaleString()}đ).\nNhập mật khẩu Chủ quán để xác nhận hủy:`);
-        if (rootPin !== "hychayfood" && rootPin !== "baochay2026") {
+        const pinValid = await verifyRootPinViaApi(rootPin);
+        if (!pinValid) {
           writeAuditLog("THU NGÂN TỰ Ý HỦY ĐƠN BỊ CHẶN", `Đơn #HC-${targetCancelOrderId.substring(targetCancelOrderId.length - 5).toUpperCase()} (${(o.grandTotal || 0).toLocaleString()}đ - In bill: ${o.billPrintedCount || 0} lần)`, "DANGER");
           return alert("❌ Không đúng mật khẩu Chủ quán! Đã lưu vết vào Nhật ký kiểm toán.");
         }
@@ -6924,9 +7046,7 @@ const origHandleAdminLogin = window.handleAdminLogin;
       });
     }
 
-    onValue(query(ref(db, 'orders'), limitToLast(window.BAL_POS_GUARD.clampQueryLimit(100))), () => {
-      setTimeout(decorateOrderCardsWithScheduleBadge, 80);
-    });
+    // Nhãn hẹn giờ được gọi trực tiếp từ listener đơn hàng hợp nhất.
     const origSetOrderFilterV12 = window.setOrderStatusFilter;
     window.setOrderStatusFilter = function(filterVal, btn) {
       origSetOrderFilterV12(filterVal, btn);
@@ -7448,15 +7568,22 @@ const origHandleAdminLogin = window.handleAdminLogin;
     };
 
     window.quickReopenStoreOnline = function() {
-      if (!confirm("🟢 Xác nhận MỞ BÁN ONLINE trở lại để khách đặt món trên App?")) return;
-      set(ref(db, 'restaurant_config/store_status'), {
-        isManualClosed: false,
-        reason: '',
-        reopenText: '',
-        updatedBy: localStorage.getItem('hy_chay_active_user') || 'admin',
-        updatedAt: new Date().toISOString()
-      }).then(() => {
-        broadcastAndSpeakKitchenAlert("Hệ thống Hy Chay đã mở bán trực tuyến trở lại!");
+      window.openPosConfirmModal({
+        title: '🟢 Mở Bán Online Trở Lại',
+        messageHtml: '<p>Xác nhận <b>MỞ BÁN ONLINE</b> trở lại để khách đặt món trên App?</p>',
+        confirmText: '🟢 Mở Bán Ngay',
+        confirmColor: '#16a34a',
+        onConfirm: () => {
+          set(ref(db, 'restaurant_config/store_status'), {
+            isManualClosed: false,
+            reason: '',
+            reopenText: '',
+            updatedBy: localStorage.getItem('hy_chay_active_user') || 'admin',
+            updatedAt: new Date().toISOString()
+          }).then(() => {
+            broadcastAndSpeakKitchenAlert("Hệ thống Hy Chay đã mở bán trực tuyến trở lại!");
+          });
+        }
       });
     };
 
@@ -7720,7 +7847,7 @@ const origHandleAdminLogin = window.handleAdminLogin;
         deliveryOrderData.dispatchQueue = autoDispatch ? candidates : [];
         deliveryOrderData.dispatchResetAt = autoDispatch ? nowIso : null;
 
-        const newOrderId = `ORD-${activeBranchId}-SHIP-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`;
+        const newOrderId = `ORD-Z-${Date.now()}-${activeBranchId}-SHIP-${Math.floor(10000 + Math.random() * 90000)}`;
         deliveryOrderData.orderCode = newOrderId;
         const newOrderRef = ref(db, `orders/${newOrderId}`);
         if (typeof announcedNewOrderIds !== 'undefined') announcedNewOrderIds[newOrderId] = true;
@@ -7761,7 +7888,7 @@ const origHandleAdminLogin = window.handleAdminLogin;
       }
 
       const itemsCopyDineIn = JSON.parse(JSON.stringify(posCart));
-      const newOrderId = `ORD-${activeBranchId}-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`;
+      const newOrderId = `ORD-Z-${Date.now()}-${activeBranchId}-${Math.floor(10000 + Math.random() * 90000)}`;
       const orderData = {
         client_request_id: posClientRequestId,
         orderType: 'dine_in',
@@ -8956,10 +9083,16 @@ const origHandleAdminLogin = window.handleAdminLogin;
     };
 
     window.resetOperatingHoursDefault = function() {
-      if (confirm("Khôi phục lại khung giờ hoạt động mặc định: Ca 1 (06:30 - 13:00) và Ca 2 (16:00 - 20:15)?")) {
-        localStorage.setItem('HYCHAY_OPERATING_HOURS', JSON.stringify(DEFAULT_OP_CONFIG));
-        window.initOperatingHoursUI();
-      }
+      window.openPosConfirmModal({
+        title: '⏰ Khôi Phục Khung Giờ Mặc Định',
+        messageHtml: '<p>Khôi phục lại khung giờ hoạt động mặc định: <b>Ca 1 (06:30 – 13:00)</b> và <b>Ca 2 (16:00 – 20:15)</b>?</p>',
+        confirmText: '✅ Khôi Phục Mặc Định',
+        confirmColor: '#16a34a',
+        onConfirm: () => {
+          localStorage.setItem('HYCHAY_OPERATING_HOURS', JSON.stringify(DEFAULT_OP_CONFIG));
+          window.initOperatingHoursUI();
+        }
+      });
     };
 
     // =========================================================================
@@ -9367,11 +9500,18 @@ const origHandleAdminLogin = window.handleAdminLogin;
     };
 
     window.deleteInvoice = function(id) {
-      if (!confirm("Bạn có chắc chắn muốn xóa hóa đơn này khỏi sổ đối soát không?")) return;
-      let list = window.getInvoicesRegistry();
-      list = list.filter(x => x.id !== id);
-      localStorage.setItem('HYCHAY_INVOICES_REGISTRY', JSON.stringify(list));
-      window.renderInvoicesInOutTable();
+      window.openPosConfirmModal({
+        title: '🗑️ Xóa Hóa Đơn Đối Soát',
+        messageHtml: '<p>Bạn có chắc chắn muốn xóa hóa đơn này khỏi sổ đối soát không?</p>',
+        confirmText: '🗑️ Xóa Hóa Đơn',
+        confirmColor: '#dc2626',
+        onConfirm: () => {
+          let list = window.getInvoicesRegistry();
+          list = list.filter(x => x.id !== id);
+          localStorage.setItem('HYCHAY_INVOICES_REGISTRY', JSON.stringify(list));
+          window.renderInvoicesInOutTable();
+        }
+      });
     };
 
     window.exportInvoicesCSV = function() {
@@ -9469,7 +9609,7 @@ const origHandleAdminLogin = window.handleAdminLogin;
             hyChayFood: '5610',
             balsHouseDrink: '5630'
           },
-          packagingFeeDefault: 3000
+          packagingFeeDefault: 0
         });
 
         function computeHash(payload) {
@@ -9498,22 +9638,28 @@ const origHandleAdminLogin = window.handleAdminLogin;
           } else if (order?.items && typeof order.items === 'object') {
             items = Object.values(order.items);
           }
-          let revenue5610 = 0;
-          let revenue5630 = 0;
+          let raw5610 = 0;
+          let raw5630 = 0;
 
           for (const item of items) {
             if (!item) continue;
             const lineTotal = (Number(item.price) || 0) * (Number(item.qty || item.quantity) || 1);
             if (item.brand === "BAL'S HOUSE" || item.categoryCode === '5630' || item.cat === 'douong') {
-              revenue5630 += lineTotal;
+              raw5630 += lineTotal;
             } else {
-              revenue5610 += lineTotal;
+              raw5610 += lineTotal;
             }
           }
 
-          const packagingFee = Number(order?.packagingFee ?? ORG_CONVENTIONS.packagingFeeDefault);
+          const rawItemSum = raw5610 + raw5630;
+          const netOrderSub = order?.subtotal !== undefined ? Math.max(0, Number(order.subtotal) || 0) : Math.max(0, rawItemSum - (Number(order?.discount) || 0));
+          const discRatio = (rawItemSum > 0 && netOrderSub < rawItemSum) ? (netOrderSub / rawItemSum) : 1;
+
+          const revenue5610 = Math.round(raw5610 * discRatio);
+          const revenue5630 = (discRatio < 1) ? Math.max(0, netOrderSub - revenue5610) : raw5630;
+          const packagingFee = Number(order?.packagingFee || 0);
           const taxableSubTotal = revenue5610 + revenue5630 + packagingFee;
-          const vatAmount = Math.round(taxableSubTotal * 0.1);
+          const vatAmount = 0;
           const driverPassThroughShipFee = Number(order?.shippingFee || 0);
 
           return {
@@ -9523,7 +9669,7 @@ const origHandleAdminLogin = window.handleAdminLogin;
             taxableSubTotal,
             vatAmount,
             driverPassThroughShipFee,
-            grandTotalCustomerPays: taxableSubTotal + vatAmount + driverPassThroughShipFee
+            grandTotalCustomerPays: taxableSubTotal + driverPassThroughShipFee
           };
         }
 

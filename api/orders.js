@@ -95,19 +95,76 @@ async function readFirebaseJson(relPath, queryParams = "") {
   return (await resp.json()) || {};
 }
 
-async function writeFirebaseOrder(relPath, orderData) {
+function generateUnifiedOrderId(nowMs, station) {
+  const cleanStation = String(station || "QUAN_280").trim().toUpperCase().replace(/[^A-Z0-9_]/g, "") || "QUAN_280";
+  const rand5 = Math.floor(10000 + Math.random() * 90000);
+  return `ORD-Z-${nowMs}-${cleanStation}-${rand5}`;
+}
+
+async function writeFirebaseOrderWithKey(relPath, orderId, orderData) {
   const authSuffix = process.env.FIREBASE_AUTH_SECRET ? `?auth=${encodeURIComponent(process.env.FIREBASE_AUTH_SECRET)}` : "";
-  const url = `${FIREBASE_DB_ROOT}/${relPath}.json${authSuffix}`;
+  const url = `${FIREBASE_DB_ROOT}/${relPath}/${encodeURIComponent(orderId)}.json${authSuffix}`;
   const resp = await fetch(url, {
-    method: "POST",
+    method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(orderData)
   });
   if (!resp.ok) {
-    throw new Error(`Firebase POST ${relPath} failed: HTTP ${resp.status}`);
+    throw new Error(`Firebase PUT ${relPath}/${orderId} failed: HTTP ${resp.status}`);
   }
-  const data = await resp.json();
-  return data.name;
+  await resp.json();
+  return orderId;
+}
+
+async function notifyTelegramNewOrder(orderId, order) {
+  const botToken = String(process.env.TELEGRAM_BOT_TOKEN || "").trim();
+  const chatId = String(process.env.TELEGRAM_CHAT_ID || "").trim();
+  if (!botToken || !chatId || !order) return false;
+
+  const shortId = `#HC-${String(orderId || "").slice(-5).toUpperCase()}`;
+  const station = order.station || order.branch_id || "QUAN_280";
+  const itemsObj = order.items && typeof order.items === "object" ? order.items : {};
+  const itemLines = Object.values(itemsObj)
+    .filter(Boolean)
+    .map((it) => `- ${Number(it.qty || 1)}x ${String(it.name || "Món")} (${(Number(it.price || 0) * Number(it.qty || 1)).toLocaleString("vi-VN")}đ)`)
+    .join("\n");
+
+  const subtotal = Number(order.subtotal || 0);
+  const shipFee = Number(order.shippingFee || 0);
+  const grandTotal = Number(order.grandTotal || (subtotal + shipFee));
+  const payStr = `${order.paymentMethod || "COD"} (${order.paymentStatus || "Thu tiền mặt"})`;
+  const msg = [
+    `🔔 ĐƠN HÀNG MỚI ${shortId} [${station}]`,
+    `👤 Khách: ${order.customerName || "Khách"}`,
+    `📞 SĐT: ${order.phone || "--"}`,
+    `📍 Địa chỉ: ${order.address || order.table || "--"}`,
+    `🍲 Món đặt:\n${itemLines || "- (Không có chi tiết)"}`,
+    `💵 Tiền món: ${subtotal.toLocaleString("vi-VN")}đ | Ship thu hộ: ${shipFee.toLocaleString("vi-VN")}đ`,
+    `💰 Tổng thu: ${grandTotal.toLocaleString("vi-VN")}đ`,
+    `💳 Hình thức TT: ${payStr}`,
+    order.note ? `📝 Ghi chú: ${order.note}` : ""
+  ].filter(Boolean).join("\n");
+
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 3500);
+  try {
+    const resp = await fetch(`https://api.telegram.org/bot${encodeURIComponent(botToken)}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      signal: ctrl.signal,
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: msg,
+        disable_web_page_preview: true
+      })
+    });
+    clearTimeout(timer);
+    return resp.ok;
+  } catch (err) {
+    clearTimeout(timer);
+    console.warn("Telegram notify warning:", err?.message || err);
+    return false;
+  }
 }
 
 function readJsonBody(req) {
@@ -261,7 +318,7 @@ module.exports = async function handler(req, res) {
         seedSandboxOrdersIfEmpty();
         rows = sandboxOrdersStore.slice();
       } else if (target === "audit_logs") {
-        const obj = await readFirebaseJson(DB_AUDIT_PATH, `orderBy=%22%24key%22&limitToLast=${MAX_LIMIT}`);
+        const obj = await readFirebaseJson(DB_AUDIT_PATH, `orderBy=%22timestamp%22&limitToLast=${MAX_LIMIT}`);
         rows = Object.keys(obj).map((id) => ({ id, ...obj[id] }));
       } else {
         const obj = await readFirebaseJson(DB_ORDERS_PATH, `orderBy=%22%24key%22&limitToLast=${MAX_LIMIT}`);
@@ -352,7 +409,7 @@ module.exports = async function handler(req, res) {
 
       const workPromise = (async () => {
         if (!sandboxMode) {
-          // Kiểm tra thêm trong 100 bản ghi gần nhất trên Firebase RTDB (phòng trường hợp serverless cold start)
+          // Kiểm tra thêm trong 100 bản ghi cuối theo $key (ORD-Z- đảm bảo xếp cuối theo thời gian)
           const recentSnap = await readFirebaseJson(DB_ORDERS_PATH, `orderBy=%22%24key%22&limitToLast=${MAX_LIMIT}`);
           for (const [oid, existingOrd] of Object.entries(recentSnap)) {
             if (!existingOrd || !existingOrd.createdAt) continue;
@@ -372,8 +429,18 @@ module.exports = async function handler(req, res) {
           }
         }
 
+        const latVal = body.deliveryLat !== undefined && body.deliveryLat !== null && body.deliveryLat !== "" && Number.isFinite(Number(body.deliveryLat)) && Number(body.deliveryLat) !== 0
+          ? Number(body.deliveryLat)
+          : null;
+        const lngVal = body.deliveryLng !== undefined && body.deliveryLng !== null && body.deliveryLng !== "" && Number.isFinite(Number(body.deliveryLng)) && Number(body.deliveryLng) !== 0
+          ? Number(body.deliveryLng)
+          : null;
         const newOrder = {
           ...body,
+          station: body.station || "QUAN_280",
+          branch_id: body.branch_id || body.station || "QUAN_280",
+          deliveryLat: latVal,
+          deliveryLng: lngVal,
           sandbox: sandboxMode,
           client_request_id: clientRequestId,
           createdAt: body.createdAt || new Date(nowMs).toISOString()
@@ -385,7 +452,8 @@ module.exports = async function handler(req, res) {
           orderId = `-SBX-HC-${nowMs}-${Math.floor(100 + Math.random() * 900)}`;
           sandboxOrdersStore.push({ id: orderId, ...newOrder });
         } else {
-          orderId = await writeFirebaseOrder(DB_ORDERS_PATH, newOrder);
+          orderId = generateUnifiedOrderId(nowMs, newOrder.station);
+          await writeFirebaseOrderWithKey(DB_ORDERS_PATH, orderId, newOrder);
         }
 
         const created = { orderId, order: newOrder, storedAt: nowMs, deduplicatedFromDb: false };
@@ -399,6 +467,9 @@ module.exports = async function handler(req, res) {
 
       try {
         const result = await workPromise;
+        if (!sandboxMode && !result.deduplicatedFromDb) {
+          await notifyTelegramNewOrder(result.orderId, result.order);
+        }
         return res.status(result.deduplicatedFromDb ? 200 : 201).json({
           ok: true,
           deduplicated: Boolean(result.deduplicatedFromDb),
