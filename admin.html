@@ -3021,6 +3021,55 @@
       }
     }
 
+    const ttsAudioBlobCache = new Map();
+    const TTS_BLOB_CACHE_MAX = 100;
+    const recentSpokenMap = new Map();
+    const VOICE_DEDUPE_WINDOW_MS = 6000;
+    let lastDetailedOrderSpokenAt = 0;
+    window.__balTtsStats = {
+      speakCalls: 0,
+      deduped: 0,
+      apiFetches: 0,
+      blobCacheHits: 0,
+      fallbacks: 0,
+      lastEngine: null
+    };
+
+    function playTtsBlobEntry(entry, nextChunk, advanceQueue) {
+      revokeActiveTtsBlob();
+      activeTtsBlobUrl = URL.createObjectURL(entry.blob);
+      ttsAudioPlayer.src = activeTtsBlobUrl;
+      ttsAudioPlayer.volume = 1.0;
+      ttsAudioPlayer.preservesPitch = true;
+      // Edge Neural da tong hop san o toc do +25% (1.25x); fallback thi tang playbackRate len 1.25x
+      const playerRate = entry.serverRate === '1.25' ? 1.0 : BAL_TTS_PLAYBACK_RATE;
+      ttsAudioPlayer.playbackRate = playerRate;
+      ttsAudioPlayer.dataset.effectiveRate = String(BAL_TTS_PLAYBACK_RATE);
+      ttsAudioPlayer.dataset.voiceEngine = entry.engine || 'edge-neural';
+      window.__balTtsStats.lastEngine = entry.engine || 'edge-neural';
+      ttsAudioPlayer.onended = () => {
+        revokeActiveTtsBlob();
+        advanceQueue();
+      };
+      ttsAudioPlayer.onerror = () => {
+        revokeActiveTtsBlob();
+        window.__balTtsStats.fallbacks++;
+        playGoogleTranslateAudioFallback(nextChunk, advanceQueue);
+      };
+      const playPromise = ttsAudioPlayer.play();
+      if (playPromise && typeof playPromise.catch === 'function') {
+        playPromise.catch((err) => {
+          revokeActiveTtsBlob();
+          if (err && err.name === 'NotAllowedError') {
+            advanceQueue();
+          } else {
+            window.__balTtsStats.fallbacks++;
+            playGoogleTranslateAudioFallback(nextChunk, advanceQueue);
+          }
+        });
+      }
+    }
+
     async function processNextVoiceChunk() {
       if (!isAudioActive || voiceSpeechQueue.length === 0) {
         isPlayingVoiceQueue = false;
@@ -3047,7 +3096,7 @@
         setTimeout(processNextVoiceChunk, 90);
       };
 
-      // Watchdog timeout 12 giây: tự giải phóng hàng đợi nếu audio bị OS tạm ngưng
+      // Watchdog timeout 16 giây: tự giải phóng hàng đợi nếu audio bị OS tạm ngưng
       watchdogTimer = setTimeout(() => {
         if (settled) return;
         try { ttsAudioPlayer.pause(); } catch (_) {}
@@ -3055,12 +3104,21 @@
         revokeActiveTtsBlob();
         isPlayingVoiceQueue = false;
         advanceQueue();
-      }, 12000);
+      }, 16000);
+
+      const blobCacheKey = String(nextChunk || '').toLowerCase();
+      const cachedBlobEntry = ttsAudioBlobCache.get(blobCacheKey);
+      if (cachedBlobEntry) {
+        window.__balTtsStats.blobCacheHits++;
+        playTtsBlobEntry(cachedBlobEntry, nextChunk, advanceQueue);
+        return;
+      }
 
       let timerId = null;
       try {
         const controller = new AbortController();
-        timerId = setTimeout(() => controller.abort(), 2800);
+        timerId = setTimeout(() => controller.abort(), 6500);
+        window.__balTtsStats.apiFetches++;
         const res = await fetch(`/api/tts?text=${encodeURIComponent(nextChunk)}`, {
           signal: controller.signal
         });
@@ -3072,31 +3130,25 @@
           throw new Error(`TTS API HTTP ${res.status}`);
         }
         const serverRate = res.headers.get('x-tts-rate') || '1.25';
+        const engine = res.headers.get('x-tts-engine') || 'edge-neural';
         const audioBlob = await res.blob();
         if (!audioBlob || !audioBlob.size) throw new Error('Empty audio blob');
 
+        if (ttsAudioBlobCache.size >= TTS_BLOB_CACHE_MAX) {
+          const oldestKey = ttsAudioBlobCache.keys().next().value;
+          ttsAudioBlobCache.delete(oldestKey);
+        }
+        const entry = { blob: audioBlob, serverRate, engine };
+        ttsAudioBlobCache.set(blobCacheKey, entry);
+
         if (settled) return;
-        revokeActiveTtsBlob();
-        activeTtsBlobUrl = URL.createObjectURL(audioBlob);
-        ttsAudioPlayer.src = activeTtsBlobUrl;
-        ttsAudioPlayer.volume = 1.0;
-        ttsAudioPlayer.preservesPitch = true;
-        // Edge Neural da tong hop san o toc do +25% (1.25x); fallback thi tang playbackRate len 1.25x
-        const playerRate = serverRate === '1.25' ? 1.0 : BAL_TTS_PLAYBACK_RATE;
-        ttsAudioPlayer.playbackRate = playerRate;
-        ttsAudioPlayer.dataset.effectiveRate = String(BAL_TTS_PLAYBACK_RATE);
-        ttsAudioPlayer.onended = () => {
-          revokeActiveTtsBlob();
-          advanceQueue();
-        };
-        ttsAudioPlayer.onerror = () => {
-          revokeActiveTtsBlob();
-          playGoogleTranslateAudioFallback(nextChunk, advanceQueue);
-        };
-        await ttsAudioPlayer.play();
+        playTtsBlobEntry(entry, nextChunk, advanceQueue);
       } catch (_) {
         if (timerId) clearTimeout(timerId);
-        if (!settled) playGoogleTranslateAudioFallback(nextChunk, advanceQueue);
+        if (!settled) {
+          window.__balTtsStats.fallbacks++;
+          playGoogleTranslateAudioFallback(nextChunk, advanceQueue);
+        }
       }
     }
 
@@ -3111,12 +3163,27 @@
 
 function speakAlert(text, broadcastToOtherDevices = false) {
       if (!isAudioActive) return;
+      const nowMs = Date.now();
+      const dedupeKey = window.formatNaturalVietnameseSpeech(text).toLowerCase();
+      if (!dedupeKey) return;
+
+      for (const [k, ts] of recentSpokenMap.entries()) {
+        if (nowMs - ts > VOICE_DEDUPE_WINDOW_MS) recentSpokenMap.delete(k);
+      }
+      const prevTs = recentSpokenMap.get(dedupeKey);
+      if (prevTs && (nowMs - prevTs <= VOICE_DEDUPE_WINDOW_MS)) {
+        window.__balTtsStats.deduped++;
+        return;
+      }
+      recentSpokenMap.set(dedupeKey, nowMs);
+      window.__balTtsStats.speakCalls++;
+
       playHardwareBeep();
 
       if (broadcastToOtherDevices) {
         set(ref(db, 'voice_sync/latest'), {
           text: text,
-          timestamp: Date.now(),
+          timestamp: nowMs,
           deviceId: BAL_VOICE_DEVICE_ID,
           sender: localStorage.getItem('hy_chay_active_user') || 'system'
         }).catch(() => {});
@@ -3135,6 +3202,7 @@ function speakAlert(text, broadcastToOtherDevices = false) {
         } catch (_) {}
       }
     }
+    window.speakAlert = speakAlert;
 
     // Lắng nghe kênh đồng bộ giọng nói giữa các tab/thiết bị (bỏ qua sự kiện của chính tab này)
     onValue(ref(db, 'voice_sync/latest'), (snap) => {
@@ -3153,6 +3221,8 @@ window.forceUnlockBackgroundAudio = function(silentWelcome = false) {
       isAudioActive = true;
       startBackgroundAudioCarrier();
       requestWakeLockSafe();
+      // Làm nóng Serverless /api/tts ngay khi mở khóa loa (không phát ra âm thanh)
+      fetch('/api/tts?text=xin+chao').catch(() => {});
       if ('Notification' in window && Notification.permission === 'default') {
         Notification.requestPermission().catch(() => {});
       }
@@ -4768,6 +4838,7 @@ window.deleteDishFromMenu = function(id, name) {
               const info = getOrderDishesVoiceInfo(o, false);
               if (info.list.length > 0) {
                 const notePart = o.note ? `. Lưu ý: ${o.note}` : '';
+                lastDetailedOrderSpokenAt = nowMs;
                 speakAlert(`Order mới ${info.label} gồm: ${info.list.join(', ')}${notePart}`, false);
                 announcedNewOrderInBatch = true;
               }
@@ -5083,7 +5154,7 @@ window.deleteDishFromMenu = function(id, name) {
       if (document.getElementById('cntFilterDelivering')) document.getElementById('cntFilterDelivering').innerText = countDelivering;
       if (document.getElementById('cntFilterDone')) document.getElementById('cntFilterDone').innerText = countDoneCancel;
 
-      if (!skipNewOrderSpeech && countPending > previousPendingCount && isAudioActive) {
+      if (!skipNewOrderSpeech && (Date.now() - lastDetailedOrderSpokenAt > 8000) && countPending > previousPendingCount && isAudioActive) {
         if (countIssue > 0) {
           speakAlert(`Cảnh báo khẩn cấp! Có đơn hàng bị sự cố tài xế hủy chuyến, vui lòng bắn lại link cho tài xế khác!`, true);
         } else {
@@ -6852,6 +6923,7 @@ window.setEditModalCategory = function(cat, btn) {
   <array>
     <dict>
       <key>FullScreen</key><true/>
+      <key>IgnoreManifestScope</key><true/>
       <key>IsRemovable</key><true/>
       <key>Icon</key><data>${iconBase64}</data>
       <key>Label</key><string>${info.label}</string>
@@ -8271,9 +8343,11 @@ window.setEditModalCategory = function(cat, btn) {
       return ratio >= 0.7 ? ratio * 0.9 : 0;
     }
 
+    const MAX_VOICE_ITEM_QTY = 20;
+    let lastProcessedVoiceResultIndex = -1;
+
     window.aiSelfThinkingRewriteTranscript = function(rawSpeech) {
       let s = ' ' + String(rawSpeech || '').toLowerCase() + ' ';
-      s = s.replace(/\b(bàn|bàng|bạn|bản|ban|bang)\s*(?:số|so)?\s*([1-9])4\b/gi, ' bàn $2 lấy 1 bún ');
       s = s.replace(/\b([1-9])41\b/gi, ' $1 bún mọc ');
       s = s.replace(/\b(?:41|4\s+1|bốn\s+một|bún\s+1|bún\s+một)\b/gi, ' 1 bún mọc ');
       s = s.replace(/\b([1-9])45\s*nêm\b/gi, ' $1 bún mắm nêm ');
@@ -8314,7 +8388,7 @@ window.setEditModalCategory = function(cat, btn) {
         ['bò\\s+húc|red\\s*bull|bò\\s+cụng', 'bò húc thái'],
         ['nước\\s+lọc|lavie|aquafina|nước\\s+suối(?!\\s*tắc)', 'nước khoáng'],
         ['hủ\\s+tíu|hủ\\s+tiểu|hũ\\s+tiếu|hũ\\s+tíu|hủ\\s+tiêu', 'hủ tiếu'],
-        ['trà\\s+quất|nước\\s+quất', 'trà tắc'],
+        ['chà\\s+tắc|trà\\s+quất|nước\\s+quất', 'trà tắc'],
         ['quất', 'tắc'],
         ['dứa|khóm', 'thơm'],
         ['cà\\s+phê|ca\\s+phe|cà\\s+phơ', 'cafe'],
@@ -8335,6 +8409,22 @@ window.setEditModalCategory = function(cat, btn) {
       'năm': 5, 'lăm': 5, 'nhăm': 5, 'sáu': 6, 'bảy': 7, 'bẩy': 7, 'tám': 8,
       'chín': 9, 'mười': 10, 'chục': 10
     };
+
+    function parseVoiceTableNumberToken(tok) {
+      const clean = String(tok || '').toLowerCase().replace(/\s+/g, ' ').trim();
+      if (/^\d{1,2}$/.test(clean)) return parseInt(clean, 10);
+      if (clean === 'hai mươi') return 20;
+      const muoiMatch = clean.match(/^mười\s+(một|mốt|hai|ba|bốn|tư|năm|lăm|sáu|bảy|bẩy|tám|chín)$/i);
+      if (muoiMatch) return 10 + (VN_SPOKEN_NUM_MAP[muoiMatch[1].toLowerCase()] || 0);
+      return VN_SPOKEN_NUM_MAP[clean] || null;
+    }
+
+    function clampVoiceItemQuantity(rawQty) {
+      const q = Number(rawQty);
+      if (!Number.isFinite(q) || q <= 0) return { qty: 1, clampedFrom: null };
+      if (q > MAX_VOICE_ITEM_QTY) return { qty: 1, clampedFrom: q };
+      return { qty: q, clampedFrom: null };
+    }
 
     function convertSpokenVietnameseNumbers(text) {
       let s = replaceVnBoundary(text, 'hai\\s+mươi', '20');
@@ -8364,7 +8454,7 @@ window.setEditModalCategory = function(cat, btn) {
 
     function resolveVoiceTableTarget(rawNum, prefixHint) {
       const n = parseInt(rawNum, 10);
-      if (isNaN(n) || n <= 0) return null;
+      if (isNaN(n) || n <= 0 || n > 30) return null;
       const padded = String(n).padStart(2, '0');
       const curMode = window.getCurrentAppMode ? window.getCurrentAppMode() : 'QUAN_280';
 
@@ -8380,31 +8470,45 @@ window.setEditModalCategory = function(cat, btn) {
       return `Bàn ${n}`;
     }
 
-    function extractTableAndNotesFromSpeech(text) {
-      let s = ' ' + String(text || '') + ' ';
+    const TABLE_NUM_TOKEN_PAT = '(?:\\d{1,2}|hai\\s+mươi|mười\\s+(?:một|mốt|hai|ba|bốn|tư|năm|lăm|sáu|bảy|bẩy|tám|chín)|một|mốt|hai|ba|bốn|tư|năm|sáu|bảy|bẩy|tám|chín|mười)';
+
+    function extractTableFromRawSpeechFirst(rawText) {
+      let s = ' ' + String(rawText || '').toLowerCase() + ' ';
       let detectedTable = null;
       let explicitStationHint = null;
 
-      // 1. Khớp tên trạm/thẻ đặc trưng (hắt xê 3 -> HC-03, ích mờ 2 -> XM-02)
-      const hcMatch = s.match(/([\s,;.|])((?:hắt\s*xê|hát\s*xê|hắc\s*xê|hc)\s*[-]?\s*(?:số\s*)?(\d{1,2}))(?=$|[\s,;.|])/i);
+      // Bóc tách số bàn/thẻ ĐẦU TIÊN rồi xóa hoàn toàn khỏi chuỗi để tránh dính vào số lượng món
+      const hcRe = new RegExp(`([\\s,;.|])((?:hắt\\s*xê|hát\\s*xê|hắc\\s*xê|hc)\\s*[-]?\\s*(?:số\\s*)?(${TABLE_NUM_TOKEN_PAT}))(?=$|[\\s,;.|])`, 'i');
+      const hcMatch = s.match(hcRe);
       if (hcMatch) {
-        detectedTable = resolveVoiceTableTarget(hcMatch[3], 'HC');
-        explicitStationHint = 'QUAN_280';
-        s = s.replace(hcMatch[0], hcMatch[1]);
-      }
-      if (!detectedTable) {
-        const xmMatch = s.match(/([\s,;.|])((?:ích\s*mờ|ít\s*mờ|x\s*mờ|xm|thẻ)\s*[-]?\s*(?:số\s*)?(\d{1,2}))(?=$|[\s,;.|])/i);
-        if (xmMatch) {
-          detectedTable = resolveVoiceTableTarget(xmMatch[3], 'XM');
-          explicitStationHint = 'XE_DIEM_MOI';
-          s = s.replace(xmMatch[0], xmMatch[1]);
+        const tNum = parseVoiceTableNumberToken(hcMatch[3]);
+        if (tNum && tNum <= 20) {
+          detectedTable = resolveVoiceTableTarget(tNum, 'HC');
+          explicitStationHint = 'QUAN_280';
+          s = s.replace(hcMatch[0], hcMatch[1]);
         }
       }
       if (!detectedTable) {
-        const banMatch = s.match(/([\s,;.|])((?:bàn|bàng|bạn|bản|ban|bang|vip)\s*(?:số|so)?\s*(\d{1,2}))(?=$|[\s,;.|])/i);
+        const xmRe = new RegExp(`([\\s,;.|])((?:ích\\s*mờ|ít\\s*mờ|x\\s*mờ|xm|thẻ)\\s*[-]?\\s*(?:số\\s*)?(${TABLE_NUM_TOKEN_PAT}))(?=$|[\\s,;.|])`, 'i');
+        const xmMatch = s.match(xmRe);
+        if (xmMatch) {
+          const tNum = parseVoiceTableNumberToken(xmMatch[3]);
+          if (tNum && tNum <= 15) {
+            detectedTable = resolveVoiceTableTarget(tNum, 'XM');
+            explicitStationHint = 'XE_DIEM_MOI';
+            s = s.replace(xmMatch[0], xmMatch[1]);
+          }
+        }
+      }
+      if (!detectedTable) {
+        const banRe = new RegExp(`([\\s,;.|])((?:bàn|bàng|bạn|bản|ban|bang|vip)\\s*(?:số|so)?\\s*(${TABLE_NUM_TOKEN_PAT}))(?=$|[\\s,;.|])`, 'i');
+        const banMatch = s.match(banRe);
         if (banMatch) {
-          detectedTable = resolveVoiceTableTarget(banMatch[3], null);
-          s = s.replace(banMatch[0], banMatch[1]);
+          const tNum = parseVoiceTableNumberToken(banMatch[3]);
+          if (tNum && tNum <= 20) {
+            detectedTable = resolveVoiceTableTarget(tNum, null);
+            s = s.replace(banMatch[0], banMatch[1]);
+          }
         }
       }
       if (!detectedTable && /([\s,;.|])(?:mang\s*về|đem\s*về|gói\s*về|mua\s*về)(?=$|[\s,;.|])/i.test(s)) {
@@ -8413,6 +8517,11 @@ window.setEditModalCategory = function(cat, btn) {
         s = replaceVnBoundary(s, 'mang\\s*về|đem\\s*về|gói\\s*về|mua\\s*về', ' ');
       }
 
+      return { speechWithoutTable: s.replace(/\s+/g, ' ').trim(), detectedTable, explicitStationHint };
+    }
+
+    function extractNotesFromSpeech(text) {
+      let s = ' ' + String(text || '') + ' ';
       const foundNotes = [];
       VOICE_NOTE_PHRASES.forEach(np => {
         const pat = np.replace(/\s+/g, '\\s+');
@@ -8423,7 +8532,7 @@ window.setEditModalCategory = function(cat, btn) {
         }
       });
 
-      return { cleanText: s.replace(/\s+/g, ' ').trim(), detectedTable, explicitStationHint, notes: foundNotes };
+      return { cleanText: s.replace(/\s+/g, ' ').trim(), notes: foundNotes };
     }
 
     function splitSpeechIntoDishClauses(cleanText) {
@@ -8457,31 +8566,34 @@ window.setEditModalCategory = function(cat, btn) {
           for (let i = 0; i < tokens.length; i++) {
             const tok = tokens[i];
             if (isNumericTok(tok)) {
-              const qty = parseFloat(tok) || 1;
+              const { qty, clampedFrom } = clampVoiceItemQuantity(parseFloat(tok));
               if (i + 1 < tokens.length && UNIT_SET.has(tokens[i + 1].toLowerCase())) i++;
               const phrase = buf.join(' ').trim();
-              if (phrase) clauses.push({ qty, phrase });
+              if (phrase) clauses.push({ qty, clampedFrom, phrase });
               buf = [];
             } else if (!FILLER_SET.has(tok.toLowerCase()) || buf.length > 0) {
               if (FILLER_SET.has(tok.toLowerCase()) && buf.length === 0) continue;
               buf.push(tok);
             }
           }
-          if (buf.length) clauses.push({ qty: 1, phrase: buf.join(' ').trim() });
+          if (buf.length) clauses.push({ qty: 1, clampedFrom: null, phrase: buf.join(' ').trim() });
           return;
         }
 
         let curQty = 1;
+        let curClampedFrom = null;
         let curWords = [];
         for (let i = 0; i < tokens.length; i++) {
           const tok = tokens[i];
           const low = tok.toLowerCase();
           if (isNumericTok(tok)) {
             if (curWords.length > 0) {
-              clauses.push({ qty: curQty, phrase: curWords.join(' ').trim() });
+              clauses.push({ qty: curQty, clampedFrom: curClampedFrom, phrase: curWords.join(' ').trim() });
               curWords = [];
             }
-            curQty = parseFloat(tok) || 1;
+            const clamped = clampVoiceItemQuantity(parseFloat(tok));
+            curQty = clamped.qty;
+            curClampedFrom = clamped.clampedFrom;
             if (i + 1 < tokens.length && UNIT_SET.has(tokens[i + 1].toLowerCase())) {
               const unitNext = tokens[i + 1].toLowerCase();
               const next2 = (tokens[i + 2] || '').toLowerCase();
@@ -8500,7 +8612,7 @@ window.setEditModalCategory = function(cat, btn) {
           }
         }
         if (curWords.length > 0) {
-          clauses.push({ qty: curQty, phrase: curWords.join(' ').trim() });
+          clauses.push({ qty: curQty, clampedFrom: curClampedFrom, phrase: curWords.join(' ').trim() });
         }
       });
 
@@ -8590,14 +8702,17 @@ window.setEditModalCategory = function(cat, btn) {
 
     window.parseAndExecuteVoiceOrder = function(rawTranscript, options = {}) {
       if (!rawTranscript || !String(rawTranscript).trim()) {
-        return { table: null, items: [], note: '', unmatched: [], score: 0, transcript: '' };
+        return { table: null, items: [], note: '', unmatched: [], clampedWarnings: [], score: 0, transcript: '' };
       }
       const dryRun = !!options.dryRun;
       const includeSoldOut = !!options.includeSoldOut;
-      const rewritten = window.aiSelfThinkingRewriteTranscript(rawTranscript);
+
+      // Bước 1: Tách số bàn/thẻ ĐẦU TIÊN và xóa cụm số bàn khỏi chuỗi trước khi phân tích số lượng món
+      const { speechWithoutTable, detectedTable, explicitStationHint } = extractTableFromRawSpeechFirst(rawTranscript);
+      const rewritten = window.aiSelfThinkingRewriteTranscript(speechWithoutTable);
       const regionalNormalized = window.normalizeRegionalVietnamese(rewritten);
       const withDigits = convertSpokenVietnameseNumbers(regionalNormalized);
-      const { cleanText, detectedTable, explicitStationHint, notes } = extractTableAndNotesFromSpeech(withDigits);
+      const { cleanText, notes } = extractNotesFromSpeech(withDigits);
 
       let candidateMenu = getUnifiedMenuList();
       const curMode = window.getCurrentAppMode ? window.getCurrentAppMode() : 'QUAN_280';
@@ -8608,12 +8723,17 @@ window.setEditModalCategory = function(cat, btn) {
       const clauses = splitSpeechIntoDishClauses(cleanText);
       const matchedItems = [];
       const unmatched = [];
+      const clampedWarnings = [];
       let totalScore = 0;
 
       clauses.forEach(cl => {
         const res = matchBestMenuDishForClause(cl.phrase, candidateMenu, includeSoldOut);
         if (res) {
-          matchedItems.push({ item: res.item, qty: cl.qty, score: res.score });
+          const safeClamp = clampVoiceItemQuantity(cl.qty);
+          const effectiveQty = cl.clampedFrom ? 1 : safeClamp.qty;
+          const clampedFrom = cl.clampedFrom || safeClamp.clampedFrom;
+          if (clampedFrom) clampedWarnings.push(`${res.item.name} (${clampedFrom} → ${effectiveQty})`);
+          matchedItems.push({ item: res.item, qty: effectiveQty, score: res.score });
           totalScore += res.score;
         } else if (cl.phrase) {
           unmatched.push(cl.phrase);
@@ -8622,7 +8742,7 @@ window.setEditModalCategory = function(cat, btn) {
 
       if (!dryRun) {
         const manualInp = document.getElementById('voiceManualTranscriptInput');
-        if (manualInp) manualInp.value = String(rawTranscript).trim();
+        if (manualInp) manualInp.value = '';
 
         lastVoiceCartSnapshot = JSON.parse(JSON.stringify(posCart || {}));
 
@@ -8633,9 +8753,10 @@ window.setEditModalCategory = function(cat, btn) {
         if (matchedItems.length > 0) {
           syncActivePosCartFromTable();
           matchedItems.forEach(({ item, qty }) => {
+            const safeQty = clampVoiceItemQuantity(qty).qty;
             const key = safeItemKey(item.name);
-            if (posCart[key]) posCart[key].qty += qty;
-            else posCart[key] = { name: item.name, price: item.price, qty, cat: item.cat };
+            if (posCart[key]) posCart[key].qty += safeQty;
+            else posCart[key] = { name: item.name, price: item.price, qty: safeQty, cat: item.cat };
           });
           persistPosCartByTable();
           if (typeof renderPosCartUI === 'function') renderPosCartUI();
@@ -8657,14 +8778,15 @@ window.setEditModalCategory = function(cat, btn) {
         if (fb) {
           fb.style.display = 'block';
           if (matchedItems.length > 0) {
-            fb.style.background = '#dcfce7';
-            fb.style.borderColor = '#86efac';
-            fb.style.color = '#166534';
+            fb.style.background = clampedWarnings.length ? '#fffbeb' : '#dcfce7';
+            fb.style.borderColor = clampedWarnings.length ? '#f59e0b' : '#86efac';
+            fb.style.color = clampedWarnings.length ? '#92400e' : '#166534';
             const dishTxt = matchedItems.map(m => `${m.qty}x ${m.item.name}`).join(', ');
             const tblTxt = detectedTable ? `[${detectedTable}] ` : '';
             const noteTxt = notes.length ? ` • Ghi chú: ${notes.join(', ')}` : '';
+            const clampTxt = clampedWarnings.length ? ` • ⚠️ Đã chặn SL > ${MAX_VOICE_ITEM_QTY}: ${clampedWarnings.join(', ')}` : '';
             const warnTxt = unmatched.length ? ` (Chưa rõ: ${unmatched.join(', ')})` : '';
-            fb.innerText = `✅ Đã nhặt vào giỏ ${tblTxt}: ${dishTxt}${noteTxt}${warnTxt}`;
+            fb.innerText = `✅ Đã nhặt vào giỏ ${tblTxt}: ${dishTxt}${noteTxt}${clampTxt}${warnTxt}`;
           } else {
             fb.style.background = '#fef2f2';
             fb.style.borderColor = '#fecaca';
@@ -8680,6 +8802,7 @@ window.setEditModalCategory = function(cat, btn) {
         items: matchedItems.map(m => ({ id: m.item.id, name: m.item.name, qty: m.qty, price: m.item.price, cat: m.item.cat })),
         note: notes.join(', '),
         unmatched,
+        clampedWarnings,
         score: Number(finalScore.toFixed(3)),
         transcript: rawTranscript
       };
@@ -8687,7 +8810,11 @@ window.setEditModalCategory = function(cat, btn) {
 
     window.processVoiceOrderInputBox = function() {
       const inp = document.getElementById('voiceManualTranscriptInput');
-      if (inp && inp.value.trim()) return window.parseAndExecuteVoiceOrder(inp.value.trim());
+      if (inp && inp.value.trim()) {
+        const val = inp.value.trim();
+        inp.value = '';
+        return window.parseAndExecuteVoiceOrder(val);
+      }
       return null;
     };
 
@@ -8703,7 +8830,7 @@ window.setEditModalCategory = function(cat, btn) {
           : 'BẤM VÀO ĐÂY ĐỂ BẮT ĐẦU ĐỌC MÓN (NGHE LIÊN TỤC)';
       }
       if (liveBar) liveBar.style.display = active ? 'block' : 'none';
-      if (liveText && interimText) liveText.innerText = interimText;
+      if (liveText && interimText !== null) liveText.innerText = interimText;
     }
 
     window.toggleVoiceOrderRecognition = function() {
@@ -8724,7 +8851,7 @@ window.setEditModalCategory = function(cat, btn) {
         isVoiceListening = false;
         if (voiceAutoRestartTimer) { clearTimeout(voiceAutoRestartTimer); voiceAutoRestartTimer = null; }
         if (speechRecognizer) { try { speechRecognizer.stop(); } catch (_) {} }
-        updateVoiceMicUiState(false);
+        updateVoiceMicUiState(false, '');
         return;
       }
 
@@ -8734,6 +8861,7 @@ window.setEditModalCategory = function(cat, btn) {
 
       const startRecognizerInstance = () => {
         if (!isVoiceListening) return;
+        lastProcessedVoiceResultIndex = -1;
         speechRecognizer = new SpeechRec();
         speechRecognizer.lang = 'vi-VN';
         speechRecognizer.continuous = true;
@@ -8742,28 +8870,35 @@ window.setEditModalCategory = function(cat, btn) {
 
         speechRecognizer.onresult = (ev) => {
           voiceConsecutiveErrors = 0;
-          const res = ev.results[ev.results.length - 1];
-          if (!res) return;
-          if (!res.isFinal) {
-            const interim = (res[0] && res[0].transcript) || '';
+          if (!ev || !ev.results || !ev.results.length) return;
+
+          const startIdx = Math.max(ev.resultIndex || 0, lastProcessedVoiceResultIndex + 1);
+          const latestRes = ev.results[ev.results.length - 1];
+          if (latestRes && !latestRes.isFinal) {
+            const interim = (latestRes[0] && latestRes[0].transcript) || '';
             updateVoiceMicUiState(true, interim);
-            return;
           }
 
-          let bestChoice = null;
-          const altCount = Math.min(res.length || 1, 5);
-          for (let i = 0; i < altCount; i++) {
-            const alt = res[i];
-            if (!alt || !alt.transcript) continue;
-            const parsed = window.parseAndExecuteVoiceOrder(alt.transcript, { dryRun: true });
-            const altScore = (parsed.score || 0) + (alt.confidence || 0) * 0.15;
-            if (!bestChoice || altScore > bestChoice.altScore) {
-              bestChoice = { transcript: alt.transcript, altScore };
+          for (let idx = startIdx; idx < ev.results.length; idx++) {
+            const res = ev.results[idx];
+            if (!res || !res.isFinal) continue;
+            lastProcessedVoiceResultIndex = idx;
+
+            let bestChoice = null;
+            const altCount = Math.min(res.length || 1, 5);
+            for (let i = 0; i < altCount; i++) {
+              const alt = res[i];
+              if (!alt || !alt.transcript) continue;
+              const parsed = window.parseAndExecuteVoiceOrder(alt.transcript, { dryRun: true });
+              const altScore = (parsed.score || 0) + (alt.confidence || 0) * 0.15;
+              if (!bestChoice || altScore > bestChoice.altScore) {
+                bestChoice = { transcript: alt.transcript, altScore };
+              }
             }
-          }
-          if (bestChoice) {
-            updateVoiceMicUiState(true, bestChoice.transcript);
-            window.parseAndExecuteVoiceOrder(bestChoice.transcript, { dryRun: false });
+            if (bestChoice) {
+              window.parseAndExecuteVoiceOrder(bestChoice.transcript, { dryRun: false });
+              updateVoiceMicUiState(true, '✅ Đã nhặt món — mời đọc tiếp...');
+            }
           }
         };
 

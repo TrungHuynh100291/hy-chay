@@ -11,50 +11,25 @@
   <meta property="og:type" content="restaurant">
 
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Hy Chay - Ẩm Thực Chay Rau Củ Nấm | Bảo Anh Lâm</title>
   
-  <link rel="icon" type="image/png" sizes="192x192" href="https://hychayfood.vercel.app/Logo%20nho.png">
-  <link rel="apple-touch-icon" href="https://hychayfood.vercel.app/Logo%20nho.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png">
   
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Hy Chay">
   <meta name="theme-color" content="#1e5e3a">
   
- <link id="customerManifestLink" rel="manifest" href="">
+  <link id="customerManifestLink" rel="manifest" href="/manifest.json">
   <script>
-    // Tách biệt hoàn toàn ID & Scope giữa App Khách và App Shipper ngay khi trình duyệt vừa đọc <head>
+    // Tách biệt manifest tĩnh cho App Khách (/manifest.json) và App Shipper (/manifest-shipper.json)
     (function() {
-      var isShp = window.location.search.indexOf('shipper=') !== -1;
-      var origin = window.location.origin;
-      var manifestObj = isShp ? {
-        id: "/hychay-shipper-standalone-v3",
-        name: "Ship Hy Chay - Trạm Nhận Đơn",
-        short_name: "Ship Hy Chay",
-        start_url: origin + "/index.html?shipper=hub",
-        scope: origin + "/index.html?shipper=hub",
-        display: "standalone",
-        background_color: "#0f172a",
-        theme_color: "#ffd800",
-        icons: [{ src: "https://hychayfood.vercel.app/Logo%20nho.png", sizes: "192x192", type: "image/png" }]
-      } : {
-        id: "/hychay-customer-standalone-v3",
-        name: "Hy Chay - Đặt Món Trực Tuyến",
-        short_name: "Hy Chay",
-        start_url: origin + "/index.html?app=customer",
-        scope: origin + "/index.html?app=customer",
-        display: "standalone",
-        background_color: "#faf9f5",
-        theme_color: "#1e5e3a",
-        icons: [{ src: "https://hychayfood.vercel.app/Logo%20nho.png", sizes: "192x192", type: "image/png" }]
-      };
-      var mLink = document.getElementById('customerManifestLink');
-      if (mLink && !(/iPad|iPhone|iPod/.test(navigator.userAgent))) {
-        mLink.href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifestObj));
-      } else if (mLink) {
-        mLink.remove();
+      if (window.location.search.indexOf('shipper=') !== -1) {
+        var mLink = document.getElementById('customerManifestLink');
+        if (mLink) mLink.setAttribute('href', '/manifest-shipper.json');
       }
     })();
   </script>
@@ -71,16 +46,17 @@
     :root { --primary: #1e5e3a; --primary-light: #2b7a4d; --accent: #ffd800; --text-dark: #1f2937; --text-muted: #64748b; --bg-light: #faf9f5; --card-bg: #ffffff; --border: #e2e8f0; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
-    body { font-family: 'Inter', sans-serif; color: var(--text-dark); background-color: var(--bg-light); line-height: 1.6; padding-bottom: 90px; }
+    body { font-family: 'Inter', sans-serif; color: var(--text-dark); background-color: var(--bg-light); line-height: 1.6; padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px)); }
     h1, h2, h3, h4 { font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--primary); }
     a { text-decoration: none; color: inherit; }
     img { max-width: 100%; height: auto; display: block; }
 
-    header { background: #ffffff; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); }
-    .nav-container { max-width: 1200px; margin: 0 auto; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
-    .brand-logo { display: flex; align-items: center; gap: 12px; }
-    .brand-logo img { height: 40px; width: auto; border-radius: 8px; }
-    .brand-logo span { font-size: 1.25rem; font-weight: 800; color:var(--primary); }
+    header { background: #ffffff; position: sticky; top: 0; z-index: 1000; padding-top: env(safe-area-inset-top, 0px); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); }
+    .nav-container { max-width: 1200px; margin: 0 auto; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .brand-logo { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .brand-logo img { height: 40px; width: auto; border-radius: 8px; flex-shrink: 0; }
+    .brand-logo span { font-size: 1.2rem; font-weight: 800; color:var(--primary); white-space: nowrap; }
+    .nav-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
     .btn-account { background: #eaf5ed; color: var(--primary); border: 1px solid #c7e5d2; padding: 8px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; max-width: 160px; overflow: hidden; text-overflow: ellipsis; }
 
     .hero { background: linear-gradient(135deg, rgba(30, 94, 58, 0.94), rgba(20, 60, 38, 0.92)), url('/combo%207%20mon%20chay.webp') center/cover no-repeat; color: #ffffff; padding: 60px 20px; text-align: center; }
@@ -99,7 +75,7 @@
     .featured-banner img { width: 100%; border-radius: 14px; }
     .tag-pill { display: inline-block; background: #eaf5ed; color: var(--primary); padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-right: 6px; margin-bottom: 10px; }
 
-    .dish-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+    .dish-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 20px; }
     .dish-card { background: var(--card-bg); border-radius: 16px; overflow: hidden; border: 1px solid var(--border); display: flex; flex-direction: column; position: relative; transition: transform 0.3s; }
     .dish-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
     .dish-img-wrap { width: 100%; height: 210px; background: #eaeaea; position: relative; overflow: hidden; }
@@ -124,12 +100,12 @@
     .filter-chip { background: #ffffff; border: 1px solid var(--border); padding: 8px 16px; border-radius: 24px; font-size: 0.88rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
     .filter-chip.active { background: var(--primary); color: #ffffff; border-color: var(--primary); box-shadow: 0 4px 10px rgba(30, 94, 58, 0.2); }
     
-    .full-menu-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
-    .menu-item-row { background: #ffffff; border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; gap: 12px; transition: transform 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+    .full-menu-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 14px; }
+    .menu-item-row { background: #ffffff; border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; gap: 12px; transition: transform 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.02); min-width: 0; }
     .menu-item-row:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
     .item-thumb { width: 68px; height: 68px; border-radius: 10px; overflow: hidden; flex-shrink: 0; background: #f8fafc; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; }
     .item-thumb img { width: 100%; height: 100%; object-fit: cover; }
-    .item-meta { flex-grow: 1; }
+    .item-meta { flex-grow: 1; min-width: 0; }
     .item-cat-label { font-size: 0.72rem; color: #64748b; background: #f1f5f9; padding: 2px 6px; border-radius: 8px; }
     .item-price-tag { font-weight: 800; color: #dc2626; font-size: 0.95rem; display: block; margin-top: 4px; }
     .btn-quick-add { background: #eaf5ed; color: var(--primary); border: 1px solid #c7e5d2; font-weight: 700; padding: 8px 14px; border-radius: 16px; font-size: 0.8rem; cursor: pointer; white-space: nowrap; }
@@ -137,7 +113,7 @@
     .menu-item-row.is-sold-out .btn-quick-add { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; border-color: #cbd5e1; }
     .hot-label-small { color: #ea580c; font-size: 0.7rem; font-weight: 700; margin-left: 6px; border: 1px solid #fdba74; padding: 1px 4px; border-radius: 4px; background: #fff7ed; }
 
-    .menu-cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; margin-top: 20px; }
+    .menu-cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 25px; margin-top: 20px; }
     .menu-poster-card { background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
     .menu-poster-header { padding: 15px; font-weight: 700; text-align: center; color: #ffffff; font-size: 1.05rem; }
     .menu-poster-card a { display: block; overflow: hidden; }
@@ -191,6 +167,22 @@
     .footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; text-align: center; font-size: 0.8rem; color: #9ca3af; }
 
     @media (max-width: 768px) { .featured-banner { grid-template-columns: 1fr; gap: 20px; } .hero h1 { font-size: 2rem; } .footer-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 420px) {
+      .nav-container { padding: 8px 10px; gap: 6px; }
+      .brand-logo { gap: 6px; }
+      .brand-logo img { height: 32px; width: 32px; }
+      .brand-logo span { font-size: 1rem; }
+      .btn-account { padding: 6px 9px; font-size: 0.76rem; max-width: 118px; }
+      .section { padding: 30px 12px; }
+      .hero { padding: 44px 12px; }
+      .hero h1 { font-size: 1.65rem; }
+      .featured-banner { padding: 16px; }
+      .menu-item-row { padding: 8px 10px; gap: 8px; }
+      .item-thumb { width: 56px; height: 56px; }
+      .btn-quick-add { padding: 6px 10px; font-size: 0.75rem; }
+      .cart-bar { padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px)); gap: 8px; }
+      .btn-checkout { padding: 8px 14px; font-size: 0.86rem; white-space: nowrap; }
+    }
 
     /* CSS TAB ĐĂNG NHẬP / ĐĂNG KÝ & MAPS */
     .auth-tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid var(--border); }
@@ -3489,6 +3481,7 @@ window.submitOrder = function(e) {
     function buildSingleWebClipXml(cfg) {
       return `    <dict>
       <key>FullScreen</key><true/>
+      <key>IgnoreManifestScope</key><true/>
       <key>IsRemovable</key><true/>
       <key>Icon</key><data>${cfg.iconB64}</data>
       <key>Label</key><string>${cfg.title}</string>
@@ -3597,14 +3590,12 @@ ${clipsXml}
       document.body.removeChild(a);
     };
 
-    window.downloadApkWithFallback = function(roleOrPath) {
-      const isShp = String(roleOrPath || '').toLowerCase().includes('shipper') || !!shipperOrderIdParam;
+    window.downloadApkWithFallback = async function(roleOrPath) {
       if (deferredCustomerPrompt) {
-        window.triggerNativeInstall();
+        await window.triggerNativeInstall();
         return;
       }
-      window.downloadAndroidLauncherFile(isShp);
-      alert("📥 Đã tải file khởi chạy độc lập!\n\n💡 Mẹo trên Android để có 3 Icon riêng biệt:\nKhi mở từng đường link trên Chrome, bạn bấm dấu 3 chấm (⋮) -> Chọn [Thêm vào màn hình chính]. Vì 3 link đã được tách Scope độc lập nên sẽ tạo ra 3 Icon riêng biệt không đè lên nhau!");
+      alert("📲 CÀI APP ANDROID TOÀN MÀN HÌNH (KHÔNG THANH ĐỊA CHỈ):\n\n1. Mở menu 3 chấm (⋮) ở góc trên bên phải trình duyệt Chrome.\n2. Chọn \"Cài đặt ứng dụng\" (Install app) hoặc \"Thêm vào màn hình chính\" → Bấm \"Cài đặt\".\n\n✅ Ứng dụng sẽ tự dùng cấu hình WebAPK standalone, không hiện thanh địa chỉ!");
     };
 
     window.triggerNativeInstall = async function() {
@@ -3612,12 +3603,11 @@ ${clipsXml}
         deferredCustomerPrompt.prompt();
         const choice = await deferredCustomerPrompt.userChoice;
         deferredCustomerPrompt = null;
-        if (choice.outcome === 'accepted') window.closeSmartInstallOverlay();
+        if (choice && choice.outcome === 'accepted') window.closeSmartInstallOverlay();
       } else if (isIOSDevice()) {
         window.downloadCustomerIOSProfile(shipperOrderIdParam ? 'shipper' : 'customer');
       } else {
-        const isShp = !!shipperOrderIdParam;
-        window.downloadApkWithFallback(isShp ? 'shipper' : 'customer');
+        await window.downloadApkWithFallback(shipperOrderIdParam ? 'shipper' : 'customer');
       }
     };
 

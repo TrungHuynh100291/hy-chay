@@ -1,0 +1,26 @@
+{
+  "id": "/hychay-customer-standalone-v4",
+  "name": "Hy Chay - Đặt Món Trực Tuyến",
+  "short_name": "Hy Chay",
+  "description": "Ẩm thực chay thanh tịnh Bảo Anh Lâm - 280 Trần Hưng Đạo, Phan Thiết.",
+  "start_url": "/index.html?app=customer",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#faf9f5",
+  "theme_color": "#1e5e3a",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -16,7 +16,7 @@ const VOICE_NAME = 'Microsoft Server Speech Text to Speech Voice (vi-VN, HoaiMyN
 
 const CACHE_TTL_MS = 15 * 60 * 1000;
 const CACHE_MAX_ENTRIES = 120;
-const EDGE_TIMEOUT_MS = 2500;
+const EDGE_TIMEOUT_MS = 5000;
 const GOOGLE_FALLBACK_TIMEOUT_MS = 1800;
 
 const ttsMemoryCache = new Map();
